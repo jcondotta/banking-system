@@ -31,9 +31,8 @@ class BankAccountDetailsMapperImplTest {
     assertThat(accountDetails.accountHolders())
       .hasSize(1)
       .singleElement()
-      .satisfies(accountHolderDetails -> {
-        assertMapping(bankAccount.primaryAccountHolder(), accountHolderDetails);
-      });
+      .satisfies(accountHolderDetails ->
+        assertMapping(bankAccount.primaryAccountHolder(), accountHolderDetails));
   }
 
   @Test
