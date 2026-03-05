@@ -23,4 +23,8 @@ public abstract class AggregateRoot<ID extends AggregateId<?>> extends Entity<ID
     events.clear();
     return unmodifiableEvents;
   }
+
+  public boolean hasEvents() {
+    return !events.isEmpty();
+  }
 }
