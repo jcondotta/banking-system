@@ -19,9 +19,9 @@ public abstract class AggregateRoot<ID extends AggregateId<?>> extends Entity<ID
   }
 
   public List<DomainEvent<ID>> pullEvents() {
-    var unmodifiableEvents = List.copyOf(events);
+    List<DomainEvent<ID>> pulledEvents = List.copyOf(events);
     events.clear();
-    return unmodifiableEvents;
+    return pulledEvents;
   }
 
   public boolean hasEvents() {
