@@ -64,4 +64,13 @@ class EntityTest {
 
     assertThat(hash1).isEqualTo(hash2);
   }
+
+  @Test
+  @SuppressWarnings("all")
+  void shouldReturnTrue_whenComparingSameEntityInstance() {
+    FakeEntity entity = new FakeEntity(new FakeId(UUID.randomUUID()));
+    FakeEntity sameReference = entity;
+
+    assertThat(entity.equals(sameReference)).isTrue();
+  }
 }
