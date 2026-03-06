@@ -1,8 +1,8 @@
 package com.jcondotta.domain.events;
 
 
-import com.jcondotta.domain.identity.EventId;
 import com.jcondotta.domain.identity.AggregateId;
+import com.jcondotta.domain.identity.EventId;
 
 import java.time.Instant;
 
