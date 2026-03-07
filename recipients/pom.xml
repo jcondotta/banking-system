@@ -15,5 +15,6 @@
 
     <modules>
         <module>recipients-domain</module>
+        <module>recipients-application</module>
     </modules>
 </project>

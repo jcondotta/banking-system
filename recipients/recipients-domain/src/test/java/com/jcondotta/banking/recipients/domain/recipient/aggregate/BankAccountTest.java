@@ -2,6 +2,7 @@ package com.jcondotta.banking.recipients.domain.recipient.aggregate;
 
 import com.jcondotta.banking.recipients.domain.recipient.enums.AccountStatus;
 import com.jcondotta.banking.recipients.domain.recipient.exceptions.BankAccountNotActiveException;
+import com.jcondotta.banking.recipients.domain.recipient.fixtures.RecipientFixtures;
 import com.jcondotta.banking.recipients.domain.recipient.identity.BankAccountId;
 import com.jcondotta.banking.recipients.domain.recipient.identity.RecipientId;
 import com.jcondotta.banking.recipients.domain.recipient.validation.BankAccountErrors;
@@ -18,8 +19,8 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 class BankAccountTest {
 
   private static final BankAccountId BANK_ACCOUNT_ID = BankAccountId.of(UUID.randomUUID());
-  private static final RecipientName RECIPIENT_NAME = RecipientName.of("Jefferson Condotta");
-  private static final Iban IBAN = Iban.of("GB82WEST12345698765432");
+  private static final RecipientName RECIPIENT_NAME = RecipientFixtures.JEFFERSON.toName();
+  private static final Iban IBAN = RecipientFixtures.JEFFERSON.toIban();
 
   @Test
   void shouldRestoreBankAccount_whenAllValuesAreProvided() {
@@ -38,8 +39,7 @@ class BankAccountTest {
     var recipient = bankAccount.createRecipient(RECIPIENT_NAME, IBAN);
 
     assertThat(bankAccount.getRecipients())
-      .hasSize(1)
-      .contains(recipient);
+      .containsExactly(recipient);
   }
 
   @Test
@@ -58,7 +58,6 @@ class BankAccountTest {
     var recipient = bankAccount.createRecipient(RECIPIENT_NAME, IBAN);
 
     bankAccount.removeRecipient(recipient.getId());
-
     assertThat(bankAccount.getRecipients()).isEmpty();
   }
 
@@ -96,13 +95,15 @@ class BankAccountTest {
   @Test
   void shouldReturnOnlyActiveRecipients_whenCallingGetRecipients() {
     var bankAccount = BankAccount.restore(BANK_ACCOUNT_ID, AccountStatus.ACTIVE, Recipients.empty());
-    var recipient = bankAccount.createRecipient(RECIPIENT_NAME, IBAN);
+    var recipient1 = bankAccount.createRecipient(RECIPIENT_NAME, IBAN);
 
-    bankAccount.removeRecipient(recipient.getId());
+    bankAccount.removeRecipient(recipient1.getId());
 
-    bankAccount.createRecipient(RecipientName.of("Another"), Iban.of("GB33BUKB20201555555555"));
+    var anotherRecipientName = RecipientFixtures.PATRIZIO.toName();
+    var anotherIBAN = RecipientFixtures.PATRIZIO.toIban();
+    Recipient recipient2 = bankAccount.createRecipient(anotherRecipientName, anotherIBAN);
 
     assertThat(bankAccount.getRecipients())
-      .hasSize(1);
+      .containsExactly(recipient2);
   }
 }

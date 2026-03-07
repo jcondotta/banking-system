@@ -7,38 +7,43 @@ import com.jcondotta.banking.recipients.domain.recipient.validation.BankAccountE
 import com.jcondotta.banking.recipients.domain.recipient.validation.RecipientError;
 import com.jcondotta.banking.recipients.domain.recipient.value_objects.Iban;
 import com.jcondotta.banking.recipients.domain.recipient.value_objects.RecipientName;
+import com.jcondotta.domain.core.DomainCollection;
 
 import java.time.Instant;
-import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
-import java.util.stream.Stream;
+import java.util.Optional;
 
 import static com.jcondotta.domain.support.DomainPreconditions.required;
 
-public final class Recipients {
+public final class Recipients extends DomainCollection<Recipient> {
 
-  private final List<Recipient> entries;
-
-  Recipients(List<Recipient> entries) {
-    required(entries, BankAccountErrors.RECIPIENTS_MUST_NOT_BE_NULL);
-    this.entries = new ArrayList<>(entries);
+  Recipients(Collection<Recipient> values) {
+    super(required(values, BankAccountErrors.RECIPIENTS_MUST_NOT_BE_NULL));
   }
 
-  static Recipients empty() {
+  public static Recipients of(Collection<Recipient> recipients) {
+    required(recipients, BankAccountErrors.RECIPIENTS_MUST_NOT_BE_NULL);
+    return new Recipients(recipients);
+  }
+
+  public static Recipients of(Recipient... recipients) {
+    required(recipients, BankAccountErrors.RECIPIENTS_MUST_NOT_BE_NULL);
+    return new Recipients(List.of(recipients));
+  }
+
+  public static Recipients empty() {
     return new Recipients(List.of());
   }
 
   Recipient add(RecipientName name, Iban iban, Instant createdAt) {
-    if (entries.stream()
-      .filter(Recipient::isActive)
-      .anyMatch(recipient -> recipient.getIban().equals(iban))) {
-
+    if (existsActiveRecipientWithIban(iban)) {
       throw new DuplicateRecipientException(iban);
     }
 
     var recipient = Recipient.create(name, iban, createdAt);
 
-    entries.add(recipient);
+    values.add(recipient);
     return recipient;
   }
 
@@ -46,19 +51,25 @@ public final class Recipients {
     required(recipientId, RecipientError.RECIPIENT_ID_NOT_PROVIDED);
 
     var recipient = find(recipientId)
-      .findFirst()
       .orElseThrow(() -> new RecipientNotFoundException(recipientId));
 
     recipient.remove();
   }
 
-  private Stream<Recipient> find(RecipientId recipientId) {
-    return entries.stream()
-      .filter(recipient -> recipient.getId().equals(recipientId));
+  private Optional<Recipient> find(RecipientId recipientId) {
+    return stream()
+      .filter(recipient -> recipient.getId().equals(recipientId))
+      .findFirst();
   }
 
-  public List<Recipient> getEntries() {
-    return entries.stream()
+  private boolean existsActiveRecipientWithIban(Iban iban) {
+    return stream()
+      .filter(Recipient::isActive)
+      .anyMatch(recipient -> recipient.getIban().equals(iban));
+  }
+
+  public List<Recipient> active() {
+    return stream()
       .filter(Recipient::isActive)
       .toList();
   }

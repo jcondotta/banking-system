@@ -1,6 +1,7 @@
 package com.jcondotta.banking.recipients.domain.recipient.aggregate;
 
 import com.jcondotta.banking.recipients.domain.recipient.enums.RecipientStatus;
+import com.jcondotta.banking.recipients.domain.recipient.fixtures.RecipientFixtures;
 import com.jcondotta.banking.recipients.domain.recipient.identity.RecipientId;
 import com.jcondotta.banking.recipients.domain.recipient.testsupport.ClockTestFactory;
 import com.jcondotta.banking.recipients.domain.recipient.validation.RecipientError;
@@ -19,15 +20,15 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 class RecipientTest {
 
   private static final RecipientId RECIPIENT_ID = RecipientId.newId();
-  private static final RecipientName RECIPIENT_NAME = RecipientName.of("Jefferson Condotta");
-  private static final Iban IBAN = Iban.of("GB82WEST12345698765432");
+  private static final RecipientName RECIPIENT_NAME = RecipientFixtures.JEFFERSON.toName();
+  private static final Iban IBAN = RecipientFixtures.JEFFERSON.toIban();
   private static final RecipientStatus STATUS_ACTIVE = RecipientStatus.ACTIVE;
 
   private static final Instant CREATED_AT = Instant.now(ClockTestFactory.FIXED_CLOCK);
 
   @Test
   void shouldCreateRecipient_whenUsingFactoryMethod() {
-    var recipient = Recipient.create(RECIPIENT_NAME, IBAN, CREATED_AT);
+    var recipient = RecipientFixtures.JEFFERSON.create();
 
     assertThat(recipient.getId()).isNotNull();
     assertThat(recipient.getRecipientName()).isEqualTo(RECIPIENT_NAME);
@@ -50,7 +51,7 @@ class RecipientTest {
 
   @Test
   void shouldDeactivateRecipient_whenRemoveIsCalled() {
-    var recipient = Recipient.create(RECIPIENT_NAME, IBAN, CREATED_AT);
+    var recipient = RecipientFixtures.JEFFERSON.create();
     recipient.remove();
 
     assertThat(recipient.isActive()).isFalse();
@@ -58,7 +59,7 @@ class RecipientTest {
 
   @Test
   void shouldKeepRecipientDeactivate_whenRemoveIsCalledTwice() {
-    var recipient = Recipient.create(RECIPIENT_NAME, IBAN, CREATED_AT);
+    var recipient = RecipientFixtures.JEFFERSON.create();
     recipient.remove();
     assertThat(recipient.isActive()).isFalse();
 
