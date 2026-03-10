@@ -1,4 +1,4 @@
-package com.jcondotta.banking.infrastructure;
+package com.jcondotta.banking.infrastructure.web.problem;
 
 import java.net.URI;
 

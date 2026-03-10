@@ -7,7 +7,7 @@ import com.jcondotta.banking.recipients.domain.recipient.identity.BankAccountId;
 import com.jcondotta.banking.recipients.domain.recipient.identity.RecipientId;
 import com.jcondotta.banking.recipients.domain.recipient.value_objects.Iban;
 import com.jcondotta.banking.recipients.domain.recipient.value_objects.RecipientName;
-import com.jcondotta.banking.recipients.infrastructure.bankaccount.adapters.output.persistence.entity.BankingEntity;
+import com.jcondotta.banking.recipients.infrastructure.bankaccount.adapters.output.persistence.entity.AccountRecipientEntity;
 import com.jcondotta.banking.recipients.infrastructure.bankaccount.adapters.output.persistence.entity.RecipientEntityKey;
 import com.jcondotta.banking.recipients.infrastructure.bankaccount.adapters.output.persistence.enums.EntityType;
 import org.mapstruct.Mapper;
@@ -15,8 +15,8 @@ import org.mapstruct.Mapper;
 @Mapper(componentModel = "spring")
 public interface RecipientEntityMapper {
 
-  default BankingEntity toEntity(BankAccountId bankAccountId, Recipient recipient) {
-    return BankingEntity.builder()
+  default AccountRecipientEntity toEntity(BankAccountId bankAccountId, Recipient recipient) {
+    return AccountRecipientEntity.builder()
       .partitionKey(RecipientEntityKey.partitionKey(bankAccountId))
       .sortKey(RecipientEntityKey.sortKey(recipient.getId()))
       .entityType(EntityType.RECIPIENT)
@@ -29,7 +29,7 @@ public interface RecipientEntityMapper {
       .build();
   }
 
-  default Recipient toDomain(BankingEntity entity) {
+  default Recipient toDomain(AccountRecipientEntity entity) {
     return Recipient.restore(
       RecipientId.of(entity.getRecipientId()),
       RecipientName.of(entity.getRecipientName()),

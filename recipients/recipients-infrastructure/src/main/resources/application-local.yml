@@ -11,5 +11,5 @@ cloud:
     dynamodb:
       endpoint: ${AWS_DYNAMODB_ENDPOINT:http://127.0.0.1:4566}
       tables:
-        recipients:
+        account-recipients:
           table-name: ${AWS_DYNAMODB_ACCOUNT_RECIPIENTS_TABLE_NAME:account-recipients}

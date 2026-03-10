@@ -18,7 +18,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder(toBuilder = true)
-public class BankingEntity {
+public class AccountRecipientEntity {
 
   private String partitionKey;
   private String sortKey;

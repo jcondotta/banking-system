@@ -1,7 +1,7 @@
 package com.jcondotta.banking.recipients.infrastructure.bankaccount.adapters.input.rest.create_recipient;
 
 import com.jcondotta.application.core.CommandHandler;
-import com.jcondotta.banking.infrastructure.ProblemTypes;
+import com.jcondotta.banking.infrastructure.web.problem.ProblemTypes;
 import com.jcondotta.banking.recipients.application.bankaccount.command.register.RegisterBankAccountCommand;
 import com.jcondotta.banking.recipients.domain.recipient.aggregate.BankAccount;
 import com.jcondotta.banking.recipients.domain.recipient.aggregate.Recipients;

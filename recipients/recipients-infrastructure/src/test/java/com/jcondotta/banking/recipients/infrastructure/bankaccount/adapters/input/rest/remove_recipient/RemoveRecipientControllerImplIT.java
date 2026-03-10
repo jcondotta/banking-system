@@ -2,7 +2,7 @@ package com.jcondotta.banking.recipients.infrastructure.bankaccount.adapters.inp
 
 import com.jcondotta.application.core.CommandHandler;
 import com.jcondotta.application.core.CommandHandlerWithResult;
-import com.jcondotta.banking.infrastructure.ProblemTypes;
+import com.jcondotta.banking.infrastructure.web.problem.ProblemTypes;
 import com.jcondotta.banking.recipients.application.bankaccount.command.create_recipient.CreateRecipientCommand;
 import com.jcondotta.banking.recipients.application.bankaccount.command.register.RegisterBankAccountCommand;
 import com.jcondotta.banking.recipients.domain.recipient.enums.RecipientStatus;

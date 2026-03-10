@@ -1,9 +1,9 @@
-package com.jcondotta.banking.recipients.application.bankaccount.query.list_recipients;
+package com.jcondotta.banking.recipients.application.bankaccount.query.model;
 
 import java.time.Instant;
 import java.util.UUID;
 
-public record RecipientView(
+public record RecipientSummary(
   UUID recipientId,
   String recipientName,
   String iban,

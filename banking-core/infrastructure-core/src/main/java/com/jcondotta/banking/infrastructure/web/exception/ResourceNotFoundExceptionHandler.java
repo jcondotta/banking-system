@@ -1,5 +1,6 @@
-package com.jcondotta.banking.infrastructure;
+package com.jcondotta.banking.infrastructure.web.exception;
 
+import com.jcondotta.banking.infrastructure.web.problem.ProblemTypes;
 import com.jcondotta.domain.exception.DomainNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;

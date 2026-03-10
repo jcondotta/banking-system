@@ -4,7 +4,7 @@ import com.jcondotta.banking.recipients.domain.recipient.aggregate.BankAccount;
 import com.jcondotta.banking.recipients.domain.recipient.identity.BankAccountId;
 import com.jcondotta.banking.recipients.domain.recipient.repository.BankAccountRepository;
 import com.jcondotta.banking.recipients.infrastructure.bankaccount.adapters.output.persistence.entity.BankAccountEntityKey;
-import com.jcondotta.banking.recipients.infrastructure.bankaccount.adapters.output.persistence.entity.BankingEntity;
+import com.jcondotta.banking.recipients.infrastructure.bankaccount.adapters.output.persistence.entity.AccountRecipientEntity;
 import com.jcondotta.banking.recipients.infrastructure.bankaccount.adapters.output.persistence.mapper.BankAccountEntityMapper;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,7 +24,7 @@ public class BankAccountDynamoDbRepository implements BankAccountRepository {
 
   private final DynamoDbEnhancedClient dynamoDbClient;
 
-  private final DynamoDbTable<BankingEntity> bankingTable;
+  private final DynamoDbTable<AccountRecipientEntity> accountRecipientsTable;
 
   private final BankAccountEntityMapper bankAccountEntityMapper;
 
@@ -35,7 +35,7 @@ public class BankAccountDynamoDbRepository implements BankAccountRepository {
       .partitionValue(partitionKey)
       .build());
 
-    var bankingEntities = bankingTable.query(queryConditional)
+    var bankingEntities = accountRecipientsTable.query(queryConditional)
       .items().stream()
       .toList();
 
@@ -57,7 +57,7 @@ public class BankAccountDynamoDbRepository implements BankAccountRepository {
 
     bankAccountEntityMapper.toEntities(bankAccount)
       .forEach(bankingEntity -> builder
-        .addPutItem(bankingTable, bankingEntity)
+        .addPutItem(accountRecipientsTable, bankingEntity)
       );
 
     bankAccount.getRecipients()

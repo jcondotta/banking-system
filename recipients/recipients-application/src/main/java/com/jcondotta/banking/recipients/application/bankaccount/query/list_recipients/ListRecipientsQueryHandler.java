@@ -4,17 +4,19 @@ import com.jcondotta.application.core.query.QueryHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
-
 @Component
 @RequiredArgsConstructor
 public class ListRecipientsQueryHandler
-  implements QueryHandler<ListRecipientsQuery, List<RecipientView>> {
+  implements QueryHandler<ListRecipientsQuery, ListRecipientsQueryResult> {
 
   private final RecipientQueryRepository queryRepository;
 
   @Override
-  public List<RecipientView> handle(ListRecipientsQuery query) {
-    return queryRepository.findActiveByBankAccountId(query.bankAccountId());
+  public ListRecipientsQueryResult handle(ListRecipientsQuery query) {
+    var recipients = queryRepository.findActiveByBankAccountId(query.bankAccountId())
+      .stream()
+      .toList();
+
+    return new ListRecipientsQueryResult(recipients);
   }
 }

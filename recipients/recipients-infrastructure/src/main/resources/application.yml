@@ -14,7 +14,7 @@ cloud:
       static: ${AWS_DEFAULT_REGION}
     dynamodb:
       tables:
-        recipients:
+        account-recipients:
           table-name: ${AWS_DYNAMODB_ACCOUNT_RECIPIENTS_TABLE_NAME}
 
 api:
@@ -28,21 +28,16 @@ management:
     web:
       exposure:
         include: health, prometheus, metrics
+
   metrics:
     tags:
       application: ${spring.application.name}
+
     distribution:
       percentiles-histogram:
         http.server.requests: true
-        account.recipients.create: true
-        account.recipients.query: true
-        cache.get: true
-        cache.put_if_absent: true
-        cache.put: true
+        bankaccount.*: true
+
       percentiles:
         http.server.requests: 0.5, 0.95, 0.99
-        bankaccount.recipient.create: 0.5, 0.95, 0.99
-        bankaccount.recipient.remove: 0.5, 0.95, 0.99
-        cache.get: 0.5, 0.95, 0.99
-        cache.put_if_absent: 0.5, 0.95, 0.99
-        cache.put: 0.5, 0.95, 0.99
+        bankaccount.*: 0.5, 0.95, 0.99
