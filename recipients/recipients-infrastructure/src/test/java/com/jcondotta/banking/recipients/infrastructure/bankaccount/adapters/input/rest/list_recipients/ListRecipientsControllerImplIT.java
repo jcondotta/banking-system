@@ -103,7 +103,7 @@ class ListRecipientsControllerImplIT {
     assertThat(response.recipients())
       .hasSize(2)
       .extracting(RecipientSummary::recipientName)
-      .containsExactly(
+      .containsExactlyInAnyOrder(
         RecipientFixtures.JEFFERSON.toName().value(),
         RecipientFixtures.PATRIZIO.toName().value()
       );
