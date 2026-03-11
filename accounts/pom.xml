@@ -17,6 +17,7 @@
         <module>accounts-domain</module>
         <module>accounts-test-support</module>
         <module>accounts-application</module>
+        <module>accounts-infrastructure</module>
     </modules>
 
     <dependencyManagement>

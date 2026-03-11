@@ -77,18 +77,6 @@
 
 			<dependency>
 				<groupId>com.jcondotta</groupId>
-				<artifactId>accounts-domain</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-
-			<dependency>
-				<groupId>com.jcondotta</groupId>
-				<artifactId>accounts-application</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-
-			<dependency>
-				<groupId>com.jcondotta</groupId>
 				<artifactId>bank-accounts-contracts</artifactId>
 				<version>${project.version}</version>
 			</dependency>

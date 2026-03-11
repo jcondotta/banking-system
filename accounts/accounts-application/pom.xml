@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>com.jcondotta</groupId>
-        <artifactId>banking-system</artifactId>
+        <artifactId>accounts</artifactId>
         <version>1.0.0</version>
     </parent>
 

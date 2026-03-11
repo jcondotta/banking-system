@@ -3,7 +3,7 @@
 set -e
 
 awslocal dynamodb update-table \
-  --table-name banking-entities \
+  --table-name bank-accounts \
   --attribute-definitions \
       AttributeName=gsi1pk,AttributeType=S \
       AttributeName=gsi1sk,AttributeType=S \
