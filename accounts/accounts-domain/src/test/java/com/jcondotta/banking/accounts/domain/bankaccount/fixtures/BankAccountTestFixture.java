@@ -6,6 +6,7 @@ import com.jcondotta.banking.accounts.domain.bankaccount.enums.AccountType;
 import com.jcondotta.banking.accounts.domain.bankaccount.enums.Currency;
 import com.jcondotta.banking.accounts.domain.bankaccount.enums.HolderType;
 import com.jcondotta.banking.accounts.domain.bankaccount.identity.AccountHolderId;
+import com.jcondotta.banking.accounts.domain.bankaccount.identity.BankAccountId;
 import com.jcondotta.banking.accounts.domain.bankaccount.value_objects.Iban;
 
 import java.time.Instant;
@@ -26,6 +27,7 @@ public final class BankAccountTestFixture {
 
   public static BankAccount openPendingAccount(AccountHolderFixtures fixtures, AccountType accountType, Currency currency) {
     return BankAccount.open(
+      BankAccountId.newId(),
       fixtures.personalInfo(),
       fixtures.contactInfo(),
       fixtures.address(),

@@ -8,7 +8,7 @@ import com.jcondotta.banking.recipients.application.bankaccount.command.remove_r
 import com.jcondotta.banking.recipients.application.bankaccount.query.model.RecipientSummary;
 import com.jcondotta.banking.recipients.domain.recipient.identity.BankAccountId;
 import com.jcondotta.banking.recipients.domain.recipient.identity.RecipientId;
-import com.jcondotta.banking.recipients.domain.recipient.testsupport.RecipientFixtures;
+import com.jcondotta.banking.accounts.domain.bankaccount.testsupport.RecipientFixtures;
 import com.jcondotta.banking.recipients.infrastructure.bankaccount.properties.AccountRecipientsURIProperties;
 import com.jcondotta.banking.recipients.infrastructure.bankaccount.testsupport.container.KafkaTestContainer;
 import com.jcondotta.banking.recipients.infrastructure.bankaccount.testsupport.container.LocalStackTestContainer;

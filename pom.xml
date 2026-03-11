@@ -83,7 +83,7 @@
 
 			<dependency>
 				<groupId>com.jcondotta</groupId>
-				<artifactId>bank-accounts-application</artifactId>
+				<artifactId>accounts-application</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 

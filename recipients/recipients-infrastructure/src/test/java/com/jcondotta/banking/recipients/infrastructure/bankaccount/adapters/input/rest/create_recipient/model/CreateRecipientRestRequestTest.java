@@ -1,6 +1,6 @@
 package com.jcondotta.banking.recipients.infrastructure.bankaccount.adapters.input.rest.create_recipient.model;
 
-import com.jcondotta.banking.recipients.domain.recipient.testsupport.RecipientFixtures;
+import com.jcondotta.banking.accounts.domain.bankaccount.testsupport.RecipientFixtures;
 import com.jcondotta.banking.recipients.infrastructure.bankaccount.testsupport.argument_provider.BlankValuesArgumentProvider;
 import com.jcondotta.banking.recipients.infrastructure.bankaccount.testsupport.factory.ValidatorTestFactory;
 import jakarta.validation.Validator;

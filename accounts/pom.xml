@@ -15,5 +15,53 @@
 
     <modules>
         <module>accounts-domain</module>
+        <module>accounts-test-support</module>
+        <module>accounts-application</module>
     </modules>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>com.jcondotta</groupId>
+                <artifactId>domain-core</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.jcondotta</groupId>
+                <artifactId>application-core</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.jcondotta</groupId>
+                <artifactId>infrastructure-core</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.jcondotta</groupId>
+                <artifactId>accounts-domain</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.jcondotta</groupId>
+                <artifactId>accounts-test-support</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.jcondotta</groupId>
+                <artifactId>recipients-application</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.jcondotta</groupId>
+                <artifactId>bank-accounts-contracts</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 </project>

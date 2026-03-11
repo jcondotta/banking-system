@@ -52,6 +52,7 @@ public final class BankAccount extends AggregateRoot<BankAccountId> {
   }
 
   public static BankAccount open(
+    BankAccountId bankAccountId,
     PersonalInfo personalInfo,
     ContactInfo contactInfo,
     Address address,
@@ -63,7 +64,7 @@ public final class BankAccount extends AggregateRoot<BankAccountId> {
     var primaryHolder = AccountHolder.createPrimary(personalInfo, contactInfo, address, now);
 
     var bankAccount = new BankAccount(
-      BankAccountId.newId(),
+      bankAccountId,
       accountType,
       currency,
       iban,
@@ -148,7 +149,7 @@ public final class BankAccount extends AggregateRoot<BankAccountId> {
     registerEvent(new BankAccountUnblockedEvent(EventId.newId(), this.getId(), Instant.now()));
   }
 
-  public void addJointAccountHolder(PersonalInfo personalInfo, ContactInfo contactInfo, Address address) {
+  public void addJointHolder(PersonalInfo personalInfo, ContactInfo contactInfo, Address address) {
     if (!accountStatus.isActive()) {
       throw new BankAccountNotActiveException(accountStatus);
     }

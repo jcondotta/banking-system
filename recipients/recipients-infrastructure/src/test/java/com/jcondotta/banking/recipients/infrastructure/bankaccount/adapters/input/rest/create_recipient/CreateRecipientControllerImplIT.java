@@ -10,7 +10,7 @@ import com.jcondotta.banking.recipients.domain.recipient.exceptions.BankAccountN
 import com.jcondotta.banking.recipients.domain.recipient.exceptions.BankAccountNotFoundException;
 import com.jcondotta.banking.recipients.domain.recipient.identity.BankAccountId;
 import com.jcondotta.banking.recipients.domain.recipient.repository.BankAccountRepository;
-import com.jcondotta.banking.recipients.domain.recipient.testsupport.RecipientFixtures;
+import com.jcondotta.banking.accounts.domain.bankaccount.testsupport.RecipientFixtures;
 import com.jcondotta.banking.recipients.infrastructure.bankaccount.adapters.input.rest.create_recipient.model.CreateRecipientRestRequest;
 import com.jcondotta.banking.recipients.infrastructure.bankaccount.properties.AccountRecipientsURIProperties;
 import com.jcondotta.banking.recipients.infrastructure.bankaccount.testsupport.argument_provider.BlankValuesArgumentProvider;

@@ -5,8 +5,8 @@ import com.jcondotta.banking.recipients.domain.recipient.exceptions.BankAccountN
 import com.jcondotta.banking.recipients.domain.recipient.exceptions.DuplicateRecipientException;
 import com.jcondotta.banking.recipients.domain.recipient.identity.BankAccountId;
 import com.jcondotta.banking.recipients.domain.recipient.repository.BankAccountRepository;
-import com.jcondotta.banking.recipients.domain.recipient.testsupport.BankAccountFixtures;
-import com.jcondotta.banking.recipients.domain.recipient.testsupport.RecipientFixtures;
+import com.jcondotta.banking.accounts.domain.bankaccount.testsupport.BankAccountFixtures;
+import com.jcondotta.banking.accounts.domain.bankaccount.testsupport.RecipientFixtures;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
