@@ -11,25 +11,44 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class DomainEventTest {
 
-  private record FakeEntityId(UUID value) implements AggregateId<UUID> {}
-
-  private record FakeDomainEvent(
-    EventId eventId,
-    FakeEntityId aggregateId,
-    Instant occurredAt
-  ) implements DomainEvent<FakeEntityId> {}
+  private static final EventId EVENT_ID = EventId.newId();
+  private static final TestAggregateId AGGREGATE_ID = new TestAggregateId(UUID.randomUUID());
+  private static final Instant OCCURRED_AT = Instant.now();
 
   @Test
-  void shouldExposeAllDomainEventProperties() {
+  void shouldReturnDefaultVersion_whenNotOverridden() {
+    DomainEvent<TestAggregateId> event = new TestDomainEvent(EVENT_ID, AGGREGATE_ID, OCCURRED_AT);
 
-    EventId eventId = EventId.newId();
-    FakeEntityId aggregateId = new FakeEntityId(UUID.randomUUID());
-    Instant occurredAt = Instant.now();
+    assertThat(event.version()).isEqualTo(1);
+  }
 
-    DomainEvent<FakeEntityId> event = new FakeDomainEvent(eventId, aggregateId, occurredAt);
+  @Test
+  void shouldAllowOverridingVersion_whenImplemented() {
+    DomainEvent<TestAggregateId> event = new TestDomainEventWithCustomVersion(EVENT_ID, AGGREGATE_ID, OCCURRED_AT);
 
-    assertThat(event.eventId()).isEqualTo(eventId);
-    assertThat(event.aggregateId()).isEqualTo(aggregateId);
-    assertThat(event.occurredAt()).isEqualTo(occurredAt);
+    assertThat(event.version()).isEqualTo(2);
+  }
+
+  @Test
+  void shouldReturnEventDataCorrectly() {
+    DomainEvent<TestAggregateId> event = new TestDomainEvent(EVENT_ID, AGGREGATE_ID, OCCURRED_AT);
+
+    assertThat(event.eventId()).isEqualTo(EVENT_ID);
+    assertThat(event.aggregateId()).isEqualTo(AGGREGATE_ID);
+    assertThat(event.occurredAt()).isEqualTo(OCCURRED_AT);
+  }
+
+  private record TestAggregateId(UUID value) implements AggregateId<UUID> {}
+
+  private record TestDomainEvent(EventId eventId, TestAggregateId aggregateId, Instant occurredAt)
+    implements DomainEvent<TestAggregateId> {}
+
+  private record TestDomainEventWithCustomVersion(EventId eventId, TestAggregateId aggregateId, Instant occurredAt)
+    implements DomainEvent<TestAggregateId> {
+
+    @Override
+    public int version() {
+      return 2;
+    }
   }
 }

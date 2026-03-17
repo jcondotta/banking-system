@@ -73,4 +73,12 @@ class EntityTest {
 
     assertThat(entity.equals(sameReference)).isTrue();
   }
+
+  @Test
+  void shouldReturnDifferentHashCode_whenEntitiesHaveDifferentIds() {
+    FakeEntity entity1 = new FakeEntity(new FakeId(UUID.randomUUID()));
+    FakeEntity entity2 = new FakeEntity(new FakeId(UUID.randomUUID()));
+
+    assertThat(entity1.hashCode()).isNotEqualTo(entity2.hashCode());
+  }
 }
