@@ -1,4 +1,4 @@
-package com.jcondotta.application.core;
+package com.jcondotta.application.core.command;
 
 @FunctionalInterface
 public interface CommandHandlerWithResult<C, R> {

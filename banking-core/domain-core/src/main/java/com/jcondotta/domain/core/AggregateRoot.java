@@ -18,8 +18,8 @@ public abstract class AggregateRoot<ID extends AggregateId<?>> extends Entity<ID
     events.add(event);
   }
 
-  public List<DomainEvent<ID>> pullEvents() {
-    List<DomainEvent<ID>> pulledEvents = List.copyOf(events);
+  public List<DomainEvent<?>> pullEvents() {
+    List<DomainEvent<?>> pulledEvents = List.copyOf(events);
     events.clear();
     return pulledEvents;
   }
