@@ -19,15 +19,14 @@ import java.net.URI;
 @RestControllerAdvice
 public class ResourceNotFoundExceptionHandler {
 
+  static final String TITLE_RESOURCE_NOT_FOUND = "Not Found";
+
   @ResponseStatus(HttpStatus.NOT_FOUND)
   @ExceptionHandler(DomainNotFoundException.class)
-  public ResponseEntity<ProblemDetail> handleResourceNotFound(
-    DomainNotFoundException ex,
-    HttpServletRequest request) {
-
+  public ResponseEntity<ProblemDetail> handleResourceNotFound(DomainNotFoundException ex, HttpServletRequest request) {
     var problemDetail = ProblemDetail.forStatus(HttpStatus.NOT_FOUND);
     problemDetail.setType(ProblemTypes.RESOURCE_NOT_FOUND);
-    problemDetail.setTitle(HttpStatus.NOT_FOUND.getReasonPhrase());
+    problemDetail.setTitle(TITLE_RESOURCE_NOT_FOUND);
     problemDetail.setDetail(ex.getMessage());
     problemDetail.setInstance(URI.create(request.getRequestURI()));
 

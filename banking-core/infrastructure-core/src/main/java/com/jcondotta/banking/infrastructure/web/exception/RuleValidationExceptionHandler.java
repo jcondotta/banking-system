@@ -18,14 +18,13 @@ import java.net.URI;
 @RestControllerAdvice
 public class RuleValidationExceptionHandler {
 
+  static final String TITLE_OPERATION_NOT_ALLOWED = "Operation not allowed";
+
   @ExceptionHandler(DomainRuleValidationException.class)
-  public ResponseEntity<ProblemDetail> handleBusinessRuleViolation(
-    DomainRuleValidationException ex,
-    HttpServletRequest request
-  ) {
+  public ResponseEntity<ProblemDetail> handleBusinessRuleViolation(DomainRuleValidationException ex, HttpServletRequest request) {
     var problemDetail = ProblemDetail.forStatus(HttpStatus.UNPROCESSABLE_ENTITY);
     problemDetail.setType(ProblemTypes.RULE_VIOLATION);
-    problemDetail.setTitle("Operation not allowed");
+    problemDetail.setTitle(TITLE_OPERATION_NOT_ALLOWED);
     problemDetail.setDetail(ex.getMessage());
     problemDetail.setInstance(URI.create(request.getRequestURI()));
 

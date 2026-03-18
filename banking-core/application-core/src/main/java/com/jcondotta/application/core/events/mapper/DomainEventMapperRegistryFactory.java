@@ -23,10 +23,7 @@ public final class DomainEventMapperRegistryFactory {
       requireNonNull(mapper.domainEventType(), DOMAIN_EVENT_TYPE_MUST_NOT_BE_NULL);
     });
 
-    Map<
-      Class<? extends DomainEvent<?>>,
-      DomainEventIntegrationEventMapper<?, ?>
-      > registry = new HashMap<>();
+    Map<Class<? extends DomainEvent<?>>, DomainEventIntegrationEventMapper<?, ?>> registry = new HashMap<>();
 
     mappers.forEach(mapper -> {
       if (registry.putIfAbsent(mapper.domainEventType(), mapper) != null) {

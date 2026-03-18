@@ -11,11 +11,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -23,39 +23,45 @@ import java.util.stream.Collectors;
 @RestControllerAdvice
 public class MethodArgumentNotValidExceptionHandler {
 
-//  private final Clock clock;
+  static final String TITLE_VALIDATION_FAILED = "Request validation failed";
+  static final String ERRORS_PROPERTY = "errors";
+  private static final HttpStatus STATUS = HttpStatus.UNPROCESSABLE_ENTITY;
 
-  @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
   @ExceptionHandler(MethodArgumentNotValidException.class)
-  public ResponseEntity<ProblemDetail> handleValidationException(
-      MethodArgumentNotValidException ex, HttpServletRequest request) {
-    var groupedByField =
-        ex.getBindingResult().getFieldErrors().stream()
-            .collect(
-                Collectors.groupingBy(
-                    FieldError::getField,
-                    Collectors.mapping(
-                        DefaultMessageSourceResolvable::getDefaultMessage, Collectors.toList())));
+  public ResponseEntity<ProblemDetail> handleValidationException(MethodArgumentNotValidException ex, HttpServletRequest request) {
+    var groupedErrors = groupErrorsByField(ex);
+    var fieldErrors = toFieldMessageErrors(groupedErrors);
 
-    var fieldMessageErrors =
-        groupedByField.entrySet().stream()
-            .map(entry -> FieldMessageError.of(entry.getKey(), entry.getValue()))
-            .toList();
-
-    log.warn("Validation error at {} -> {}", request.getRequestURI(), groupedByField);
-
-    var problemDetail = ProblemDetail.forStatus(HttpStatus.UNPROCESSABLE_ENTITY);
-    problemDetail.setType(ProblemTypes.VALIDATION_ERRORS);
-    problemDetail.setTitle("Request validation failed");
-    problemDetail.setInstance(URI.create(request.getRequestURI()));
-//    problemDetail.setProperty("timestamp", ZonedDateTime.now(clock));
-    problemDetail.setProperty("errors", fieldMessageErrors);
-
+    var problemDetail = buildProblemDetail(request, fieldErrors);
     return ResponseEntity.unprocessableEntity().body(problemDetail);
   }
 
-  private record FieldMessageError(String field, List<String> messages) {
+  private Map<String, List<String>> groupErrorsByField(MethodArgumentNotValidException ex) {
+    return ex.getBindingResult().getFieldErrors()
+      .stream()
+      .collect(Collectors.groupingBy(FieldError::getField,
+        Collectors.mapping(DefaultMessageSourceResolvable::getDefaultMessage, Collectors.toList())
+      ));
+  }
 
+  private List<FieldMessageError> toFieldMessageErrors(Map<String, List<String>> groupedErrors) {
+    return groupedErrors.entrySet()
+      .stream()
+      .map(entry -> FieldMessageError.of(entry.getKey(), entry.getValue()))
+      .toList();
+  }
+
+  private ProblemDetail buildProblemDetail(HttpServletRequest request, List<FieldMessageError> errors) {
+    var problemDetail = ProblemDetail.forStatus(STATUS);
+    problemDetail.setType(ProblemTypes.VALIDATION_ERRORS);
+    problemDetail.setTitle(TITLE_VALIDATION_FAILED);
+    problemDetail.setInstance(URI.create(request.getRequestURI()));
+    problemDetail.setProperty(ERRORS_PROPERTY, errors);
+
+    return problemDetail;
+  }
+
+  private record FieldMessageError(String field, List<String> messages) {
     public static FieldMessageError of(String field, List<String> messages) {
       return new FieldMessageError(field, messages);
     }

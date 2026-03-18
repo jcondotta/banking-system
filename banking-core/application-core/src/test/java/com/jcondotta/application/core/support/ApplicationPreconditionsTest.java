@@ -3,6 +3,8 @@ package com.jcondotta.application.core;
 import com.jcondotta.application.core.support.ApplicationPreconditions;
 import org.junit.jupiter.api.Test;
 
+import java.lang.reflect.Constructor;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -47,5 +49,16 @@ class ApplicationPreconditionsTest {
     assertThatThrownBy(() -> ApplicationPreconditions.requiredNotBlank(null, MESSAGE))
       .isInstanceOf(NullPointerException.class)
       .hasMessage(MESSAGE);
+  }
+
+  @Test
+  void shouldThrowUnsupportedOperationException_whenInstantiatingUtilityClass() throws Exception {
+    Constructor<ApplicationPreconditions> constructor = ApplicationPreconditions.class.getDeclaredConstructor();
+
+    constructor.setAccessible(true);
+
+    assertThatThrownBy(constructor::newInstance)
+      .hasCauseInstanceOf(UnsupportedOperationException.class)
+      .hasRootCauseMessage("No instances allowed for this class");
   }
 }

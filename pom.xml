@@ -256,6 +256,12 @@
 							<param>com.jcondotta.*</param>
 						</targetTests>
 
+						<excludedClasses>
+<!--							<param>*.config.*</param>-->
+<!--							<param>*Configuration</param>-->
+							<param>*Config</param>
+						</excludedClasses>
+
 						<mutationThreshold>80</mutationThreshold>
 
 <!--						<mutators>-->
