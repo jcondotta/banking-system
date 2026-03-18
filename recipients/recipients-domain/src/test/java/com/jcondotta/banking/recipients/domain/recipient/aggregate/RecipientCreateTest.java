@@ -1,9 +1,9 @@
 package com.jcondotta.banking.recipients.domain.recipient.aggregate;
 
+import com.jcondotta.banking.accounts.domain.bankaccount.testsupport.ClockTestFactory;
 import com.jcondotta.banking.recipients.domain.recipient.enums.RecipientStatus;
 import com.jcondotta.banking.recipients.domain.recipient.fixtures.RecipientFixtures;
 import com.jcondotta.banking.recipients.domain.recipient.identity.RecipientId;
-import com.jcondotta.banking.accounts.domain.bankaccount.testsupport.ClockTestFactory;
 import com.jcondotta.banking.recipients.domain.recipient.validation.RecipientError;
 import com.jcondotta.banking.recipients.domain.recipient.value_objects.Iban;
 import com.jcondotta.banking.recipients.domain.recipient.value_objects.RecipientName;
@@ -17,7 +17,7 @@ import java.time.Instant;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-class RecipientTest {
+class RecipientCreateTest {
 
   private static final RecipientId RECIPIENT_ID = RecipientId.newId();
   private static final RecipientName RECIPIENT_NAME = RecipientFixtures.JEFFERSON.toName();
@@ -47,24 +47,6 @@ class RecipientTest {
     assertThat(recipient.getIban()).isEqualTo(IBAN);
     assertThat(recipient.getStatus()).isEqualTo(status);
     assertThat(recipient.getCreatedAt()).isEqualTo(CREATED_AT);
-  }
-
-  @Test
-  void shouldDeactivateRecipient_whenRemoveIsCalled() {
-    var recipient = RecipientFixtures.JEFFERSON.create();
-    recipient.remove();
-
-    assertThat(recipient.isActive()).isFalse();
-  }
-
-  @Test
-  void shouldKeepRecipientDeactivate_whenRemoveIsCalledTwice() {
-    var recipient = RecipientFixtures.JEFFERSON.create();
-    recipient.remove();
-    assertThat(recipient.isActive()).isFalse();
-
-    recipient.remove();
-    assertThat(recipient.isActive()).isFalse();
   }
 
   @Test

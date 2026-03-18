@@ -1,10 +1,10 @@
 package com.jcondotta.banking.recipients.domain.recipient.aggregate;
 
+import com.jcondotta.banking.accounts.domain.bankaccount.testsupport.ClockTestFactory;
 import com.jcondotta.banking.recipients.domain.recipient.exceptions.DuplicateRecipientException;
 import com.jcondotta.banking.recipients.domain.recipient.exceptions.RecipientNotFoundException;
 import com.jcondotta.banking.recipients.domain.recipient.fixtures.RecipientFixtures;
 import com.jcondotta.banking.recipients.domain.recipient.identity.RecipientId;
-import com.jcondotta.banking.accounts.domain.bankaccount.testsupport.ClockTestFactory;
 import com.jcondotta.banking.recipients.domain.recipient.validation.BankAccountErrors;
 import com.jcondotta.banking.recipients.domain.recipient.validation.RecipientError;
 import com.jcondotta.banking.recipients.domain.recipient.value_objects.Iban;
@@ -87,6 +87,19 @@ class RecipientsTest {
   }
 
   @Test
+  void shouldAddRecipient_whenActiveRecipientWithDifferentIbanExists() {
+    var recipient1 = RecipientFixtures.JEFFERSON.create();
+    var recipients = Recipients.of(recipient1);
+
+    var differentIban = RecipientFixtures.PATRIZIO.toIban();
+
+    var recipient2 = recipients.add(RecipientFixtures.PATRIZIO.toName(), differentIban, CREATED_AT);
+
+    assertThat(recipients.active())
+      .containsExactly(recipient1, recipient2);
+  }
+
+  @Test
   void shouldThrowException_whenAddRecipientWithExistingIban() {
     var recipient1 = RecipientFixtures.JEFFERSON.create();
     var recipients = Recipients.of(recipient1);
@@ -132,12 +145,37 @@ class RecipientsTest {
   }
 
   @Test
+  void shouldThrowException_whenRemovingRecipientThatDoesNotExist() {
+    var recipient = RecipientFixtures.JEFFERSON.create();
+
+    var recipients = Recipients.of(recipient);
+
+    var unknownId = RecipientId.newId();
+
+    assertThatThrownBy(() -> recipients.remove(unknownId))
+      .isInstanceOf(RecipientNotFoundException.class);
+  }
+
+  @Test
   void shouldThrowException_whenRemovingRecipient_givenNullRecipientId() {
     var recipients = Recipients.empty();
 
     assertThatThrownBy(() -> recipients.remove(null))
       .isInstanceOf(DomainValidationException.class)
       .hasMessage(RecipientError.RECIPIENT_ID_NOT_PROVIDED);
+  }
+
+  @Test
+  void shouldReturnRecipient_whenRecipientExists() {
+    var recipient1 = RecipientFixtures.JEFFERSON.create();
+    var recipient2 = RecipientFixtures.PATRIZIO.create();
+
+    var recipients = Recipients.of(recipient1, recipient2);
+
+    recipients.remove(recipient1.getId());
+
+    assertThat(recipients.active())
+      .containsExactly(recipient2);
   }
 
   @Test

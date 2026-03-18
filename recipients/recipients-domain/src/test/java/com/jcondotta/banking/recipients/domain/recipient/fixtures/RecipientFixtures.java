@@ -1,9 +1,9 @@
 package com.jcondotta.banking.recipients.domain.recipient.fixtures;
 
+import com.jcondotta.banking.accounts.domain.bankaccount.testsupport.ClockTestFactory;
 import com.jcondotta.banking.recipients.domain.recipient.aggregate.Recipient;
 import com.jcondotta.banking.recipients.domain.recipient.enums.RecipientStatus;
 import com.jcondotta.banking.recipients.domain.recipient.identity.RecipientId;
-import com.jcondotta.banking.accounts.domain.bankaccount.testsupport.ClockTestFactory;
 import com.jcondotta.banking.recipients.domain.recipient.value_objects.Iban;
 import com.jcondotta.banking.recipients.domain.recipient.value_objects.RecipientName;
 
@@ -45,6 +45,16 @@ public enum RecipientFixtures {
       toName(),
       toIban(),
       RecipientStatus.ACTIVE,
+      Instant.now(ClockTestFactory.FIXED_CLOCK)
+    );
+  }
+
+  public Recipient createRemoved() {
+    return Recipient.restore(
+      RecipientId.newId(),
+      toName(),
+      toIban(),
+      RecipientStatus.REMOVED,
       Instant.now(ClockTestFactory.FIXED_CLOCK)
     );
   }

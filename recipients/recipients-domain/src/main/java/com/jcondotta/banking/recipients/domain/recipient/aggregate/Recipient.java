@@ -38,7 +38,7 @@ public final class Recipient extends Entity<RecipientId> {
   }
 
   void remove() {
-    if (RecipientStatus.REMOVED.equals(this.status)) {
+    if (RecipientStatus.REMOVED.equals(status)) {
       return;
     }
 
