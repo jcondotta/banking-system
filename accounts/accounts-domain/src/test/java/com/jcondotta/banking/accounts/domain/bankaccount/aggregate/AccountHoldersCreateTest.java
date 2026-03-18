@@ -30,6 +30,19 @@ class AccountHoldersCreateTest {
   }
 
   @Test
+  void shouldCreateAccountHolders_whenListIsValid() {
+    var primaryHolder = BankAccountTestFixture.createPrimaryHolder(PRIMARY_ACCOUNT_HOLDER);
+    var jointHolder = BankAccountTestFixture.createJointHolder(JOINT_ACCOUNT_HOLDER_1);
+
+    var accountHolders = AccountHolders.of(
+      List.of(primaryHolder, jointHolder)
+    );
+
+    assertThat(accountHolders.active())
+      .containsExactly(primaryHolder, jointHolder);
+  }
+
+  @Test
   void shouldThrowException_whenNoPrimaryHolderExists() {
     var jointHolder = BankAccountTestFixture.createJointHolder(JOINT_ACCOUNT_HOLDER_1);
 

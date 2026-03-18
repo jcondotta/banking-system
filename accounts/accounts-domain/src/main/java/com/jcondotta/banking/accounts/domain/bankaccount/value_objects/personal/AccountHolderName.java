@@ -1,6 +1,7 @@
 package com.jcondotta.banking.accounts.domain.bankaccount.value_objects.personal;
 
 import com.jcondotta.domain.exception.DomainValidationException;
+import org.apache.commons.lang3.StringUtils;
 
 import static com.jcondotta.domain.support.DomainPreconditions.requiredNotBlank;
 
@@ -15,28 +16,24 @@ public record AccountHolderName(String firstName, String lastName) {
   public static final String LAST_NAME_MUST_NOT_EXCEED_LENGTH = "Last holderName must not exceed %d characters";
 
   public AccountHolderName {
-    firstName = normalize(firstName);
-    lastName = normalize(lastName);
-
     requiredNotBlank(firstName, FIRST_NAME_MUST_NOT_BE_EMPTY);
     requiredNotBlank(lastName, LAST_NAME_MUST_NOT_BE_EMPTY);
 
-    if (firstName.length() > MAX_LENGTH) {
-      throw new DomainValidationException(
-        FIRST_NAME_MUST_NOT_EXCEED_LENGTH.formatted(MAX_LENGTH)
-      );
-    }
+    firstName = normalize(firstName);
+    lastName = normalize(lastName);
 
-    if (lastName.length() > MAX_LENGTH) {
-      throw new DomainValidationException(
-        LAST_NAME_MUST_NOT_EXCEED_LENGTH.formatted(MAX_LENGTH)
-      );
-    }
+    validateLength(firstName, FIRST_NAME_MUST_NOT_EXCEED_LENGTH);
+    validateLength(lastName, LAST_NAME_MUST_NOT_EXCEED_LENGTH);
   }
 
   private static String normalize(String value) {
-    if (value == null) return null;
-    return value.trim().replaceAll("\\s+", " ");
+    return StringUtils.normalizeSpace(value);
+  }
+
+  private static void validateLength(String value, String message) {
+    if (value.length() > MAX_LENGTH) {
+      throw new DomainValidationException(message.formatted(MAX_LENGTH));
+    }
   }
 
   public static AccountHolderName of(String firstName, String lastName) {

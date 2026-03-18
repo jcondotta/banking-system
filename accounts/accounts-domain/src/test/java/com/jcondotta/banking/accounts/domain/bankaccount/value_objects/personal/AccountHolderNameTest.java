@@ -12,8 +12,10 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 class AccountHolderNameTest {
 
   private static final String FIRST_NAME_JEFFERSON = "Jefferson";
-  private static final String LAST_NAME_CONDOTTA = "Condotta";
   private static final String FIRST_NAME_PATRIZIO = "Patrizio";
+  private static final String LAST_NAME_CONDOTTA = "Condotta";
+
+  private static final String FULL_NAME = FIRST_NAME_JEFFERSON + " " + LAST_NAME_CONDOTTA;
 
   @Test
   void shouldCreateAccountHolderName_whenValuesAreValid() {
@@ -21,7 +23,7 @@ class AccountHolderNameTest {
 
     assertThat(name.firstName()).isEqualTo(FIRST_NAME_JEFFERSON);
     assertThat(name.lastName()).isEqualTo(LAST_NAME_CONDOTTA);
-    assertThat(name.fullName()).isEqualTo("Jefferson Condotta");
+    assertThat(name.fullName()).isEqualTo(FULL_NAME);
   }
 
   @Test
@@ -40,8 +42,8 @@ class AccountHolderNameTest {
 
   @ParameterizedTest
   @ArgumentsSource(BlankValuesArgumentProvider.class)
-  void shouldThrowException_whenFirstNameIsBlank(String blankFirstName) {
-    assertThatThrownBy(() -> AccountHolderName.of(blankFirstName, LAST_NAME_CONDOTTA))
+  void shouldThrowException_whenFirstNameIsBlank(String blankValue) {
+    assertThatThrownBy(() -> AccountHolderName.of(blankValue, LAST_NAME_CONDOTTA))
       .isInstanceOf(DomainValidationException.class)
       .hasMessage(AccountHolderName.FIRST_NAME_MUST_NOT_BE_EMPTY);
   }
@@ -55,7 +57,7 @@ class AccountHolderNameTest {
   }
 
   @Test
-  void shouldThrowException_whenFirstNameIsTooLong() {
+  void shouldThrowException_whenFirstNameExceedsMaxLength() {
     var longFirstName = "A".repeat(AccountHolderName.MAX_LENGTH + 1);
 
     assertThatThrownBy(() -> AccountHolderName.of(longFirstName, LAST_NAME_CONDOTTA))
@@ -64,7 +66,7 @@ class AccountHolderNameTest {
   }
 
   @Test
-  void shouldThrowException_whenLastNameIsTooLong() {
+  void shouldThrowException_whenLastNameExceedsMaxLength() {
     var longLastName = "A".repeat(AccountHolderName.MAX_LENGTH + 1);
 
     assertThatThrownBy(() -> AccountHolderName.of(FIRST_NAME_JEFFERSON, longLastName))
@@ -73,12 +75,21 @@ class AccountHolderNameTest {
   }
 
   @Test
-  void shouldNormalizeWhitespace() {
+  void shouldCreateAccountHolderName_whenFirstNameIsExactlyMaxLength() {
+    var firstName = "A".repeat(AccountHolderName.MAX_LENGTH);
+
+    var name = AccountHolderName.of(firstName, LAST_NAME_CONDOTTA);
+
+    assertThat(name.firstName()).isEqualTo(firstName);
+  }
+
+  @Test
+  void shouldNormalizeWhitespace_whenNamesContainExtraSpaces() {
     var name = AccountHolderName.of("  Jefferson  ", "  Condotta  ");
 
     assertThat(name.firstName()).isEqualTo(FIRST_NAME_JEFFERSON);
     assertThat(name.lastName()).isEqualTo(LAST_NAME_CONDOTTA);
-    assertThat(name.fullName()).isEqualTo("Jefferson Condotta");
+    assertThat(name.fullName()).isEqualTo(FULL_NAME);
   }
 
   @Test

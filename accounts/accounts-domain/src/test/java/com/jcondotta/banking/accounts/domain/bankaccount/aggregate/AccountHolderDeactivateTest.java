@@ -23,12 +23,15 @@ class AccountHolderDeactivateTest {
   }
 
   @Test
-  void shouldKeepAccountHolderDeactivated_whenDeactivateIsCalledTwice() {
+  void shouldKeepSameDeactivatedAt_whenDeactivateIsCalledTwice() {
     var accountHolder = BankAccountTestFixture.createJointHolder(AccountHolderFixtures.JEFFERSON, CREATED_AT);
+
     accountHolder.deactivate();
+    var firstDeactivatedAt = accountHolder.getDeactivatedAt();
+
     accountHolder.deactivate();
 
     assertThat(accountHolder.isActive()).isFalse();
-    assertThat(accountHolder.getDeactivatedAt()).isNotNull();
+    assertThat(accountHolder.getDeactivatedAt()).isEqualTo(firstDeactivatedAt);
   }
 }
