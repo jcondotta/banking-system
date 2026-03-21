@@ -26,7 +26,7 @@ class AddressTest {
 
     assertThat(address.street().value()).isEqualTo(VALID_STREET);
     assertThat(address.streetNumber().value()).isEqualTo(VALID_NUMBER);
-    assertThat(address.complement()).isNull();
+    assertThat(address.addressComplement()).isNull();
     assertThat(address.postalCode().value()).isEqualTo(VALID_POSTAL_CODE);
     assertThat(address.city().value()).isEqualTo(VALID_CITY);
   }
@@ -43,7 +43,7 @@ class AddressTest {
 
     assertThat(address.street().value()).isEqualTo(VALID_STREET);
     assertThat(address.streetNumber().value()).isEqualTo(VALID_NUMBER);
-    assertThat(address.complement().value()).isEqualTo(VALID_COMPLEMENT);
+    assertThat(address.addressComplement().value()).isEqualTo(VALID_COMPLEMENT);
     assertThat(address.postalCode().value()).isEqualTo(VALID_POSTAL_CODE);
     assertThat(address.city().value()).isEqualTo(VALID_CITY);
   }

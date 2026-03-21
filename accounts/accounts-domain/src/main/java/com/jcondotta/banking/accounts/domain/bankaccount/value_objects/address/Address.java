@@ -5,7 +5,7 @@ import static com.jcondotta.domain.support.DomainPreconditions.required;
 public record Address(
   Street street,
   StreetNumber streetNumber,
-  AddressComplement complement,
+  AddressComplement addressComplement,
   PostalCode postalCode,
   City city
 ) {
@@ -22,11 +22,11 @@ public record Address(
     required(city, CITY_MUST_BE_PROVIDED);
   }
 
-  public static Address of(String street, String number, String complement, String postalCode, String city) {
+  public static Address of(String street, String number, String addressComplement, String postalCode, String city) {
     return new Address(
       Street.of(street),
       StreetNumber.of(number),
-      complement == null ? null : AddressComplement.of(complement),
+      addressComplement == null ? null : AddressComplement.of(addressComplement),
       PostalCode.of(postalCode),
       City.of(city)
     );
