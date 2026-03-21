@@ -10,7 +10,6 @@ class GetBankAccountByIdQueryTest {
 
   @Test
   void shouldCreateQuery_whenBankAccountIdIsProvided() {
-
     var bankAccountId = BankAccountId.newId();
 
     var query = new GetBankAccountByIdQuery(bankAccountId);
@@ -20,7 +19,6 @@ class GetBankAccountByIdQueryTest {
 
   @Test
   void shouldThrowException_whenBankAccountIdIsNull() {
-
     assertThatThrownBy(() -> new GetBankAccountByIdQuery(null))
       .isInstanceOf(NullPointerException.class)
       .hasMessage(GetBankAccountByIdQuery.BANK_ACCOUNT_ID_REQUIRED);

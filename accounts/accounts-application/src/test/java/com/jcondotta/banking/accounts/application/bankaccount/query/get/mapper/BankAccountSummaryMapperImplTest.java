@@ -13,26 +13,25 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class BankAccountSummaryMapperImplTest {
 
+  private final IdentityDocumentSummaryMapper identityMapper = new IdentityDocumentSummaryMapperImpl();
+
+  private final AccountHolderSummaryMapper accountHolderSummaryMapper = new AccountHolderSummaryMapperImpl(
+    new PersonalInfoSummaryMapperImpl(identityMapper),
+    new ContactInfoSummaryMapperImpl(),
+    new AddressSummaryMapperImpl()
+  );
+
   private BankAccountSummaryMapper bankAccountMapper;
 
   @BeforeEach
   void setUp() {
-    var accountHolderMapper = new AccountHolderSummaryMapperImpl(
-      new PersonalInfoSummaryMapperImpl(new IdentityDocumentSummaryMapper() {
-      }),
-      new ContactInfoSummaryMapper() {
-      },
-      new AddressSummaryMapper() {}
-    );
-
-    bankAccountMapper = new BankAccountSummaryMapperImpl(accountHolderMapper);
+    bankAccountMapper = new BankAccountSummaryMapperImpl(accountHolderSummaryMapper);
   }
 
   @Test
   void shouldMapBankAccount_whenOnlyPrimaryHolderIsPresent() {
-    BankAccount bankAccount = BankAccountFixture.openPendingAccount(AccountHolderFixtures.JEFFERSON);
-
-    BankAccountSummary bankAccountSummary = bankAccountMapper.toSummary(bankAccount);
+    var bankAccount = BankAccountFixture.openPendingAccount(AccountHolderFixtures.JEFFERSON);
+    var bankAccountSummary = bankAccountMapper.toSummary(bankAccount);
 
     assertThat(bankAccountSummary.id()).isEqualTo(bankAccount.getId().value());
     assertThat(bankAccountSummary.accountType()).isEqualTo(bankAccount.getAccountType());
@@ -48,7 +47,7 @@ class BankAccountSummaryMapperImplTest {
 
   @Test
   void shouldMapBankAccount_whenPrimaryAndJointHolderArePresent() {
-    BankAccount bankAccount = BankAccountFixture.openActiveAccount(AccountHolderFixtures.JEFFERSON);
+    var bankAccount = BankAccountFixture.openActiveAccount(AccountHolderFixtures.JEFFERSON);
 
     bankAccount.addJointHolder(
       AccountHolderFixtures.PATRIZIO.personalInfo(),
@@ -56,7 +55,7 @@ class BankAccountSummaryMapperImplTest {
       AccountHolderFixtures.PATRIZIO.address()
     );
 
-    BankAccountSummary details = bankAccountMapper.toSummary(bankAccount);
+    var details = bankAccountMapper.toSummary(bankAccount);
     assertThat(details.holders())
       .hasSize(2)
       .extracting(AccountHolderSummary::type)

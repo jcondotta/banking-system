@@ -1,6 +1,6 @@
 package com.jcondotta.banking.accounts.application.bankaccount.command.open.model;
 
-import com.jcondotta.application.core.Command;
+import com.jcondotta.application.core.command.Command;
 import com.jcondotta.banking.accounts.domain.bankaccount.enums.AccountType;
 import com.jcondotta.banking.accounts.domain.bankaccount.enums.Currency;
 import com.jcondotta.banking.accounts.domain.bankaccount.identity.BankAccountId;

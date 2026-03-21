@@ -1,6 +1,6 @@
 package com.jcondotta.banking.accounts.application.bankaccount.command.unblock;
 
-import com.jcondotta.application.core.CommandHandler;
+import com.jcondotta.application.core.command.CommandHandler;
 import com.jcondotta.banking.accounts.application.bankaccount.command.unblock.model.UnblockBankAccountCommand;
 import com.jcondotta.banking.accounts.domain.bankaccount.enums.AccountStatus;
 import com.jcondotta.banking.accounts.domain.bankaccount.exceptions.BankAccountNotFoundException;

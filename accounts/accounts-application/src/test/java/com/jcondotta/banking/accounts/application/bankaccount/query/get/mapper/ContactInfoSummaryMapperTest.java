@@ -13,12 +13,11 @@ class ContactInfoSummaryMapperTest {
   private static final Email EMAIL = Email.of("jefferson.condotta@email.com");
   private static final PhoneNumber PHONE = PhoneNumber.of("+34600111222");
 
-  private final ContactInfoSummaryMapper mapper = new ContactInfoSummaryMapper() {
-  };
+  private final ContactInfoSummaryMapper mapper = new ContactInfoSummaryMapperImpl();
 
   @Test
   void shouldMapContactInfoDetails_whenEmailAndPhoneArePresent() {
-    ContactInfo contactInfo = ContactInfo.of(EMAIL, PHONE);
+    var contactInfo = ContactInfo.of(EMAIL, PHONE);
 
     ContactInfoSummary details = mapper.toSummary(contactInfo);
 

@@ -15,14 +15,12 @@ class PersonalInfoSummaryMapperTest {
   private static final String LAST_NAME = "Condotta";
   private static final String DOCUMENT_NUMBER = "12345678Z";
 
-  private final IdentityDocumentSummaryMapper identityMapper =
-    new IdentityDocumentSummaryMapper() {};
+  private final IdentityDocumentSummaryMapper identityMapper = new IdentityDocumentSummaryMapperImpl();
 
   private final PersonalInfoSummaryMapper mapper = new PersonalInfoSummaryMapperImpl(identityMapper);
 
   @Test
   void shouldMapPersonalInfoDetails_whenPersonalInfoIsValid() {
-
     var identityDocument = IdentityDocument.of(
       DocumentCountry.SPAIN,
       DocumentType.NATIONAL_ID,

@@ -15,14 +15,11 @@ class IdentityDocumentSummaryMapperTest {
   private static final DocumentType TYPE = DocumentType.NATIONAL_ID;
   private static final String NUMBER = "12345678Z";
 
-  private final IdentityDocumentSummaryMapper mapper = new IdentityDocumentSummaryMapper() {
-  };
+  private final IdentityDocumentSummaryMapper mapper = new IdentityDocumentSummaryMapperImpl();
 
   @Test
   void shouldMapIdentityDocumentDetails_whenIdentityDocumentIsValid() {
-
-    IdentityDocument identityDocument =
-      IdentityDocument.of(COUNTRY, TYPE, DocumentNumber.of(NUMBER));
+    var identityDocument = IdentityDocument.of(COUNTRY, TYPE, DocumentNumber.of(NUMBER));
 
     IdentityDocumentSummary details = mapper.toSummary(identityDocument);
 
@@ -33,8 +30,7 @@ class IdentityDocumentSummaryMapperTest {
 
   @Test
   void shouldReturnNull_whenIdentityDocumentIsNull() {
-
-    IdentityDocumentSummary details = mapper.toSummary(null);
+    var details = mapper.toSummary(null);
 
     assertThat(details).isNull();
   }

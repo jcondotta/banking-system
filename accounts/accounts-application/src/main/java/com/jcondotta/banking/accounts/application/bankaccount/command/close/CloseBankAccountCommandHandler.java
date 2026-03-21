@@ -1,6 +1,6 @@
 package com.jcondotta.banking.accounts.application.bankaccount.command.close;
 
-import com.jcondotta.application.core.CommandHandler;
+import com.jcondotta.application.core.command.CommandHandler;
 import com.jcondotta.banking.accounts.application.bankaccount.command.close.model.CloseBankAccountCommand;
 import com.jcondotta.banking.accounts.domain.bankaccount.exceptions.BankAccountNotFoundException;
 import com.jcondotta.banking.accounts.domain.bankaccount.repository.BankAccountRepository;

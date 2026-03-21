@@ -1,6 +1,5 @@
 package com.jcondotta.banking.accounts.application.bankaccount.query.get.mapper;
 
-import com.jcondotta.banking.accounts.application.bankaccount.query.get.mapper.AddressSummaryMapper;
 import com.jcondotta.banking.accounts.application.bankaccount.query.get.model.AddressSummary;
 import com.jcondotta.banking.accounts.domain.bankaccount.value_objects.address.Address;
 import org.junit.jupiter.api.Test;
@@ -15,8 +14,7 @@ class AddressSummaryMapperTest {
   private static final String POSTAL_CODE = "08013";
   private static final String CITY = "Barcelona";
 
-  private final AddressSummaryMapper mapper = new AddressSummaryMapper() {
-  };
+  private final AddressSummaryMapper mapper = new AddressSummaryMapperImpl();
 
   @Test
   void shouldMapAddressDetails_whenComplementIsPresent() {
@@ -33,7 +31,7 @@ class AddressSummaryMapperTest {
 
   @Test
   void shouldMapAddressDetails_whenComplementIsNull() {
-    Address address = Address.of(STREET, NUMBER, null, POSTAL_CODE, CITY);
+    var address = Address.of(STREET, NUMBER, null, POSTAL_CODE, CITY);
 
     AddressSummary details = mapper.toSummary(address);
 
@@ -46,7 +44,7 @@ class AddressSummaryMapperTest {
 
   @Test
   void shouldReturnNull_whenAddressIsNull() {
-    AddressSummary details = mapper.toSummary(null);
+    var details = mapper.toSummary(null);
 
     assertThat(details).isNull();
   }

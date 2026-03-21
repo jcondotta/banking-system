@@ -1,22 +1,24 @@
 package com.jcondotta.banking.accounts.application.bankaccount.query.get.mapper;
 
 import com.jcondotta.banking.accounts.application.bankaccount.query.get.model.IdentityDocumentSummary;
+import com.jcondotta.banking.accounts.domain.bankaccount.value_objects.personal.DocumentNumber;
 import com.jcondotta.banking.accounts.domain.bankaccount.value_objects.personal.IdentityDocument;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 
 @Mapper(componentModel = "spring")
 public interface IdentityDocumentSummaryMapper {
 
-  default IdentityDocumentSummary toSummary(IdentityDocument identityDocument) {
+  @Mapping(target = "country", source = "country")
+  @Mapping(target = "type", source = "type")
+  @Mapping(target = "number", source = "number")
+  IdentityDocumentSummary toSummary(IdentityDocument identityDocument);
 
-    if (identityDocument == null) {
-      return null;
-    }
+  default String map(Enum<?> value) {
+    return value != null ? value.name() : null;
+  }
 
-    return new IdentityDocumentSummary(
-      identityDocument.country().name(),
-      identityDocument.type().name(),
-      identityDocument.number().value()
-    );
+  default String map(DocumentNumber number) {
+    return number != null ? number.value() : null;
   }
 }

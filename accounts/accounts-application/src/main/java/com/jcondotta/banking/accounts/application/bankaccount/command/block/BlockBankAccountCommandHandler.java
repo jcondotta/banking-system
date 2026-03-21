@@ -1,6 +1,6 @@
 package com.jcondotta.banking.accounts.application.bankaccount.command.block;
 
-import com.jcondotta.application.core.CommandHandler;
+import com.jcondotta.application.core.command.CommandHandler;
 import com.jcondotta.banking.accounts.application.bankaccount.command.block.model.BlockBankAccountCommand;
 import com.jcondotta.banking.accounts.domain.bankaccount.exceptions.BankAccountNotFoundException;
 import com.jcondotta.banking.accounts.domain.bankaccount.repository.BankAccountRepository;

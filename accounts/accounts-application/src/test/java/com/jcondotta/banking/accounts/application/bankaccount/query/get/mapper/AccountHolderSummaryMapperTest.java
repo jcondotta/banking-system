@@ -13,13 +13,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class AccountHolderSummaryMapperTest {
 
-  private final IdentityDocumentSummaryMapper identityMapper =
-    new IdentityDocumentSummaryMapper() {};
+  private final IdentityDocumentSummaryMapper identityMapper = new IdentityDocumentSummaryMapperImpl();
 
   private final AccountHolderSummaryMapper mapper = new AccountHolderSummaryMapperImpl(
     new PersonalInfoSummaryMapperImpl(identityMapper),
-    Mappers.getMapper(ContactInfoSummaryMapper.class),
-    Mappers.getMapper(AddressSummaryMapper.class)
+    new ContactInfoSummaryMapperImpl(),
+    new AddressSummaryMapperImpl()
   );
 
   @Test
@@ -75,7 +74,7 @@ class AccountHolderSummaryMapperTest {
 
     assertThat(address.street()).isEqualTo(source.street().value());
     assertThat(address.streetNumber()).isEqualTo(source.streetNumber().value());
-    assertThat(address.addressComplement()).isEqualTo(source.complement().value());
+    assertThat(address.addressComplement()).isEqualTo(source.addressComplement().value());
     assertThat(address.postalCode()).isEqualTo(source.postalCode().value());
     assertThat(address.city()).isEqualTo(source.city().value());
   }
