@@ -1,6 +1,5 @@
-package com.jcondotta.application.core;
+package com.jcondotta.application.core.support;
 
-import com.jcondotta.application.core.support.ApplicationPreconditions;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Constructor;
@@ -10,49 +9,47 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class ApplicationPreconditionsTest {
 
-  private static final String MESSAGE = "error";
+  private static final String ERROR_MESSAGE = "error";
+  private static final String CURRENT_VALUE = "current value";
 
   @Test
-  void shouldReturnValue_whenValueIsNotNull() {
-    String value = "test";
+  void shouldReturnValue_whenRequiredValueIsNotNull() {
+    String result = ApplicationPreconditions.required(CURRENT_VALUE, ERROR_MESSAGE);
 
-    String result = ApplicationPreconditions.required(value, MESSAGE);
-
-    assertThat(result).isEqualTo(value);
+    assertThat(result).isEqualTo(CURRENT_VALUE);
   }
 
   @Test
-  void shouldThrowException_whenValueIsNull() {
-    assertThatThrownBy(() -> ApplicationPreconditions.required(null, MESSAGE))
+  @SuppressWarnings("ConstantConditions")
+  void shouldThrowNullPointerException_whenRequiredValueIsNull() {
+    assertThatThrownBy(() -> ApplicationPreconditions.required(null, ERROR_MESSAGE))
       .isInstanceOf(NullPointerException.class)
-      .hasMessage(MESSAGE);
+      .hasMessage(ERROR_MESSAGE);
   }
 
   @Test
-  void shouldReturnValue_whenStringIsNotBlank() {
-    String value = "test";
+  void shouldReturnValue_whenRequiredNotBlankValueIsNotBlank() {
+    String result = ApplicationPreconditions.requiredNotBlank(CURRENT_VALUE, ERROR_MESSAGE);
 
-    String result = ApplicationPreconditions.requiredNotBlank(value, MESSAGE);
-
-    assertThat(result).isEqualTo(value);
+    assertThat(result).isEqualTo(CURRENT_VALUE);
   }
 
   @Test
-  void shouldThrowException_whenStringIsBlank() {
-    assertThatThrownBy(() -> ApplicationPreconditions.requiredNotBlank("   ", MESSAGE))
+  void shouldThrowIllegalArgumentException_whenRequiredNotBlankValueIsBlank() {
+    assertThatThrownBy(() -> ApplicationPreconditions.requiredNotBlank("   ", ERROR_MESSAGE))
       .isInstanceOf(IllegalArgumentException.class)
-      .hasMessage(MESSAGE);
+      .hasMessage(ERROR_MESSAGE);
   }
 
   @Test
-  void shouldThrowException_whenStringIsNull() {
-    assertThatThrownBy(() -> ApplicationPreconditions.requiredNotBlank(null, MESSAGE))
+  void shouldThrowNullPointerException_whenRequiredNotBlankValueIsNull() {
+    assertThatThrownBy(() -> ApplicationPreconditions.requiredNotBlank(null, ERROR_MESSAGE))
       .isInstanceOf(NullPointerException.class)
-      .hasMessage(MESSAGE);
+      .hasMessage(ERROR_MESSAGE);
   }
 
   @Test
-  void shouldThrowUnsupportedOperationException_whenInstantiatingUtilityClass() throws Exception {
+  void shouldThrowUnsupportedOperationException_whenInstantiatedViaReflection() throws Exception {
     Constructor<ApplicationPreconditions> constructor = ApplicationPreconditions.class.getDeclaredConstructor();
 
     constructor.setAccessible(true);
