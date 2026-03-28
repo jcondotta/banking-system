@@ -26,15 +26,16 @@ public final class BankAccountTestFixture {
   }
 
   public static BankAccount openPendingAccount(AccountHolderFixtures holder, AccountType accountType, Currency currency) {
-    return BankAccount.open(
-      holder.getAccountHolderName(),
-      holder.getIdentityDocument(),
-      holder.getDateOfBirth(),
-      holder.getEmail(),
-      accountType,
-      currency,
-      VALID_IBAN
-    );
+//    return BankAccount.open(
+//      holder.getAccountHolderName(),
+//      holder.getIdentityDocument(),
+//      holder.getDateOfBirth(),
+//      holder.getEmail(),
+//      accountType,
+//      currency,
+//      VALID_IBAN
+//    );
+    return null;
   }
 
   public static BankAccount openActiveAccount(AccountHolderFixtures holder) {
@@ -50,26 +51,29 @@ public final class BankAccountTestFixture {
   }
 
   public static AccountHolder createPrimaryHolder(AccountHolderFixtures fixture, Instant createdAt) {
-    return BankAccount.restoreAccountHolder(
-      AccountHolderId.newId(),
-      fixture.getAccountHolderName(),
-      fixture.getIdentityDocument(),
-      fixture.getDateOfBirth(),
-      fixture.getEmail(),
-      HolderType.PRIMARY,
-      createdAt
-    );
+//    return AccountHolder.restore(
+//      AccountHolderId.newId(),
+//      fixture.getAccountHolderName(),
+//      fixture.getIdentityDocument(),
+//      fixture.getDateOfBirth(),
+//      fixture.getEmail(),
+//      HolderType.PRIMARY,
+//      createdAt
+//    );
+    return null;
   }
 
   public static AccountHolder createJointHolder(AccountHolderFixtures fixture, Instant createdAt) {
-    return BankAccount.restoreAccountHolder(
-      AccountHolderId.newId(),
-      fixture.getAccountHolderName(),
-      fixture.getIdentityDocument(),
-      fixture.getDateOfBirth(),
-      fixture.getEmail(),
-      HolderType.JOINT,
-      createdAt
-    );
+//    return AccountHolder.restore(
+//      AccountHolderId.newId(),
+//      fixture.getAccountHolderName(),
+//      fixture.getIdentityDocument(),
+//      fixture.getDateOfBirth(),
+//      fixture.getEmail(),
+//      HolderType.JOINT,
+//      createdAt
+//    );
+
+    return null;
   }
 }

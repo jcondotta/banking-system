@@ -36,7 +36,7 @@ public interface AccountHolderEntityMapper {
       .phoneNumber(accountHolder.getContactInfo().phoneNumber().value())
       .street(accountHolder.getAddress().street().value())
       .streetNumber(accountHolder.getAddress().streetNumber().value())
-      .addressComplement(accountHolder.getAddress().complement().value())
+      .addressComplement(accountHolder.getAddress().addressComplement().value())
       .postalCode(accountHolder.getAddress().postalCode().value())
       .city(accountHolder.getAddress().city().value())
       .holderType(accountHolder.getAccountHolderType().name())

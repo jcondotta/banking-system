@@ -12,6 +12,7 @@ awslocal dynamodb create-table \
   --key-schema \
     AttributeName=partitionKey,KeyType=HASH \
     AttributeName=sortKey,KeyType=RANGE \
-  --billing-mode PAY_PER_REQUEST
+  --billing-mode PROVISIONED \
+  --provisioned-throughput ReadCapacityUnits=1,WriteCapacityUnits=1
 
 echo "✅ DynamoDB table created: bank-accounts"

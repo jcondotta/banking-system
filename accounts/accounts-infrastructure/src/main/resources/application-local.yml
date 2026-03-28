@@ -1,6 +1,6 @@
 spring:
   kafka:
-    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092, localhost:9094, localhost:9096}
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
 
 app:
   kafka:
@@ -28,5 +28,11 @@ cloud:
     dynamodb:
       endpoint: ${AWS_DYNAMODB_ENDPOINT:http://127.0.0.1:4566}
       tables:
-        banking-entities:
+        bank-accounts:
           table-name: ${AWS_DYNAMODB_BANK_ACCOUNTS_TABLE_NAME:bank-accounts}
+
+        outbox:
+          table-name: ${AWS_DYNAMODB_BANK_ACCOUNTS_TABLE_NAME:bank-accounts}
+          indexes:
+            gsi1:
+              name: ${AWS_DYNAMODB_OUTBOX_GSI1_NAME:gsi-outbox-status}

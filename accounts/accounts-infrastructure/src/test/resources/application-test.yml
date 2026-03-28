@@ -11,6 +11,6 @@ cloud:
     dynamodb:
       endpoint: ${AWS_DYNAMODB_ENDPOINT}
       tables:
-        banking-entities:
+        bank-accounts:
           table-name: ${AWS_DYNAMODB_BANK_ACCOUNTS_TABLE_NAME:bank-accounts}
 

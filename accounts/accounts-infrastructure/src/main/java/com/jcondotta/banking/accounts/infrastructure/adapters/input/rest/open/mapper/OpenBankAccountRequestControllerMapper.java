@@ -34,30 +34,30 @@ public interface OpenBankAccountRequestControllerMapper {
 
     default PersonalInfo toPersonalInfo(OpenBankAccountRequest request) {
         return PersonalInfo.of(
-          AccountHolderName.of(request.accountHolder().personalInfo().firstName(), request.accountHolder().personalInfo().lastName()),
+          AccountHolderName.of(request.primaryHolder().personalInfo().firstName(), request.primaryHolder().personalInfo().lastName()),
           IdentityDocument.of(
-            DocumentCountry.valueOf(request.accountHolder().personalInfo().identityDocument().country()),
-            DocumentType.valueOf(request.accountHolder().personalInfo().identityDocument().type()),
-            DocumentNumber.of(request.accountHolder().personalInfo().identityDocument().number())
+            DocumentCountry.valueOf(request.primaryHolder().personalInfo().identityDocument().country()),
+            DocumentType.valueOf(request.primaryHolder().personalInfo().identityDocument().type()),
+            DocumentNumber.of(request.primaryHolder().personalInfo().identityDocument().number())
           ),
-          DateOfBirth.of(request.accountHolder().personalInfo().dateOfBirth())
+          DateOfBirth.of(request.primaryHolder().personalInfo().dateOfBirth())
         );
     }
 
     default ContactInfo toContactInfo(OpenBankAccountRequest request) {
         return ContactInfo.of(
-          Email.of(request.accountHolder().contactInfo().email()),
-          PhoneNumber.of(request.accountHolder().contactInfo().phoneNumber())
+          Email.of(request.primaryHolder().contactInfo().email()),
+          PhoneNumber.of(request.primaryHolder().contactInfo().phoneNumber())
         );
     }
 
     default Address toAddress(OpenBankAccountRequest request) {
         return new Address(
-          Street.of(request.accountHolder().address().street()),
-          StreetNumber.of(request.accountHolder().address().streetNumber()),
-          request.accountHolder().address().complement() != null ? AddressComplement.of(request.accountHolder().address().complement()) : null,
-          PostalCode.of(request.accountHolder().address().postalCode()),
-          City.of(request.accountHolder().address().city())
+          Street.of(request.primaryHolder().address().street()),
+          StreetNumber.of(request.primaryHolder().address().streetNumber()),
+          request.primaryHolder().address().complement() != null ? AddressComplement.of(request.primaryHolder().address().complement()) : null,
+          PostalCode.of(request.primaryHolder().address().postalCode()),
+          City.of(request.primaryHolder().address().city())
         );
     }
 }

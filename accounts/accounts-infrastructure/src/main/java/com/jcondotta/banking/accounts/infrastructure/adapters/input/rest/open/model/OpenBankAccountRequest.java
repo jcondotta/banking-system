@@ -27,6 +27,6 @@ public record OpenBankAccountRequest(
       description = "Account holder information required to open the bank account.",
       requiredMode = Schema.RequiredMode.REQUIRED
     )
-    AccountHolderRequest accountHolder
+    AccountHolderRequest primaryHolder
 ){
 }

@@ -1,9 +1,15 @@
 package com.jcondotta.banking.contracts.open;
 
-import com.jcondotta.banking.contracts.IntegrationEvent;
-import com.jcondotta.banking.contracts.IntegrationEventMetadata;
+import com.jcondotta.application.core.events.IntegrationEvent;
+import com.jcondotta.application.core.events.IntegrationEventMetadata;
 
 public record BankAccountOpenedIntegrationEvent(IntegrationEventMetadata metadata, BankAccountOpenedIntegrationPayload payload)
   implements IntegrationEvent<BankAccountOpenedIntegrationPayload> {
 
+  public static final String EVENT_TYPE = "bank-account-opened";
+
+  @Override
+  public String eventType() {
+    return EVENT_TYPE;
+  }
 }

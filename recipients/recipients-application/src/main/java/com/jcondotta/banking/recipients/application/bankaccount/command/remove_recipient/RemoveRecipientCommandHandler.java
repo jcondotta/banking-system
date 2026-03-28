@@ -1,6 +1,6 @@
 package com.jcondotta.banking.recipients.application.bankaccount.command.remove_recipient;
 
-import com.jcondotta.application.core.CommandHandler;
+import com.jcondotta.application.core.command.CommandHandler;
 import com.jcondotta.banking.recipients.domain.recipient.exceptions.BankAccountNotFoundException;
 import com.jcondotta.banking.recipients.domain.recipient.repository.BankAccountRepository;
 import io.micrometer.observation.annotation.Observed;

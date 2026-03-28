@@ -1,6 +1,6 @@
 package com.jcondotta.banking.recipients.infrastructure.bankaccount.adapters.output.messaging;
 
-import com.jcondotta.banking.contracts.DefaultIntegrationEventMetadata;
+import com.jcondotta.application.core.events.IntegrationEventMetadata;
 import com.jcondotta.banking.contracts.activate.BankAccountActivatedIntegrationEvent;
 import com.jcondotta.banking.contracts.activate.BankAccountActivatedIntegrationPayload;
 import com.jcondotta.banking.recipients.domain.recipient.identity.BankAccountId;
@@ -39,13 +39,14 @@ class BankAccountActivatedConsumerIT {
   private final UUID bankAccountId = UUID.randomUUID();
   private final UUID eventId = UUID.randomUUID();
   private final UUID correlationId = UUID.randomUUID();
+  private final String source = "bank-account-service";
 
   @Test
   void shouldCreateBankAccount_whenBankAccountActivatedEventIsPublished() {
-    var eventMetadata = DefaultIntegrationEventMetadata.create(
+    var eventMetadata = IntegrationEventMetadata.of(
       eventId,
       correlationId,
-      "BANK_ACCOUNT_ACTIVATED",
+      source,
       1,
       Instant.now()
     );
@@ -65,10 +66,10 @@ class BankAccountActivatedConsumerIT {
 
   @Test
   void shouldNotCreateDuplicateBankAccount_whenEventIsPublishedTwice() {
-    var eventMetadata = DefaultIntegrationEventMetadata.create(
+    var eventMetadata = IntegrationEventMetadata.of(
       eventId,
       correlationId,
-      "BANK_ACCOUNT_ACTIVATED",
+      source,
       1,
       Instant.now()
     );

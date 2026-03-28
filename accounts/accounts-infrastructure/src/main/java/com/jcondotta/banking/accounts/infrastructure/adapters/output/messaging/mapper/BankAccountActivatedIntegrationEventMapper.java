@@ -1,25 +1,22 @@
 package com.jcondotta.banking.accounts.infrastructure.adapters.output.messaging.mapper;
 
+import com.jcondotta.application.core.events.IntegrationEventMetadata;
+import com.jcondotta.application.core.events.mapper.AbstractDomainEventMapper;
 import com.jcondotta.banking.accounts.domain.bankaccount.events.BankAccountActivatedEvent;
-import com.jcondotta.banking.contracts.IntegrationEvent;
-import com.jcondotta.banking.contracts.IntegrationEventMetadata;
+import com.jcondotta.banking.contracts.activate.BankAccountActivatedIntegrationEvent;
+import com.jcondotta.banking.contracts.activate.BankAccountActivatedIntegrationPayload;
 import org.springframework.stereotype.Component;
 
 @Component
-public class BankAccountActivatedIntegrationEventMapper extends AbstractDomainEventMapper<BankAccountActivatedEvent> {
-
-  public BankAccountActivatedIntegrationEventMapper() {
-    super(BankAccountActivatedEvent.class);
-  }
+public class BankAccountActivatedIntegrationEventMapper
+  extends AbstractDomainEventMapper<BankAccountActivatedEvent, BankAccountActivatedIntegrationEvent> {
 
   @Override
-  protected IntegrationEvent<?> buildIntegrationEvent(BankAccountActivatedEvent event, IntegrationEventMetadata metadata) {
-//    BankAccountActivatedIntegrationPayload payload = new BankAccountActivatedIntegrationPayload(
-//      event.aggregateId().value()
-//    );
-//
-//    return new BankAccountActivatedIntegrationEvent(metadata, payload);
+  public BankAccountActivatedIntegrationEvent map(IntegrationEventMetadata metadata, BankAccountActivatedEvent event) {
+    var payload = new BankAccountActivatedIntegrationPayload(
+      event.aggregateId().value()
+    );
 
-    return null;
+    return new BankAccountActivatedIntegrationEvent(metadata, payload);
   }
 }

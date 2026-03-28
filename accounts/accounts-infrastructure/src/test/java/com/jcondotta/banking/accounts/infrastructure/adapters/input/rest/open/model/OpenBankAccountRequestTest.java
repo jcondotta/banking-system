@@ -77,7 +77,7 @@ class OpenBankAccountRequestTest {
 //      .hasSize(1)
 //      .first()
 //      .satisfies(violation ->
-//        assertThat(violation.getPropertyPath()).hasToString("accountHolder")
+//        assertThat(violation.getPropertyPath()).hasToString("primaryHolder")
 //      );
 //  }
 //

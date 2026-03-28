@@ -1,6 +1,6 @@
 package com.jcondotta.banking.accounts.infrastructure.adapters.input.rest.open;
 
-import com.jcondotta.application.core.CommandHandlerWithResult;
+import com.jcondotta.application.core.command.CommandHandlerWithResult;
 import com.jcondotta.banking.accounts.application.bankaccount.command.open.model.OpenBankAccountCommand;
 import com.jcondotta.banking.accounts.domain.bankaccount.identity.BankAccountId;
 import com.jcondotta.banking.accounts.infrastructure.adapters.input.rest.open.mapper.OpenBankAccountRequestControllerMapper;

@@ -1,6 +1,6 @@
 package com.jcondotta.banking.accounts.infrastructure.adapters.input.rest.unblock;
 
-import com.jcondotta.application.core.CommandHandler;
+import com.jcondotta.application.core.command.CommandHandler;
 import com.jcondotta.banking.accounts.application.bankaccount.command.unblock.model.UnblockBankAccountCommand;
 import com.jcondotta.banking.accounts.domain.bankaccount.identity.BankAccountId;
 import lombok.AllArgsConstructor;

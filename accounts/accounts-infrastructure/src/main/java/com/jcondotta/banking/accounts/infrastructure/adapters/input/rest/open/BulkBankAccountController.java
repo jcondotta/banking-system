@@ -1,0 +1,45 @@
+package com.jcondotta.banking.accounts.infrastructure.adapters.input.rest.open;
+
+import com.jcondotta.banking.accounts.domain.bankaccount.enums.AccountType;
+import com.jcondotta.banking.accounts.domain.bankaccount.enums.Currency;
+import com.jcondotta.banking.accounts.infrastructure.adapters.input.rest.open.model.OpenBankAccountRequest;
+import com.jcondotta.banking.accounts.infrastructure.adapters.output.messaging.outbox.query.OutboxRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.util.concurrent.Executors;
+import java.util.stream.IntStream;
+
+@RestController
+@RequestMapping("/api/v1/bank-accounts/bulk")
+@RequiredArgsConstructor
+public class BulkBankAccountController {
+
+    private final BankAccountsHttpClient client;
+    private final OutboxRepository outboxRepository;
+
+    @PostMapping("/{quantity}")
+    public void createBulk(@PathVariable int quantity) {
+
+        try (var executor = Executors.newVirtualThreadPerTaskExecutor()) {
+
+            IntStream.range(0, quantity)
+              .forEach(i -> executor.submit(() -> {
+                  var request = buildRequest(i);
+                  client.create(request);
+              }));
+
+        }
+    }
+
+    private OpenBankAccountRequest buildRequest(int i) {
+        return new OpenBankAccountRequest(
+            AccountType.CHECKING,
+            Currency.EUR,
+            AccountHolderRequestFactory.random(i)
+        );
+    }
+}

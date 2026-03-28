@@ -1,7 +1,8 @@
 package com.jcondotta.banking.recipients.infrastructure.bankaccount.adapters.input.rest.remove_recipient;
 
-import com.jcondotta.application.core.CommandHandler;
-import com.jcondotta.application.core.CommandHandlerWithResult;
+import com.jcondotta.application.core.command.CommandHandler;
+import com.jcondotta.application.core.command.CommandHandlerWithResult;
+import com.jcondotta.banking.accounts.domain.bankaccount.testsupport.RecipientFixtures;
 import com.jcondotta.banking.infrastructure.web.problem.ProblemTypes;
 import com.jcondotta.banking.recipients.application.bankaccount.command.create_recipient.CreateRecipientCommand;
 import com.jcondotta.banking.recipients.application.bankaccount.command.register.RegisterBankAccountCommand;
@@ -11,7 +12,6 @@ import com.jcondotta.banking.recipients.domain.recipient.exceptions.RecipientNot
 import com.jcondotta.banking.recipients.domain.recipient.identity.BankAccountId;
 import com.jcondotta.banking.recipients.domain.recipient.identity.RecipientId;
 import com.jcondotta.banking.recipients.domain.recipient.repository.BankAccountRepository;
-import com.jcondotta.banking.accounts.domain.bankaccount.testsupport.RecipientFixtures;
 import com.jcondotta.banking.recipients.infrastructure.bankaccount.properties.AccountRecipientsURIProperties;
 import com.jcondotta.banking.recipients.infrastructure.bankaccount.testsupport.container.KafkaTestContainer;
 import com.jcondotta.banking.recipients.infrastructure.bankaccount.testsupport.container.LocalStackTestContainer;
@@ -55,8 +55,6 @@ class RemoveRecipientControllerImplIT {
   private AccountRecipientsURIProperties uriProperties;
 
   private BankAccountId bankAccountId;
-  private String recipientName;
-  private String iban;
 
   private RequestSpecification requestSpecification;
 
@@ -71,9 +69,6 @@ class RemoveRecipientControllerImplIT {
     RestAssured.port = port;
 
     bankAccountId = BankAccountId.of(UUID.randomUUID());
-    recipientName = RecipientFixtures.JEFFERSON.toName().value();
-    iban = RecipientFixtures.JEFFERSON.toIban().value();
-
     requestSpecification = buildRequestSpecification();
   }
 

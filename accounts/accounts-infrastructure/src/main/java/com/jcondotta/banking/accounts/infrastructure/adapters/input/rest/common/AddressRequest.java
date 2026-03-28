@@ -27,7 +27,7 @@ public record AddressRequest(
 
   @Size(max = 255)
   @Schema(
-    description = "Additional address complement (apartment, floor, etc).",
+    description = "Additional address addressComplement (apartment, floor, etc).",
     example = "Apartment 4B",
     requiredMode = Schema.RequiredMode.NOT_REQUIRED
   )

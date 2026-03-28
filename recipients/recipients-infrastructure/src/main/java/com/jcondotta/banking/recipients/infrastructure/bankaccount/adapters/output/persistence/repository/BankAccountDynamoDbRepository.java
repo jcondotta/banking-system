@@ -66,7 +66,7 @@ public class BankAccountDynamoDbRepository implements BankAccountRepository {
     dynamoDbClient.transactWriteItems(builder.build());
 
     log.info(
-      "BankAccount persisted successfully. id={}", bankAccount.getId()
+      "BankAccount persisted successfully. id={}", bankAccount.getId().value()
     );
   }
 }

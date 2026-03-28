@@ -1,13 +1,13 @@
 package com.jcondotta.banking.accounts.infrastructure.adapters.output.persistence.repository;
 
+import com.jcondotta.banking.accounts.domain.bankaccount.aggregate.BankAccount;
+import com.jcondotta.banking.accounts.domain.bankaccount.identity.BankAccountId;
+import com.jcondotta.banking.accounts.domain.bankaccount.repository.BankAccountRepository;
 import com.jcondotta.banking.accounts.infrastructure.adapters.output.messaging.outbox.OutboxEventCollector;
 import com.jcondotta.banking.accounts.infrastructure.adapters.output.persistence.entity.BankAccountEntityKey;
 import com.jcondotta.banking.accounts.infrastructure.adapters.output.persistence.entity.BankingEntity;
 import com.jcondotta.banking.accounts.infrastructure.adapters.output.persistence.entity.OutboxEntity;
 import com.jcondotta.banking.accounts.infrastructure.adapters.output.persistence.mapper.BankAccountEntityMapper;
-import com.jcondotta.banking.accounts.domain.bankaccount.aggregate.BankAccount;
-import com.jcondotta.banking.accounts.domain.bankaccount.identity.BankAccountId;
-import com.jcondotta.banking.accounts.domain.bankaccount.repository.BankAccountRepository;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
@@ -85,15 +85,15 @@ public class BankAccountDynamoDbRepository implements BankAccountRepository {
         .addPutItem(bankingTable, bankingEntity)
       );
 
-//    outboxEventCollector.collect(bankAccount)
-//      .forEach(entry -> builder
-//        .addPutItem(outboxTable, entry)
-//      );
+    outboxEventCollector.collect(bankAccount)
+      .forEach(entry -> builder
+        .addPutItem(outboxTable, entry)
+      );
 
     dynamoDbClient.transactWriteItems(builder.build());
 
     log.info(
-      "BankAccount persisted successfully. id={}", bankAccount.getId()
+      "BankAccount persisted successfully. id={}", bankAccount.getId().value()
     );
   }
 }

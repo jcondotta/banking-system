@@ -38,5 +38,5 @@ cloud:
       secret-key: ${AWS_SECRET_ACCESS_KEY}
     dynamodb:
       tables:
-        banking-entities:
+        bank-accounts:
           table-name: ${AWS_DYNAMODB_BANK_ACCOUNTS_TABLE_NAME}

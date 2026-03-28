@@ -1,9 +1,15 @@
 package com.jcondotta.banking.contracts.activate;
 
-import com.jcondotta.banking.contracts.DefaultIntegrationEventMetadata;
-import com.jcondotta.banking.contracts.IntegrationEvent;
+import com.jcondotta.application.core.events.IntegrationEvent;
+import com.jcondotta.application.core.events.IntegrationEventMetadata;
 
-public record BankAccountActivatedIntegrationEvent(DefaultIntegrationEventMetadata metadata, BankAccountActivatedIntegrationPayload payload)
+public record BankAccountActivatedIntegrationEvent(IntegrationEventMetadata metadata, BankAccountActivatedIntegrationPayload payload)
   implements IntegrationEvent<BankAccountActivatedIntegrationPayload> {
 
+  public static final String EVENT_TYPE = "bank-account-activated";
+
+  @Override
+  public String eventType() {
+    return EVENT_TYPE;
+  }
 }

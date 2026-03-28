@@ -67,7 +67,7 @@ public class BankingEntity {
     return entityType;
   }
 
-  @DynamoDbAttribute("id")
+  @DynamoDbAttribute("bankAccountId")
   public UUID getBankAccountId() {
     return bankAccountId;
   }
@@ -166,7 +166,6 @@ public class BankingEntity {
   public String getHolderType() {
     return holderType;
   }
-
 
   @DynamoDbAttribute("createdAt")
   public Instant getCreatedAt() {

@@ -1,6 +1,7 @@
 package com.jcondotta.banking.accounts.infrastructure.adapters.output.persistence.entity;
 
 import com.jcondotta.banking.accounts.infrastructure.adapters.output.persistence.enums.EntityType;
+import com.jcondotta.banking.accounts.infrastructure.adapters.output.persistence.enums.OutboxStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.NoArgsConstructor;
@@ -8,29 +9,38 @@ import lombok.Setter;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.*;
 
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.Objects;
 import java.util.UUID;
 
-@Setter
 @DynamoDbBean
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@Setter
 public class OutboxEntity {
+
+  private static final EntityType DEFAULT_ENTITY_TYPE = EntityType.OUTBOX_EVENT;
+  private static final OutboxStatus DEFAULT_STATUS = OutboxStatus.PENDING;
 
   private String partitionKey;
   private String sortKey;
-
   private String gsi1pk;
   private String gsi1sk;
 
-  private EntityType entityType;
+  @Builder.Default
+  private EntityType entityType = DEFAULT_ENTITY_TYPE;
+
+  @Builder.Default
+  private OutboxStatus status = DEFAULT_STATUS;
 
   private UUID eventId;
-  private UUID aggregateId;
+  private String aggregateId;
   private String eventType;
-
   private String payload;
   private Instant publishedAt;
+  private Instant createdAt;
+  private Long timeToLive;
 
   @DynamoDbPartitionKey
   @DynamoDbAttribute("partitionKey")
@@ -43,11 +53,14 @@ public class OutboxEntity {
   @DynamoDbAttribute("entityType")
   public EntityType getEntityType() { return entityType; }
 
+  @DynamoDbAttribute("outboxStatus")
+  public OutboxStatus getStatus() { return status; }
+
   @DynamoDbAttribute("eventId")
   public UUID getEventId() { return eventId; }
 
   @DynamoDbAttribute("aggregateId")
-  public UUID getAggregateId() { return aggregateId; }
+  public String getAggregateId() { return aggregateId; }
 
   @DynamoDbAttribute("eventType")
   public String getEventType() { return eventType; }
@@ -66,5 +79,46 @@ public class OutboxEntity {
   @DynamoDbSecondarySortKey(indexNames = "gsi-outbox-status")
   public String getGsi1sk() {
     return gsi1sk;
+  }
+
+  @DynamoDbAttribute("createdAt")
+  public Instant getCreatedAt() {
+    return createdAt;
+  }
+
+  @DynamoDbAttribute("ttl")
+  public Long getTimeToLive() {
+    return timeToLive;
+  }
+
+  public void markAsPublished(Instant now) {
+    Objects.requireNonNull(now, "publishedAt must not be null");
+
+    if (this.status == OutboxStatus.PUBLISHED) {
+      return;
+    }
+
+    setStatus(OutboxStatus.PUBLISHED);
+
+    this.publishedAt = now;
+    this.gsi1sk = OutboxStatusKey.buildSortKey(status, now);
+    this.timeToLive = now.plus(1, ChronoUnit.DAYS).getEpochSecond();
+  }
+
+  public void resetToPending() {
+    this.status = OutboxStatus.PENDING;
+    this.publishedAt = null;
+    this.timeToLive = null;
+    this.gsi1sk = OutboxStatusKey.SORT_KEY_PENDING_TEMPLATE.formatted(this.createdAt);
+  }
+
+  @SuppressWarnings("all")
+  void setStatus(OutboxStatus status) {
+    if (!this.status.canTransitionTo(status)) {
+      throw new IllegalStateException(
+        "Invalid status transition: %s -> %s".formatted(this.status, status)
+      );
+    }
+    this.status = status;
   }
 }

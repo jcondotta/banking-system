@@ -1,9 +1,15 @@
 package com.jcondotta.banking.contracts.block;
 
-import com.jcondotta.banking.contracts.IntegrationEvent;
-import com.jcondotta.banking.contracts.IntegrationEventMetadata;
+import com.jcondotta.application.core.events.IntegrationEvent;
+import com.jcondotta.application.core.events.IntegrationEventMetadata;
 
 public record BankAccountBlockedIntegrationEvent(IntegrationEventMetadata metadata, BankAccountBlockedIntegrationPayload payload)
   implements IntegrationEvent<BankAccountBlockedIntegrationPayload> {
 
+  public static final String EVENT_TYPE = "bank-account-blocked";
+
+  @Override
+  public String eventType() {
+    return EVENT_TYPE;
+  }
 }

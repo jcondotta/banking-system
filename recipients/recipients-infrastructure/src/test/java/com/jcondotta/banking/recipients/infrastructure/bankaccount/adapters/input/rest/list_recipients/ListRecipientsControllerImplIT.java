@@ -1,7 +1,7 @@
 package com.jcondotta.banking.recipients.infrastructure.bankaccount.adapters.input.rest.list_recipients;
 
-import com.jcondotta.application.core.CommandHandler;
-import com.jcondotta.application.core.CommandHandlerWithResult;
+import com.jcondotta.application.core.command.CommandHandler;
+import com.jcondotta.application.core.command.CommandHandlerWithResult;
 import com.jcondotta.banking.recipients.application.bankaccount.command.create_recipient.CreateRecipientCommand;
 import com.jcondotta.banking.recipients.application.bankaccount.command.register.RegisterBankAccountCommand;
 import com.jcondotta.banking.recipients.application.bankaccount.command.remove_recipient.RemoveRecipientCommand;

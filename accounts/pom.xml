@@ -54,7 +54,7 @@
 
             <dependency>
                 <groupId>com.jcondotta</groupId>
-                <artifactId>recipients-application</artifactId>
+                <artifactId>accounts-application</artifactId>
                 <version>${project.version}</version>
             </dependency>
 

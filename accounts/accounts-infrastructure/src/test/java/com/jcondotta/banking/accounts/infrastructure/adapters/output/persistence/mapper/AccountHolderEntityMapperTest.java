@@ -25,7 +25,7 @@ class AccountHolderEntityMapperTest {
 //    BankAccountId id = BankAccountId.of(BANK_ACCOUNT_UUID);
 //    AccountHolderId accountHolderId = AccountHolderId.of(ACCOUNT_HOLDER_UUID);
 //
-//    AccountHolder accountHolder = BankAccount.restoreAccountHolder(
+//    AccountHolder primaryHolder = BankAccount.restoreAccountHolder(
 //      accountHolderId,
 //      VALID_NAME,
 //      VALID_PASSPORT,
@@ -35,7 +35,7 @@ class AccountHolderEntityMapperTest {
 //      NOW
 //    );
 //
-//    BankingEntity entity = mapper.toAccountHolderEntity(id, accountHolder);
+//    BankingEntity entity = mapper.toAccountHolderEntity(id, primaryHolder);
 //
 //    assertThat(entity).isNotNull();
 //    assertThat(entity.getPartitionKey()).isEqualTo(AccountHolderEntityKey.partitionKey(id));

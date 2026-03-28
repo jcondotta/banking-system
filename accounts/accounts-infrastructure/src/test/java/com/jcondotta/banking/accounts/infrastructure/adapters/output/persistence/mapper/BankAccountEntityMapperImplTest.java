@@ -38,7 +38,7 @@ class BankAccountEntityMapperImplTest {
 //  @ParameterizedTest
 //  @ArgumentsSource(AccountTypeAndCurrencyArgumentsProvider.class)
 //  void shouldMapToBankingEntities_whenBankAccountIsValid(AccountType accountType, Currency currency) {
-//    AccountHolder accountHolder = BankAccount.restoreAccountHolder(
+//    AccountHolder primaryHolder = BankAccount.restoreAccountHolder(
 //      accountHolderId,
 //      AccountHolderFixtures.JEFFERSON.getAccountHolderName(),
 //      AccountHolderFixtures.JEFFERSON.getPassportNumber(),
@@ -55,7 +55,7 @@ class BankAccountEntityMapperImplTest {
 //      VALID_IBAN,
 //      AccountStatus.ACTIVE,
 //      NOW,
-//      List.of(accountHolder)
+//      List.of(primaryHolder)
 //    );
 //
 //    BankingEntity mockedAccountHolderEntity = BankingEntity.builder()
@@ -63,7 +63,7 @@ class BankAccountEntityMapperImplTest {
 //      .accountHolderId(accountHolderId.value())
 //      .build();
 //
-//    when(accountHolderEntityMapper.toAccountHolderEntity(id, accountHolder))
+//    when(accountHolderEntityMapper.toAccountHolderEntity(id, primaryHolder))
 //      .thenReturn(mockedAccountHolderEntity);
 //
 //    List<BankingEntity> entities = mapper.toBankingEntities(bankAccount);
@@ -82,7 +82,7 @@ class BankAccountEntityMapperImplTest {
 //    assertThat(bankAccountEntity.getStatus()).isEqualTo(AccountStatus.ACTIVE);
 //    assertThat(bankAccountEntity.getCreatedAt()).isEqualTo(NOW);
 //
-//    verify(accountHolderEntityMapper).toAccountHolderEntity(id, accountHolder);
+//    verify(accountHolderEntityMapper).toAccountHolderEntity(id, primaryHolder);
 //  }
 //
 //  @ParameterizedTest

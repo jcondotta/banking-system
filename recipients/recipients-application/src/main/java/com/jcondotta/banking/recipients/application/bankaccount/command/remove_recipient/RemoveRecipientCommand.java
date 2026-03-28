@@ -1,6 +1,6 @@
 package com.jcondotta.banking.recipients.application.bankaccount.command.remove_recipient;
 
-import com.jcondotta.application.core.Command;
+import com.jcondotta.application.core.command.Command;
 import com.jcondotta.banking.recipients.domain.recipient.identity.BankAccountId;
 import com.jcondotta.banking.recipients.domain.recipient.identity.RecipientId;
 
