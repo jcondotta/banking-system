@@ -1,7 +1,7 @@
 package com.jcondotta.banking.accounts.infrastructure.adapters.output.messaging.mapper;
 
-import com.jcondotta.application.core.events.IntegrationEventMetadata;
-import com.jcondotta.application.core.events.mapper.AbstractDomainEventMapper;
+import com.jcondotta.application.events.IntegrationEventMetadata;
+import com.jcondotta.application.events.mapper.AbstractDomainEventMapper;
 import com.jcondotta.banking.accounts.domain.bankaccount.events.BankAccountJointHolderAddedEvent;
 import com.jcondotta.banking.contracts.addholder.BankAccountJointHolderAddedIntegrationEvent;
 import com.jcondotta.banking.contracts.addholder.BankAccountJointHolderAddedIntegrationPayload;

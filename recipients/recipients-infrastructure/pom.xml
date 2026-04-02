@@ -17,26 +17,37 @@
         <dependency>
             <groupId>com.jcondotta</groupId>
             <artifactId>infrastructure-core</artifactId>
+            <version>${project.version}</version>
         </dependency>
 
         <dependency>
             <groupId>com.jcondotta</groupId>
             <artifactId>recipients-domain</artifactId>
+            <version>${project.version}</version>
         </dependency>
 
         <dependency>
             <groupId>com.jcondotta</groupId>
             <artifactId>recipients-test-support</artifactId>
+            <version>${project.version}</version>
         </dependency>
 
         <dependency>
             <groupId>com.jcondotta</groupId>
             <artifactId>recipients-application</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.jcondotta</groupId>
+            <artifactId>exception-handler-core</artifactId>
+            <version>${project.version}</version>
         </dependency>
 
         <dependency>
             <groupId>com.jcondotta</groupId>
             <artifactId>bank-accounts-contracts</artifactId>
+            <version>${project.version}</version>
         </dependency>
 
         <dependency>

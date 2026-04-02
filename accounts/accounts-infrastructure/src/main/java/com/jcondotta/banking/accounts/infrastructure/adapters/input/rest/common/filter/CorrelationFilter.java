@@ -1,13 +1,12 @@
 package com.jcondotta.banking.accounts.infrastructure.adapters.input.rest.common.filter;
 
-import com.jcondotta.banking.accounts.infrastructure.ThreadLocalCorrelationIdProvider;
+import com.jcondotta.banking.accounts.infrastructure.ScopedCorrelationIdProvider;
 import com.jcondotta.banking.accounts.infrastructure.adapters.input.rest.common.HttpHeadersConstants;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.core.Ordered;
-import org.springframework.core.annotation.Order;
+import org.jspecify.annotations.NonNull;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -18,10 +17,11 @@ import java.util.UUID;
 @Component
 public class CorrelationFilter extends OncePerRequestFilter {
 
+
+
   @Override
-  @SuppressWarnings("all")
-  protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
-    throws ServletException, IOException {
+  protected void doFilterInternal(
+    HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull FilterChain chain) {
 
     UUID correlationId;
 
@@ -34,14 +34,16 @@ public class CorrelationFilter extends OncePerRequestFilter {
       correlationId = UUID.randomUUID();
     }
 
-    ThreadLocalCorrelationIdProvider.set(correlationId);
     response.setHeader(HttpHeadersConstants.CORRELATION_ID, correlationId.toString());
 
-    try {
-      chain.doFilter(request, response);
-    }
-    finally {
-      ThreadLocalCorrelationIdProvider.clear();
-    }
+    ScopedValue.where(ScopedCorrelationIdProvider.CORRELATION_ID, correlationId)
+      .run(() -> {
+        try {
+          chain.doFilter(request, response);
+        }
+        catch (IOException | ServletException e) {
+          throw new RuntimeException(e);
+        }
+      });
   }
 }

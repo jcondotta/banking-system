@@ -1,5 +1,6 @@
 package com.jcondotta.banking.accounts.domain.bankaccount.testsupport;
 
+import com.jcondotta.banking.accounts.domain.bankaccount.aggregate.AccountHolder;
 import com.jcondotta.banking.accounts.domain.bankaccount.value_objects.address.Address;
 import com.jcondotta.banking.accounts.domain.bankaccount.value_objects.contact.ContactInfo;
 import com.jcondotta.banking.accounts.domain.bankaccount.value_objects.personal.PersonalInfo;

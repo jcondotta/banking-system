@@ -22,7 +22,7 @@ public final class DynamoPageIterable {
 
       @Override
       public Iterator<Page<T>> iterator() {
-        return List.<Page<T>>of().iterator();
+        return List.of(Page.create(items)).iterator();
       }
     };
   }

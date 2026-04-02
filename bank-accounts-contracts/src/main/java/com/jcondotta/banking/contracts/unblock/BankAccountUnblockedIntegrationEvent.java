@@ -1,7 +1,7 @@
 package com.jcondotta.banking.contracts.unblock;
 
-import com.jcondotta.application.core.events.IntegrationEvent;
-import com.jcondotta.application.core.events.IntegrationEventMetadata;
+import com.jcondotta.application.events.IntegrationEvent;
+import com.jcondotta.application.events.IntegrationEventMetadata;
 
 public record BankAccountUnblockedIntegrationEvent(IntegrationEventMetadata metadata, BankAccountUnblockedIntegrationPayload payload)
   implements IntegrationEvent<BankAccountUnblockedIntegrationPayload> {

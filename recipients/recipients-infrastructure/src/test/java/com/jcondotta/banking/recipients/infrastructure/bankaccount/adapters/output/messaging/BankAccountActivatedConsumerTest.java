@@ -1,21 +1,8 @@
 package com.jcondotta.banking.recipients.infrastructure.bankaccount.adapters.output.messaging;
 
-import com.jcondotta.application.core.events.EventSourceProvider;
-import com.jcondotta.application.core.events.IntegrationEventMetadata;
-import com.jcondotta.banking.contracts.activate.BankAccountActivatedIntegrationEvent;
-import com.jcondotta.banking.contracts.activate.BankAccountActivatedIntegrationPayload;
-import com.jcondotta.banking.recipients.application.bankaccount.command.register.RegisterBankAccountCommandHandler;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import tools.jackson.databind.ObjectMapper;
 
-import java.time.Instant;
-import java.util.UUID;
-
-import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)

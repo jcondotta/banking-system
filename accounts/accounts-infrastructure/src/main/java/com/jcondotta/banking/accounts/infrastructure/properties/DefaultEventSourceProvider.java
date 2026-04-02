@@ -1,6 +1,6 @@
 package com.jcondotta.banking.accounts.infrastructure.properties;
 
-import com.jcondotta.application.core.events.EventSourceProvider;
+import com.jcondotta.application.events.EventSourceProvider;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 

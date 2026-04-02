@@ -36,11 +36,11 @@ app:
     shards:
       count: 4
       concurrency-per-shard: 2
-      batch-size-per-shard: 50
+      batch-size-per-shard: 3
     processing:
       timeout: 10s
     polling:
-      interval: 2s
+      interval: 20s
   kafka:
     topics:
       bank-account-opened:

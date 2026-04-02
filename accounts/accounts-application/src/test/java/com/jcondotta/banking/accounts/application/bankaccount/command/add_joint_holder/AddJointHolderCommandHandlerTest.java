@@ -1,6 +1,6 @@
 package com.jcondotta.banking.accounts.application.bankaccount.command.add_joint_holder;
 
-import com.jcondotta.application.core.command.CommandHandler;
+import com.jcondotta.application.command.CommandHandler;
 import com.jcondotta.banking.accounts.application.bankaccount.command.add_joint_holder.model.AddJointHolderCommand;
 import com.jcondotta.banking.accounts.domain.bankaccount.aggregate.BankAccount;
 import com.jcondotta.banking.accounts.domain.bankaccount.exceptions.BankAccountNotFoundException;

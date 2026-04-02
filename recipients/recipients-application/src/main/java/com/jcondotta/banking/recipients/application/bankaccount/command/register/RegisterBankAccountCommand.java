@@ -1,6 +1,6 @@
 package com.jcondotta.banking.recipients.application.bankaccount.command.register;
 
-import com.jcondotta.application.core.command.Command;
+import com.jcondotta.application.command.Command;
 import com.jcondotta.banking.recipients.domain.recipient.identity.BankAccountId;
 
 import static java.util.Objects.requireNonNull;

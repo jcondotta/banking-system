@@ -1,6 +1,6 @@
 package com.jcondotta.banking.accounts.infrastructure.config.aws.dynamodb;
 
-import com.jcondotta.banking.accounts.infrastructure.adapters.output.persistence.entity.OutboxEntity;
+import com.jcondotta.banking.accounts.infrastructure.adapters.output.outbox.entity.OutboxEntity;
 import com.jcondotta.banking.accounts.infrastructure.properties.BankAccountsTableProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

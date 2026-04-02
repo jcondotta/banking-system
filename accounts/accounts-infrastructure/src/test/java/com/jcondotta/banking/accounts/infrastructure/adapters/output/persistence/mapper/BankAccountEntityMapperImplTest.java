@@ -1,131 +1,195 @@
 package com.jcondotta.banking.accounts.infrastructure.adapters.output.persistence.mapper;
 
-import com.jcondotta.banking.accounts.infrastructure.config.ClockTestFactory;
-import com.jcondotta.banking.accounts.domain.bankaccount.identity.AccountHolderId;
+import com.jcondotta.banking.accounts.domain.bankaccount.aggregate.AccountHolder;
+import com.jcondotta.banking.accounts.domain.bankaccount.aggregate.BankAccount;
+import com.jcondotta.banking.accounts.domain.bankaccount.enums.AccountStatus;
+import com.jcondotta.banking.accounts.domain.bankaccount.enums.AccountType;
+import com.jcondotta.banking.accounts.domain.bankaccount.enums.Currency;
+import com.jcondotta.banking.accounts.domain.bankaccount.enums.HolderType;
 import com.jcondotta.banking.accounts.domain.bankaccount.identity.BankAccountId;
-import com.jcondotta.banking.accounts.domain.bankaccount.value_objects.Iban;
+import com.jcondotta.banking.accounts.domain.bankaccount.testsupport.AccountHolderFixtures;
+import com.jcondotta.banking.accounts.domain.bankaccount.testsupport.AccountHolderTestFactory;
+import com.jcondotta.banking.accounts.domain.bankaccount.testsupport.BankAccountTestFactory;
+import com.jcondotta.banking.accounts.infrastructure.adapters.output.persistence.entity.BankAccountEntityKey;
+import com.jcondotta.banking.accounts.infrastructure.adapters.output.persistence.entity.BankingEntity;
+import com.jcondotta.banking.accounts.infrastructure.adapters.output.persistence.enums.EntityType;
+import com.jcondotta.banking.accounts.infrastructure.arguments_provider.AccountTypeAndCurrencyArgumentsProvider;
 import org.junit.jupiter.api.BeforeEach;
-import org.mockito.Mockito;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ArgumentsSource;
 
-import java.time.Instant;
-import java.util.UUID;
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class BankAccountEntityMapperImplTest {
 
-  private static final UUID BANK_ACCOUNT_UUID = UUID.randomUUID();
-  private static final UUID ACCOUNT_HOLDER_UUID = UUID.randomUUID();
+    private static final AccountHolderFixtures PRIMARY_FIXTURE = AccountHolderFixtures.JEFFERSON;
+    private static final AccountHolderFixtures JOINT_FIXTURE = AccountHolderFixtures.VIRGINIO;
 
-  private static final Iban VALID_IBAN = Iban.of("ES3801283316232166447417");
+    private BankAccountEntityMapperImpl mapper;
 
-  private static final Instant NOW = Instant.now(ClockTestFactory.FIXED_CLOCK);
+    @BeforeEach
+    void setUp() {
+        mapper = new BankAccountEntityMapperImpl(new AccountHolderEntityMapperImpl());
+    }
 
-  private AccountHolderEntityMapper accountHolderEntityMapper;
-  private BankAccountEntityMapperImpl mapper;
+    @Nested
+    class ToEntities {
 
-  private BankAccountId bankAccountId;
-  private AccountHolderId accountHolderId;
+        @ParameterizedTest
+        @ArgumentsSource(AccountTypeAndCurrencyArgumentsProvider.class)
+        void shouldReturnTwoEntities_whenBankAccountHasOnlyPrimaryHolder(AccountType accountType, Currency currency) {
+            BankAccount bankAccount = BankAccountTestFactory.withPrimary(BankAccountId.newId(), accountType, currency, PRIMARY_FIXTURE);
 
-  @BeforeEach
-  void setUp() {
-    accountHolderEntityMapper = Mockito.mock(AccountHolderEntityMapper.class);
-    mapper = new BankAccountEntityMapperImpl(accountHolderEntityMapper);
+            List<BankingEntity> entities = mapper.toEntities(bankAccount);
 
-    bankAccountId = BankAccountId.of(BANK_ACCOUNT_UUID);
-    accountHolderId = AccountHolderId.of(ACCOUNT_HOLDER_UUID);
-  }
+            assertThat(entities).hasSize(2);
+            assertThat(entities.get(0).getEntityType()).isEqualTo(EntityType.BANK_ACCOUNT);
+            assertThat(entities.get(1).getEntityType()).isEqualTo(EntityType.ACCOUNT_HOLDER);
+        }
 
-  //TODO
-//  @ParameterizedTest
-//  @ArgumentsSource(AccountTypeAndCurrencyArgumentsProvider.class)
-//  void shouldMapToBankingEntities_whenBankAccountIsValid(AccountType accountType, Currency currency) {
-//    AccountHolder primaryHolder = BankAccount.restoreAccountHolder(
-//      accountHolderId,
-//      AccountHolderFixtures.JEFFERSON.getAccountHolderName(),
-//      AccountHolderFixtures.JEFFERSON.getPassportNumber(),
-//      AccountHolderFixtures.JEFFERSON.getDateOfBirth(),
-//      AccountHolderFixtures.JEFFERSON.getEmail(),
-//      AccountHolderType.PRIMARY,
-//      NOW
-//    );
-//
-//    BankAccount bankAccount = BankAccount.restore(
-//      id,
-//      accountType,
-//      currency,
-//      VALID_IBAN,
-//      AccountStatus.ACTIVE,
-//      NOW,
-//      List.of(primaryHolder)
-//    );
-//
-//    BankingEntity mockedAccountHolderEntity = BankingEntity.builder()
-//      .entityType(EntityType.ACCOUNT_HOLDER)
-//      .accountHolderId(accountHolderId.value())
-//      .build();
-//
-//    when(accountHolderEntityMapper.toAccountHolderEntity(id, primaryHolder))
-//      .thenReturn(mockedAccountHolderEntity);
-//
-//    List<BankingEntity> entities = mapper.toBankingEntities(bankAccount);
-//
-//    assertThat(entities).hasSize(2);
-//
-//    BankingEntity bankAccountEntity = entities.getFirst();
-//
-//    assertThat(bankAccountEntity.getEntityType()).isEqualTo(EntityType.BANK_ACCOUNT);
-//    assertThat(bankAccountEntity.getPartitionKey()).isEqualTo(BankAccountEntityKey.partitionKey(id));
-//    assertThat(bankAccountEntity.getSortKey()).isEqualTo(BankAccountEntityKey.sortKey(id));
-//    assertThat(bankAccountEntity.getBankAccountId()).isEqualTo(id.value());
-//    assertThat(bankAccountEntity.getAccountType()).isEqualTo(accountType);
-//    assertThat(bankAccountEntity.getCurrency()).isEqualTo(currency);
-//    assertThat(bankAccountEntity.getIban()).isEqualTo(VALID_IBAN.value());
-//    assertThat(bankAccountEntity.getStatus()).isEqualTo(AccountStatus.ACTIVE);
-//    assertThat(bankAccountEntity.getCreatedAt()).isEqualTo(NOW);
-//
-//    verify(accountHolderEntityMapper).toAccountHolderEntity(id, primaryHolder);
-//  }
-//
-//  @ParameterizedTest
-//  @ArgumentsSource(AccountTypeAndCurrencyArgumentsProvider.class)
-//  void shouldMapToDomain_whenEntityAndAccountHoldersAreValid(AccountType accountType, Currency currency) {
-//    BankingEntity bankAccountEntity = BankingEntity.builder()
-//      .id(id.value())
-//      .accountType(accountType)
-//      .currency(currency)
-//      .iban(VALID_IBAN.value())
-//      .status(AccountStatus.ACTIVE)
-//      .createdAt(NOW)
-//      .build();
-//
-//    BankingEntity accountHolderEntity = BankingEntity.builder()
-//      .entityType(EntityType.ACCOUNT_HOLDER)
-//      .accountHolderName(AccountHolderFixtures.JEFFERSON.getAccountHolderName().value())
-//      .passportNumber(AccountHolderFixtures.JEFFERSON.getPassportNumber().value())
-//      .dateOfBirth(AccountHolderFixtures.JEFFERSON.getDateOfBirth().value())
-//      .email(AccountHolderFixtures.JEFFERSON.getEmail().value())
-//      .type(AccountHolderType.PRIMARY)
-//      .createdAt(NOW)
-//      .build();
-//
-//    AccountHolder mockedAccountHolder = mock(AccountHolder.class);
-//
-//    when(accountHolderEntityMapper.toDomain(accountHolderEntity))
-//      .thenReturn(mockedAccountHolder);
-//
-//    BankAccount result = mapper.toDomain(
-//      bankAccountEntity,
-//      List.of(accountHolderEntity)
-//    );
-//
-//    assertThat(result.id()).isEqualTo(id);
-//    assertThat(result.accountType()).isEqualTo(accountType);
-//    assertThat(result.currency()).isEqualTo(currency);
-//    assertThat(result.iban()).isEqualTo(VALID_IBAN);
-//    assertThat(result.accountStatus()).isEqualTo(AccountStatus.ACTIVE);
-//    assertThat(result.createdAt()).isEqualTo(NOW);
-//    assertThat(result.holders()).containsExactly(mockedAccountHolder);
-//
-//    verify(accountHolderEntityMapper)
-//      .toDomain(accountHolderEntity);
-//  }
+        @Test
+        void shouldReturnThreeEntities_whenBankAccountHasPrimaryAndJointHolder() {
+            BankAccount bankAccount = BankAccountTestFactory.withPrimaryAndJoint(PRIMARY_FIXTURE, JOINT_FIXTURE);
+
+            List<BankingEntity> entities = mapper.toEntities(bankAccount);
+
+            assertThat(entities).hasSize(3);
+            assertThat(entities.get(0).getEntityType()).isEqualTo(EntityType.BANK_ACCOUNT);
+            assertThat(entities.get(1).getEntityType()).isEqualTo(EntityType.ACCOUNT_HOLDER);
+            assertThat(entities.get(2).getEntityType()).isEqualTo(EntityType.ACCOUNT_HOLDER);
+        }
+
+        @ParameterizedTest
+        @ArgumentsSource(AccountTypeAndCurrencyArgumentsProvider.class)
+        void shouldPlaceBankAccountEntityFirst_whenMappingToEntities(AccountType accountType, Currency currency) {
+            BankAccount bankAccount = BankAccountTestFactory.withPrimary(BankAccountId.newId(), accountType, currency, PRIMARY_FIXTURE);
+
+            List<BankingEntity> entities = mapper.toEntities(bankAccount);
+
+            assertThat(entities.getFirst().isBankAccount()).isTrue();
+        }
+
+        @ParameterizedTest
+        @ArgumentsSource(AccountTypeAndCurrencyArgumentsProvider.class)
+        void shouldMapBankAccountEntityFields_whenMappingToEntities(AccountType accountType, Currency currency) {
+            BankAccount bankAccount = BankAccountTestFactory.withPrimary(BankAccountId.newId(), accountType, currency, PRIMARY_FIXTURE);
+
+            BankingEntity entity = mapper.toEntities(bankAccount).getFirst();
+
+            assertThat(entity.getPartitionKey()).isEqualTo(BankAccountEntityKey.partitionKey(bankAccount.getId()));
+            assertThat(entity.getSortKey()).isEqualTo(BankAccountEntityKey.sortKey(bankAccount.getId()));
+            assertThat(entity.getEntityType()).isEqualTo(EntityType.BANK_ACCOUNT);
+            assertThat(entity.getBankAccountId()).isEqualTo(bankAccount.getId().value());
+            assertThat(entity.getAccountType()).isEqualTo(accountType.name());
+            assertThat(entity.getCurrency()).isEqualTo(currency.name());
+            assertThat(entity.getIban()).isEqualTo(bankAccount.getIban().value());
+            assertThat(entity.getStatus()).isEqualTo(bankAccount.getAccountStatus().name());
+            assertThat(entity.getCreatedAt()).isEqualTo(bankAccount.getCreatedAt());
+        }
+
+        @ParameterizedTest
+        @ArgumentsSource(AccountTypeAndCurrencyArgumentsProvider.class)
+        void shouldMapAllAccountStatuses_whenMappingToEntities(AccountType accountType, Currency currency) {
+            for (AccountStatus status : AccountStatus.values()) {
+                BankAccount bankAccount = BankAccountTestFactory.build(BankAccountId.newId(), accountType, currency, status,
+                  AccountHolderTestFactory.primary(PRIMARY_FIXTURE));
+
+                BankingEntity entity = mapper.toEntities(bankAccount).getFirst();
+                assertThat(entity.getStatus()).isEqualTo(status.name());
+            }
+        }
+    }
+
+    @Nested
+    class Restore {
+
+        @ParameterizedTest
+        @ArgumentsSource(AccountTypeAndCurrencyArgumentsProvider.class)
+        void shouldRestoreBankAccount_whenMappingToEntitiesAndRestoringBack(AccountType accountType, Currency currency) {
+            BankAccount original = BankAccountTestFactory.withPrimary(BankAccountId.newId(), accountType, currency, PRIMARY_FIXTURE);
+
+            BankAccount restored = mapper.restore(mapper.toEntities(original));
+
+            assertThat(restored.getId()).isEqualTo(original.getId());
+            assertThat(restored.getAccountType()).isEqualTo(original.getAccountType());
+            assertThat(restored.getCurrency()).isEqualTo(original.getCurrency());
+            assertThat(restored.getIban()).isEqualTo(original.getIban());
+            assertThat(restored.getAccountStatus()).isEqualTo(original.getAccountStatus());
+            assertThat(restored.getCreatedAt()).isEqualTo(original.getCreatedAt());
+            assertThat(restored.getActiveHolders()).hasSize(1);
+        }
+
+        @Test
+        void shouldRestorePrimaryHolderFields_whenRestoringFromEntities() {
+            BankAccount original = BankAccountTestFactory.withPrimary(PRIMARY_FIXTURE);
+
+            BankAccount restored = mapper.restore(mapper.toEntities(original));
+
+            AccountHolder primaryHolder = restored.getPrimaryHolder();
+            assertThat(primaryHolder.getAccountHolderType()).isEqualTo(HolderType.PRIMARY);
+            assertThat(primaryHolder.getPersonalInfo()).isEqualTo(PRIMARY_FIXTURE.personalInfo());
+            assertThat(primaryHolder.getContactInfo()).isEqualTo(PRIMARY_FIXTURE.contactInfo());
+            assertThat(primaryHolder.getAddress()).isEqualTo(PRIMARY_FIXTURE.address());
+        }
+
+        @Test
+        void shouldRestorePrimaryAndJointHolders_whenEntitiesContainBothHolderTypes() {
+            BankAccount original = BankAccountTestFactory.withPrimaryAndJoint(PRIMARY_FIXTURE, JOINT_FIXTURE);
+
+            BankAccount restored = mapper.restore(mapper.toEntities(original));
+
+            assertThat(restored.getActiveHolders()).hasSize(2);
+            assertThat(restored.getPrimaryHolder().getPersonalInfo()).isEqualTo(PRIMARY_FIXTURE.personalInfo());
+            assertThat(restored.getJointHolders()).hasSize(1);
+            assertThat(restored.getJointHolders().getFirst().getPersonalInfo()).isEqualTo(JOINT_FIXTURE.personalInfo());
+        }
+
+        @Test
+        void shouldThrowIllegalStateException_whenNoBankAccountEntityInList() {
+            BankingEntity holderEntity = mapper.toEntities(BankAccountTestFactory.withPrimary(PRIMARY_FIXTURE)).get(1);
+
+            assertThatThrownBy(() -> mapper.restore(List.of(holderEntity)))
+              .isInstanceOf(IllegalStateException.class)
+              .hasMessage("Bank account entity not found");
+        }
+
+        @Test
+        void shouldThrowIllegalStateException_whenListIsEmpty() {
+            assertThatThrownBy(() -> mapper.restore(List.of()))
+              .isInstanceOf(IllegalStateException.class)
+              .hasMessage("Bank account entity not found");
+        }
+    }
+
+    @Nested
+    class RoundTrip {
+
+        @ParameterizedTest
+        @ArgumentsSource(AccountTypeAndCurrencyArgumentsProvider.class)
+        void shouldPreserveAllBankAccountFields_whenMappingToEntitiesAndRestoringToDomain(AccountType accountType, Currency currency) {
+            BankAccount original = BankAccountTestFactory.withPrimaryAndJoint(
+              BankAccountId.newId(),
+              accountType,
+              currency,
+              PRIMARY_FIXTURE,
+              JOINT_FIXTURE
+            );
+
+            BankAccount restored = mapper.restore(mapper.toEntities(original));
+
+            assertThat(restored.getId()).isEqualTo(original.getId());
+            assertThat(restored.getAccountType()).isEqualTo(original.getAccountType());
+            assertThat(restored.getCurrency()).isEqualTo(original.getCurrency());
+            assertThat(restored.getIban()).isEqualTo(original.getIban());
+            assertThat(restored.getAccountStatus()).isEqualTo(original.getAccountStatus());
+            assertThat(restored.getCreatedAt()).isEqualTo(original.getCreatedAt());
+            assertThat(restored.getPrimaryHolder().getPersonalInfo()).isEqualTo(PRIMARY_FIXTURE.personalInfo());
+            assertThat(restored.getJointHolders().getFirst().getPersonalInfo()).isEqualTo(JOINT_FIXTURE.personalInfo());
+        }
+    }
 }

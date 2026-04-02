@@ -1,6 +1,6 @@
 package com.jcondotta.banking.accounts.application.bankaccount.query.get;
 
-import com.jcondotta.application.core.query.QueryHandler;
+import com.jcondotta.application.query.QueryHandler;
 import com.jcondotta.banking.accounts.application.bankaccount.query.get.model.BankAccountSummary;
 import com.jcondotta.banking.accounts.domain.bankaccount.exceptions.BankAccountNotFoundException;
 import com.jcondotta.banking.accounts.domain.bankaccount.identity.BankAccountId;

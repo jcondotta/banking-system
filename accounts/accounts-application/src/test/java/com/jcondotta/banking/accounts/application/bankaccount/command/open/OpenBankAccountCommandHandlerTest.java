@@ -1,6 +1,6 @@
 package com.jcondotta.banking.accounts.application.bankaccount.command.open;
 
-import com.jcondotta.application.core.command.CommandHandlerWithResult;
+import com.jcondotta.application.command.CommandHandlerWithResult;
 import com.jcondotta.banking.accounts.application.bankaccount.argument_provider.AccountTypeAndCurrencyArgumentsProvider;
 import com.jcondotta.banking.accounts.application.bankaccount.command.open.model.OpenBankAccountCommand;
 import com.jcondotta.banking.accounts.application.bankaccount.ports.output.facade.IbanGeneratorFacade;

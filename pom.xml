@@ -17,7 +17,7 @@
 	<name>banking-system</name>
 
 	<modules>
-		<module>banking-core</module>
+		<module>core</module>
 		<module>accounts</module>
 		<module>recipients</module>
 		<module>bank-accounts-contracts</module>

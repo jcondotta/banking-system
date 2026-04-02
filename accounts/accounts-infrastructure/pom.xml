@@ -23,7 +23,8 @@
 
         <dependency>
             <groupId>com.jcondotta</groupId>
-            <artifactId>infrastructure-core</artifactId>
+            <artifactId>exception-handler-core</artifactId>
+            <version>${project.version}</version>
         </dependency>
 
         <dependency>
@@ -67,10 +68,10 @@
             <version>4.0.0-M2</version>
         </dependency>
 
-<!--        <dependency>-->
-<!--            <groupId>software.amazon.awssdk</groupId>-->
-<!--            <artifactId>dynamodb-enhanced</artifactId>-->
-<!--        </dependency>-->
+        <dependency>
+            <groupId>software.amazon.awssdk</groupId>
+            <artifactId>dynamodb-enhanced</artifactId>
+        </dependency>
 
         <dependency>
             <groupId>org.mapstruct</groupId>
@@ -89,6 +90,11 @@
         </dependency>
 
         <!-- Tests -->
+        <dependency>
+            <groupId>com.jcondotta</groupId>
+            <artifactId>accounts-test-support</artifactId>
+            <scope>test</scope>
+        </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>

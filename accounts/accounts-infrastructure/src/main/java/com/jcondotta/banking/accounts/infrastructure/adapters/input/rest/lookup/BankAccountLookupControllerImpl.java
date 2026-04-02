@@ -1,6 +1,6 @@
 package com.jcondotta.banking.accounts.infrastructure.adapters.input.rest.lookup;
 
-import com.jcondotta.application.core.query.QueryHandler;
+import com.jcondotta.application.query.QueryHandler;
 import com.jcondotta.banking.accounts.application.bankaccount.query.get.GetBankAccountByIdQuery;
 import com.jcondotta.banking.accounts.application.bankaccount.query.get.model.BankAccountSummary;
 import com.jcondotta.banking.accounts.domain.bankaccount.identity.BankAccountId;

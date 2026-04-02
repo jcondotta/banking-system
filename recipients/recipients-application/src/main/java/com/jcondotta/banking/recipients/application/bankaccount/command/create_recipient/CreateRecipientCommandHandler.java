@@ -1,6 +1,6 @@
 package com.jcondotta.banking.recipients.application.bankaccount.command.create_recipient;
 
-import com.jcondotta.application.core.command.CommandHandlerWithResult;
+import com.jcondotta.application.command.CommandHandlerWithResult;
 import com.jcondotta.banking.recipients.domain.recipient.aggregate.Recipient;
 import com.jcondotta.banking.recipients.domain.recipient.exceptions.BankAccountNotFoundException;
 import com.jcondotta.banking.recipients.domain.recipient.identity.RecipientId;

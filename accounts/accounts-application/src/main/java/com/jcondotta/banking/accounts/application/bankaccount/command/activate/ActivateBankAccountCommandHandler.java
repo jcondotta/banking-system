@@ -1,6 +1,6 @@
 package com.jcondotta.banking.accounts.application.bankaccount.command.activate;
 
-import com.jcondotta.application.core.command.CommandHandler;
+import com.jcondotta.application.command.CommandHandler;
 import com.jcondotta.banking.accounts.application.bankaccount.command.activate.model.ActivateBankAccountCommand;
 import com.jcondotta.banking.accounts.domain.bankaccount.exceptions.BankAccountNotFoundException;
 import com.jcondotta.banking.accounts.domain.bankaccount.repository.BankAccountRepository;

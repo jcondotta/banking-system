@@ -1,6 +1,6 @@
 package com.jcondotta.banking.recipients.application.bankaccount.query.list_recipients;
 
-import com.jcondotta.application.core.query.QueryHandler;
+import com.jcondotta.application.query.QueryHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 

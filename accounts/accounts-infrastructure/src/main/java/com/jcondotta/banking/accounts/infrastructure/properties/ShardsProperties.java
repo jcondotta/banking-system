@@ -1,11 +1,13 @@
 package com.jcondotta.banking.accounts.infrastructure.properties;
 
 import jakarta.validation.constraints.Min;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+@ConfigurationProperties(prefix = "app.outbox.shards")
 public record ShardsProperties(
 
   @Min(1) int count,

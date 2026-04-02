@@ -1,6 +1,6 @@
 package com.jcondotta.banking.accounts.infrastructure.adapters.input.rest.activate;
 
-import com.jcondotta.application.core.command.CommandHandler;
+import com.jcondotta.application.command.CommandHandler;
 import com.jcondotta.banking.accounts.application.bankaccount.command.activate.model.ActivateBankAccountCommand;
 import com.jcondotta.banking.accounts.domain.bankaccount.identity.BankAccountId;
 import lombok.AllArgsConstructor;

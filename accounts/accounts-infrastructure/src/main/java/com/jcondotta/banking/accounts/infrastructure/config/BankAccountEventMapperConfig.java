@@ -1,11 +1,11 @@
 package com.jcondotta.banking.accounts.infrastructure.config;
 
-import com.jcondotta.application.core.events.CorrelationIdProvider;
-import com.jcondotta.application.core.events.EventSourceProvider;
-import com.jcondotta.application.core.events.IntegrationEventCollector;
-import com.jcondotta.application.core.events.mapper.DomainEventIntegrationEventMapper;
-import com.jcondotta.application.core.events.mapper.DomainEventMapperRegistry;
-import com.jcondotta.application.core.events.mapper.DomainEventMapperRegistryFactory;
+import com.jcondotta.application.events.CorrelationIdProvider;
+import com.jcondotta.application.events.EventSourceProvider;
+import com.jcondotta.application.events.IntegrationEventCollector;
+import com.jcondotta.application.events.mapper.DomainEventIntegrationEventMapper;
+import com.jcondotta.application.events.mapper.DomainEventMapperRegistry;
+import com.jcondotta.application.events.mapper.DomainEventMapperRegistryFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 

@@ -10,7 +10,7 @@ import org.springframework.validation.annotation.Validated;
 public record OutboxProperties(
 
   @NotNull @Valid ShardsProperties shards,
-  @NotNull @Valid ProcessingProperties processing,
+  @NotNull @Valid OutboxProcessingProperties processing,
   @NotNull @Valid PollingProperties polling
 
 ) {}

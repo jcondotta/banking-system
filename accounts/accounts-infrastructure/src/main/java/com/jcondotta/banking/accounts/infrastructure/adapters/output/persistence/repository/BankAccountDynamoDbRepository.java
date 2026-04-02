@@ -3,10 +3,10 @@ package com.jcondotta.banking.accounts.infrastructure.adapters.output.persistenc
 import com.jcondotta.banking.accounts.domain.bankaccount.aggregate.BankAccount;
 import com.jcondotta.banking.accounts.domain.bankaccount.identity.BankAccountId;
 import com.jcondotta.banking.accounts.domain.bankaccount.repository.BankAccountRepository;
-import com.jcondotta.banking.accounts.infrastructure.adapters.output.messaging.outbox.OutboxEventCollector;
+import com.jcondotta.banking.accounts.infrastructure.adapters.output.outbox.collector.OutboxEventCollector;
 import com.jcondotta.banking.accounts.infrastructure.adapters.output.persistence.entity.BankAccountEntityKey;
 import com.jcondotta.banking.accounts.infrastructure.adapters.output.persistence.entity.BankingEntity;
-import com.jcondotta.banking.accounts.infrastructure.adapters.output.persistence.entity.OutboxEntity;
+import com.jcondotta.banking.accounts.infrastructure.adapters.output.outbox.entity.OutboxEntity;
 import com.jcondotta.banking.accounts.infrastructure.adapters.output.persistence.mapper.BankAccountEntityMapper;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,9 +17,7 @@ import software.amazon.awssdk.enhanced.dynamodb.Key;
 import software.amazon.awssdk.enhanced.dynamodb.model.QueryConditional;
 import software.amazon.awssdk.enhanced.dynamodb.model.TransactWriteItemsEnhancedRequest;
 
-import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 @Slf4j
 @Repository
@@ -55,25 +53,6 @@ public class BankAccountDynamoDbRepository implements BankAccountRepository {
       "BankAccount restored successfully. id={}", bankAccount.getId().value()
     );
     return Optional.of(bankAccount);
-  }
-
-  public List<OutboxEntity> findOutboxEvents(UUID aggregateId) {
-
-    var partitionKey = "BANK_ACCOUNT#" + aggregateId;
-
-    return outboxTable.query(r -> r
-        .queryConditional(
-          QueryConditional.sortBeginsWith(
-            Key.builder()
-              .partitionValue(partitionKey)
-              .sortValue("OUTBOX#")
-              .build()
-          )
-        )
-      )
-      .stream()
-      .flatMap(page -> page.items().stream())
-      .toList();
   }
 
   @Override

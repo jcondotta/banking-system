@@ -1,6 +1,6 @@
 package com.jcondotta.banking.accounts.infrastructure.fixtures;
 
-import com.jcondotta.application.core.events.IntegrationEventMetadata;
+import com.jcondotta.application.events.IntegrationEventMetadata;
 
 import java.time.Instant;
 import java.util.UUID;

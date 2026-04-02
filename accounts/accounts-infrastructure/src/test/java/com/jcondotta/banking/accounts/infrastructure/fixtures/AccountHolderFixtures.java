@@ -10,6 +10,7 @@ import com.jcondotta.banking.accounts.domain.bankaccount.value_objects.personal.
 import java.time.LocalDate;
 import java.time.Month;
 
+@Deprecated
 public enum AccountHolderFixtures {
 
 //  JEFFERSON(

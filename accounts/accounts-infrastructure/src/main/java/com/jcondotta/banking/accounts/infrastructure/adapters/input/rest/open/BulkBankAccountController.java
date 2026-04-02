@@ -3,7 +3,7 @@ package com.jcondotta.banking.accounts.infrastructure.adapters.input.rest.open;
 import com.jcondotta.banking.accounts.domain.bankaccount.enums.AccountType;
 import com.jcondotta.banking.accounts.domain.bankaccount.enums.Currency;
 import com.jcondotta.banking.accounts.infrastructure.adapters.input.rest.open.model.OpenBankAccountRequest;
-import com.jcondotta.banking.accounts.infrastructure.adapters.output.messaging.outbox.query.OutboxRepository;
+import com.jcondotta.banking.accounts.infrastructure.adapters.output.outbox.store.OutboxEventStore;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -19,7 +19,7 @@ import java.util.stream.IntStream;
 public class BulkBankAccountController {
 
     private final BankAccountsHttpClient client;
-    private final OutboxRepository outboxRepository;
+    private final OutboxEventStore outboxEventStore;
 
     @PostMapping("/{quantity}")
     public void createBulk(@PathVariable int quantity) {

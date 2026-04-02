@@ -16,6 +16,8 @@ import com.jcondotta.banking.accounts.infrastructure.adapters.output.persistence
 import com.jcondotta.banking.accounts.infrastructure.adapters.output.persistence.enums.EntityType;
 import org.mapstruct.Mapper;
 
+import java.util.Optional;
+
 @Mapper(componentModel = "spring")
 public interface AccountHolderEntityMapper {
 
@@ -36,7 +38,9 @@ public interface AccountHolderEntityMapper {
       .phoneNumber(accountHolder.getContactInfo().phoneNumber().value())
       .street(accountHolder.getAddress().street().value())
       .streetNumber(accountHolder.getAddress().streetNumber().value())
-      .addressComplement(accountHolder.getAddress().addressComplement().value())
+      .addressComplement(Optional.ofNullable(accountHolder.getAddress().addressComplement())
+        .map(AddressComplement::value)
+        .orElse(null))
       .postalCode(accountHolder.getAddress().postalCode().value())
       .city(accountHolder.getAddress().city().value())
       .holderType(accountHolder.getAccountHolderType().name())

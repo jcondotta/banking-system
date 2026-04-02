@@ -1,6 +1,6 @@
 package com.jcondotta.banking.recipients.application.bankaccount.query.list_recipients;
 
-import com.jcondotta.application.core.query.Query;
+import com.jcondotta.application.query.Query;
 import com.jcondotta.banking.recipients.domain.recipient.identity.BankAccountId;
 
 import static java.util.Objects.requireNonNull;

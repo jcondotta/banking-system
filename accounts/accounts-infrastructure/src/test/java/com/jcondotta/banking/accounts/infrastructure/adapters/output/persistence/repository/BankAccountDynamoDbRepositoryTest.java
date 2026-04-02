@@ -1,17 +1,17 @@
 package com.jcondotta.banking.accounts.infrastructure.adapters.output.persistence.repository;
 
-import com.jcondotta.banking.accounts.infrastructure.adapters.output.messaging.outbox.OutboxEventCollector;
-import com.jcondotta.banking.accounts.infrastructure.adapters.output.persistence.entity.BankingEntity;
-import com.jcondotta.banking.accounts.infrastructure.adapters.output.persistence.entity.OutboxEntity;
-import com.jcondotta.banking.accounts.infrastructure.adapters.output.persistence.enums.EntityType;
-import com.jcondotta.banking.accounts.infrastructure.adapters.output.persistence.mapper.BankAccountEntityMapper;
-import com.jcondotta.banking.accounts.infrastructure.fixtures.AccountHolderFixtures;
-import com.jcondotta.banking.accounts.infrastructure.fixtures.BankAccountTestFixture;
-import com.jcondotta.banking.accounts.infrastructure.support.DynamoPageIterable;
-import com.jcondotta.banking.accounts.domain.bankaccount.aggregate.BankAccount;
 import com.jcondotta.banking.accounts.domain.bankaccount.enums.HolderType;
 import com.jcondotta.banking.accounts.domain.bankaccount.identity.BankAccountId;
+import com.jcondotta.banking.accounts.domain.bankaccount.testsupport.AccountHolderFixtures;
+import com.jcondotta.banking.accounts.domain.bankaccount.testsupport.BankAccountTestFactory;
+import com.jcondotta.banking.accounts.infrastructure.adapters.output.outbox.collector.OutboxEventCollector;
+import com.jcondotta.banking.accounts.infrastructure.adapters.output.persistence.entity.BankingEntity;
+import com.jcondotta.banking.accounts.infrastructure.adapters.output.outbox.entity.OutboxEntity;
+import com.jcondotta.banking.accounts.infrastructure.adapters.output.persistence.enums.EntityType;
+import com.jcondotta.banking.accounts.infrastructure.adapters.output.persistence.mapper.BankAccountEntityMapper;
+import com.jcondotta.banking.accounts.infrastructure.support.DynamoPageIterable;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -31,7 +31,11 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class BankAccountDynamoDbRepositoryTest {
 
-  private static final AccountHolderFixtures PRIMARY_ACCOUNT_HOLDER = null;//AccountHolderFixtures.JEFFERSON;
+  private static final AccountHolderFixtures PRIMARY = AccountHolderFixtures.JEFFERSON;
+  private static final AccountHolderFixtures JOINT = AccountHolderFixtures.VIRGINIO;
+
+  private final TableSchema<BankingEntity> bankingTableSchema = TableSchema.fromBean(BankingEntity.class);
+  private final TableSchema<OutboxEntity> outboxTableSchema = TableSchema.fromBean(OutboxEntity.class);
 
   @Mock
   private DynamoDbEnhancedClient dynamoDbClient;
@@ -43,123 +47,165 @@ class BankAccountDynamoDbRepositoryTest {
   private DynamoDbTable<OutboxEntity> outboxTable;
 
   @Mock
-  private BankAccountEntityMapper entityMapper;
+  private BankAccountEntityMapper bankAccountEntityMapper;
 
   @Mock
-  private OutboxEventCollector outboxCollector;
+  private OutboxEventCollector outboxEventCollector;
 
   private BankAccountDynamoDbRepository repository;
 
-  private final TableSchema<BankingEntity> bankingTableSchema = TableSchema.fromBean(BankingEntity.class);
-  private final TableSchema<OutboxEntity> outboxTableSchema = TableSchema.fromBean(OutboxEntity.class);
+  @BeforeEach
+  void setUp() {
+    repository = new BankAccountDynamoDbRepository(
+      dynamoDbClient,
+      bankingTable,
+      outboxTable,
+      bankAccountEntityMapper,
+      outboxEventCollector
+    );
+  }
 
-//  @BeforeEach
-//  void setUp() {
-//    repository = new BankAccountDynamoDbRepository(
-//      dynamoDbClient,
-//      bankingTable,
-//      outboxTable,
-//      entityMapper,
-//      outboxCollector
-//    );
-//  }
-//
-//  @Test
-//  void shouldReturnBankAccount_whenEntitiesAreFound() {
-//    BankAccount bankAccount = BankAccountTestFixture.openActiveAccount(PRIMARY_ACCOUNT_HOLDER);
-//
-//    BankingEntity bankAccountEntity = BankingEntity.builder()
-//      .entityType(EntityType.BANK_ACCOUNT)
-//      .build();
-//
-//    BankingEntity accountHolderEntity = BankingEntity.builder()
-//      .entityType(EntityType.ACCOUNT_HOLDER)
-//      .build();
-//
-//    var bankingEntities = List.of(bankAccountEntity, accountHolderEntity);
-//
-//    when(bankingTable.query(any(QueryConditional.class)))
-//      .thenReturn(DynamoPageIterable.pageOf(bankingEntities));
-//
-//    when(entityMapper.restore(bankingEntities)).thenReturn(bankAccount);
-//
-//    assertThat(repository.findById(bankAccount.getId())).hasValue(bankAccount);
-//
-//    verify(bankingTable).query(any(QueryConditional.class));
-//    verify(entityMapper).restore(bankingEntities);
-//  }
-//
-//  @Test
-//  void shouldReturnBankAccount_whenMultipleAccountHoldersExist() {
-//    BankAccount bankAccount = BankAccountTestFixture.openActiveAccount(PRIMARY_ACCOUNT_HOLDER);
-//
-//    BankingEntity bankAccountEntity = BankingEntity.builder()
-//      .entityType(EntityType.BANK_ACCOUNT)
-//      .build();
-//
-//    BankingEntity primaryHolder = BankingEntity.builder()
-//      .entityType(EntityType.ACCOUNT_HOLDER)
-//      .holderType(HolderType.PRIMARY.name())
-//      .build();
-//
-//    BankingEntity jointHolder = BankingEntity.builder()
-//      .entityType(EntityType.ACCOUNT_HOLDER)
-//      .holderType(HolderType.JOINT.name())
-//      .build();
-//
-//    var bankingEntities = List.of(bankAccountEntity, primaryHolder, jointHolder);
-//
-//    when(bankingTable.query(any(QueryConditional.class)))
-//      .thenReturn(DynamoPageIterable.pageOf(bankingEntities));
-//
-//    when(entityMapper.restore(bankingEntities)).thenReturn(bankAccount);
-//
-//    assertThat(repository.findById(bankAccount.getId())).hasValue(bankAccount);
-//
-//    verify(bankingTable).query(any(QueryConditional.class));
-//    verify(entityMapper).restore(bankingEntities);
-//  }
-//
-//  @Test
-//  void shouldReturnEmpty_whenBankAccountDoesNotExist() {
-//    BankAccountId bankAccountId = BankAccountId.newId();
-//
-//    when(bankingTable.query(any(QueryConditional.class)))
-//      .thenReturn(DynamoPageIterable.emptyPage());
-//
-//    assertThat(repository.findById(bankAccountId)).isEmpty();
-//
-//    verify(bankingTable).query(any(QueryConditional.class));
-//    verifyNoInteractions(entityMapper);
-//  }
-//
-//  @Test
-//  void shouldPersistAggregateAndOutboxEvents_whenSavingBankAccount() {
-//    BankAccount bankAccount = BankAccountTestFixture.openPendingAccount(PRIMARY_ACCOUNT_HOLDER);
-//
-//    when(bankingTable.tableSchema()).thenReturn(bankingTableSchema);
-//    when(outboxTable.tableSchema()).thenReturn(outboxTableSchema);
-//
-//    List<BankingEntity> entities = List.of(
-//      BankingEntity.builder().entityType(EntityType.BANK_ACCOUNT).build(),
-//      BankingEntity.builder().entityType(EntityType.ACCOUNT_HOLDER).build()
-//    );
-//
-//    var outboxEntity = OutboxEntity.builder()
-//      .entityType(EntityType.OUTBOX_EVENT)
-//      .eventType("bank-account-opened")
-//      .build();
-//
-//    when(entityMapper.toEntities(bankAccount)).thenReturn(entities);
-//    when(outboxCollector.collect(bankAccount)).thenReturn(List.of(outboxEntity));
-//
-//    repository.save(bankAccount);
-//
-//    var argumentCaptor = ArgumentCaptor.forClass(TransactWriteItemsEnhancedRequest.class);
-//    verify(dynamoDbClient).transactWriteItems(argumentCaptor.capture());
-//
-//    var request = argumentCaptor.getValue();
-//    assertThat(request.transactWriteItems())
-//      .hasSize(entities.size() + 1);
-//  }
+  @Nested
+  class FindById {
+
+    @Test
+    void shouldReturnBankAccount_whenSingleHolderEntitiesAreFound() {
+      var account = BankAccountTestFactory.withPrimary(PRIMARY);
+
+      var entities = List.of(
+        BankingEntity.builder().entityType(EntityType.BANK_ACCOUNT).build(),
+        BankingEntity.builder().entityType(EntityType.ACCOUNT_HOLDER).build()
+      );
+
+      when(bankingTable.query(any(QueryConditional.class)))
+        .thenReturn(DynamoPageIterable.pageOf(entities));
+      when(bankAccountEntityMapper.restore(entities)).thenReturn(account);
+
+      var result = repository.findById(account.getId());
+
+      assertThat(result).contains(account);
+      verify(bankAccountEntityMapper).restore(entities);
+    }
+
+    @Test
+    void shouldReturnBankAccount_whenPrimaryAndJointHolderEntitiesAreFound() {
+      var account = BankAccountTestFactory.withPrimaryAndJoint(PRIMARY, JOINT);
+
+      var entities = List.of(
+        BankingEntity.builder().entityType(EntityType.BANK_ACCOUNT).build(),
+        BankingEntity.builder()
+          .entityType(EntityType.ACCOUNT_HOLDER)
+          .holderType(HolderType.PRIMARY.name())
+          .build(),
+        BankingEntity.builder()
+          .entityType(EntityType.ACCOUNT_HOLDER)
+          .holderType(HolderType.JOINT.name())
+          .build()
+      );
+
+      when(bankingTable.query(any(QueryConditional.class)))
+        .thenReturn(DynamoPageIterable.pageOf(entities));
+      when(bankAccountEntityMapper.restore(entities)).thenReturn(account);
+
+      var result = repository.findById(account.getId());
+
+      assertThat(result).contains(account);
+      verify(bankAccountEntityMapper).restore(entities);
+    }
+
+    @Test
+    void shouldReturnEmpty_whenNoEntitiesAreFound() {
+      var id = BankAccountId.newId();
+
+      when(bankingTable.query(any(QueryConditional.class)))
+        .thenReturn(DynamoPageIterable.emptyPage());
+
+      var result = repository.findById(id);
+
+      assertThat(result).isEmpty();
+      verifyNoInteractions(bankAccountEntityMapper);
+    }
+  }
+
+  @Nested
+  class Save {
+
+    @BeforeEach
+    void setUp() {
+      when(bankingTable.tableSchema()).thenReturn(bankingTableSchema);
+    }
+
+    @Test
+    void shouldPersistBankingEntitiesAndOutboxEvents() {
+      when(outboxTable.tableSchema()).thenReturn(outboxTableSchema);
+
+      var account = BankAccountTestFactory.withPrimary(PRIMARY);
+
+      var bankingEntities = List.of(
+        BankingEntity.builder().entityType(EntityType.BANK_ACCOUNT).build(),
+        BankingEntity.builder().entityType(EntityType.ACCOUNT_HOLDER).build()
+      );
+
+      var outboxEvents = List.of(
+        OutboxEntity.builder().entityType(EntityType.OUTBOX_EVENT).build()
+      );
+
+      when(bankAccountEntityMapper.toEntities(account)).thenReturn(bankingEntities);
+      when(outboxEventCollector.collect(account)).thenReturn(outboxEvents);
+
+      repository.save(account);
+
+      var captor = ArgumentCaptor.forClass(TransactWriteItemsEnhancedRequest.class);
+      verify(dynamoDbClient).transactWriteItems(captor.capture());
+
+      assertThat(captor.getValue().transactWriteItems())
+        .hasSize(bankingEntities.size() + outboxEvents.size());
+    }
+
+    @Test
+    void shouldPersistOnlyBankingEntities_whenNoOutboxEvents() {
+      var account = BankAccountTestFactory.withPrimary(PRIMARY);
+
+      var bankingEntities = List.of(
+        BankingEntity.builder().entityType(EntityType.BANK_ACCOUNT).build()
+      );
+
+      when(bankAccountEntityMapper.toEntities(account)).thenReturn(bankingEntities);
+      when(outboxEventCollector.collect(account)).thenReturn(List.of());
+
+      repository.save(account);
+
+      var captor = ArgumentCaptor.forClass(TransactWriteItemsEnhancedRequest.class);
+      verify(dynamoDbClient).transactWriteItems(captor.capture());
+
+      assertThat(captor.getValue().transactWriteItems())
+        .hasSize(bankingEntities.size());
+    }
+
+    @Test
+    void shouldPersistMultipleOutboxEvents() {
+      when(outboxTable.tableSchema()).thenReturn(outboxTableSchema);
+      var account = BankAccountTestFactory.withPrimary(PRIMARY);
+
+      var bankingEntities = List.of(
+        BankingEntity.builder().entityType(EntityType.BANK_ACCOUNT).build()
+      );
+
+      var outboxEvents = List.of(
+        OutboxEntity.builder().entityType(EntityType.OUTBOX_EVENT).build(),
+        OutboxEntity.builder().entityType(EntityType.OUTBOX_EVENT).build()
+      );
+
+      when(bankAccountEntityMapper.toEntities(account)).thenReturn(bankingEntities);
+      when(outboxEventCollector.collect(account)).thenReturn(outboxEvents);
+
+      repository.save(account);
+
+      var captor = ArgumentCaptor.forClass(TransactWriteItemsEnhancedRequest.class);
+      verify(dynamoDbClient).transactWriteItems(captor.capture());
+
+      assertThat(captor.getValue().transactWriteItems())
+        .hasSize(bankingEntities.size() + outboxEvents.size());
+    }
+  }
 }

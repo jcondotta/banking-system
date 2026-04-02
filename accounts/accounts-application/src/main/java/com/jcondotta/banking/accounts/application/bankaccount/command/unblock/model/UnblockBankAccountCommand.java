@@ -1,6 +1,6 @@
 package com.jcondotta.banking.accounts.application.bankaccount.command.unblock.model;
 
-import com.jcondotta.application.core.command.Command;
+import com.jcondotta.application.command.Command;
 import com.jcondotta.banking.accounts.domain.bankaccount.identity.BankAccountId;
 
 import static java.util.Objects.requireNonNull;

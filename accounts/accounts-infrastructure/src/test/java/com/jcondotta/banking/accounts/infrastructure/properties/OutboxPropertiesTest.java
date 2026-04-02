@@ -17,7 +17,7 @@ class OutboxPropertiesTest {
   @Test
   void shouldBindAllProperties_whenValidConfiguration() {
     var shards = new ShardsProperties(SHARD_COUNT, CONCURRENCY_PER_SHARD, BATCH_SIZE_PER_SHARD);
-    var processing = new ProcessingProperties(PROCESSING_TIMEOUT);
+    var processing = new OutboxProcessingProperties(PROCESSING_TIMEOUT);
     var polling = new PollingProperties(POLLING_INTERVAL);
 
     var outbox = new OutboxProperties(shards, processing, polling);
@@ -32,7 +32,7 @@ class OutboxPropertiesTest {
   @Test
   void shouldDelegateShardIdsToShardsProperties_whenValidConfiguration() {
     var shards = new ShardsProperties(SHARD_COUNT, CONCURRENCY_PER_SHARD, BATCH_SIZE_PER_SHARD);
-    var processing = new ProcessingProperties(PROCESSING_TIMEOUT);
+    var processing = new OutboxProcessingProperties(PROCESSING_TIMEOUT);
     var polling = new PollingProperties(POLLING_INTERVAL);
 
     var outbox = new OutboxProperties(shards, processing, polling);
