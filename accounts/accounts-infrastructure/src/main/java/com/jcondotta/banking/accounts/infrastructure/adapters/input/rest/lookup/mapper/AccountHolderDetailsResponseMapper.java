@@ -1,13 +1,18 @@
 package com.jcondotta.banking.accounts.infrastructure.adapters.input.rest.lookup.mapper;
 
 import com.jcondotta.banking.accounts.application.bankaccount.query.get.model.*;
-import com.jcondotta.banking.accounts.infrastructure.adapters.input.rest.lookup.*;
+import com.jcondotta.banking.accounts.domain.bankaccount.enums.HolderType;
+import com.jcondotta.banking.accounts.infrastructure.adapters.input.rest.lookup.model.*;
 import org.mapstruct.Mapper;
 
 @Mapper(componentModel = "spring")
 public interface AccountHolderDetailsResponseMapper {
 
   AccountHolderDetailsResponse toResponse(AccountHolderSummary accountHolderSummary);
+
+  default HolderTypeResponse map(HolderType holderType) {
+    return HolderTypeResponse.valueOf(holderType.name());
+  }
 
   default PersonalInfoResponse map(PersonalInfoSummary personalInfoSummary) {
     if (personalInfoSummary == null) return null;

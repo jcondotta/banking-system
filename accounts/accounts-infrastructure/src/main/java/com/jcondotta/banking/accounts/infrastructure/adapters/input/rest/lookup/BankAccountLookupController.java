@@ -1,5 +1,6 @@
 package com.jcondotta.banking.accounts.infrastructure.adapters.input.rest.lookup;
 
+import com.jcondotta.banking.accounts.infrastructure.adapters.input.rest.lookup.model.BankAccountDetailsResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import org.springframework.http.MediaType;

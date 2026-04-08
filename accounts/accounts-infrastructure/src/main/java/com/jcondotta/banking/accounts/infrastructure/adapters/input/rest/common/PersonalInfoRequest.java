@@ -44,4 +44,5 @@ public record PersonalInfoRequest(
   )
   LocalDate dateOfBirth
 
-) {}
+) {
+}

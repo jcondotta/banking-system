@@ -2,26 +2,25 @@ package com.jcondotta.banking.accounts.infrastructure.adapters.input.rest.common
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 public record IdentityDocumentRequest(
 
-  @NotBlank
+  @NotNull
   @Schema(
     description = "Type of identity document.",
     example = "NATIONAL_ID",
-    allowableValues = {"NATIONAL_ID", "FOREIGNER_ID"},
     requiredMode = Schema.RequiredMode.REQUIRED
   )
-  String type,
+  DocumentTypeRequest type,
 
-  @NotBlank
+  @NotNull
   @Schema(
     description = "Country that issued the identity document.",
     example = "SPAIN",
-    allowableValues = {"SPAIN"},
     requiredMode = Schema.RequiredMode.REQUIRED
   )
-  String country,
+  DocumentCountryRequest country,
 
   @NotBlank
   @Schema(

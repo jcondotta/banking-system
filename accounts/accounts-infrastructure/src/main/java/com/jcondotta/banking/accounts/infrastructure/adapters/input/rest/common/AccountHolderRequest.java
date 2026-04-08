@@ -34,4 +34,5 @@ public record AccountHolderRequest(
   )
   AddressRequest address
 
-) {}
+) {
+}

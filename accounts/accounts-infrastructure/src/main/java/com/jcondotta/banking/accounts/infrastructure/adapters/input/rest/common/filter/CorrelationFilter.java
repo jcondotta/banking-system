@@ -18,7 +18,6 @@ import java.util.UUID;
 public class CorrelationFilter extends OncePerRequestFilter {
 
 
-
   @Override
   protected void doFilterInternal(
     HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull FilterChain chain) {
@@ -29,8 +28,7 @@ public class CorrelationFilter extends OncePerRequestFilter {
       correlationId = Optional.ofNullable(request.getHeader(HttpHeadersConstants.CORRELATION_ID))
         .map(UUID::fromString)
         .orElse(UUID.randomUUID());
-    }
-    catch (IllegalArgumentException ex) {
+    } catch (IllegalArgumentException ex) {
       correlationId = UUID.randomUUID();
     }
 
@@ -40,8 +38,7 @@ public class CorrelationFilter extends OncePerRequestFilter {
       .run(() -> {
         try {
           chain.doFilter(request, response);
-        }
-        catch (IOException | ServletException e) {
+        } catch (IOException | ServletException e) {
           throw new RuntimeException(e);
         }
       });

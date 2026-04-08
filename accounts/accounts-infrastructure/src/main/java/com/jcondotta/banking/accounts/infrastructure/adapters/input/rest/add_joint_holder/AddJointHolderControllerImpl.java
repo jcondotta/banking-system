@@ -31,6 +31,6 @@ public class AddJointHolderControllerImpl implements AddJointHolderController {
                 .log();
 
         commandHandler.handle(requestMapper.toCommand(bankAccountId, restRequest));
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 }

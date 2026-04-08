@@ -50,4 +50,5 @@ public record AddressRequest(
     requiredMode = Schema.RequiredMode.REQUIRED
   )
   String city
-) {}
+) {
+}

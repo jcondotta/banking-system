@@ -1,6 +1,8 @@
 package com.jcondotta.banking.accounts.infrastructure.adapters.input.rest.open;
 
 import com.jcondotta.banking.accounts.infrastructure.adapters.input.rest.common.*;
+import com.jcondotta.banking.accounts.infrastructure.adapters.input.rest.common.DocumentCountryRequest;
+import com.jcondotta.banking.accounts.infrastructure.adapters.input.rest.common.DocumentTypeRequest;
 
 import java.time.LocalDate;
 import java.time.Month;
@@ -14,8 +16,8 @@ public class AccountHolderRequestFactory {
                 "Jefferson" + i,
                 "Condotta",
                 new IdentityDocumentRequest(
-                    "FOREIGNER_ID",
-                    "SPAIN",
+                    DocumentTypeRequest.FOREIGNER_ID,
+                    DocumentCountryRequest.SPAIN,
                     "Y8451167S"
                 ),
               LocalDate.of(1988, Month.JUNE, 10)

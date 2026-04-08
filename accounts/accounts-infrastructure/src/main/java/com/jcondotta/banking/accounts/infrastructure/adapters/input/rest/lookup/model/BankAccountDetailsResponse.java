@@ -1,8 +1,5 @@
-package com.jcondotta.banking.accounts.infrastructure.adapters.input.rest.lookup;
+package com.jcondotta.banking.accounts.infrastructure.adapters.input.rest.lookup.model;
 
-import com.jcondotta.banking.accounts.domain.bankaccount.enums.AccountStatus;
-import com.jcondotta.banking.accounts.domain.bankaccount.enums.AccountType;
-import com.jcondotta.banking.accounts.domain.bankaccount.enums.Currency;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.time.Instant;
@@ -20,11 +17,11 @@ public record BankAccountDetailsResponse(
   UUID id,
 
   @Schema(description = "Type of bank account (e.g., SAVINGS, CHECKING)", example = "SAVINGS",
-    requiredMode = RequiredMode.REQUIRED, allowableValues = {"SAVINGS", "CHECKING"})
-  AccountType accountType,
+    requiredMode = RequiredMode.REQUIRED)
+  AccountTypeResponse accountType,
 
   @Schema(description = "Currency for the bank account (e.g., USD, EUR)", example = "USD", requiredMode = RequiredMode.REQUIRED)
-  Currency currency,
+  CurrencyResponse currency,
 
   @Schema(description = "International Bank Account Number (IBAN) for the bank account.",
     example = "GB29NWBK60161331926819",
@@ -39,10 +36,9 @@ public record BankAccountDetailsResponse(
   )
   Instant createdAt,
 
-    @Schema(description = "Current accountStatus of the bank account",
-    allowableValues = {"PENDING", "ACTIVE", "BLOCKED", "CLOSED"},
+  @Schema(description = "Current accountStatus of the bank account",
     requiredMode = RequiredMode.REQUIRED)
-  AccountStatus accountStatus,
+  AccountStatusResponse accountStatus,
 
   @Schema(description = "Account holders associated with this bank account.", requiredMode = RequiredMode.REQUIRED)
   List<AccountHolderDetailsResponse> holders

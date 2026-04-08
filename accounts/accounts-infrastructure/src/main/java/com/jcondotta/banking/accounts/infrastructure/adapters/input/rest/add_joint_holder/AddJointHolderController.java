@@ -30,7 +30,7 @@ public interface AddJointHolderController {
       )
     )
   )
-  @PostMapping(value = "/account-holders", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+  @PostMapping(value = "/account-holders", consumes = MediaType.APPLICATION_JSON_VALUE)
   ResponseEntity<Void> createJointAccountHolder(
     @Parameter(description = "Unique identifier of the bank account", required = true, example = "01920bff-1338-7efd-ade6-e9128debe5d4")
     @PathVariable("bank-account-id") UUID bankAccountId,

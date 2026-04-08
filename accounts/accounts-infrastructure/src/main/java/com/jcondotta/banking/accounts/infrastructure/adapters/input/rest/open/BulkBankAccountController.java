@@ -1,7 +1,7 @@
 package com.jcondotta.banking.accounts.infrastructure.adapters.input.rest.open;
 
-import com.jcondotta.banking.accounts.domain.bankaccount.enums.AccountType;
-import com.jcondotta.banking.accounts.domain.bankaccount.enums.Currency;
+import com.jcondotta.banking.accounts.infrastructure.adapters.input.rest.open.model.AccountTypeRequest;
+import com.jcondotta.banking.accounts.infrastructure.adapters.input.rest.open.model.CurrencyRequest;
 import com.jcondotta.banking.accounts.infrastructure.adapters.input.rest.open.model.OpenBankAccountRequest;
 import com.jcondotta.banking.accounts.infrastructure.adapters.output.outbox.store.OutboxEventStore;
 import lombok.RequiredArgsConstructor;
@@ -37,8 +37,8 @@ public class BulkBankAccountController {
 
     private OpenBankAccountRequest buildRequest(int i) {
         return new OpenBankAccountRequest(
-            AccountType.CHECKING,
-            Currency.EUR,
+            AccountTypeRequest.CHECKING,
+            CurrencyRequest.EUR,
             AccountHolderRequestFactory.random(i)
         );
     }

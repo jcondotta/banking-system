@@ -41,8 +41,8 @@ public interface AddJointHolderRequestControllerMapper {
     return PersonalInfo.of(
       AccountHolderName.of(value.firstName(), value.lastName()),
       IdentityDocument.of(
-        DocumentCountry.valueOf(value.identityDocument().country()),
-        DocumentType.valueOf(value.identityDocument().type()),
+        DocumentCountry.valueOf(value.identityDocument().country().name()),
+        DocumentType.valueOf(value.identityDocument().type().name()),
         DocumentNumber.of(value.identityDocument().number())
       ),
       DateOfBirth.of(value.dateOfBirth())
@@ -66,7 +66,7 @@ public interface AddJointHolderRequestControllerMapper {
     return new Address(
       Street.of(value.street()),
       StreetNumber.of(value.streetNumber()),
-      AddressComplement.of(value.complement()),
+      AddressComplement.ofNullable(value.complement()),
       PostalCode.of(value.postalCode()),
       City.of(value.city())
     );

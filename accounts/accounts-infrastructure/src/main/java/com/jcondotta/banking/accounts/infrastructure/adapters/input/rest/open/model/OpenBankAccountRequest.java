@@ -1,8 +1,6 @@
 package com.jcondotta.banking.accounts.infrastructure.adapters.input.rest.open.model;
 
 import com.jcondotta.banking.accounts.infrastructure.adapters.input.rest.common.AccountHolderRequest;
-import com.jcondotta.banking.accounts.domain.bankaccount.enums.AccountType;
-import com.jcondotta.banking.accounts.domain.bankaccount.enums.Currency;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
@@ -14,12 +12,12 @@ public record OpenBankAccountRequest(
 
     @NotNull
     @Schema(description = "Type of bank account (e.g., SAVINGS, CHECKING)", example = "SAVINGS",
-        requiredMode = RequiredMode.REQUIRED, allowableValues = { "SAVINGS", "CHECKING "})
-    AccountType accountType,
+        requiredMode = RequiredMode.REQUIRED)
+    AccountTypeRequest accountType,
 
     @NotNull
     @Schema(description = "Currency for the bank account (e.g., USD, EUR)", example = "USD", requiredMode = RequiredMode.REQUIRED)
-    Currency currency,
+    CurrencyRequest currency,
 
     @Valid
     @NotNull

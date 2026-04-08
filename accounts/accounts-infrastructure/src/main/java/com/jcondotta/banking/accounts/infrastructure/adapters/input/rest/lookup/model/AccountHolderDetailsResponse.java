@@ -1,7 +1,6 @@
-package com.jcondotta.banking.accounts.infrastructure.adapters.input.rest.lookup;
+package com.jcondotta.banking.accounts.infrastructure.adapters.input.rest.lookup.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.jcondotta.banking.accounts.domain.bankaccount.enums.HolderType;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 
@@ -28,7 +27,7 @@ public record AccountHolderDetailsResponse(
     allowableValues = {"PRIMARY", "JOINT"},
     requiredMode = RequiredMode.REQUIRED
   )
-  HolderType type,
+  HolderTypeResponse type,
 
   @NotNull
   @Schema(
