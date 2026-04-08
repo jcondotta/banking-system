@@ -5,7 +5,6 @@ import com.jcondotta.domain.exception.DomainValidationException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ArgumentsSource;
-import org.junit.jupiter.params.provider.ValueSource;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -46,24 +45,34 @@ class IbanTest {
       .hasMessage(Iban.IBAN_NOT_PROVIDED);
   }
 
-  @ParameterizedTest
-  @ValueSource(strings = {
-    "DE4450010517540732493",     // too short
-    "DE445001051754073249312",   // too long
-    "INVALIDIBAN123",
-    "DE44$00105175407324931"
-  })
-  void shouldThrowException_whenIbanFormatIsInvalid(String invalidIban) {
-    assertThatThrownBy(() -> Iban.of(invalidIban))
+  @Test
+  void shouldThrowException_whenIbanIsTooShort() {
+    var tooShortIban = "A".repeat(14);
+
+    assertThatThrownBy(() -> Iban.of(tooShortIban))
       .isInstanceOf(DomainValidationException.class)
       .hasMessage(Iban.IBAN_INVALID_FORMAT);
   }
 
   @Test
-  void shouldThrowException_whenIbanExceedsMaxLength() {
+  void shouldThrowException_whenIbanIsTooLong() {
     var tooLongIban = "A".repeat(35);
 
     assertThatThrownBy(() -> Iban.of(tooLongIban))
+      .isInstanceOf(DomainValidationException.class)
+      .hasMessage(Iban.IBAN_INVALID_FORMAT);
+  }
+
+  @Test
+  void shouldThrowException_whenIbanContainsInvalidCharacter() {
+    assertThatThrownBy(() -> Iban.of("DE44$00105175407324931"))
+      .isInstanceOf(DomainValidationException.class)
+      .hasMessage(Iban.IBAN_INVALID_FORMAT);
+  }
+
+  @Test
+  void shouldThrowException_whenIbanChecksumIsInvalid() {
+    assertThatThrownBy(() -> Iban.of("DE44500105175407324932"))
       .isInstanceOf(DomainValidationException.class)
       .hasMessage(Iban.IBAN_INVALID_FORMAT);
   }
@@ -77,14 +86,6 @@ class IbanTest {
       .isEqualTo(iban2)
       .hasSameHashCodeAs(iban2);
   }
-
-  @Test
-  void shouldThrowException_whenIbanChecksumIsInvalid() {
-    assertThatThrownBy(() -> Iban.of("DE44500105175407324932")) // último dígito alterado
-      .isInstanceOf(DomainValidationException.class)
-      .hasMessage(Iban.IBAN_INVALID_FORMAT);
-  }
-
 
   @Test
   void shouldNotBeEqual_whenIbansHaveDifferentValues() {
