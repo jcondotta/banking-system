@@ -14,10 +14,10 @@
     <packaging>pom</packaging>
 
     <modules>
-        <module>accounts-domain</module>
+        <module>accounts-core</module>
         <module>accounts-test-support</module>
-        <module>accounts-application</module>
         <module>accounts-infrastructure</module>
+        <module>accounts-bootstrap</module>
     </modules>
 
     <dependencyManagement>
@@ -55,6 +55,12 @@
             <dependency>
                 <groupId>com.jcondotta</groupId>
                 <artifactId>accounts-application</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.jcondotta</groupId>
+                <artifactId>accounts-infrastructure</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
