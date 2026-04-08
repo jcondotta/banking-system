@@ -16,9 +16,9 @@ public class TestKafkaListener {
 //    records.add(record);
 //  }
 //
-//  public ConsumerRecord<String, EventEnvelope<BankAccountOpenedIntegrationPayload>> poll(long timeout, TimeUnit unit)
+//  public ConsumerRecord<String, EventEnvelope<BankAccountOpenedIntegrationPayload>> poll(long acquireTimeout, TimeUnit unit)
 //      throws InterruptedException {
-//    return records.poll(timeout, unit);
+//    return records.poll(acquireTimeout, unit);
 //  }
 //
 //  public void clear() {

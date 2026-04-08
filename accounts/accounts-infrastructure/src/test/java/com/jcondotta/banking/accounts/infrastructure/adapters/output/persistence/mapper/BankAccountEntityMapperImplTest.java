@@ -88,7 +88,7 @@ class BankAccountEntityMapperImplTest {
             assertThat(entity.getAccountType()).isEqualTo(accountType.name());
             assertThat(entity.getCurrency()).isEqualTo(currency.name());
             assertThat(entity.getIban()).isEqualTo(bankAccount.getIban().value());
-            assertThat(entity.getStatus()).isEqualTo(bankAccount.getAccountStatus().name());
+            assertThat(entity.getAccountStatus()).isEqualTo(bankAccount.getAccountStatus().name());
             assertThat(entity.getCreatedAt()).isEqualTo(bankAccount.getCreatedAt());
         }
 
@@ -100,7 +100,7 @@ class BankAccountEntityMapperImplTest {
                   AccountHolderTestFactory.primary(PRIMARY_FIXTURE));
 
                 BankingEntity entity = mapper.toEntities(bankAccount).getFirst();
-                assertThat(entity.getStatus()).isEqualTo(status.name());
+                assertThat(entity.getAccountStatus()).isEqualTo(status.name());
             }
         }
     }

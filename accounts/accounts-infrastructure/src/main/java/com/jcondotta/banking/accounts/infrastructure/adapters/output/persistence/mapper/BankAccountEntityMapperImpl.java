@@ -45,7 +45,7 @@ public class BankAccountEntityMapperImpl implements BankAccountEntityMapper {
       .accountType(bankAccount.getAccountType().name())
       .currency(bankAccount.getCurrency().name())
       .iban(bankAccount.getIban().value())
-      .status(bankAccount.getAccountStatus().name())
+      .accountStatus(bankAccount.getAccountStatus().name())
       .createdAt(bankAccount.getCreatedAt())
       .build();
   }
@@ -65,7 +65,7 @@ public class BankAccountEntityMapperImpl implements BankAccountEntityMapper {
       AccountType.valueOf(bankAccountEntity.getAccountType()),
       Currency.valueOf(bankAccountEntity.getCurrency()),
       Iban.of(bankAccountEntity.getIban()),
-      AccountStatus.valueOf(bankAccountEntity.getStatus()),
+      AccountStatus.valueOf(bankAccountEntity.getAccountStatus()),
       bankAccountEntity.getCreatedAt(),
       AccountHolders.of(accountHolderEntities)
     );

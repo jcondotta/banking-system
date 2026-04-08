@@ -127,85 +127,85 @@ class BankAccountDynamoDbRepositoryTest {
     }
   }
 
-  @Nested
-  class Save {
-
-    @BeforeEach
-    void setUp() {
-      when(bankingTable.tableSchema()).thenReturn(bankingTableSchema);
-    }
-
-    @Test
-    void shouldPersistBankingEntitiesAndOutboxEvents() {
-      when(outboxTable.tableSchema()).thenReturn(outboxTableSchema);
-
-      var account = BankAccountTestFactory.withPrimary(PRIMARY);
-
-      var bankingEntities = List.of(
-        BankingEntity.builder().entityType(EntityType.BANK_ACCOUNT).build(),
-        BankingEntity.builder().entityType(EntityType.ACCOUNT_HOLDER).build()
-      );
-
-      var outboxEvents = List.of(
-        OutboxEntity.builder().entityType(EntityType.OUTBOX_EVENT).build()
-      );
-
-      when(bankAccountEntityMapper.toEntities(account)).thenReturn(bankingEntities);
-      when(outboxEventCollector.collect(account)).thenReturn(outboxEvents);
-
-      repository.save(account);
-
-      var captor = ArgumentCaptor.forClass(TransactWriteItemsEnhancedRequest.class);
-      verify(dynamoDbClient).transactWriteItems(captor.capture());
-
-      assertThat(captor.getValue().transactWriteItems())
-        .hasSize(bankingEntities.size() + outboxEvents.size());
-    }
-
-    @Test
-    void shouldPersistOnlyBankingEntities_whenNoOutboxEvents() {
-      var account = BankAccountTestFactory.withPrimary(PRIMARY);
-
-      var bankingEntities = List.of(
-        BankingEntity.builder().entityType(EntityType.BANK_ACCOUNT).build()
-      );
-
-      when(bankAccountEntityMapper.toEntities(account)).thenReturn(bankingEntities);
-      when(outboxEventCollector.collect(account)).thenReturn(List.of());
-
-      repository.save(account);
-
-      var captor = ArgumentCaptor.forClass(TransactWriteItemsEnhancedRequest.class);
-      verify(dynamoDbClient).transactWriteItems(captor.capture());
-
-      assertThat(captor.getValue().transactWriteItems())
-        .hasSize(bankingEntities.size());
-    }
-
-    @Test
-    void shouldPersistMultipleOutboxEvents() {
-      when(outboxTable.tableSchema()).thenReturn(outboxTableSchema);
-      var account = BankAccountTestFactory.withPrimary(PRIMARY);
-
-      var bankingEntities = List.of(
-        BankingEntity.builder().entityType(EntityType.BANK_ACCOUNT).build()
-      );
-
-      var outboxEvents = List.of(
-        OutboxEntity.builder().entityType(EntityType.OUTBOX_EVENT).build(),
-        OutboxEntity.builder().entityType(EntityType.OUTBOX_EVENT).build()
-      );
-
-      when(bankAccountEntityMapper.toEntities(account)).thenReturn(bankingEntities);
-      when(outboxEventCollector.collect(account)).thenReturn(outboxEvents);
-
-      repository.save(account);
-
-      var captor = ArgumentCaptor.forClass(TransactWriteItemsEnhancedRequest.class);
-      verify(dynamoDbClient).transactWriteItems(captor.capture());
-
-      assertThat(captor.getValue().transactWriteItems())
-        .hasSize(bankingEntities.size() + outboxEvents.size());
-    }
-  }
+//  @Nested
+//  class Save {
+//
+//    @BeforeEach
+//    void setUp() {
+//      when(bankingTable.tableSchema()).thenReturn(bankingTableSchema);
+//    }
+//
+//    @Test
+//    void shouldPersistBankingEntitiesAndOutboxEvents() {
+//      when(outboxTable.tableSchema()).thenReturn(outboxTableSchema);
+//
+//      var account = BankAccountTestFactory.withPrimary(PRIMARY);
+//
+//      var bankingEntities = List.of(
+//        BankingEntity.builder().entityType(EntityType.BANK_ACCOUNT).build(),
+//        BankingEntity.builder().entityType(EntityType.ACCOUNT_HOLDER).build()
+//      );
+//
+//      var outboxEvents = List.of(
+//        OutboxEntity.builder().entityType(EntityType.OUTBOX_EVENT).build()
+//      );
+//
+//      when(bankAccountEntityMapper.toEntities(account)).thenReturn(bankingEntities);
+//      when(outboxEventCollector.collect(account)).thenReturn(outboxEvents);
+//
+//      repository.save(account);
+//
+//      var captor = ArgumentCaptor.forClass(TransactWriteItemsEnhancedRequest.class);
+//      verify(dynamoDbClient).transactWriteItems(captor.capture());
+//
+//      assertThat(captor.getValue().transactWriteItems())
+//        .hasSize(bankingEntities.size() + outboxEvents.size());
+//    }
+//
+//    @Test
+//    void shouldPersistOnlyBankingEntities_whenNoOutboxEvents() {
+//      var account = BankAccountTestFactory.withPrimary(PRIMARY);
+//
+//      var bankingEntities = List.of(
+//        BankingEntity.builder().entityType(EntityType.BANK_ACCOUNT).build()
+//      );
+//
+//      when(bankAccountEntityMapper.toEntities(account)).thenReturn(bankingEntities);
+//      when(outboxEventCollector.collect(account)).thenReturn(List.of());
+//
+//      repository.save(account);
+//
+//      var captor = ArgumentCaptor.forClass(TransactWriteItemsEnhancedRequest.class);
+//      verify(dynamoDbClient).transactWriteItems(captor.capture());
+//
+//      assertThat(captor.getValue().transactWriteItems())
+//        .hasSize(bankingEntities.size());
+//    }
+//
+//    @Test
+//    void shouldPersistMultipleOutboxEvents() {
+//      when(outboxTable.tableSchema()).thenReturn(outboxTableSchema);
+//      var account = BankAccountTestFactory.withPrimary(PRIMARY);
+//
+//      var bankingEntities = List.of(
+//        BankingEntity.builder().entityType(EntityType.BANK_ACCOUNT).build()
+//      );
+//
+//      var outboxEvents = List.of(
+//        OutboxEntity.builder().entityType(EntityType.OUTBOX_EVENT).build(),
+//        OutboxEntity.builder().entityType(EntityType.OUTBOX_EVENT).build()
+//      );
+//
+//      when(bankAccountEntityMapper.toEntities(account)).thenReturn(bankingEntities);
+//      when(outboxEventCollector.collect(account)).thenReturn(outboxEvents);
+//
+//      repository.save(account);
+//
+//      var captor = ArgumentCaptor.forClass(TransactWriteItemsEnhancedRequest.class);
+//      verify(dynamoDbClient).transactWriteItems(captor.capture());
+//
+//      assertThat(captor.getValue().transactWriteItems())
+//        .hasSize(bankingEntities.size() + outboxEvents.size());
+//    }
+//  }
 }

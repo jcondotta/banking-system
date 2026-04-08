@@ -19,8 +19,8 @@ awslocal dynamodb update-table \
           "ProjectionType": "ALL"
         },
         "ProvisionedThroughput": {
-          "ReadCapacityUnits": 1,
-          "WriteCapacityUnits": 1
+          "ReadCapacityUnits": 10,
+          "WriteCapacityUnits": 10
         }
       }
     }

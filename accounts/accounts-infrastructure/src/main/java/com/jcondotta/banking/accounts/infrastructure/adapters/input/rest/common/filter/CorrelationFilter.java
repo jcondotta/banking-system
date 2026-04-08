@@ -1,7 +1,7 @@
 package com.jcondotta.banking.accounts.infrastructure.adapters.input.rest.common.filter;
 
-import com.jcondotta.banking.accounts.infrastructure.ScopedCorrelationIdProvider;
 import com.jcondotta.banking.accounts.infrastructure.adapters.input.rest.common.HttpHeadersConstants;
+import com.jcondotta.banking.accounts.infrastructure.correlation.ScopedCorrelationIdProvider;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -17,18 +17,16 @@ import java.util.UUID;
 @Component
 public class CorrelationFilter extends OncePerRequestFilter {
 
-
   @Override
-  protected void doFilterInternal(
-    HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull FilterChain chain) {
-
+  protected void doFilterInternal(HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull FilterChain chain) {
     UUID correlationId;
 
     try {
       correlationId = Optional.ofNullable(request.getHeader(HttpHeadersConstants.CORRELATION_ID))
         .map(UUID::fromString)
         .orElse(UUID.randomUUID());
-    } catch (IllegalArgumentException ex) {
+    }
+    catch (IllegalArgumentException ex) {
       correlationId = UUID.randomUUID();
     }
 
@@ -38,7 +36,8 @@ public class CorrelationFilter extends OncePerRequestFilter {
       .run(() -> {
         try {
           chain.doFilter(request, response);
-        } catch (IOException | ServletException e) {
+        }
+        catch (IOException | ServletException e) {
           throw new RuntimeException(e);
         }
       });

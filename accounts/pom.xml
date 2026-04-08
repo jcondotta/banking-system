@@ -16,7 +16,10 @@
     <modules>
         <module>accounts-core</module>
         <module>accounts-test-support</module>
+        <module>accounts-dynamodb</module>
+        <module>accounts-contracts</module>
         <module>accounts-infrastructure</module>
+        <module>accounts-outbox</module>
         <module>accounts-bootstrap</module>
     </modules>
 
@@ -60,13 +63,25 @@
 
             <dependency>
                 <groupId>com.jcondotta</groupId>
+                <artifactId>accounts-dynamodb</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.jcondotta</groupId>
                 <artifactId>accounts-infrastructure</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
             <dependency>
                 <groupId>com.jcondotta</groupId>
-                <artifactId>bank-accounts-contracts</artifactId>
+                <artifactId>accounts-outbox</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.jcondotta</groupId>
+                <artifactId>accounts-contracts</artifactId>
                 <version>${project.version}</version>
             </dependency>
         </dependencies>

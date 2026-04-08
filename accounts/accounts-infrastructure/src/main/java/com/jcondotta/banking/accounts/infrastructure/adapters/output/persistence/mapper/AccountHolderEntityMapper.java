@@ -67,7 +67,7 @@ public interface AccountHolderEntityMapper {
     Address address = new Address(
       Street.of(entity.getStreet()),
       StreetNumber.of(entity.getStreetNumber()),
-      entity.getAddressComplement() != null ? AddressComplement.of(entity.getAddressComplement()) : null,
+      entity.getAddressComplement() != null ? AddressComplement.ofNullable(entity.getAddressComplement()) : null,
       PostalCode.of(entity.getPostalCode()),
       City.of(entity.getCity())
     );

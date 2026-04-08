@@ -1,12 +1,12 @@
 package com.jcondotta.banking.accounts.infrastructure.adapters.output.persistence.repository;
 
+import com.jcondotta.banking.accounts.DynamoDbTransactionContext;
+import com.jcondotta.banking.accounts.application.outbound.TransactionalAppender;
 import com.jcondotta.banking.accounts.domain.bankaccount.aggregate.BankAccount;
 import com.jcondotta.banking.accounts.domain.bankaccount.identity.BankAccountId;
 import com.jcondotta.banking.accounts.domain.bankaccount.repository.BankAccountRepository;
-import com.jcondotta.banking.accounts.infrastructure.adapters.output.outbox.collector.OutboxEventCollector;
 import com.jcondotta.banking.accounts.infrastructure.adapters.output.persistence.entity.BankAccountEntityKey;
 import com.jcondotta.banking.accounts.infrastructure.adapters.output.persistence.entity.BankingEntity;
-import com.jcondotta.banking.accounts.infrastructure.adapters.output.outbox.entity.OutboxEntity;
 import com.jcondotta.banking.accounts.infrastructure.adapters.output.persistence.mapper.BankAccountEntityMapper;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,6 +17,7 @@ import software.amazon.awssdk.enhanced.dynamodb.Key;
 import software.amazon.awssdk.enhanced.dynamodb.model.QueryConditional;
 import software.amazon.awssdk.enhanced.dynamodb.model.TransactWriteItemsEnhancedRequest;
 
+import java.util.List;
 import java.util.Optional;
 
 @Slf4j
@@ -25,12 +26,10 @@ import java.util.Optional;
 public class BankAccountDynamoDbRepository implements BankAccountRepository {
 
   private final DynamoDbEnhancedClient dynamoDbClient;
-
   private final DynamoDbTable<BankingEntity> bankingTable;
-  private final DynamoDbTable<OutboxEntity> outboxTable;
 
   private final BankAccountEntityMapper bankAccountEntityMapper;
-  private final OutboxEventCollector outboxEventCollector;
+  private final List<TransactionalAppender> appenders;
 
   @Override
   public Optional<BankAccount> findById(BankAccountId id) {
@@ -49,30 +48,22 @@ public class BankAccountDynamoDbRepository implements BankAccountRepository {
     }
 
     var bankAccount = bankAccountEntityMapper.restore(bankingEntities);
-    log.info(
-      "BankAccount restored successfully. id={}", bankAccount.getId().value()
-    );
+    log.info("BankAccount restored successfully. id={}", bankAccount.getId().value());
     return Optional.of(bankAccount);
   }
 
   @Override
   public void save(BankAccount bankAccount) {
-    TransactWriteItemsEnhancedRequest.Builder builder = TransactWriteItemsEnhancedRequest.builder();
+    var builder = TransactWriteItemsEnhancedRequest.builder();
+    var transactionContext = new DynamoDbTransactionContext(builder);
 
     bankAccountEntityMapper.toEntities(bankAccount)
-      .forEach(bankingEntity -> builder
-        .addPutItem(bankingTable, bankingEntity)
-      );
+      .forEach(entity -> transactionContext.addPutItem(bankingTable, entity));
 
-    outboxEventCollector.collect(bankAccount)
-      .forEach(entry -> builder
-        .addPutItem(outboxTable, entry)
-      );
+    appenders.forEach(appender -> appender.append(bankAccount, transactionContext));
 
-    dynamoDbClient.transactWriteItems(builder.build());
+    dynamoDbClient.transactWriteItems(transactionContext.builder().build());
 
-    log.info(
-      "BankAccount persisted successfully. id={}", bankAccount.getId().value()
-    );
+    log.info("BankAccount persisted successfully. id={}", bankAccount.getId().value());
   }
 }
