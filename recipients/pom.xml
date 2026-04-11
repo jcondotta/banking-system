@@ -9,13 +9,11 @@
     </parent>
 
     <artifactId>recipients</artifactId>
-    <name>recipients</name>
 
     <packaging>pom</packaging>
 
     <modules>
-        <module>recipients-domain</module>
-        <module>recipients-application</module>
+        <module>recipients-core</module>
         <module>recipients-infrastructure</module>
         <module>recipients-test-support</module>
     </modules>
@@ -24,31 +22,7 @@
         <dependencies>
             <dependency>
                 <groupId>com.jcondotta</groupId>
-                <artifactId>domain-core</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>com.jcondotta</groupId>
-                <artifactId>application-core</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>com.jcondotta</groupId>
-                <artifactId>infrastructure-core</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>com.jcondotta</groupId>
                 <artifactId>recipients-domain</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>com.jcondotta</groupId>
-                <artifactId>recipients-test-support</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
@@ -58,10 +32,18 @@
                 <version>${project.version}</version>
             </dependency>
 
+            <!-- Cross-BC dependency: accounts-contracts consumed via Kafka events -->
             <dependency>
                 <groupId>com.jcondotta</groupId>
                 <artifactId>accounts-contracts</artifactId>
                 <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.jcondotta</groupId>
+                <artifactId>recipients-test-support</artifactId>
+                <version>${project.version}</version>
+                <scope>test</scope>
             </dependency>
         </dependencies>
     </dependencyManagement>

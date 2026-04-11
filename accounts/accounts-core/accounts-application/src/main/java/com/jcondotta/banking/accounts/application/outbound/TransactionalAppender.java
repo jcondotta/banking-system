@@ -1,6 +1,6 @@
 package com.jcondotta.banking.accounts.application.outbound;
 
-import com.jcondotta.banking.accounts.application.TransactionContext;
+import com.jcondotta.application.TransactionContext;
 import com.jcondotta.domain.core.AggregateRoot;
 
 public interface TransactionalAppender {

@@ -3,7 +3,8 @@ package com.jcondotta.banking.accounts.infrastructure.adapters.output.outbox.col
 import com.jcondotta.application.events.IntegrationEvent;
 import com.jcondotta.application.events.IntegrationEventCollector;
 import com.jcondotta.banking.accounts.infrastructure.adapters.output.outbox.entity.OutboxEntity;
-import com.jcondotta.banking.accounts.infrastructure.adapters.output.outbox.mapper.OutboxEntityMapper;
+import com.jcondotta.banking.accounts.infrastructure.adapters.output.outbox.write.mapper.OutboxEntityMapper;
+import com.jcondotta.banking.accounts.infrastructure.adapters.output.outbox.write.collector.OutboxEventCollector;
 import com.jcondotta.domain.core.AggregateRoot;
 import com.jcondotta.domain.events.DomainEvent;
 import com.jcondotta.domain.identity.AggregateId;

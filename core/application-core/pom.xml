@@ -5,22 +5,19 @@
 
     <parent>
         <groupId>com.jcondotta</groupId>
-        <artifactId>banking-system</artifactId>
+        <artifactId>core</artifactId>
         <version>1.0.0</version>
+        <relativePath>../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>application-core</artifactId>
 
-    <name>application-core</name>
-    <description>Core application building blocks</description>
-
     <dependencies>
         <dependency>
             <groupId>com.jcondotta</groupId>
             <artifactId>domain-core</artifactId>
-            <version>${project.version}</version>
         </dependency>
 
         <dependency>

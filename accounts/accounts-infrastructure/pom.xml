@@ -6,25 +6,21 @@
         <groupId>com.jcondotta</groupId>
         <artifactId>accounts</artifactId>
         <version>1.0.0</version>
+        <relativePath>../pom.xml</relativePath>
     </parent>
 
     <artifactId>accounts-infrastructure</artifactId>
 
     <dependencies>
+        <!-- Internal -->
+        <dependency>
+            <groupId>com.jcondotta</groupId>
+            <artifactId>infrastructure-core</artifactId>
+        </dependency>
+
         <dependency>
             <groupId>com.jcondotta</groupId>
             <artifactId>accounts-application</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>com.jcondotta</groupId>
-            <artifactId>accounts-dynamodb</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>com.jcondotta</groupId>
-            <artifactId>exception-handler-core</artifactId>
-            <version>${project.version}</version>
         </dependency>
 
         <dependency>
@@ -33,13 +29,14 @@
         </dependency>
 
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-web</artifactId>
+            <groupId>com.jcondotta</groupId>
+            <artifactId>outbox-core</artifactId>
         </dependency>
 
+        <!-- Spring Boot -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-kafka</artifactId>
+            <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
 
         <dependency>
@@ -49,25 +46,10 @@
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-logging</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-jackson</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-actuator</artifactId>
         </dependency>
 
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-aop</artifactId>
-            <version>4.0.0-M2</version>
-        </dependency>
-
+        <!-- Annotation processors -->
         <dependency>
             <groupId>org.mapstruct</groupId>
             <artifactId>mapstruct</artifactId>
@@ -79,44 +61,53 @@
             <scope>provided</scope>
         </dependency>
 
+        <!-- OpenAPI -->
         <dependency>
             <groupId>org.springdoc</groupId>
             <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
         </dependency>
 
-        <!-- Tests -->
+        <!-- Test -->
         <dependency>
             <groupId>com.jcondotta</groupId>
             <artifactId>accounts-test-support</artifactId>
             <scope>test</scope>
         </dependency>
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-testcontainers</artifactId>
             <scope>test</scope>
         </dependency>
+
         <dependency>
             <groupId>org.testcontainers</groupId>
             <artifactId>localstack</artifactId>
+            <scope>test</scope>
         </dependency>
+
         <dependency>
             <groupId>org.testcontainers</groupId>
             <artifactId>kafka</artifactId>
+            <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>io.rest-assured</groupId>
             <artifactId>rest-assured</artifactId>
+            <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>org.instancio</groupId>
             <artifactId>instancio-junit</artifactId>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 

@@ -7,13 +7,11 @@
         <groupId>com.jcondotta</groupId>
         <artifactId>core</artifactId>
         <version>1.0.0</version>
+        <relativePath>../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>domain-core</artifactId>
-
-    <name>domain-core</name>
-    <description>Core domain building blocks</description>
 
     <dependencies>
         <dependency>
@@ -28,14 +26,5 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
-
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.pitest</groupId>
-                <artifactId>pitest-maven</artifactId>
-            </plugin>
-        </plugins>
-    </build>
 
 </project>

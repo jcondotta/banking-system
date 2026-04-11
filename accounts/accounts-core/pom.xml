@@ -16,4 +16,5 @@
         <module>accounts-domain</module>
         <module>accounts-application</module>
     </modules>
+
 </project>

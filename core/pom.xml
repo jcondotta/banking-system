@@ -7,18 +7,16 @@
         <groupId>com.jcondotta</groupId>
         <artifactId>banking-system</artifactId>
         <version>1.0.0</version>
+        <relativePath>../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>core</artifactId>
     <packaging>pom</packaging>
 
-    <name>banking-core</name>
-
     <modules>
         <module>domain-core</module>
         <module>application-core</module>
         <module>infrastructure-core</module>
     </modules>
-
 </project>

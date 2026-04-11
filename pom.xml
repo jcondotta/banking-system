@@ -28,6 +28,8 @@
 
 		<lombok.version>1.18.38</lombok.version>
 		<mapstruct.version>1.6.3</mapstruct.version>
+		<jackson.version>3.1.0</jackson.version>
+		<spring-cloud-aws.version>4.0.0</spring-cloud-aws.version>
 
 		<software.amazon.awssdk.version>2.33.4</software.amazon.awssdk.version>
 
@@ -35,11 +37,12 @@
 
 		<commons-validator.version>1.10.1</commons-validator.version>
 		<commons-lang3.version>3.14.0</commons-lang3.version>
+		<iban4j.version>3.2.1</iban4j.version>
 		<testcontainers.version>1.21.4</testcontainers.version>
 		<rest-assured.version>6.0.0</rest-assured.version>
 		<instancio-junit.version>5.5.1</instancio-junit.version>
 
-		<springdoc-openapi-starter-webmvc-ui.version>2.8.5</springdoc-openapi-starter-webmvc-ui.version>
+		<springdoc-openapi-starter-webmvc-ui.version>3.0.2</springdoc-openapi-starter-webmvc-ui.version>
 		<maven-surefire-plugin.version>3.5.2</maven-surefire-plugin.version>
 		<maven-failsafe-plugin.version>3.5.2</maven-failsafe-plugin.version>
 		<maven-compiler-plugin.version>3.14.0</maven-compiler-plugin.version>
@@ -62,18 +65,7 @@
 
 	<dependencyManagement>
 		<dependencies>
-			<dependency>
-				<groupId>com.jcondotta</groupId>
-				<artifactId>application-core</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-
-			<dependency>
-				<groupId>com.jcondotta</groupId>
-				<artifactId>accounts-contracts</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-
+			<!-- ===== BOM IMPORTS ===== -->
 			<dependency>
 				<groupId>software.amazon.awssdk</groupId>
 				<artifactId>bom</artifactId>
@@ -91,6 +83,34 @@
 			</dependency>
 
 			<dependency>
+				<groupId>org.testcontainers</groupId>
+				<artifactId>testcontainers-bom</artifactId>
+				<version>${testcontainers.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+
+			<!-- ===== CROSS-CUTTING CORE MODULES ===== -->
+			<dependency>
+				<groupId>com.jcondotta</groupId>
+				<artifactId>domain-core</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>com.jcondotta</groupId>
+				<artifactId>application-core</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>com.jcondotta</groupId>
+				<artifactId>infrastructure-core</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+
+			<!-- ===== ANNOTATION PROCESSORS ===== -->
+			<dependency>
 				<groupId>org.projectlombok</groupId>
 				<artifactId>lombok</artifactId>
 				<version>${lombok.version}</version>
@@ -103,12 +123,27 @@
 				<version>${mapstruct.version}</version>
 			</dependency>
 
+			<!-- ===== JACKSON (Jackson 3.x uses tools.jackson.core groupId) ===== -->
 			<dependency>
-				<groupId>org.springdoc</groupId>
-				<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
-				<version>${springdoc-openapi-starter-webmvc-ui.version}</version>
+				<groupId>tools.jackson.core</groupId>
+				<artifactId>jackson-databind</artifactId>
+				<version>${jackson.version}</version>
 			</dependency>
 
+			<dependency>
+				<groupId>tools.jackson.core</groupId>
+				<artifactId>jackson-core</artifactId>
+				<version>${jackson.version}</version>
+			</dependency>
+
+			<!-- ===== AWS / CLOUD ===== -->
+			<dependency>
+				<groupId>io.awspring.cloud</groupId>
+				<artifactId>spring-cloud-aws-starter</artifactId>
+				<version>${spring-cloud-aws.version}</version>
+			</dependency>
+
+			<!-- ===== UTILITIES ===== -->
 			<dependency>
 				<groupId>commons-validator</groupId>
 				<artifactId>commons-validator</artifactId>
@@ -122,26 +157,18 @@
 			</dependency>
 
 			<dependency>
-				<groupId>org.testcontainers</groupId>
-				<artifactId>junit-jupiter</artifactId>
-				<version>${testcontainers.version}</version>
-				<scope>test</scope>
+				<groupId>org.iban4j</groupId>
+				<artifactId>iban4j</artifactId>
+				<version>${iban4j.version}</version>
 			</dependency>
 
 			<dependency>
-				<groupId>org.testcontainers</groupId>
-				<artifactId>localstack</artifactId>
-				<version>${testcontainers.version}</version>
-				<scope>test</scope>
+				<groupId>org.springdoc</groupId>
+				<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+				<version>${springdoc-openapi-starter-webmvc-ui.version}</version>
 			</dependency>
 
-			<dependency>
-				<groupId>org.testcontainers</groupId>
-				<artifactId>kafka</artifactId>
-				<version>${testcontainers.version}</version>
-				<scope>test</scope>
-			</dependency>
-
+			<!-- ===== TEST ===== -->
 			<dependency>
 				<groupId>io.rest-assured</groupId>
 				<artifactId>rest-assured</artifactId>

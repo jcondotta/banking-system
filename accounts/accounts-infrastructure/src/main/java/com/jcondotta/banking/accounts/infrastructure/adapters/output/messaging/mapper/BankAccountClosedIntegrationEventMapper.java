@@ -3,8 +3,8 @@ package com.jcondotta.banking.accounts.infrastructure.adapters.output.messaging.
 import com.jcondotta.application.events.IntegrationEventMetadata;
 import com.jcondotta.application.events.mapper.AbstractDomainEventMapper;
 import com.jcondotta.banking.accounts.domain.bankaccount.events.BankAccountClosedEvent;
-import com.jcondotta.banking.contracts.close.BankAccountClosedIntegrationEvent;
-import com.jcondotta.banking.contracts.close.BankAccountClosedIntegrationPayload;
+import com.jcondotta.banking.accounts.contracts.close.BankAccountClosedIntegrationEvent;
+import com.jcondotta.banking.accounts.contracts.close.BankAccountClosedIntegrationPayload;
 import org.springframework.stereotype.Component;
 
 @Component

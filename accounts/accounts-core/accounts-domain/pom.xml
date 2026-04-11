@@ -5,8 +5,9 @@
 
     <parent>
         <groupId>com.jcondotta</groupId>
-        <artifactId>accounts</artifactId>
+        <artifactId>accounts-core</artifactId>
         <version>1.0.0</version>
+        <relativePath>../pom.xml</relativePath>
     </parent>
 
     <artifactId>accounts-domain</artifactId>

@@ -2,8 +2,10 @@ package com.jcondotta.banking.accounts.infrastructure.adapters.output.outbox.map
 
 import com.jcondotta.application.events.IntegrationEvent;
 import com.jcondotta.application.events.IntegrationEventMetadata;
-import com.jcondotta.banking.accounts.infrastructure.adapters.output.outbox.store.exceptions.OutboxSerializationException;
+import com.jcondotta.banking.accounts.infrastructure.adapters.output.outbox.write.shard.OutboxShardResolver;
+import com.jcondotta.banking.accounts.infrastructure.adapters.output.outbox.write.exceptions.OutboxSerializationException;
 import com.jcondotta.banking.accounts.infrastructure.adapters.output.outbox.entity.OutboxEntity;
+import com.jcondotta.banking.accounts.infrastructure.adapters.output.outbox.write.mapper.OutboxEntityMapperImpl;
 import com.jcondotta.banking.accounts.infrastructure.fixtures.IntegrationEventMetadataFixture;
 import com.jcondotta.domain.identity.AggregateId;
 import org.junit.jupiter.api.BeforeEach;
@@ -31,6 +33,9 @@ class OutboxEntityMapperImplTest {
   private ObjectMapper objectMapper;
 
   @Mock
+  private OutboxShardResolver shardResolver;
+
+  @Mock
   private AggregateId<?> aggregateId;
 
   @Mock
@@ -48,6 +53,7 @@ class OutboxEntityMapperImplTest {
     when(aggregateId.asString()).thenReturn(AGGREGATE_ID);
     when(integrationEvent.metadata()).thenReturn(metadata);
     when(integrationEvent.eventType()).thenReturn(EVENT_TYPE);
+    when(shardResolver.resolve(aggregateId)).thenReturn(0);
   }
 
   @Test

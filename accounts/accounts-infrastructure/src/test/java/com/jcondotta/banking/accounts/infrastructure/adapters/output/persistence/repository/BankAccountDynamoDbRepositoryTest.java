@@ -4,7 +4,6 @@ import com.jcondotta.banking.accounts.domain.bankaccount.enums.HolderType;
 import com.jcondotta.banking.accounts.domain.bankaccount.identity.BankAccountId;
 import com.jcondotta.banking.accounts.domain.bankaccount.testsupport.AccountHolderFixtures;
 import com.jcondotta.banking.accounts.domain.bankaccount.testsupport.BankAccountTestFactory;
-import com.jcondotta.banking.accounts.infrastructure.adapters.output.outbox.collector.OutboxEventCollector;
 import com.jcondotta.banking.accounts.infrastructure.adapters.output.persistence.entity.BankingEntity;
 import com.jcondotta.banking.accounts.infrastructure.adapters.output.outbox.entity.OutboxEntity;
 import com.jcondotta.banking.accounts.infrastructure.adapters.output.persistence.enums.EntityType;
@@ -49,9 +48,6 @@ class BankAccountDynamoDbRepositoryTest {
   @Mock
   private BankAccountEntityMapper bankAccountEntityMapper;
 
-  @Mock
-  private OutboxEventCollector outboxEventCollector;
-
   private BankAccountDynamoDbRepository repository;
 
   @BeforeEach
@@ -59,9 +55,8 @@ class BankAccountDynamoDbRepositoryTest {
     repository = new BankAccountDynamoDbRepository(
       dynamoDbClient,
       bankingTable,
-      outboxTable,
       bankAccountEntityMapper,
-      outboxEventCollector
+      List.of()
     );
   }
 

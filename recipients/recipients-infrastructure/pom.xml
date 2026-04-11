@@ -14,42 +14,24 @@
     <artifactId>recipients-infrastructure</artifactId>
 
     <dependencies>
+        <!-- Internal -->
         <dependency>
             <groupId>com.jcondotta</groupId>
             <artifactId>infrastructure-core</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.jcondotta</groupId>
-            <artifactId>recipients-domain</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.jcondotta</groupId>
-            <artifactId>recipients-test-support</artifactId>
-            <version>${project.version}</version>
         </dependency>
 
         <dependency>
             <groupId>com.jcondotta</groupId>
             <artifactId>recipients-application</artifactId>
-            <version>${project.version}</version>
         </dependency>
 
+        <!-- Cross-BC: accounts integration events consumed via Kafka -->
         <dependency>
             <groupId>com.jcondotta</groupId>
-            <artifactId>exception-handler-core</artifactId>
-            <version>${project.version}</version>
+            <artifactId>accounts-contracts</artifactId>
         </dependency>
 
-        <dependency>
-            <groupId>com.google.googlejavaformat</groupId>
-            <artifactId>google-java-format</artifactId>
-            <version>1.0</version>
-        </dependency>
-
+        <!-- Spring Boot -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
@@ -72,25 +54,16 @@
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-logging</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-actuator</artifactId>
         </dependency>
 
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-aop</artifactId>
-            <version>4.0.0-M2</version>
-        </dependency>
-
+        <!-- Utilities -->
         <dependency>
             <groupId>commons-codec</groupId>
             <artifactId>commons-codec</artifactId>
         </dependency>
 
+        <!-- Annotation processors -->
         <dependency>
             <groupId>org.mapstruct</groupId>
             <artifactId>mapstruct</artifactId>
@@ -102,17 +75,12 @@
             <scope>provided</scope>
         </dependency>
 
-<!--        <dependency>-->
-<!--            <groupId>io.github.hakky54</groupId>-->
-<!--            <artifactId>logcaptor</artifactId>-->
-<!--        </dependency>-->
-
-        <!-- Tests -->
-<!--        <dependency>-->
-<!--            <groupId>org.springframework.integration</groupId>-->
-<!--            <artifactId>spring-integration-aws</artifactId>-->
-<!--            <scope>test</scope>-->
-<!--        </dependency>-->
+        <!-- Test -->
+        <dependency>
+            <groupId>com.jcondotta</groupId>
+            <artifactId>recipients-test-support</artifactId>
+            <scope>test</scope>
+        </dependency>
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -145,20 +113,20 @@
         </dependency>
 
         <dependency>
+            <groupId>org.instancio</groupId>
+            <artifactId>instancio-junit</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
             <groupId>org.iban4j</groupId>
             <artifactId>iban4j</artifactId>
-            <version>3.2.1</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
 
     <build>
         <plugins>
-            <plugin>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-maven-plugin</artifactId>
-            </plugin>
-
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>

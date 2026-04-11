@@ -4,8 +4,8 @@ import com.jcondotta.banking.accounts.domain.bankaccount.events.BankAccountClose
 import com.jcondotta.banking.accounts.domain.bankaccount.identity.BankAccountId;
 import com.jcondotta.banking.accounts.infrastructure.config.ClockTestFactory;
 import com.jcondotta.banking.accounts.infrastructure.fixtures.IntegrationEventMetadataFixture;
-import com.jcondotta.banking.contracts.close.BankAccountClosedIntegrationEvent;
-import com.jcondotta.banking.contracts.close.BankAccountClosedIntegrationPayload;
+import com.jcondotta.banking.accounts.contracts.close.BankAccountClosedIntegrationEvent;
+import com.jcondotta.banking.accounts.contracts.close.BankAccountClosedIntegrationPayload;
 import com.jcondotta.domain.identity.EventId;
 import org.junit.jupiter.api.Test;
 

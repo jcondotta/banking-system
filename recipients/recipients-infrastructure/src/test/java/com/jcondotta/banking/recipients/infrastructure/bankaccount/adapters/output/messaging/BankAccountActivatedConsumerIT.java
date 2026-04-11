@@ -1,26 +1,10 @@
 package com.jcondotta.banking.recipients.infrastructure.bankaccount.adapters.output.messaging;
 
-import com.jcondotta.application.events.IntegrationEventMetadata;
-import com.jcondotta.banking.contracts.activate.BankAccountActivatedIntegrationEvent;
-import com.jcondotta.banking.contracts.activate.BankAccountActivatedIntegrationPayload;
-import com.jcondotta.banking.recipients.domain.recipient.identity.BankAccountId;
-import com.jcondotta.banking.recipients.domain.recipient.repository.BankAccountRepository;
-import com.jcondotta.banking.recipients.infrastructure.bankaccount.properties.BankAccountActivatedTopicProperties;
 import com.jcondotta.banking.recipients.infrastructure.bankaccount.testsupport.container.KafkaTestContainer;
 import com.jcondotta.banking.recipients.infrastructure.bankaccount.testsupport.container.LocalStackTestContainer;
-import org.awaitility.Awaitility;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
-
-import java.time.Duration;
-import java.time.Instant;
-import java.util.UUID;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 @ActiveProfiles("test")
 @ContextConfiguration(initializers = { LocalStackTestContainer.class, KafkaTestContainer.class })

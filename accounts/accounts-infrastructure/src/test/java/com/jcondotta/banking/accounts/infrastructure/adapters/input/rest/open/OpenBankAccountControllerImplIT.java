@@ -3,9 +3,9 @@ package com.jcondotta.banking.accounts.infrastructure.adapters.input.rest.open;
 import com.jcondotta.banking.accounts.domain.bankaccount.enums.AccountType;
 import com.jcondotta.banking.accounts.domain.bankaccount.enums.Currency;
 import com.jcondotta.banking.accounts.domain.bankaccount.repository.BankAccountRepository;
+import com.jcondotta.banking.accounts.domain.bankaccount.testsupport.AccountHolderFixtures;
 import com.jcondotta.banking.accounts.infrastructure.container.KafkaTestContainer;
 import com.jcondotta.banking.accounts.infrastructure.container.LocalStackTestContainer;
-import com.jcondotta.banking.accounts.infrastructure.fixtures.AccountHolderFixtures;
 import com.jcondotta.banking.accounts.infrastructure.properties.BankAccountsURIProperties;
 import io.restassured.RestAssured;
 import io.restassured.builder.RequestSpecBuilder;
@@ -33,35 +33,35 @@ class OpenBankAccountControllerImplIT {
 //  @Autowired
 //  Clock testClockUTC;
 //
-  @Autowired
-  ObjectMapper objectMapper;
-
-  @Autowired
-  BankAccountsURIProperties uriProperties;
-
-  @Autowired
-  private BankAccountRepository bankAccountRepository;
-
-  RequestSpecification requestSpecification;
+//  @Autowired
+//  ObjectMapper objectMapper;
 //
-  @BeforeAll
-  static void beforeAll() {
-    RestAssured.enableLoggingOfRequestAndResponseIfValidationFails();
-  }
-
-  @BeforeEach
-  void beforeEach(@LocalServerPort int port) {
-    RestAssured.baseURI = "http://localhost";
-    RestAssured.port = port;
-
-    requestSpecification = new RequestSpecBuilder()
-      .setBaseUri(RestAssured.baseURI)
-      .setPort(RestAssured.port)
-      .setBasePath(uriProperties.rootPath())
-      .setContentType(ContentType.JSON)
-      .setAccept(ContentType.JSON)
-      .build();
-  }
+//  @Autowired
+//  BankAccountsURIProperties uriProperties;
+//
+//  @Autowired
+//  private BankAccountRepository bankAccountRepository;
+//
+//  RequestSpecification requestSpecification;
+////
+//  @BeforeAll
+//  static void beforeAll() {
+//    RestAssured.enableLoggingOfRequestAndResponseIfValidationFails();
+//  }
+//
+//  @BeforeEach
+//  void beforeEach(@LocalServerPort int port) {
+//    RestAssured.baseURI = "http://localhost";
+//    RestAssured.port = port;
+//
+//    requestSpecification = new RequestSpecBuilder()
+//      .setBaseUri(RestAssured.baseURI)
+//      .setPort(RestAssured.port)
+//      .setBasePath(uriProperties.rootPath())
+//      .setContentType(ContentType.JSON)
+//      .setAccept(ContentType.JSON)
+//      .build();
+//  }
 
 //  @ParameterizedTest
 //  @ArgumentsSource(AccountTypeAndCurrencyArgumentsProvider.class)

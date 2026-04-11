@@ -5,8 +5,8 @@ import com.jcondotta.banking.accounts.domain.bankaccount.identity.AccountHolderI
 import com.jcondotta.banking.accounts.domain.bankaccount.identity.BankAccountId;
 import com.jcondotta.banking.accounts.infrastructure.config.ClockTestFactory;
 import com.jcondotta.banking.accounts.infrastructure.fixtures.IntegrationEventMetadataFixture;
-import com.jcondotta.banking.contracts.addholder.BankAccountJointHolderAddedIntegrationEvent;
-import com.jcondotta.banking.contracts.addholder.BankAccountJointHolderAddedIntegrationPayload;
+import com.jcondotta.banking.accounts.contracts.addholder.BankAccountJointHolderAddedIntegrationEvent;
+import com.jcondotta.banking.accounts.contracts.addholder.BankAccountJointHolderAddedIntegrationPayload;
 import com.jcondotta.domain.identity.EventId;
 import org.junit.jupiter.api.Test;
 

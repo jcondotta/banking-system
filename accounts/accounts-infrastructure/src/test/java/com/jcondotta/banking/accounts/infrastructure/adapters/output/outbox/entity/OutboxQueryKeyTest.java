@@ -1,5 +1,6 @@
 package com.jcondotta.banking.accounts.infrastructure.adapters.output.outbox.entity;
 
+import com.jcondotta.banking.accounts.infrastructure.adapters.output.outbox.store.OutboxQueryKey;
 import com.jcondotta.banking.accounts.infrastructure.config.ClockTestFactory;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;

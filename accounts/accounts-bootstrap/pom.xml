@@ -23,16 +23,8 @@
         </dependency>
 
         <dependency>
-            <groupId>com.jcondotta</groupId>
-            <artifactId>accounts-outbox</artifactId>
-        </dependency>
-
-        <!-- Source: https://mvnrepository.com/artifact/io.awspring.cloud/spring-cloud-starter-aws -->
-        <dependency>
             <groupId>io.awspring.cloud</groupId>
             <artifactId>spring-cloud-aws-starter</artifactId>
-            <version>4.0.0</version>
-            <scope>compile</scope>
         </dependency>
     </dependencies>
 

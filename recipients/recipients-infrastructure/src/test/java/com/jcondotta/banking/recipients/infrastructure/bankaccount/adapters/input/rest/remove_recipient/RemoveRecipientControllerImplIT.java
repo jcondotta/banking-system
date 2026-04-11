@@ -2,36 +2,12 @@ package com.jcondotta.banking.recipients.infrastructure.bankaccount.adapters.inp
 
 import com.jcondotta.application.command.CommandHandler;
 import com.jcondotta.application.command.CommandHandlerWithResult;
-import com.jcondotta.banking.accounts.domain.bankaccount.testsupport.RecipientFixtures;
-import com.jcondotta.exceptionhandler.ProblemTypes;
-import com.jcondotta.banking.recipients.application.bankaccount.command.create_recipient.CreateRecipientCommand;
-import com.jcondotta.banking.recipients.application.bankaccount.command.register.RegisterBankAccountCommand;
-import com.jcondotta.banking.recipients.domain.recipient.enums.RecipientStatus;
-import com.jcondotta.banking.recipients.domain.recipient.exceptions.BankAccountNotFoundException;
-import com.jcondotta.banking.recipients.domain.recipient.exceptions.RecipientNotFoundException;
-import com.jcondotta.banking.recipients.domain.recipient.identity.BankAccountId;
-import com.jcondotta.banking.recipients.domain.recipient.identity.RecipientId;
-import com.jcondotta.banking.recipients.domain.recipient.repository.BankAccountRepository;
-import com.jcondotta.banking.recipients.infrastructure.bankaccount.properties.AccountRecipientsURIProperties;
 import com.jcondotta.banking.recipients.infrastructure.bankaccount.testsupport.container.KafkaTestContainer;
 import com.jcondotta.banking.recipients.infrastructure.bankaccount.testsupport.container.LocalStackTestContainer;
-import io.restassured.RestAssured;
-import io.restassured.builder.RequestSpecBuilder;
-import io.restassured.http.ContentType;
-import io.restassured.specification.RequestSpecification;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
-import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ProblemDetail;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
-
-import java.util.UUID;
 
 import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;
