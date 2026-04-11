@@ -1,0 +1,88 @@
+server:
+  port: ${SERVER_PORT:8081}
+
+spring:
+  application:
+    name: accounts-outbox-service
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.ByteArraySerializer
+    consumer:
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.ByteArrayDeserializer
+      properties:
+        spring.json.trusted.packages: "*"
+        spring.json.write-dates-as-timestamps: false
+
+cloud:
+  aws:
+    region:
+      static: ${AWS_DEFAULT_REGION:us-east-1}
+    credentials:
+      access-key-id: ${AWS_ACCESS_KEY_ID:test}
+      secret-key: ${AWS_SECRET_ACCESS_KEY:test}
+    dynamodb:
+      endpoint: ${AWS_DYNAMODB_ENDPOINT:http://127.0.0.1:4566}
+      tables:
+        outbox:
+          table-name: ${AWS_DYNAMODB_BANK_ACCOUNTS_TABLE_NAME:bank-accounts}
+          indexes:
+            gsi1:
+              name: ${AWS_DYNAMODB_OUTBOX_GSI1_NAME:gsi-outbox-status}
+
+app:
+  outbox:
+    shards:
+      count: 4
+      batch-size-per-shard: 40
+      concurrency-per-shard: 4
+    processing:
+      acquire-timeout: 10s
+      publish-timeout: 5s
+      max-retries: 5
+      lease:
+        duration: 30s
+    polling:
+      interval: 10s
+  kafka:
+    topics:
+      bank-account-opened:
+        topic-name: ${KAFKA_BANK_ACCOUNT_OPENED_TOPIC_NAME}
+      bank-account-activated:
+        topic-name: ${KAFKA_BANK_ACCOUNT_ACTIVATED_TOPIC_NAME}
+      bank-account-blocked:
+        topic-name: ${KAFKA_BANK_ACCOUNT_BLOCKED_TOPIC_NAME}
+      bank-account-unblocked:
+        topic-name: ${KAFKA_BANK_ACCOUNT_UNBLOCKED_TOPIC_NAME}
+      bank-account-closed:
+        topic-name: ${KAFKA_BANK_ACCOUNT_CLOSED_TOPIC_NAME}
+      joint-account-holder-added:
+        topic-name: ${KAFKA_JOINT_ACCOUNT_HOLDER_ADDED_TOPIC_NAME}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, prometheus, metrics
+  metrics:
+    tags:
+      application: ${spring.application.name}
+    distribution:
+      percentiles-histogram:
+        http.server.requests: true
+        outbox.process.duration: true
+        outbox.publish.duration: true
+        outbox.shard.wait.duration: true
+      percentiles:
+        http.server.requests: 0.5, 0.95, 0.99
+        outbox.process.duration: 0.5, 0.95, 0.99
+        outbox.publish.duration: 0.5, 0.95, 0.99
+        outbox.shard.wait.duration: 0.5, 0.95, 0.99
+      expiry:
+        outbox.publish.duration: 5m
+        outbox.shard.wait.duration: 5m
+      buffer-length:
+        outbox.publish.duration: 3
+        outbox.shard.wait.duration: 3

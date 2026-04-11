@@ -1,0 +1,28 @@
+package com.jcondotta.banking.accounts.outbox.infrastructure.config;
+
+import com.jcondotta.banking.accounts.outbox.infrastructure.adapters.output.outbox.concurrency.ConcurrencyAwareShardExecutor;
+import com.jcondotta.banking.accounts.outbox.infrastructure.adapters.output.outbox.concurrency.ConcurrencyPolicy;
+import com.jcondotta.banking.accounts.outbox.infrastructure.adapters.output.outbox.concurrency.SemaphoreConcurrencyPolicy;
+import com.jcondotta.banking.accounts.outbox.infrastructure.adapters.output.outbox.concurrency.ShardExecutor;
+import com.jcondotta.banking.accounts.outbox.infrastructure.properties.OutboxProcessingProperties;
+import com.jcondotta.banking.accounts.outbox.infrastructure.properties.OutboxShardsProperties;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+@Configuration
+public class OutboxProcessorConfiguration {
+
+    @Bean
+    ConcurrencyPolicy<Integer> outboxConcurrencyPolicy(OutboxShardsProperties outboxShardsProperties) {
+        return new SemaphoreConcurrencyPolicy<>(
+          outboxShardsProperties.shardIds(),
+          outboxShardsProperties.concurrencyPerShard()
+        );
+    }
+
+    @Bean
+    ShardExecutor<Integer> outboxShardExecutor(ConcurrencyPolicy<Integer> outboxConcurrencyPolicy,
+                                               OutboxProcessingProperties processingProperties) {
+        return new ConcurrencyAwareShardExecutor<>(outboxConcurrencyPolicy, processingProperties.acquireTimeout());
+    }
+}
