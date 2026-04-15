@@ -1,0 +1,52 @@
+server:
+  port: ${SERVER_PORT:8096}
+
+spring:
+  application:
+    name: account-recipients
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+
+    consumer:
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+
+cloud:
+  aws:
+    region:
+      static: ${AWS_DEFAULT_REGION:us-east-1}
+    dynamodb:
+      tables:
+        account-recipients:
+          table-name: ${AWS_DYNAMODB_ACCOUNT_RECIPIENTS_TABLE_NAME:account-recipients}
+
+app:
+  environment: ${APPLICATION_ENV:local}
+  api:
+    v1:
+      recipients:
+        root-path: '/api/v1/bank-accounts/{bank-account-id}/recipients'
+        recipient-id-path: '/api/v1/bank-accounts/{bank-account-id}/recipients/{recipient-id}'
+  kafka:
+    topics:
+      bank-account-activated:
+        topic-name: ${KAFKA_BANK_ACCOUNT_ACTIVATED_TOPIC_NAME:bank-account-activated}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, prometheus, metrics
+
+  metrics:
+    tags:
+      application: ${spring.application.name}
+
+    distribution:
+      percentiles-histogram:
+        http.server.requests: true
+        bankaccount.*: true
+
+      percentiles:
+        http.server.requests: 0.5, 0.95, 0.99
+        bankaccount.*: 0.5, 0.95, 0.99

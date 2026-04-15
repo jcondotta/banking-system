@@ -3,7 +3,7 @@ package com.jcondotta.banking.recipients.infrastructure.bankaccount.adapters.inp
 import com.jcondotta.application.command.CommandHandlerWithResult;
 import com.jcondotta.banking.recipients.application.bankaccount.command.create_recipient.CreateRecipientCommand;
 import com.jcondotta.banking.recipients.domain.recipient.identity.RecipientId;
-import com.jcondotta.banking.accounts.domain.bankaccount.testsupport.RecipientFixtures;
+import com.jcondotta.banking.recipients.domain.bankaccount.testsupport.RecipientFixtures;
 import com.jcondotta.banking.recipients.infrastructure.bankaccount.adapters.input.rest.create_recipient.model.CreateRecipientRestRequest;
 import com.jcondotta.banking.recipients.infrastructure.bankaccount.properties.AccountRecipientsURIProperties;
 import org.junit.jupiter.api.BeforeEach;

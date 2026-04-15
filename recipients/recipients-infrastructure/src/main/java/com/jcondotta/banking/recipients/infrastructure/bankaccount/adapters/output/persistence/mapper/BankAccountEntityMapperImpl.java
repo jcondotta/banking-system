@@ -24,7 +24,7 @@ public class BankAccountEntityMapperImpl implements BankAccountEntityMapper {
   @Override
   public List<AccountRecipientEntity> toEntities(BankAccount bankAccount) {
     var bankAccountEntity = toEntity(bankAccount);
-    var recipientEntities = bankAccount.getRecipients().stream()
+    var recipientEntities = bankAccount.getActiveRecipients().stream()
       .map(recipient -> recipientEntityMapper.toEntity(bankAccount.getId(), recipient))
       .toList();
 

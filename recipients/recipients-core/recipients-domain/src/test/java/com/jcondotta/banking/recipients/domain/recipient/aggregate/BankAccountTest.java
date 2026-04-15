@@ -1,9 +1,9 @@
 package com.jcondotta.banking.recipients.domain.recipient.aggregate;
 
 import com.jcondotta.banking.recipients.domain.bankaccount.testsupport.ClockTestFactory;
+import com.jcondotta.banking.recipients.domain.bankaccount.testsupport.RecipientTestData;
 import com.jcondotta.banking.recipients.domain.recipient.enums.AccountStatus;
 import com.jcondotta.banking.recipients.domain.recipient.exceptions.BankAccountNotActiveException;
-import com.jcondotta.banking.recipients.domain.recipient.fixtures.RecipientFixtures;
 import com.jcondotta.banking.recipients.domain.recipient.identity.BankAccountId;
 import com.jcondotta.banking.recipients.domain.recipient.identity.RecipientId;
 import com.jcondotta.banking.recipients.domain.recipient.validation.BankAccountErrors;
@@ -24,8 +24,12 @@ import static org.junit.jupiter.params.provider.EnumSource.Mode.EXCLUDE;
 class BankAccountTest {
 
   private static final BankAccountId BANK_ACCOUNT_ID = BankAccountId.of(UUID.randomUUID());
-  private static final RecipientName RECIPIENT_NAME = RecipientFixtures.JEFFERSON.toName();
-  private static final Iban IBAN = RecipientFixtures.JEFFERSON.toIban();
+  private static final RecipientName RECIPIENT_NAME_JEFFERSON =
+    RecipientName.of(RecipientTestData.JEFFERSON.getName());
+  private static final RecipientName RECIPIENT_NAME_PATRIZIO =
+    RecipientName.of(RecipientTestData.PATRIZIO.getName());
+  private static final Iban IBAN_JEFFERSON = Iban.of(RecipientTestData.JEFFERSON.getIban());
+  private static final Iban IBAN_PATRIZIO = Iban.of(RecipientTestData.PATRIZIO.getIban());
   private static final Instant NOW = Instant.now(ClockTestFactory.FIXED_CLOCK);
 
   @Test
@@ -57,7 +61,7 @@ class BankAccountTest {
   void shouldCreateRecipient_whenAccountIsActive() {
     var bankAccount = BankAccount.restore(BANK_ACCOUNT_ID, AccountStatus.ACTIVE, Recipients.empty());
 
-    var recipient = bankAccount.createRecipient(RECIPIENT_NAME, IBAN, NOW);
+    var recipient = bankAccount.createRecipient(RECIPIENT_NAME_JEFFERSON, IBAN_JEFFERSON, NOW);
 
     assertThat(bankAccount.getActiveRecipients()).containsExactly(recipient);
     assertThat(recipient.getCreatedAt()).isEqualTo(NOW);
@@ -68,7 +72,7 @@ class BankAccountTest {
   void shouldThrowException_whenCreatingRecipientAndAccountIsNotActive(AccountStatus status) {
     var bankAccount = BankAccount.restore(BANK_ACCOUNT_ID, status, Recipients.empty());
 
-    assertThatThrownBy(() -> bankAccount.createRecipient(RECIPIENT_NAME, IBAN, NOW))
+    assertThatThrownBy(() -> bankAccount.createRecipient(RECIPIENT_NAME_JEFFERSON, IBAN_JEFFERSON, NOW))
       .isInstanceOf(BankAccountNotActiveException.class)
       .hasMessage(BankAccountNotActiveException.BANK_ACCOUNT_MUST_BE_ACTIVE.formatted(status));
   }
@@ -77,7 +81,7 @@ class BankAccountTest {
   void shouldRemoveRecipient_whenAccountIsActive() {
     var bankAccount = BankAccount.restore(BANK_ACCOUNT_ID, AccountStatus.ACTIVE, Recipients.empty());
 
-    var recipient = bankAccount.createRecipient(RECIPIENT_NAME, IBAN, NOW);
+    var recipient = bankAccount.createRecipient(RECIPIENT_NAME_JEFFERSON, IBAN_JEFFERSON, NOW);
 
     bankAccount.removeRecipient(recipient.getId());
     assertThat(bankAccount.getActiveRecipients()).isEmpty();
@@ -117,13 +121,11 @@ class BankAccountTest {
   @Test
   void shouldReturnOnlyActiveRecipients_whenCallingGetActiveRecipients() {
     var bankAccount = BankAccount.restore(BANK_ACCOUNT_ID, AccountStatus.ACTIVE, Recipients.empty());
-    var recipient1 = bankAccount.createRecipient(RECIPIENT_NAME, IBAN, NOW);
+    var recipient1 = bankAccount.createRecipient(RECIPIENT_NAME_JEFFERSON, IBAN_JEFFERSON, NOW);
 
     bankAccount.removeRecipient(recipient1.getId());
 
-    var anotherRecipientName = RecipientFixtures.PATRIZIO.toName();
-    var anotherIBAN = RecipientFixtures.PATRIZIO.toIban();
-    Recipient recipient2 = bankAccount.createRecipient(anotherRecipientName, anotherIBAN, NOW);
+    Recipient recipient2 = bankAccount.createRecipient(RECIPIENT_NAME_PATRIZIO, IBAN_PATRIZIO, NOW);
 
     assertThat(bankAccount.getActiveRecipients())
       .containsExactly(recipient2);

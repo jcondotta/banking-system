@@ -60,7 +60,7 @@ public class BankAccountDynamoDbRepository implements BankAccountRepository {
         .addPutItem(accountRecipientsTable, bankingEntity)
       );
 
-    bankAccount.getRecipients()
+    bankAccount.getActiveRecipients()
       .forEach(r -> log.info("Saving recipient {} status {}", r.getId(), r.getStatus()));
 
     dynamoDbClient.transactWriteItems(builder.build());

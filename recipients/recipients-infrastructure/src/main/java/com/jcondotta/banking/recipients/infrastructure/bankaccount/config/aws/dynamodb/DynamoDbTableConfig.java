@@ -18,10 +18,4 @@ public class DynamoDbTableConfig {
         TableSchema.fromBean(AccountRecipientEntity.class)
     );
   }
-
-//  @Bean
-//  public DynamoDbIndex<BankAccountEntity> recipientNameLSI(
-//      DynamoDbTable<BankAccountEntity> recipientsTable) {
-//    return recipientsTable.index("RecipientNameLSI");
-//  }
 }

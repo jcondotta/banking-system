@@ -12,7 +12,6 @@ import java.util.UUID;
 @RequestMapping("${app.api.v1.recipients.root-path}")
 public interface CreateRecipientController {
 
-  @ResponseStatus(HttpStatus.CREATED)
   @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
   ResponseEntity<Void> createRecipient(
       @PathVariable("bank-account-id") UUID bankAccountId,

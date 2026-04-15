@@ -47,7 +47,7 @@
         <!-- test dependencies-->
         <dependency>
             <groupId>com.jcondotta</groupId>
-            <artifactId>recipients-test-support</artifactId>
+            <artifactId>recipients-domain-test-support</artifactId>
             <scope>test</scope>
         </dependency>
 

@@ -1,9 +1,9 @@
 package com.jcondotta.banking.recipients.domain.recipient.aggregate;
 
 import com.jcondotta.banking.recipients.domain.bankaccount.testsupport.ClockTestFactory;
+import com.jcondotta.banking.recipients.domain.bankaccount.testsupport.RecipientTestData;
 import com.jcondotta.banking.recipients.domain.recipient.exceptions.DuplicateRecipientIbanException;
 import com.jcondotta.banking.recipients.domain.recipient.exceptions.RecipientNotFoundException;
-import com.jcondotta.banking.recipients.domain.recipient.fixtures.RecipientFixtures;
 import com.jcondotta.banking.recipients.domain.recipient.identity.RecipientId;
 import com.jcondotta.banking.recipients.domain.recipient.validation.BankAccountErrors;
 import com.jcondotta.banking.recipients.domain.recipient.validation.RecipientError;
@@ -21,13 +21,17 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class RecipientsTest {
 
-  private static final RecipientName RECIPIENT_NAME = RecipientFixtures.JEFFERSON.toName();
-  private static final Iban IBAN = RecipientFixtures.JEFFERSON.toIban();
+  private static final RecipientName RECIPIENT_NAME_JEFFERSON = RecipientName.of(RecipientTestData.JEFFERSON.getName());
+  private static final RecipientName RECIPIENT_NAME_PATRIZIO = RecipientName.of(RecipientTestData.PATRIZIO.getName());
+
+  private static final Iban IBAN_JEFFERSON = Iban.of(RecipientTestData.JEFFERSON.getIban());
+  private static final Iban IBAN_PATRIZIO = Iban.of(RecipientTestData.PATRIZIO.getIban());
+
   private static final Instant CREATED_AT = Instant.now(ClockTestFactory.FIXED_CLOCK);
 
   @Test
   void shouldCreateRecipients_whenUsingListFactoryMethod() {
-    var recipient = RecipientFixtures.JEFFERSON.create();
+    var recipient = createRecipient(RECIPIENT_NAME_JEFFERSON, IBAN_JEFFERSON);
 
     var recipients = Recipients.of(List.of(recipient));
 
@@ -44,7 +48,7 @@ class RecipientsTest {
 
   @Test
   void shouldCreateRecipients_whenUsingVarargsFactoryMethod() {
-    var recipient = RecipientFixtures.JEFFERSON.create();
+    var recipient = createRecipient(RECIPIENT_NAME_JEFFERSON, IBAN_JEFFERSON);
 
     var recipients = Recipients.of(recipient);
 
@@ -54,8 +58,8 @@ class RecipientsTest {
 
   @Test
   void shouldCreateRecipientsFromMultipleRecipients_whenUsingVarargsFactoryMethod() {
-    var recipient1 = RecipientFixtures.JEFFERSON.create();
-    var recipient2 = RecipientFixtures.PATRIZIO.create();
+    var recipient1 = createRecipient(RECIPIENT_NAME_JEFFERSON, IBAN_JEFFERSON);
+    var recipient2 = createRecipient(RECIPIENT_NAME_PATRIZIO, IBAN_PATRIZIO);
 
     var recipients = Recipients.of(recipient1, recipient2);
 
@@ -94,7 +98,7 @@ class RecipientsTest {
   @Test
   void shouldAddRecipient_whenNoRecipientActiveExists() {
     var recipients = Recipients.empty();
-    var recipient = recipients.add(RECIPIENT_NAME, IBAN, CREATED_AT);
+    var recipient = recipients.add(RECIPIENT_NAME_JEFFERSON, IBAN_JEFFERSON, CREATED_AT);
 
     assertThat(recipients.values())
       .containsExactly(recipient);
@@ -102,12 +106,10 @@ class RecipientsTest {
 
   @Test
   void shouldAddRecipient_whenActiveRecipientWithDifferentIbanExists() {
-    var recipient1 = RecipientFixtures.JEFFERSON.create();
+    var recipient1 = createRecipient(RECIPIENT_NAME_JEFFERSON, IBAN_JEFFERSON);
     var recipients = Recipients.of(recipient1);
 
-    var differentIban = RecipientFixtures.PATRIZIO.toIban();
-
-    var recipient2 = recipients.add(RecipientFixtures.PATRIZIO.toName(), differentIban, CREATED_AT);
+    var recipient2 = recipients.add(RECIPIENT_NAME_PATRIZIO, IBAN_PATRIZIO, CREATED_AT);
 
     assertThat(recipients.active())
       .containsExactly(recipient1, recipient2);
@@ -115,23 +117,22 @@ class RecipientsTest {
 
   @Test
   void shouldThrowException_whenAddRecipientWithExistingIban() {
-    var recipient1 = RecipientFixtures.JEFFERSON.create();
+    var recipient1 = createRecipient(RECIPIENT_NAME_JEFFERSON, IBAN_JEFFERSON);
     var recipients = Recipients.of(recipient1);
 
-    var anotherRecipientName = RecipientFixtures.PATRIZIO.toName();
-    assertThatThrownBy(() -> recipients.add(anotherRecipientName, IBAN, CREATED_AT))
+    assertThatThrownBy(() -> recipients.add(RECIPIENT_NAME_PATRIZIO, IBAN_JEFFERSON, CREATED_AT))
       .isInstanceOf(DuplicateRecipientIbanException.class)
-      .hasMessage(DuplicateRecipientIbanException.RECIPIENT_WITH_IBAN_ALREADY_EXISTS.formatted(IBAN.value()));
+      .hasMessage(DuplicateRecipientIbanException.RECIPIENT_WITH_IBAN_ALREADY_EXISTS.formatted(IBAN_JEFFERSON.value()));
   }
 
   @Test
   void shouldAddRecipient_whenRecipientWithExistingIbanIsDeactivated() {
-    var recipient1 = RecipientFixtures.JEFFERSON.create();
+    var recipient1 = createRecipient(RECIPIENT_NAME_JEFFERSON, IBAN_JEFFERSON);
     var recipients = Recipients.of(recipient1);
 
     recipients.remove(recipient1.getId());
 
-    Recipient recipient2 = recipients.add(RecipientFixtures.PATRIZIO.toName(), IBAN, CREATED_AT);
+    Recipient recipient2 = recipients.add(RECIPIENT_NAME_PATRIZIO, IBAN_JEFFERSON, CREATED_AT);
 
     assertThat(recipients.active())
       .containsExactly(recipient2);
@@ -140,7 +141,7 @@ class RecipientsTest {
   @Test
   void shouldMarkRecipientAsRemoved_whenRecipientExists() {
     var recipients = Recipients.empty();
-    var recipient = recipients.add(RECIPIENT_NAME, IBAN, CREATED_AT);
+    var recipient = recipients.add(RECIPIENT_NAME_JEFFERSON, IBAN_JEFFERSON, CREATED_AT);
 
     recipients.remove(recipient.getId());
 
@@ -160,7 +161,7 @@ class RecipientsTest {
 
   @Test
   void shouldThrowException_whenRemovingRecipientThatDoesNotExist() {
-    var recipient = RecipientFixtures.JEFFERSON.create();
+    var recipient = createRecipient(RECIPIENT_NAME_JEFFERSON, IBAN_JEFFERSON);
 
     var recipients = Recipients.of(recipient);
 
@@ -181,8 +182,8 @@ class RecipientsTest {
 
   @Test
   void shouldReturnRecipient_whenRecipientExists() {
-    var recipient1 = RecipientFixtures.JEFFERSON.create();
-    var recipient2 = RecipientFixtures.PATRIZIO.create();
+    var recipient1 = createRecipient(RECIPIENT_NAME_JEFFERSON, IBAN_JEFFERSON);
+    var recipient2 = createRecipient(RECIPIENT_NAME_PATRIZIO, IBAN_PATRIZIO);
 
     var recipients = Recipients.of(recipient1, recipient2);
 
@@ -194,8 +195,8 @@ class RecipientsTest {
 
   @Test
   void shouldReturnActiveRecipients_whenRecipientsContainRemovedOnes() {
-    var recipient1 = RecipientFixtures.JEFFERSON.create();
-    var recipient2 = RecipientFixtures.PATRIZIO.create();
+    var recipient1 = createRecipient(RECIPIENT_NAME_JEFFERSON, IBAN_JEFFERSON);
+    var recipient2 = createRecipient(RECIPIENT_NAME_PATRIZIO, IBAN_PATRIZIO);
 
     var recipients = Recipients.of(recipient1, recipient2);
     recipients.remove(recipient1.getId());
@@ -203,4 +204,9 @@ class RecipientsTest {
     assertThat(recipients.active())
       .containsExactly(recipient2);
   }
+
+  private static Recipient createRecipient(RecipientName recipientName, Iban iban) {
+    return Recipient.create(recipientName, iban, CREATED_AT);
+  }
+
 }

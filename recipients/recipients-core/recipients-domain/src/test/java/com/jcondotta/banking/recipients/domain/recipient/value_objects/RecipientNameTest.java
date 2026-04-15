@@ -1,10 +1,9 @@
 package com.jcondotta.banking.recipients.domain.recipient.value_objects;
 
-import com.jcondotta.banking.recipients.domain.recipient.argument_provider.BlankValuesArgumentProvider;
+import com.jcondotta.banking.recipients.domain.bankaccount.testsupport.BlankValuesSource;
 import com.jcondotta.domain.exception.DomainValidationException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ArgumentsSource;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -30,7 +29,7 @@ class RecipientNameTest {
   }
 
   @ParameterizedTest
-  @ArgumentsSource(BlankValuesArgumentProvider.class)
+  @BlankValuesSource
   void shouldThrowException_whenNameIsBlank(String blankValue) {
     assertThatThrownBy(() -> RecipientName.of(blankValue))
         .isInstanceOf(DomainValidationException.class)

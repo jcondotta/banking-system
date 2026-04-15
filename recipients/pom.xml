@@ -15,7 +15,7 @@
     <modules>
         <module>recipients-core</module>
         <module>recipients-infrastructure</module>
-        <module>recipients-test-support</module>
+        <module>recipients-bootstrap</module>
     </modules>
 
     <dependencyManagement>
@@ -32,7 +32,12 @@
                 <version>${project.version}</version>
             </dependency>
 
-            <!-- Cross-BC dependency: accounts-contracts consumed via Kafka events -->
+            <dependency>
+                <groupId>com.jcondotta</groupId>
+                <artifactId>recipients-infrastructure</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
             <dependency>
                 <groupId>com.jcondotta</groupId>
                 <artifactId>accounts-contracts</artifactId>
@@ -41,7 +46,14 @@
 
             <dependency>
                 <groupId>com.jcondotta</groupId>
-                <artifactId>recipients-test-support</artifactId>
+                <artifactId>recipients-test-common</artifactId>
+                <version>${project.version}</version>
+                <scope>test</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>com.jcondotta</groupId>
+                <artifactId>recipients-domain-test-support</artifactId>
                 <version>${project.version}</version>
                 <scope>test</scope>
             </dependency>

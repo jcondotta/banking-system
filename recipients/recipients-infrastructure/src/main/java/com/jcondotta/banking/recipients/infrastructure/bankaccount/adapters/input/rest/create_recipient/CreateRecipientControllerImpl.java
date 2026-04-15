@@ -9,10 +9,8 @@ import com.jcondotta.banking.recipients.domain.recipient.value_objects.Recipient
 import com.jcondotta.banking.recipients.infrastructure.bankaccount.adapters.input.rest.create_recipient.model.CreateRecipientRestRequest;
 import com.jcondotta.banking.recipients.infrastructure.bankaccount.properties.AccountRecipientsURIProperties;
 import lombok.AllArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.UUID;
@@ -26,7 +24,6 @@ public class CreateRecipientControllerImpl implements CreateRecipientController 
   private final AccountRecipientsURIProperties uriProperties;
 
   @Override
-  @ResponseStatus(HttpStatus.CREATED)
   public ResponseEntity<Void> createRecipient(UUID bankAccountId, CreateRecipientRestRequest request) {
     var command = new CreateRecipientCommand(
       BankAccountId.of(bankAccountId),

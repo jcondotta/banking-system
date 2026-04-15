@@ -1,8 +1,8 @@
 package com.jcondotta.banking.recipients.domain.recipient.aggregate;
 
 import com.jcondotta.banking.recipients.domain.bankaccount.testsupport.ClockTestFactory;
+import com.jcondotta.banking.recipients.domain.bankaccount.testsupport.RecipientTestData;
 import com.jcondotta.banking.recipients.domain.recipient.enums.RecipientStatus;
-import com.jcondotta.banking.recipients.domain.recipient.fixtures.RecipientFixtures;
 import com.jcondotta.banking.recipients.domain.recipient.identity.RecipientId;
 import com.jcondotta.banking.recipients.domain.recipient.validation.RecipientError;
 import com.jcondotta.banking.recipients.domain.recipient.value_objects.Iban;
@@ -20,19 +20,22 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 class RecipientCreateTest {
 
   private static final RecipientId RECIPIENT_ID = RecipientId.newId();
-  private static final RecipientName RECIPIENT_NAME = RecipientFixtures.JEFFERSON.toName();
-  private static final Iban IBAN = RecipientFixtures.JEFFERSON.toIban();
+  private static final RecipientName RECIPIENT_NAME_JEFFERSON =
+    RecipientName.of(RecipientTestData.JEFFERSON.getName());
+  private static final RecipientName RECIPIENT_NAME_PATRIZIO =
+    RecipientName.of(RecipientTestData.PATRIZIO.getName());
+  private static final Iban IBAN_JEFFERSON = Iban.of(RecipientTestData.JEFFERSON.getIban());
   private static final RecipientStatus STATUS_ACTIVE = RecipientStatus.ACTIVE;
 
   private static final Instant CREATED_AT = Instant.now(ClockTestFactory.FIXED_CLOCK);
 
   @Test
   void shouldCreateRecipient_whenUsingFactoryMethod() {
-    var recipient = RecipientFixtures.JEFFERSON.create();
+    var recipient = Recipient.create(RECIPIENT_NAME_JEFFERSON, IBAN_JEFFERSON, CREATED_AT);
 
     assertThat(recipient.getId()).isNotNull();
-    assertThat(recipient.getRecipientName()).isEqualTo(RECIPIENT_NAME);
-    assertThat(recipient.getIban()).isEqualTo(IBAN);
+    assertThat(recipient.getRecipientName()).isEqualTo(RECIPIENT_NAME_JEFFERSON);
+    assertThat(recipient.getIban()).isEqualTo(IBAN_JEFFERSON);
     assertThat(recipient.isActive()).isTrue();
     assertThat(recipient.getCreatedAt()).isEqualTo(CREATED_AT);
   }
@@ -40,76 +43,76 @@ class RecipientCreateTest {
   @ParameterizedTest
   @EnumSource(RecipientStatus.class)
   void shouldRestoreRecipient_whenAllValuesAreProvided(RecipientStatus status) {
-    var recipient = Recipient.restore(RECIPIENT_ID, RECIPIENT_NAME, IBAN, status, CREATED_AT);
+    var recipient = Recipient.restore(RECIPIENT_ID, RECIPIENT_NAME_JEFFERSON, IBAN_JEFFERSON, status, CREATED_AT);
 
     assertThat(recipient.getId()).isEqualTo(RECIPIENT_ID);
-    assertThat(recipient.getRecipientName()).isEqualTo(RECIPIENT_NAME);
-    assertThat(recipient.getIban()).isEqualTo(IBAN);
+    assertThat(recipient.getRecipientName()).isEqualTo(RECIPIENT_NAME_JEFFERSON);
+    assertThat(recipient.getIban()).isEqualTo(IBAN_JEFFERSON);
     assertThat(recipient.getStatus()).isEqualTo(status);
     assertThat(recipient.getCreatedAt()).isEqualTo(CREATED_AT);
   }
 
   @Test
   void shouldThrowException_whenRecipientIdIsNull() {
-    assertThatThrownBy(() -> Recipient.restore(null, RECIPIENT_NAME, IBAN, STATUS_ACTIVE, CREATED_AT))
+    assertThatThrownBy(() -> Recipient.restore(null, RECIPIENT_NAME_JEFFERSON, IBAN_JEFFERSON, STATUS_ACTIVE, CREATED_AT))
       .isInstanceOf(DomainValidationException.class)
       .hasMessage(RecipientError.RECIPIENT_ID_NOT_PROVIDED);
   }
 
   @Test
   void shouldThrowException_whenRecipientNameIsNull() {
-    assertThatThrownBy(() -> Recipient.restore(RECIPIENT_ID, null, IBAN, STATUS_ACTIVE, CREATED_AT))
+    assertThatThrownBy(() -> Recipient.restore(RECIPIENT_ID, null, IBAN_JEFFERSON, STATUS_ACTIVE, CREATED_AT))
       .isInstanceOf(DomainValidationException.class)
       .hasMessage(RecipientError.RECIPIENT_NAME_NOT_PROVIDED);
   }
 
   @Test
   void shouldThrowException_whenIbanIsNull() {
-    assertThatThrownBy(() -> Recipient.restore(RECIPIENT_ID, RECIPIENT_NAME, null, STATUS_ACTIVE, CREATED_AT))
+    assertThatThrownBy(() -> Recipient.restore(RECIPIENT_ID, RECIPIENT_NAME_JEFFERSON, null, STATUS_ACTIVE, CREATED_AT))
       .isInstanceOf(DomainValidationException.class)
       .hasMessage(RecipientError.IBAN_NOT_PROVIDED);
   }
 
   @Test
   void shouldThrowException_whenStatusIsNull() {
-    assertThatThrownBy(() -> Recipient.restore(RECIPIENT_ID, RECIPIENT_NAME, IBAN, null, CREATED_AT))
+    assertThatThrownBy(() -> Recipient.restore(RECIPIENT_ID, RECIPIENT_NAME_JEFFERSON, IBAN_JEFFERSON, null, CREATED_AT))
       .isInstanceOf(DomainValidationException.class)
       .hasMessage(RecipientError.STATUS_NOT_PROVIDED);
   }
 
   @Test
   void shouldThrowException_whenCreatedAtIsNull() {
-    assertThatThrownBy(() -> Recipient.restore(RECIPIENT_ID, RECIPIENT_NAME, IBAN, STATUS_ACTIVE, null))
+    assertThatThrownBy(() -> Recipient.restore(RECIPIENT_ID, RECIPIENT_NAME_JEFFERSON, IBAN_JEFFERSON, STATUS_ACTIVE, null))
       .isInstanceOf(DomainValidationException.class)
       .hasMessage(RecipientError.CREATED_AT_NOT_PROVIDED);
   }
 
   @Test
   void shouldAssignActiveStatus_whenCreatingRecipient() {
-    var recipient = Recipient.create(RECIPIENT_NAME, IBAN, CREATED_AT);
+    var recipient = Recipient.create(RECIPIENT_NAME_JEFFERSON, IBAN_JEFFERSON, CREATED_AT);
 
     assertThat(recipient.getStatus()).isEqualTo(RecipientStatus.ACTIVE);
   }
 
   @Test
   void shouldAssignCreatedAt_whenCreatingRecipient() {
-    var recipient = Recipient.create(RECIPIENT_NAME, IBAN, CREATED_AT);
+    var recipient = Recipient.create(RECIPIENT_NAME_JEFFERSON, IBAN_JEFFERSON, CREATED_AT);
 
     assertThat(recipient.getCreatedAt()).isEqualTo(CREATED_AT);
   }
 
   @Test
   void shouldGenerateDifferentIds_whenCreatingMultipleRecipients() {
-    var recipient1 = Recipient.create(RECIPIENT_NAME, IBAN, CREATED_AT);
-    var recipient2 = Recipient.create(RECIPIENT_NAME, IBAN, CREATED_AT);
+    var recipient1 = Recipient.create(RECIPIENT_NAME_JEFFERSON, IBAN_JEFFERSON, CREATED_AT);
+    var recipient2 = Recipient.create(RECIPIENT_NAME_JEFFERSON, IBAN_JEFFERSON, CREATED_AT);
 
     assertThat(recipient1.getId()).isNotEqualTo(recipient2.getId());
   }
 
   @Test
   void shouldBeEqual_whenRecipientIdIsSame() {
-    var recipient1 = Recipient.restore(RECIPIENT_ID, RECIPIENT_NAME, IBAN, STATUS_ACTIVE, CREATED_AT);
-    var recipient2 = Recipient.restore(RECIPIENT_ID, RecipientName.of("Different name"), IBAN, STATUS_ACTIVE, CREATED_AT);
+    var recipient1 = Recipient.restore(RECIPIENT_ID, RECIPIENT_NAME_JEFFERSON, IBAN_JEFFERSON, STATUS_ACTIVE, CREATED_AT);
+    var recipient2 = Recipient.restore(RECIPIENT_ID, RECIPIENT_NAME_PATRIZIO, IBAN_JEFFERSON, STATUS_ACTIVE, CREATED_AT);
 
     assertThat(recipient1)
       .isEqualTo(recipient2)
@@ -118,8 +121,8 @@ class RecipientCreateTest {
 
   @Test
   void shouldNotBeEqual_whenRecipientIdIsDifferent() {
-    var recipient1 = Recipient.restore(RecipientId.newId(), RECIPIENT_NAME, IBAN, STATUS_ACTIVE, CREATED_AT);
-    var recipient2 = Recipient.restore(RecipientId.newId(), RECIPIENT_NAME, IBAN, STATUS_ACTIVE, CREATED_AT);
+    var recipient1 = Recipient.restore(RecipientId.newId(), RECIPIENT_NAME_JEFFERSON, IBAN_JEFFERSON, STATUS_ACTIVE, CREATED_AT);
+    var recipient2 = Recipient.restore(RecipientId.newId(), RECIPIENT_NAME_JEFFERSON, IBAN_JEFFERSON, STATUS_ACTIVE, CREATED_AT);
 
     assertThat(recipient1).isNotEqualTo(recipient2);
   }

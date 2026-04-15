@@ -1,0 +1,21 @@
+app:
+  environment: test
+
+spring:
+  kafka:
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.ByteArraySerializer
+
+cloud:
+  aws:
+    region:
+      static: us-east-1
+    credentials:
+      access-key-id: test
+      secret-key: test
+    dynamodb:
+      endpoint: ${AWS_DYNAMODB_ENDPOINT}
+      tables:
+        account-recipients:
+          table-name: 'account-recipients'
