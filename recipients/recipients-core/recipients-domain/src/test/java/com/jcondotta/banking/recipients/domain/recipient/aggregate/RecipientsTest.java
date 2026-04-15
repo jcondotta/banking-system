@@ -1,7 +1,7 @@
 package com.jcondotta.banking.recipients.domain.recipient.aggregate;
 
 import com.jcondotta.banking.recipients.domain.bankaccount.testsupport.ClockTestFactory;
-import com.jcondotta.banking.recipients.domain.recipient.exceptions.DuplicateRecipientException;
+import com.jcondotta.banking.recipients.domain.recipient.exceptions.DuplicateRecipientIbanException;
 import com.jcondotta.banking.recipients.domain.recipient.exceptions.RecipientNotFoundException;
 import com.jcondotta.banking.recipients.domain.recipient.fixtures.RecipientFixtures;
 import com.jcondotta.banking.recipients.domain.recipient.identity.RecipientId;
@@ -120,8 +120,8 @@ class RecipientsTest {
 
     var anotherRecipientName = RecipientFixtures.PATRIZIO.toName();
     assertThatThrownBy(() -> recipients.add(anotherRecipientName, IBAN, CREATED_AT))
-      .isInstanceOf(DuplicateRecipientException.class)
-      .hasMessage(DuplicateRecipientException.RECIPIENT_WITH_IBAN_ALREADY_EXISTS.formatted(IBAN.value()));
+      .isInstanceOf(DuplicateRecipientIbanException.class)
+      .hasMessage(DuplicateRecipientIbanException.RECIPIENT_WITH_IBAN_ALREADY_EXISTS.formatted(IBAN.value()));
   }
 
   @Test

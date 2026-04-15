@@ -5,18 +5,18 @@ import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class DuplicateRecipientExceptionTest {
+class DuplicateRecipientIbanExceptionTest {
 
   @Test
   void shouldCreateExceptionWithCorrectMessage_whenIbanIsProvided() {
     var iban = RecipientFixtures.JEFFERSON.toIban();
 
-    var exception = new DuplicateRecipientException(iban.value());
+    var exception = new DuplicateRecipientIbanException(iban.value());
 
     assertThat(exception)
       .isInstanceOf(RuntimeException.class)
       .hasMessage(
-        DuplicateRecipientException.RECIPIENT_WITH_IBAN_ALREADY_EXISTS.formatted(iban.value())
+        DuplicateRecipientIbanException.RECIPIENT_WITH_IBAN_ALREADY_EXISTS.formatted(iban.value())
       );
   }
 }

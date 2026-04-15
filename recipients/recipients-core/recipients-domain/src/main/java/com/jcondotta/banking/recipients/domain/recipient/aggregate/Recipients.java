@@ -1,6 +1,6 @@
 package com.jcondotta.banking.recipients.domain.recipient.aggregate;
 
-import com.jcondotta.banking.recipients.domain.recipient.exceptions.DuplicateRecipientException;
+import com.jcondotta.banking.recipients.domain.recipient.exceptions.DuplicateRecipientIbanException;
 import com.jcondotta.banking.recipients.domain.recipient.exceptions.RecipientNotFoundException;
 import com.jcondotta.banking.recipients.domain.recipient.identity.RecipientId;
 import com.jcondotta.banking.recipients.domain.recipient.validation.BankAccountErrors;
@@ -38,7 +38,7 @@ public final class Recipients extends DomainCollection<Recipient> {
 
   Recipient add(RecipientName name, Iban iban, Instant createdAt) {
     if (existsActiveRecipientWithIban(iban)) {
-      throw new DuplicateRecipientException(iban.value());
+      throw new DuplicateRecipientIbanException(iban.value());
     }
 
     var recipient = Recipient.create(name, iban, createdAt);
