@@ -12,6 +12,8 @@ class RecipientRemoveTest {
   void shouldDeactivateRecipient_whenRemoveIsCalled() {
     var recipient = RecipientFixtures.JEFFERSON.create();
 
+    assertThat(recipient.getStatus()).isEqualTo(RecipientStatus.ACTIVE);
+
     recipient.remove();
 
     assertThat(recipient.getStatus()).isEqualTo(RecipientStatus.REMOVED);
@@ -20,6 +22,8 @@ class RecipientRemoveTest {
   @Test
   void shouldKeepRecipientRemoved_whenRemoveIsCalledTwice() {
     var recipient = RecipientFixtures.JEFFERSON.create();
+
+    assertThat(recipient.getStatus()).isEqualTo(RecipientStatus.ACTIVE);
 
     recipient.remove();
     assertThat(recipient.getStatus()).isEqualTo(RecipientStatus.REMOVED);

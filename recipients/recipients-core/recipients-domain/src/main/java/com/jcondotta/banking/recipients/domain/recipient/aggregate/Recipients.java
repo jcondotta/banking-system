@@ -38,7 +38,7 @@ public final class Recipients extends DomainCollection<Recipient> {
 
   Recipient add(RecipientName name, Iban iban, Instant createdAt) {
     if (existsActiveRecipientWithIban(iban)) {
-      throw new DuplicateRecipientException(iban);
+      throw new DuplicateRecipientException(iban.value());
     }
 
     var recipient = Recipient.create(name, iban, createdAt);

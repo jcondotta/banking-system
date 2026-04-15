@@ -11,7 +11,7 @@ class DuplicateRecipientExceptionTest {
   void shouldCreateExceptionWithCorrectMessage_whenIbanIsProvided() {
     var iban = RecipientFixtures.JEFFERSON.toIban();
 
-    var exception = new DuplicateRecipientException(iban);
+    var exception = new DuplicateRecipientException(iban.value());
 
     assertThat(exception)
       .isInstanceOf(RuntimeException.class)

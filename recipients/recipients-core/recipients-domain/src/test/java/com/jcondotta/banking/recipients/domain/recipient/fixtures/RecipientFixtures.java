@@ -1,6 +1,6 @@
 package com.jcondotta.banking.recipients.domain.recipient.fixtures;
 
-import com.jcondotta.banking.accounts.domain.bankaccount.testsupport.ClockTestFactory;
+import com.jcondotta.banking.recipients.domain.bankaccount.testsupport.ClockTestFactory;
 import com.jcondotta.banking.recipients.domain.recipient.aggregate.Recipient;
 import com.jcondotta.banking.recipients.domain.recipient.enums.RecipientStatus;
 import com.jcondotta.banking.recipients.domain.recipient.identity.RecipientId;

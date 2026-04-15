@@ -33,12 +33,12 @@ public final class BankAccount extends AggregateRoot<BankAccountId> {
     return new BankAccount(id, status, recipients);
   }
 
-  public Recipient createRecipient(RecipientName name, Iban iban) {
+  public Recipient createRecipient(RecipientName name, Iban iban, Instant now) {
     if (!accountStatus.isActive()) {
       throw new BankAccountNotActiveException(accountStatus);
     }
 
-    return recipients.add(name, iban, Instant.now());
+    return recipients.add(name, iban, now);
   }
 
   public void removeRecipient(RecipientId recipientId) {
@@ -51,10 +51,6 @@ public final class BankAccount extends AggregateRoot<BankAccountId> {
 
   public AccountStatus getAccountStatus() {
     return accountStatus;
-  }
-
-  public List<Recipient> getRecipients() {
-    return recipients.values();
   }
 
   public List<Recipient> getActiveRecipients() {

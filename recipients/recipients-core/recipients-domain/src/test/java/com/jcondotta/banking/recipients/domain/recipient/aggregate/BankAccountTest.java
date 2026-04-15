@@ -1,5 +1,6 @@
 package com.jcondotta.banking.recipients.domain.recipient.aggregate;
 
+import com.jcondotta.banking.recipients.domain.bankaccount.testsupport.ClockTestFactory;
 import com.jcondotta.banking.recipients.domain.recipient.enums.AccountStatus;
 import com.jcondotta.banking.recipients.domain.recipient.exceptions.BankAccountNotActiveException;
 import com.jcondotta.banking.recipients.domain.recipient.fixtures.RecipientFixtures;
@@ -10,17 +11,22 @@ import com.jcondotta.banking.recipients.domain.recipient.value_objects.Iban;
 import com.jcondotta.banking.recipients.domain.recipient.value_objects.RecipientName;
 import com.jcondotta.domain.exception.DomainValidationException;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 
+import java.time.Instant;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.params.provider.EnumSource.Mode.EXCLUDE;
 
 class BankAccountTest {
 
   private static final BankAccountId BANK_ACCOUNT_ID = BankAccountId.of(UUID.randomUUID());
   private static final RecipientName RECIPIENT_NAME = RecipientFixtures.JEFFERSON.toName();
   private static final Iban IBAN = RecipientFixtures.JEFFERSON.toIban();
+  private static final Instant NOW = Instant.now(ClockTestFactory.FIXED_CLOCK);
 
   @Test
   void shouldRegisterBankAccountWithActiveStatus_whenBankAccountIdIsValid() {
@@ -28,7 +34,7 @@ class BankAccountTest {
 
     assertThat(bankAccount.getId()).isEqualTo(BANK_ACCOUNT_ID);
     assertThat(bankAccount.getAccountStatus()).isEqualTo(AccountStatus.ACTIVE);
-    assertThat(bankAccount.getRecipients()).isEmpty();
+    assertThat(bankAccount.getActiveRecipients()).isEmpty();
   }
 
   @Test
@@ -45,46 +51,46 @@ class BankAccountTest {
     var bankAccount = BankAccount.restore(BANK_ACCOUNT_ID, AccountStatus.ACTIVE, recipients);
 
     assertThat(bankAccount.getAccountStatus()).isEqualTo(AccountStatus.ACTIVE);
-    assertThat(bankAccount.getRecipients()).isEmpty();
   }
 
   @Test
   void shouldCreateRecipient_whenAccountIsActive() {
     var bankAccount = BankAccount.restore(BANK_ACCOUNT_ID, AccountStatus.ACTIVE, Recipients.empty());
 
-    var recipient = bankAccount.createRecipient(RECIPIENT_NAME, IBAN);
+    var recipient = bankAccount.createRecipient(RECIPIENT_NAME, IBAN, NOW);
 
-    assertThat(bankAccount.getRecipients())
-      .containsExactly(recipient);
+    assertThat(bankAccount.getActiveRecipients()).containsExactly(recipient);
+    assertThat(recipient.getCreatedAt()).isEqualTo(NOW);
   }
 
-  @Test
-  void shouldThrowException_whenCreatingRecipientAndAccountIsNotActive() {
-    var bankAccount = BankAccount.restore(BANK_ACCOUNT_ID, AccountStatus.BLOCKED, Recipients.empty());
+  @ParameterizedTest
+  @EnumSource(value = AccountStatus.class, names = "ACTIVE", mode = EXCLUDE)
+  void shouldThrowException_whenCreatingRecipientAndAccountIsNotActive(AccountStatus status) {
+    var bankAccount = BankAccount.restore(BANK_ACCOUNT_ID, status, Recipients.empty());
 
-    assertThatThrownBy(() -> bankAccount.createRecipient(RECIPIENT_NAME, IBAN))
+    assertThatThrownBy(() -> bankAccount.createRecipient(RECIPIENT_NAME, IBAN, NOW))
       .isInstanceOf(BankAccountNotActiveException.class)
-      .hasMessage(BankAccountNotActiveException.BANK_ACCOUNT_MUST_BE_ACTIVE.formatted(AccountStatus.BLOCKED));
+      .hasMessage(BankAccountNotActiveException.BANK_ACCOUNT_MUST_BE_ACTIVE.formatted(status));
   }
 
   @Test
   void shouldRemoveRecipient_whenAccountIsActive() {
     var bankAccount = BankAccount.restore(BANK_ACCOUNT_ID, AccountStatus.ACTIVE, Recipients.empty());
 
-    var recipient = bankAccount.createRecipient(RECIPIENT_NAME, IBAN);
+    var recipient = bankAccount.createRecipient(RECIPIENT_NAME, IBAN, NOW);
 
     bankAccount.removeRecipient(recipient.getId());
     assertThat(bankAccount.getActiveRecipients()).isEmpty();
   }
 
-  @Test
-  void shouldThrowException_whenRemovingRecipientAndAccountIsNotActive() {
-    var recipients = Recipients.empty();
-    var bankAccount = BankAccount.restore(BANK_ACCOUNT_ID, AccountStatus.BLOCKED, recipients);
+  @ParameterizedTest
+  @EnumSource(value = AccountStatus.class, names = "ACTIVE", mode = EXCLUDE)
+  void shouldThrowException_whenRemovingRecipientAndAccountIsNotActive(AccountStatus status) {
+    var bankAccount = BankAccount.restore(BANK_ACCOUNT_ID, status, Recipients.empty());
 
     assertThatThrownBy(() -> bankAccount.removeRecipient(RecipientId.newId()))
-      .isInstanceOf(BankAccountNotActiveException.class)
-      .hasMessage(BankAccountNotActiveException.BANK_ACCOUNT_MUST_BE_ACTIVE.formatted(AccountStatus.BLOCKED));
+        .isInstanceOf(BankAccountNotActiveException.class)
+        .hasMessage(BankAccountNotActiveException.BANK_ACCOUNT_MUST_BE_ACTIVE.formatted(status));
   }
 
   @Test
@@ -109,32 +115,15 @@ class BankAccountTest {
   }
 
   @Test
-  void shouldReturnAllRecipientsIncludingRemoved_whenCallingGetRecipients() {
-    var bankAccount = BankAccount.restore(BANK_ACCOUNT_ID, AccountStatus.ACTIVE, Recipients.empty());
-
-    var recipient1 = bankAccount.createRecipient(RECIPIENT_NAME, IBAN);
-
-    bankAccount.removeRecipient(recipient1.getId());
-
-    var anotherRecipientName = RecipientFixtures.PATRIZIO.toName();
-    var anotherIban = RecipientFixtures.PATRIZIO.toIban();
-
-    var recipient2 = bankAccount.createRecipient(anotherRecipientName, anotherIban);
-
-    assertThat(bankAccount.getRecipients())
-      .containsExactly(recipient1, recipient2);
-  }
-
-  @Test
   void shouldReturnOnlyActiveRecipients_whenCallingGetActiveRecipients() {
     var bankAccount = BankAccount.restore(BANK_ACCOUNT_ID, AccountStatus.ACTIVE, Recipients.empty());
-    var recipient1 = bankAccount.createRecipient(RECIPIENT_NAME, IBAN);
+    var recipient1 = bankAccount.createRecipient(RECIPIENT_NAME, IBAN, NOW);
 
     bankAccount.removeRecipient(recipient1.getId());
 
     var anotherRecipientName = RecipientFixtures.PATRIZIO.toName();
     var anotherIBAN = RecipientFixtures.PATRIZIO.toIban();
-    Recipient recipient2 = bankAccount.createRecipient(anotherRecipientName, anotherIBAN);
+    Recipient recipient2 = bankAccount.createRecipient(anotherRecipientName, anotherIBAN, NOW);
 
     assertThat(bankAccount.getActiveRecipients())
       .containsExactly(recipient2);

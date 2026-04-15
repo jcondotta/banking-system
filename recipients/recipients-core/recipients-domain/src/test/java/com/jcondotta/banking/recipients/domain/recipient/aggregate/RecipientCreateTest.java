@@ -1,6 +1,6 @@
 package com.jcondotta.banking.recipients.domain.recipient.aggregate;
 
-import com.jcondotta.banking.accounts.domain.bankaccount.testsupport.ClockTestFactory;
+import com.jcondotta.banking.recipients.domain.bankaccount.testsupport.ClockTestFactory;
 import com.jcondotta.banking.recipients.domain.recipient.enums.RecipientStatus;
 import com.jcondotta.banking.recipients.domain.recipient.fixtures.RecipientFixtures;
 import com.jcondotta.banking.recipients.domain.recipient.identity.RecipientId;
@@ -82,6 +82,28 @@ class RecipientCreateTest {
     assertThatThrownBy(() -> Recipient.restore(RECIPIENT_ID, RECIPIENT_NAME, IBAN, STATUS_ACTIVE, null))
       .isInstanceOf(DomainValidationException.class)
       .hasMessage(RecipientError.CREATED_AT_NOT_PROVIDED);
+  }
+
+  @Test
+  void shouldAssignActiveStatus_whenCreatingRecipient() {
+    var recipient = Recipient.create(RECIPIENT_NAME, IBAN, CREATED_AT);
+
+    assertThat(recipient.getStatus()).isEqualTo(RecipientStatus.ACTIVE);
+  }
+
+  @Test
+  void shouldAssignCreatedAt_whenCreatingRecipient() {
+    var recipient = Recipient.create(RECIPIENT_NAME, IBAN, CREATED_AT);
+
+    assertThat(recipient.getCreatedAt()).isEqualTo(CREATED_AT);
+  }
+
+  @Test
+  void shouldGenerateDifferentIds_whenCreatingMultipleRecipients() {
+    var recipient1 = Recipient.create(RECIPIENT_NAME, IBAN, CREATED_AT);
+    var recipient2 = Recipient.create(RECIPIENT_NAME, IBAN, CREATED_AT);
+
+    assertThat(recipient1.getId()).isNotEqualTo(recipient2.getId());
   }
 
   @Test

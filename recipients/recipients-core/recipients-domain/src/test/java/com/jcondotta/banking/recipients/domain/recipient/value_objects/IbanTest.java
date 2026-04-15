@@ -1,73 +1,112 @@
 package com.jcondotta.banking.recipients.domain.recipient.value_objects;
 
 import com.jcondotta.banking.recipients.domain.recipient.argument_provider.BlankValuesArgumentProvider;
+import com.jcondotta.domain.exception.DomainValidationException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ArgumentsSource;
-import org.junit.jupiter.params.provider.ValueSource;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class IbanTest {
 
-  private static final String VALID_IBAN_NO_SPACES = "GB82WEST12345698765432";
+  private static final String VALID_IBAN_1 = "DE44500105175407324931";
+  private static final String VALID_IBAN_2 = "FR1420041010050500013M02606";
+  private static final String MIN_LENGTH_IBAN = "NO9386011117947";           // 15 chars — Norwegian format
+  private static final String MAX_LENGTH_IBAN = "AA75000000000000000000000000000000"; // 34 chars — synthetic
 
-  @ParameterizedTest(name = "{index} => input={0}")
-  @ValueSource(
-    strings = {
-      "GB82WEST12345698765432",
-      "GB82 WEST 1234 5698 7654 32",
-      "   GB82WEST12345698765432   ",
-      "GB82\tWEST\n1234\t5698\n7654\t32"
-    })
-  void shouldCreateIban_whenValueIsValid(String rawValidIban) {
-    assertThat(Iban.of(rawValidIban)).extracting(Iban::value).isEqualTo(VALID_IBAN_NO_SPACES);
+  @Test
+  void shouldCreateIban_whenValueIsValid() {
+    var iban = Iban.of(VALID_IBAN_1);
+
+    assertThat(iban)
+      .extracting(Iban::value)
+      .isEqualTo(VALID_IBAN_1);
   }
 
   @Test
-  void shouldThrowNullPointerException_whenIbanIsNull() {
+  void shouldNormalizeIbanValue() {
+    var iban = Iban.of("  de44 5001 0517 5407 3249 31  ");
+
+    assertThat(iban.value()).isEqualTo(VALID_IBAN_1);
+  }
+
+  @Test
+  void shouldThrowException_whenValueIsNull() {
     assertThatThrownBy(() -> Iban.of(null))
-      .isInstanceOf(NullPointerException.class)
+      .isInstanceOf(DomainValidationException.class)
       .hasMessage(Iban.IBAN_NOT_PROVIDED);
   }
 
   @ParameterizedTest
   @ArgumentsSource(BlankValuesArgumentProvider.class)
-  void shouldThrowIllegalArgumentException_whenIbanIsBlank(String blankValue) {
+  void shouldThrowException_whenValueIsBlank(String blankValue) {
     assertThatThrownBy(() -> Iban.of(blankValue))
-      .isInstanceOf(IllegalArgumentException.class)
-      .hasMessage(Iban.IBAN_INVALID_FORMAT_MESSAGE);
+      .isInstanceOf(DomainValidationException.class)
+      .hasMessage(Iban.IBAN_NOT_PROVIDED);
   }
 
-  @ParameterizedTest(name = "{index} => invalid input={0}")
-  @ValueSource(
-    strings = {
-      "", // empty
-      "GB82WEST123", // too short
-      "GB82WEST1234569876543212345678901234567890", // too long
-      "1B82WEST12345698765432", // invalid country code
-      "GB00WEST12345698765432", // bad check digits
-      "GB82WEST1234$698765432" // invalid chars
-    })
-  void shouldThrowIllegalArgumentException_whenIbanFormatIsInvalid(String invalidIban) {
-    assertThatThrownBy(() -> Iban.of(invalidIban))
-      .isInstanceOf(IllegalArgumentException.class)
-      .hasMessage(Iban.IBAN_INVALID_FORMAT_MESSAGE);
+  @Test
+  void shouldThrowException_whenIbanIsTooShort() {
+    var tooShortIban = "A".repeat(14);
+
+    assertThatThrownBy(() -> Iban.of(tooShortIban))
+      .isInstanceOf(DomainValidationException.class)
+      .hasMessage(Iban.IBAN_INVALID_FORMAT);
+  }
+
+  @Test
+  void shouldThrowException_whenIbanIsTooLong() {
+    var tooLongIban = "A".repeat(35);
+
+    assertThatThrownBy(() -> Iban.of(tooLongIban))
+      .isInstanceOf(DomainValidationException.class)
+      .hasMessage(Iban.IBAN_INVALID_FORMAT);
+  }
+
+  @Test
+  void shouldThrowException_whenIbanContainsInvalidCharacter() {
+    assertThatThrownBy(() -> Iban.of("DE44$00105175407324931"))
+      .isInstanceOf(DomainValidationException.class)
+      .hasMessage(Iban.IBAN_INVALID_FORMAT);
+  }
+
+  @Test
+  void shouldThrowException_whenIbanChecksumIsInvalid() {
+    assertThatThrownBy(() -> Iban.of("DE44500105175407324932"))
+      .isInstanceOf(DomainValidationException.class)
+      .hasMessage(Iban.IBAN_INVALID_FORMAT);
+  }
+
+  @Test
+  void shouldCreateIban_whenIbanHasMinimumLength() {
+    var iban = Iban.of(MIN_LENGTH_IBAN);
+
+    assertThat(iban.value()).hasSize(15);
+  }
+
+  @Test
+  void shouldCreateIban_whenIbanHasMaximumLength() {
+    var iban = Iban.of(MAX_LENGTH_IBAN);
+
+    assertThat(iban.value()).hasSize(34);
   }
 
   @Test
   void shouldBeEqual_whenIbansHaveSameValue() {
-    var iban1 = Iban.of(VALID_IBAN_NO_SPACES);
-    var iban2 = Iban.of(VALID_IBAN_NO_SPACES);
+    var iban1 = Iban.of(VALID_IBAN_1);
+    var iban2 = Iban.of(VALID_IBAN_1);
 
-    assertThat(iban1).isEqualTo(iban2).hasSameHashCodeAs(iban2);
+    assertThat(iban1)
+      .isEqualTo(iban2)
+      .hasSameHashCodeAs(iban2);
   }
 
   @Test
   void shouldNotBeEqual_whenIbansHaveDifferentValues() {
-    var iban1 = Iban.of(VALID_IBAN_NO_SPACES);
-    var iban2 = Iban.of("GB94BARC10201530093459");
+    var iban1 = Iban.of(VALID_IBAN_1);
+    var iban2 = Iban.of(VALID_IBAN_2);
 
     assertThat(iban1).isNotEqualTo(iban2);
   }

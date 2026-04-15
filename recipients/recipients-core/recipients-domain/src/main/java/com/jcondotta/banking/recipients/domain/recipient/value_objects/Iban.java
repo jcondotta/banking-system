@@ -1,25 +1,30 @@
 package com.jcondotta.banking.recipients.domain.recipient.value_objects;
 
-import org.apache.commons.lang3.StringUtils;
+import com.jcondotta.domain.exception.DomainValidationException;
 
 import java.util.Locale;
-import java.util.Objects;
 
 public record Iban(String value) {
 
   public static final String IBAN_NOT_PROVIDED = "IBAN must be provided.";
-  public static final String IBAN_INVALID_FORMAT_MESSAGE = "IBAN format is invalid.";
+  public static final String IBAN_INVALID_FORMAT = "IBAN format is invalid.";
 
   public Iban {
-    Objects.requireNonNull(value, IBAN_NOT_PROVIDED);
-
-    var sanitizedValue = StringUtils.deleteWhitespace(value).toUpperCase(Locale.ROOT);
-
-    if (!isValid(sanitizedValue)) {
-      throw new IllegalArgumentException(IBAN_INVALID_FORMAT_MESSAGE);
+    if (value == null) {
+      throw new DomainValidationException(IBAN_NOT_PROVIDED);
     }
 
-    value = sanitizedValue;
+    var sanitized = value.replaceAll("\\s+", "").toUpperCase(Locale.ROOT);
+
+    if (sanitized.isEmpty()) {
+      throw new DomainValidationException(IBAN_NOT_PROVIDED);
+    }
+
+    if (!isValid(sanitized)) {
+      throw new DomainValidationException(IBAN_INVALID_FORMAT);
+    }
+
+    value = sanitized;
   }
 
   public static Iban of(String value) {

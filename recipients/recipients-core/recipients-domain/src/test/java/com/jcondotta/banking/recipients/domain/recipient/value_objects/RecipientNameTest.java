@@ -38,6 +38,13 @@ class RecipientNameTest {
   }
 
   @Test
+  void shouldCreateRecipientName_whenNameHasMaxLength() {
+    var maxLengthName = "A".repeat(RecipientName.MAX_LENGTH);
+
+    assertThat(RecipientName.of(maxLengthName).value()).isEqualTo(maxLengthName);
+  }
+
+  @Test
   void shouldThrowException_whenNameIsTooLong() {
     var longName = "A".repeat(51);
 

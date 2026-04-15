@@ -1,32 +1,36 @@
 package com.jcondotta.banking.recipients.domain.recipient.value_objects;
 
 import com.jcondotta.domain.exception.DomainValidationException;
-import com.jcondotta.domain.support.DomainPreconditions;
-import org.apache.commons.lang3.StringUtils;
+
+import static com.jcondotta.domain.support.DomainPreconditions.required;
+import static com.jcondotta.domain.support.DomainPreconditions.requiredNotBlank;
 
 public record RecipientName(String value) {
 
-  static final int MAX_LENGTH = 50;
+  public static final int MAX_LENGTH = 50;
 
-  static final String NAME_NOT_PROVIDED = "recipient name must be provided";
-  static final String NAME_NOT_BLANK = "recipient name must not be blank";
-
+  public static final String NAME_NOT_PROVIDED = "recipient name must be provided";
+  public static final String NAME_NOT_BLANK = "recipient name must not be blank";
   public static final String NAME_MUST_NOT_EXCEED_LENGTH = "recipient name must not exceed %d characters";
 
   public RecipientName {
-    DomainPreconditions.required(value, NAME_NOT_PROVIDED);
+    required(value, NAME_NOT_PROVIDED);
+    value = normalize(value);
 
-    var normalized = StringUtils.normalizeSpace(value).trim();
+    requiredNotBlank(value, NAME_NOT_BLANK);
+    validateLength(value);
+  }
 
-    DomainPreconditions.requiredNotBlank(value, NAME_NOT_BLANK);
+  private static String normalize(String value) {
+    return value.trim().replaceAll("\\s+", " ");
+  }
 
-    if (normalized.length() > MAX_LENGTH) {
+  private static void validateLength(String value) {
+    if (value.length() > MAX_LENGTH) {
       throw new DomainValidationException(
         NAME_MUST_NOT_EXCEED_LENGTH.formatted(MAX_LENGTH)
       );
     }
-
-    value = normalized;
   }
 
   public static RecipientName of(String value) {

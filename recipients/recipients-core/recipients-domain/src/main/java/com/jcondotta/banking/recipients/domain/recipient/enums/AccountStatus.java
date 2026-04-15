@@ -4,8 +4,7 @@ public enum AccountStatus {
   ACTIVE,
   CLOSED,
   PENDING,
-  BLOCKED,
-  UNKNOWN;
+  BLOCKED;
 
   public boolean isActive() {
     return this == ACTIVE;

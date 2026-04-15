@@ -1,6 +1,6 @@
 package com.jcondotta.banking.recipients.domain.recipient.aggregate;
 
-import com.jcondotta.banking.accounts.domain.bankaccount.testsupport.ClockTestFactory;
+import com.jcondotta.banking.recipients.domain.bankaccount.testsupport.ClockTestFactory;
 import com.jcondotta.banking.recipients.domain.recipient.exceptions.DuplicateRecipientException;
 import com.jcondotta.banking.recipients.domain.recipient.exceptions.RecipientNotFoundException;
 import com.jcondotta.banking.recipients.domain.recipient.fixtures.RecipientFixtures;
@@ -73,6 +73,20 @@ class RecipientsTest {
   @Test
   void shouldCreateEmptyRecipients_whenUsingFactoryMethod() {
     var recipients = Recipients.empty();
+
+    assertThat(recipients.values()).isEmpty();
+  }
+
+  @Test
+  void shouldReturnEmptyCollection_whenPassingEmptyList() {
+    var recipients = Recipients.of(List.of());
+
+    assertThat(recipients.values()).isEmpty();
+  }
+
+  @Test
+  void shouldReturnEmptyCollection_whenPassingEmptyVarargs() {
+    var recipients = Recipients.of(new Recipient[0]);
 
     assertThat(recipients.values()).isEmpty();
   }
