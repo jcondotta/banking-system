@@ -27,12 +27,12 @@ public class RegisterBankAccountCommandHandler implements CommandHandler<Registe
   public void handle(RegisterBankAccountCommand command) {
     bankAccountRepository.findById(command.bankAccountId())
       .ifPresentOrElse(
-        this::skipIfAlreadyActive,
+        this::requireActiveWhenAlreadyRegistered,
         () -> register(command)
       );
   }
 
-  private void skipIfAlreadyActive(BankAccount bankAccount) {
+  private void requireActiveWhenAlreadyRegistered(BankAccount bankAccount) {
     if (!bankAccount.getAccountStatus().isActive()) {
       throw new BankAccountNotActiveException(bankAccount.getAccountStatus());
     }

@@ -19,7 +19,7 @@ public final class BankAccount extends AggregateRoot<BankAccountId> {
   private final AccountStatus accountStatus;
   private final Recipients recipients;
 
-  public BankAccount(BankAccountId id, AccountStatus accountStatus, Recipients recipients) {
+  BankAccount(BankAccountId id, AccountStatus accountStatus, Recipients recipients) {
     super(required(id, BankAccountErrors.ID_MUST_BE_PROVIDED));
     this.accountStatus = required(accountStatus, BankAccountErrors.ACCOUNT_STATUS_MUST_BE_PROVIDED);
     this.recipients = required(recipients, BankAccountErrors.RECIPIENTS_MUST_NOT_BE_NULL);
@@ -51,6 +51,10 @@ public final class BankAccount extends AggregateRoot<BankAccountId> {
 
   public AccountStatus getAccountStatus() {
     return accountStatus;
+  }
+
+  public List<Recipient> getRecipients() {
+    return recipients.values();
   }
 
   public List<Recipient> getActiveRecipients() {

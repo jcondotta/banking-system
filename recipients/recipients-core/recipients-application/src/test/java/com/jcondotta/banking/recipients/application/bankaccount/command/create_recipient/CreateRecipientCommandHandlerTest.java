@@ -1,5 +1,6 @@
 package com.jcondotta.banking.recipients.application.bankaccount.command.create_recipient;
 
+import com.jcondotta.banking.recipients.domain.bankaccount.testsupport.ClockTestFactory;
 import com.jcondotta.banking.recipients.domain.recipient.aggregate.BankAccount;
 import com.jcondotta.banking.recipients.domain.recipient.aggregate.Recipients;
 import com.jcondotta.banking.recipients.domain.recipient.enums.AccountStatus;
@@ -16,6 +17,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.Clock;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -27,6 +29,7 @@ import static org.mockito.Mockito.*;
 class CreateRecipientCommandHandlerTest {
 
   private static final BankAccountId BANK_ACCOUNT_ID = BankAccountId.of(UUID.randomUUID());
+  private static final Clock CLOCK = ClockTestFactory.FIXED_CLOCK;
 
   @Mock
   private BankAccountRepository bankAccountRepository;
@@ -35,7 +38,7 @@ class CreateRecipientCommandHandlerTest {
 
   @BeforeEach
   void setUp() {
-    commandHandler = new CreateRecipientCommandHandler(bankAccountRepository);
+    commandHandler = new CreateRecipientCommandHandler(bankAccountRepository, CLOCK);
   }
 
   @Test
@@ -51,17 +54,19 @@ class CreateRecipientCommandHandlerTest {
       recipientFixture.toName(),
       recipientFixture.toIban()
     );
-    commandHandler.handle(command);
+    var recipientId = commandHandler.handle(command);
+
+    assertThat(recipientId).isNotNull();
 
     assertThat(bankAccount.getActiveRecipients())
         .hasSize(1)
         .singleElement()
         .satisfies(
             recipient -> {
-              assertThat(recipient.getId()).isNotNull();
+              assertThat(recipient.getId()).isEqualTo(recipientId);
               assertThat(recipient.getRecipientName()).isEqualTo(recipientFixture.toName());
               assertThat(recipient.getIban()).isEqualTo(recipientFixture.toIban());
-              assertThat(recipient.getCreatedAt()).isNotNull();
+              assertThat(recipient.getCreatedAt()).isEqualTo(CLOCK.instant());
             });
 
     verify(bankAccountRepository).findById(BANK_ACCOUNT_ID);

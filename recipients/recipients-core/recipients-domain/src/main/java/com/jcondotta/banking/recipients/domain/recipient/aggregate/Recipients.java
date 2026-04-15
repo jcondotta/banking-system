@@ -43,7 +43,7 @@ public final class Recipients extends DomainCollection<Recipient> {
 
     var recipient = Recipient.create(name, iban, createdAt);
 
-    values.add(recipient);
+    super.add(recipient);
     return recipient;
   }
 

@@ -8,6 +8,6 @@ import java.util.Optional;
 public interface BankAccountRepository {
 
   Optional<BankAccount> findById(BankAccountId id);
-  void save(BankAccount recipient);
+  void save(BankAccount bankAccount);
 
 }

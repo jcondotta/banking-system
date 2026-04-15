@@ -14,6 +14,8 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class ListRecipientsQueryResultTest {
 
+  private static final Instant CREATED_AT = Instant.parse("2026-01-01T00:00:00Z");
+
   @Test
   void shouldCreateResult_whenRecipientsAreProvided() {
     var recipient = RecipientFixtures.JEFFERSON.toRecipient();
@@ -22,7 +24,7 @@ class ListRecipientsQueryResultTest {
       UUID.randomUUID(),
       recipient.getRecipientName().value(),
       recipient.getIban().value(),
-      Instant.now()
+      CREATED_AT
     );
 
     var queryResult = new ListRecipientsQueryResult(List.of(recipientSummary));

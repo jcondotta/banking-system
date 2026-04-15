@@ -6,11 +6,11 @@ import com.jcondotta.banking.recipients.domain.bankaccount.testsupport.Recipient
 import com.jcondotta.banking.recipients.application.bankaccount.command.create_recipient.CreateRecipientCommand;
 import com.jcondotta.banking.recipients.application.bankaccount.command.register.RegisterBankAccountCommand;
 import com.jcondotta.banking.recipients.application.bankaccount.command.remove_recipient.RemoveRecipientCommand;
-import com.jcondotta.banking.recipients.application.bankaccount.query.model.RecipientSummary;
 import com.jcondotta.banking.recipients.domain.recipient.identity.BankAccountId;
 import com.jcondotta.banking.recipients.domain.recipient.identity.RecipientId;
-import com.jcondotta.banking.recipients.infrastructure.bankaccount.adapters.input.rest.list_recipients.ListRecipientsResponse;
-import com.jcondotta.banking.recipients.infrastructure.bankaccount.properties.AccountRecipientsURIProperties;
+import com.jcondotta.banking.recipients.infrastructure.adapters.input.rest.list_recipients.ListRecipientsResponse;
+import com.jcondotta.banking.recipients.infrastructure.adapters.input.rest.list_recipients.RecipientRestResponse;
+import com.jcondotta.banking.recipients.infrastructure.adapters.input.rest.properties.AccountRecipientsURIProperties;
 import com.jcondotta.banking.recipients.integration.testsupport.annotation.IntegrationTest;
 import io.restassured.RestAssured;
 import io.restassured.builder.RequestSpecBuilder;
@@ -97,7 +97,7 @@ class ListRecipientsControllerImplIT {
 
     assertThat(response.recipients())
       .hasSize(2)
-      .extracting(RecipientSummary::recipientName)
+      .extracting(RecipientRestResponse::recipientName)
       .containsExactlyInAnyOrder(
         RecipientFixtures.JEFFERSON.toName().value(),
         RecipientFixtures.PATRIZIO.toName().value()
@@ -143,7 +143,7 @@ class ListRecipientsControllerImplIT {
 
     assertThat(response.recipients())
       .hasSize(1)
-      .extracting(RecipientSummary::recipientName)
+      .extracting(RecipientRestResponse::recipientName)
       .containsExactly(RecipientFixtures.JEFFERSON.toName().value());
   }
 

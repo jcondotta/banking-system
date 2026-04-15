@@ -31,6 +31,7 @@ app:
     topics:
       bank-account-activated:
         topic-name: ${KAFKA_BANK_ACCOUNT_ACTIVATED_TOPIC_NAME:bank-account-activated}
+        group-id: ${KAFKA_BANK_ACCOUNT_ACTIVATED_GROUP_ID:recipients-service}
 
 management:
   endpoints:

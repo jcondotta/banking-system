@@ -12,7 +12,7 @@ import com.jcondotta.banking.recipients.domain.recipient.exceptions.RecipientNot
 import com.jcondotta.banking.recipients.domain.recipient.identity.BankAccountId;
 import com.jcondotta.banking.recipients.domain.recipient.identity.RecipientId;
 import com.jcondotta.banking.recipients.domain.recipient.repository.BankAccountRepository;
-import com.jcondotta.banking.recipients.infrastructure.bankaccount.properties.AccountRecipientsURIProperties;
+import com.jcondotta.banking.recipients.infrastructure.adapters.input.rest.properties.AccountRecipientsURIProperties;
 import com.jcondotta.banking.recipients.integration.testsupport.annotation.IntegrationTest;
 import io.restassured.RestAssured;
 import io.restassured.builder.RequestSpecBuilder;
@@ -85,10 +85,11 @@ class RemoveRecipientControllerImplIT {
 
     var bankAccount = bankAccountRepository.findById(bankAccountId).orElseThrow();
 
-    assertThat(bankAccount.getActiveRecipients())
-      .hasSize(1)
+    assertThat(bankAccount.getActiveRecipients()).isEmpty();
+    assertThat(bankAccount.getRecipients())
       .singleElement()
       .satisfies(recipient -> {
+        assertThat(recipient.getId()).isEqualTo(recipientId);
         assertThat(recipient.getStatus()).isEqualTo(RecipientStatus.REMOVED);
         assertThat(recipient.isActive()).isFalse();
       });

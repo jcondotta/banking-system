@@ -5,7 +5,7 @@ import com.jcondotta.banking.accounts.contracts.activate.BankAccountActivatedInt
 import com.jcondotta.banking.accounts.contracts.activate.BankAccountActivatedIntegrationPayload;
 import com.jcondotta.banking.recipients.domain.recipient.identity.BankAccountId;
 import com.jcondotta.banking.recipients.domain.recipient.repository.BankAccountRepository;
-import com.jcondotta.banking.recipients.infrastructure.bankaccount.properties.BankAccountActivatedTopicProperties;
+import com.jcondotta.banking.recipients.infrastructure.adapters.input.messaging.properties.BankAccountActivatedTopicProperties;
 import com.jcondotta.banking.recipients.integration.testsupport.annotation.IntegrationTest;
 import org.awaitility.Awaitility;
 import org.junit.jupiter.api.Test;
@@ -21,6 +21,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @IntegrationTest
 class BankAccountActivatedConsumerIT {
+
+  private static final Instant OCCURRED_AT = Instant.parse("2026-01-01T00:00:00Z");
 
   @Autowired
   private KafkaTemplate<String, byte[]> kafkaTemplate;
@@ -46,7 +48,7 @@ class BankAccountActivatedConsumerIT {
       correlationId,
       source,
       1,
-      Instant.now()
+      OCCURRED_AT
     );
 
     var payload = new BankAccountActivatedIntegrationPayload(bankAccountId);
@@ -71,7 +73,7 @@ class BankAccountActivatedConsumerIT {
       correlationId,
       source,
       1,
-      Instant.now()
+      OCCURRED_AT
     );
 
     var payload = new BankAccountActivatedIntegrationPayload(bankAccountId);

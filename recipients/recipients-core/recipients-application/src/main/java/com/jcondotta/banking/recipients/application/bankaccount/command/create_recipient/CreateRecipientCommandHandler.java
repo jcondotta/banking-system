@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+import java.time.Clock;
 import java.time.Instant;
 
 @Slf4j
@@ -18,6 +19,7 @@ import java.time.Instant;
 public class CreateRecipientCommandHandler implements CommandHandlerWithResult<CreateRecipientCommand, RecipientId> {
 
   private final BankAccountRepository bankAccountRepository;
+  private final Clock clock;
 
   @Override
   @Observed(
@@ -34,7 +36,7 @@ public class CreateRecipientCommandHandler implements CommandHandlerWithResult<C
     Recipient recipient = bankAccount.createRecipient(
       command.recipientName(),
       command.iban(),
-      Instant.now()
+      Instant.now(clock)
     );
 
     bankAccountRepository.save(bankAccount);
