@@ -5,7 +5,7 @@ import com.jcondotta.banking.recipients.domain.recipient.exceptions.BankAccountN
 import com.jcondotta.banking.recipients.domain.recipient.identity.BankAccountId;
 import com.jcondotta.banking.recipients.domain.recipient.identity.RecipientId;
 import com.jcondotta.banking.recipients.domain.recipient.repository.BankAccountRepository;
-import com.jcondotta.banking.accounts.domain.bankaccount.testsupport.BankAccountFixtures;
+import com.jcondotta.banking.recipients.domain.bankaccount.testsupport.BankAccountFixtures;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -41,7 +41,7 @@ class RemoveRecipientCommandHandlerTest {
     when(bankAccountRepository.findById(BANK_ACCOUNT_ID))
       .thenReturn(Optional.of(bankAccount));
 
-    var recipient = bankAccount.getRecipients().getFirst();
+    var recipient = bankAccount.getActiveRecipients().getFirst();
 
     var command = new RemoveRecipientCommand(
       BANK_ACCOUNT_ID,

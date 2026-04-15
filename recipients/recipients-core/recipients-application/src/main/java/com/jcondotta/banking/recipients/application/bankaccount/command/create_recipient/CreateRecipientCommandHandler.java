@@ -10,6 +10,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+import java.time.Instant;
+
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -31,7 +33,8 @@ public class CreateRecipientCommandHandler implements CommandHandlerWithResult<C
 
     Recipient recipient = bankAccount.createRecipient(
       command.recipientName(),
-      command.iban()
+      command.iban(),
+      Instant.now()
     );
 
     bankAccountRepository.save(bankAccount);

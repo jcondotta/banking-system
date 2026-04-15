@@ -1,7 +1,7 @@
 package com.jcondotta.banking.recipients.application.bankaccount.query.list_recipients;
 
 import com.jcondotta.banking.recipients.application.bankaccount.query.model.RecipientSummary;
-import com.jcondotta.banking.accounts.domain.bankaccount.testsupport.RecipientFixtures;
+import com.jcondotta.banking.recipients.domain.bankaccount.testsupport.RecipientFixtures;
 import org.junit.jupiter.api.Test;
 
 import java.time.Instant;

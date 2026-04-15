@@ -3,7 +3,7 @@ package com.jcondotta.banking.recipients.application.bankaccount.query.list_reci
 import com.jcondotta.banking.recipients.application.bankaccount.query.mapper.RecipientSummaryMapper;
 import com.jcondotta.banking.recipients.application.bankaccount.query.model.RecipientSummary;
 import com.jcondotta.banking.recipients.domain.recipient.aggregate.Recipient;
-import com.jcondotta.banking.accounts.domain.bankaccount.testsupport.RecipientFixtures;
+import com.jcondotta.banking.recipients.domain.bankaccount.testsupport.RecipientFixtures;
 import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;
 

@@ -2,6 +2,7 @@ package com.jcondotta.banking.recipients.application.bankaccount.command.registe
 
 import com.jcondotta.application.command.CommandHandler;
 import com.jcondotta.banking.recipients.domain.recipient.aggregate.BankAccount;
+import com.jcondotta.banking.recipients.domain.recipient.exceptions.BankAccountNotActiveException;
 import com.jcondotta.banking.recipients.domain.recipient.repository.BankAccountRepository;
 import io.micrometer.observation.annotation.Observed;
 import lombok.RequiredArgsConstructor;
@@ -24,8 +25,26 @@ public class RegisterBankAccountCommandHandler implements CommandHandler<Registe
       "operation", "register"
     })
   public void handle(RegisterBankAccountCommand command) {
-    BankAccount bankAccount = BankAccount.register(command.bankAccountId());
+    bankAccountRepository.findById(command.bankAccountId())
+      .ifPresentOrElse(
+        this::skipIfAlreadyActive,
+        () -> register(command)
+      );
+  }
 
+  private void skipIfAlreadyActive(BankAccount bankAccount) {
+    if (!bankAccount.getAccountStatus().isActive()) {
+      throw new BankAccountNotActiveException(bankAccount.getAccountStatus());
+    }
+
+    log.info(
+      "BankAccount already registered - skipping [bankAccountId={}]",
+      bankAccount.getId().value()
+    );
+  }
+
+  private void register(RegisterBankAccountCommand command) {
+    var bankAccount = BankAccount.register(command.bankAccountId());
     bankAccountRepository.save(bankAccount);
 
     log.info(

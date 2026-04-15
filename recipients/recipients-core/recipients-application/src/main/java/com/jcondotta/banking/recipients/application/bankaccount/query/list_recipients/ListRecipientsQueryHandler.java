@@ -13,10 +13,8 @@ public class ListRecipientsQueryHandler
 
   @Override
   public ListRecipientsQueryResult handle(ListRecipientsQuery query) {
-    var recipients = queryRepository.findActiveByBankAccountId(query.bankAccountId())
-      .stream()
-      .toList();
-
-    return new ListRecipientsQueryResult(recipients);
+    return new ListRecipientsQueryResult(
+      queryRepository.findActiveByBankAccountId(query.bankAccountId())
+    );
   }
 }

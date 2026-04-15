@@ -1,12 +1,15 @@
 package com.jcondotta.banking.recipients.application.bankaccount.command.create_recipient;
 
 import com.jcondotta.banking.recipients.domain.recipient.aggregate.BankAccount;
+import com.jcondotta.banking.recipients.domain.recipient.aggregate.Recipients;
+import com.jcondotta.banking.recipients.domain.recipient.enums.AccountStatus;
+import com.jcondotta.banking.recipients.domain.recipient.exceptions.BankAccountNotActiveException;
 import com.jcondotta.banking.recipients.domain.recipient.exceptions.BankAccountNotFoundException;
-import com.jcondotta.banking.recipients.domain.recipient.exceptions.DuplicateRecipientException;
+import com.jcondotta.banking.recipients.domain.recipient.exceptions.DuplicateRecipientIbanException;
 import com.jcondotta.banking.recipients.domain.recipient.identity.BankAccountId;
 import com.jcondotta.banking.recipients.domain.recipient.repository.BankAccountRepository;
-import com.jcondotta.banking.accounts.domain.bankaccount.testsupport.BankAccountFixtures;
-import com.jcondotta.banking.accounts.domain.bankaccount.testsupport.RecipientFixtures;
+import com.jcondotta.banking.recipients.domain.bankaccount.testsupport.BankAccountFixtures;
+import com.jcondotta.banking.recipients.domain.bankaccount.testsupport.RecipientFixtures;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -50,7 +53,7 @@ class CreateRecipientCommandHandlerTest {
     );
     commandHandler.handle(command);
 
-    assertThat(bankAccount.getRecipients())
+    assertThat(bankAccount.getActiveRecipients())
         .hasSize(1)
         .singleElement()
         .satisfies(
@@ -100,8 +103,30 @@ class CreateRecipientCommandHandlerTest {
     );
 
     assertThatThrownBy(() -> commandHandler.handle(command))
-      .isInstanceOf(DuplicateRecipientException.class)
-      .hasMessage(DuplicateRecipientException.RECIPIENT_WITH_IBAN_ALREADY_EXISTS.formatted(recipientFixture.toIban().value()));
+      .isInstanceOf(DuplicateRecipientIbanException.class)
+      .hasMessage(DuplicateRecipientIbanException.RECIPIENT_WITH_IBAN_ALREADY_EXISTS.formatted(recipientFixture.toIban().value()));
+
+    verify(bankAccountRepository).findById(BANK_ACCOUNT_ID);
+    verifyNoMoreInteractions(bankAccountRepository);
+  }
+
+  @Test
+  void shouldThrowBankAccountNotActiveException_whenBankAccountIsNotActive() {
+    var bankAccount = BankAccount.restore(BANK_ACCOUNT_ID, AccountStatus.BLOCKED, Recipients.empty());
+
+    when(bankAccountRepository.findById(BANK_ACCOUNT_ID))
+      .thenReturn(Optional.of(bankAccount));
+
+    var recipientFixture = RecipientFixtures.JEFFERSON;
+    var command = new CreateRecipientCommand(
+      BANK_ACCOUNT_ID,
+      recipientFixture.toName(),
+      recipientFixture.toIban()
+    );
+
+    assertThatThrownBy(() -> commandHandler.handle(command))
+      .isInstanceOf(BankAccountNotActiveException.class)
+      .hasMessage(new BankAccountNotActiveException(AccountStatus.BLOCKED).getMessage());
 
     verify(bankAccountRepository).findById(BANK_ACCOUNT_ID);
     verifyNoMoreInteractions(bankAccountRepository);
