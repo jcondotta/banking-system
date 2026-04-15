@@ -5,6 +5,7 @@ import com.jcondotta.banking.recipients.domain.bankaccount.testsupport.Recipient
 import org.junit.jupiter.api.Test;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -36,5 +37,24 @@ class ListRecipientsQueryResultTest {
     assertThatThrownBy(() -> new ListRecipientsQueryResult(null))
       .isInstanceOf(NullPointerException.class)
       .hasMessage(ListRecipientsQueryResult.RECIPIENTS_REQUIRED);
+  }
+
+  @Test
+  void shouldCreateImmutableResult_whenRecipientsAreProvided() {
+    var recipient = RecipientFixtures.JEFFERSON.toRecipient();
+    var recipientSummary = new RecipientSummary(
+      recipient.getId().value(),
+      recipient.getRecipientName().value(),
+      recipient.getIban().value(),
+      recipient.getCreatedAt()
+    );
+    var recipients = new ArrayList<>(List.of(recipientSummary));
+
+    var queryResult = new ListRecipientsQueryResult(recipients);
+    recipients.clear();
+
+    assertThat(queryResult.recipients()).containsExactly(recipientSummary);
+    assertThatThrownBy(() -> queryResult.recipients().clear())
+      .isInstanceOf(UnsupportedOperationException.class);
   }
 }

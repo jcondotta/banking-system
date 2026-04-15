@@ -1,6 +1,9 @@
 package com.jcondotta.banking.recipients.application.bankaccount.command.remove_recipient;
 
 import com.jcondotta.banking.recipients.domain.recipient.aggregate.BankAccount;
+import com.jcondotta.banking.recipients.domain.recipient.aggregate.Recipients;
+import com.jcondotta.banking.recipients.domain.recipient.enums.AccountStatus;
+import com.jcondotta.banking.recipients.domain.recipient.exceptions.BankAccountNotActiveException;
 import com.jcondotta.banking.recipients.domain.recipient.exceptions.BankAccountNotFoundException;
 import com.jcondotta.banking.recipients.domain.recipient.identity.BankAccountId;
 import com.jcondotta.banking.recipients.domain.recipient.identity.RecipientId;
@@ -72,6 +75,27 @@ class RemoveRecipientCommandHandlerTest {
       .hasMessage(BankAccountNotFoundException.BANK_ACCOUNT_NOT_FOUND.formatted(BANK_ACCOUNT_ID.value()));
 
     verify(bankAccountRepository).findById(BANK_ACCOUNT_ID);
+    verifyNoMoreInteractions(bankAccountRepository);
+  }
+
+  @Test
+  void shouldThrowBankAccountNotActiveException_whenBankAccountIsNotActive() {
+    var bankAccount = BankAccount.restore(BANK_ACCOUNT_ID, AccountStatus.BLOCKED, Recipients.empty());
+
+    when(bankAccountRepository.findById(BANK_ACCOUNT_ID))
+      .thenReturn(Optional.of(bankAccount));
+
+    var command = new RemoveRecipientCommand(
+      BANK_ACCOUNT_ID,
+      RecipientId.newId()
+    );
+
+    assertThatThrownBy(() -> commandHandler.handle(command))
+      .isInstanceOf(BankAccountNotActiveException.class)
+      .hasMessage(new BankAccountNotActiveException(AccountStatus.BLOCKED).getMessage());
+
+    verify(bankAccountRepository).findById(BANK_ACCOUNT_ID);
+    verify(bankAccountRepository, never()).save(any(BankAccount.class));
     verifyNoMoreInteractions(bankAccountRepository);
   }
 }

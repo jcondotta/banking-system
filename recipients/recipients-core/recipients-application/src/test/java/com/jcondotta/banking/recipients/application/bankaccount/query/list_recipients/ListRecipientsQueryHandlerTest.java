@@ -48,7 +48,7 @@ class ListRecipientsQueryHandlerTest {
     var query = new ListRecipientsQuery(bankAccountId);
     var queryResult = handler.handle(query);
 
-    assertThat(queryResult.recipients()).containsAll(recipientsSummary);
+    assertThat(queryResult.recipients()).containsExactlyElementsOf(recipientsSummary);
 
     verify(queryRepository).findActiveByBankAccountId(bankAccountId);
   }

@@ -10,7 +10,8 @@ public record ListRecipientsQueryResult(List<RecipientSummary> recipients) {
 
   static final String RECIPIENTS_REQUIRED = "recipients must be provided";
 
-  public ListRecipientsQueryResult {
+  public ListRecipientsQueryResult(List<RecipientSummary> recipients) {
     requireNonNull(recipients, RECIPIENTS_REQUIRED);
+    this.recipients = List.copyOf(recipients);
   }
 }
