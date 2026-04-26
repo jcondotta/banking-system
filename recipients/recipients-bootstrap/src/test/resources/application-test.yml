@@ -2,20 +2,26 @@ app:
   environment: test
 
 spring:
-  kafka:
-    producer:
-      key-serializer: org.apache.kafka.common.serialization.StringSerializer
-      value-serializer: org.apache.kafka.common.serialization.ByteArraySerializer
+  datasource:
+    url: ${TEST_DATASOURCE_URL}
+    username: ${TEST_DATASOURCE_USERNAME}
+    password: ${TEST_DATASOURCE_PASSWORD}
+    driver-class-name: org.postgresql.Driver
 
-cloud:
-  aws:
-    region:
-      static: us-east-1
-    credentials:
-      access-key-id: test
-      secret-key: test
-    dynamodb:
-      endpoint: ${AWS_DYNAMODB_ENDPOINT}
-      tables:
-        account-recipients:
-          table-name: 'account-recipients'
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: false
+
+management:
+  tracing:
+    export:
+      enabled: false
+      otlp:
+        enabled: false
+  opentelemetry:
+    tracing:
+      export:
+        otlp:
+          endpoint: http://localhost:4317
+          transport: grpc

@@ -1,39 +1,35 @@
 package com.jcondotta.banking.recipients.application.bankaccount.command.remove_recipient;
 
 import com.jcondotta.application.command.CommandHandler;
-import com.jcondotta.banking.recipients.domain.recipient.exceptions.BankAccountNotFoundException;
-import com.jcondotta.banking.recipients.domain.recipient.repository.BankAccountRepository;
+import com.jcondotta.banking.recipients.domain.recipient.exceptions.RecipientNotFoundException;
+import com.jcondotta.banking.recipients.domain.recipient.repository.RecipientRepository;
 import io.micrometer.observation.annotation.Observed;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
-@Slf4j
 @Component
-@RequiredArgsConstructor
 public class RemoveRecipientCommandHandler implements CommandHandler<RemoveRecipientCommand> {
 
-  private final BankAccountRepository bankAccountRepository;
+  private final RecipientRepository recipientRepository;
+
+  public RemoveRecipientCommandHandler(RecipientRepository recipientRepository) {
+    this.recipientRepository = recipientRepository;
+  }
 
   @Override
   @Observed(
-    name = "bankaccount.recipient.remove",
+    name = "recipient.remove",
     contextualName = "removeRecipient",
     lowCardinalityKeyValues = {
-      "aggregate", "bankAccount",
+      "aggregate", "recipient",
       "operation", "remove"
-    })
+    }
+  )
   public void handle(RemoveRecipientCommand command) {
-    var bankAccount = bankAccountRepository.findById(command.bankAccountId())
-      .orElseThrow(() -> new BankAccountNotFoundException(command.bankAccountId()));
+    var recipient = recipientRepository.findById(command.recipientId())
+      .orElseThrow(() -> new RecipientNotFoundException(command.recipientId()));
 
-    bankAccount.removeRecipient(command.recipientId());
-    bankAccountRepository.save(bankAccount);
+    recipient.assertBelongsTo(command.bankAccountId());
 
-    log.info(
-      "Recipient removed successfully [recipientId={}, bankAccountId={}]",
-      command.recipientId().value(),
-      command.bankAccountId().value()
-    );
+    recipientRepository.delete(recipient);
   }
 }

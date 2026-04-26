@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+    <conversionRule conversionWord="clr"
+                    converterClass="org.springframework.boot.logging.logback.ColorConverter"/>
+
+    <appender name="LOCAL_CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <pattern>%clr(%d{HH:mm:ss.SSS}){faint} %clr(%-5level) %clr(%logger{36}){cyan} %clr(%msg){white} %kvp%n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="JSON_CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+            <customFields>{"application":"recipients"}</customFields>
+            <includeStructuredArguments>true</includeStructuredArguments>
+            <fieldNames>
+                <version>[ignore]</version>
+                <thread>[ignore]</thread>
+                <levelValue>[ignore]</levelValue>
+            </fieldNames>
+        </encoder>
+    </appender>
+
+    <appender name="LOKI" class="com.github.loki4j.logback.Loki4jAppender">
+        <http>
+            <url>http://localhost:3100/loki/api/v1/push</url>
+        </http>
+        <format>
+            <label>
+                <pattern>application=recipients,level=%level</pattern>
+            </label>
+            <message class="net.logstash.logback.layout.LogstashLayout">
+                <customFields>{"application":"recipients"}</customFields>
+                <includeStructuredArguments>true</includeStructuredArguments>
+                <includeKeyValuePairs>true</includeKeyValuePairs>
+                <includeMdc>true</includeMdc>
+                <fieldNames>
+                    <version>[ignore]</version>
+                    <thread>[ignore]</thread>
+                    <levelValue>[ignore]</levelValue>
+                </fieldNames>
+            </message>
+        </format>
+    </appender>
+
+    <springProfile name="local">
+        <root level="INFO">
+            <appender-ref ref="LOCAL_CONSOLE"/>
+            <appender-ref ref="LOKI"/>
+        </root>
+        <logger name="org.springframework" level="WARN"/>
+        <logger name="org.hibernate" level="WARN"/>
+        <logger name="org.hibernate.orm.jdbc.error" level="ERROR"/>
+        <logger name="com.zaxxer.hikari" level="WARN"/>
+        <logger name="com.jcondotta" level="DEBUG"/>
+    </springProfile>
+
+    <springProfile name="!local">
+        <root level="INFO">
+            <appender-ref ref="JSON_CONSOLE"/>
+        </root>
+        <logger name="org.springframework" level="WARN"/>
+        <logger name="org.hibernate" level="WARN"/>
+        <logger name="org.hibernate.orm.jdbc.error" level="ERROR"/>
+        <logger name="com.zaxxer.hikari" level="WARN"/>
+        <logger name="com.jcondotta" level="INFO"/>
+    </springProfile>
+
+</configuration>

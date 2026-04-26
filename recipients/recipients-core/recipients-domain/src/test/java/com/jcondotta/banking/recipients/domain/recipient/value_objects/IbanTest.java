@@ -1,6 +1,6 @@
 package com.jcondotta.banking.recipients.domain.recipient.value_objects;
 
-import com.jcondotta.banking.recipients.domain.bankaccount.testsupport.BlankValuesSource;
+import com.jcondotta.banking.recipients.domain.testsupport.BlankValuesSource;
 import com.jcondotta.domain.exception.DomainValidationException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -25,7 +25,7 @@ class IbanTest {
   }
 
   @Test
-  void shouldNormalizeIbanValue() {
+  void shouldNormalizeIbanValue_whenValueContainsSpacesAndLowercaseLetters() {
     var iban = Iban.of("  de44 5001 0517 5407 3249 31  ");
 
     assertThat(iban.value()).isEqualTo(VALID_IBAN_1);

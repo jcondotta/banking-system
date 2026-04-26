@@ -1,26 +1,26 @@
 package com.jcondotta.banking.recipients.application.bankaccount.command.remove_recipient;
 
-import com.jcondotta.banking.recipients.domain.recipient.aggregate.BankAccount;
-import com.jcondotta.banking.recipients.domain.recipient.aggregate.Recipients;
-import com.jcondotta.banking.recipients.domain.recipient.enums.AccountStatus;
-import com.jcondotta.banking.recipients.domain.recipient.enums.RecipientStatus;
-import com.jcondotta.banking.recipients.domain.recipient.exceptions.BankAccountNotActiveException;
-import com.jcondotta.banking.recipients.domain.recipient.exceptions.BankAccountNotFoundException;
+import com.jcondotta.banking.recipients.domain.recipient.aggregate.Recipient;
+import com.jcondotta.banking.recipients.domain.recipient.exceptions.RecipientNotFoundException;
+import com.jcondotta.banking.recipients.domain.recipient.exceptions.RecipientOwnershipMismatchException;
 import com.jcondotta.banking.recipients.domain.recipient.identity.BankAccountId;
 import com.jcondotta.banking.recipients.domain.recipient.identity.RecipientId;
-import com.jcondotta.banking.recipients.domain.recipient.repository.BankAccountRepository;
-import com.jcondotta.banking.recipients.domain.bankaccount.testsupport.BankAccountFixtures;
+import com.jcondotta.banking.recipients.domain.recipient.repository.RecipientRepository;
+import com.jcondotta.banking.recipients.domain.recipient.value_objects.Iban;
+import com.jcondotta.banking.recipients.domain.recipient.value_objects.RecipientName;
+import com.jcondotta.banking.recipients.domain.testsupport.ClockTestFactory;
+import com.jcondotta.banking.recipients.domain.testsupport.RecipientFixtures;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.Clock;
+import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.*;
 
@@ -28,107 +28,77 @@ import static org.mockito.Mockito.*;
 class RemoveRecipientCommandHandlerTest {
 
   private static final BankAccountId BANK_ACCOUNT_ID = BankAccountId.of(UUID.randomUUID());
+  private static final RecipientId RECIPIENT_ID = RecipientId.newId();
+
+  private static final RecipientName RECIPIENT_NAME = RecipientFixtures.JEFFERSON.toName();
+  private static final Iban IBAN = RecipientFixtures.JEFFERSON.toIban();
+
+  private static final Instant CREATED_AT = ClockTestFactory.FIXED_CLOCK.instant();
 
   @Mock
-  private BankAccountRepository bankAccountRepository;
+  private RecipientRepository recipientRepository;
 
   private RemoveRecipientCommandHandler commandHandler;
 
   @BeforeEach
   void setUp() {
-    commandHandler = new RemoveRecipientCommandHandler(bankAccountRepository);
+    commandHandler = new RemoveRecipientCommandHandler(recipientRepository);
   }
 
   @Test
-  void shouldRemoveRecipient_whenCommandIsValidAndBankAccountExists() {
-    BankAccount bankAccount = BankAccountFixtures.WITH_ONE_RECIPIENT.create();
+  void shouldRemoveRecipient_whenRecipientExists() {
+    var recipient = recipient();
+    var command = new RemoveRecipientCommand(BANK_ACCOUNT_ID, RECIPIENT_ID);
 
-    when(bankAccountRepository.findById(BANK_ACCOUNT_ID))
-      .thenReturn(Optional.of(bankAccount));
-
-    var recipient = bankAccount.getActiveRecipients().getFirst();
-
-    var command = new RemoveRecipientCommand(
-      BANK_ACCOUNT_ID,
-      recipient.getId()
-    );
+    when(recipientRepository.findById(RECIPIENT_ID))
+      .thenReturn(Optional.of(recipient));
 
     commandHandler.handle(command);
 
-    assertThat(bankAccount.getActiveRecipients()).isEmpty();
-    assertThat(bankAccount.getRecipients())
-      .singleElement()
-      .satisfies(removedRecipient -> assertThat(removedRecipient.getStatus()).isEqualTo(RecipientStatus.REMOVED));
-
-    verify(bankAccountRepository).findById(BANK_ACCOUNT_ID);
-    verify(bankAccountRepository).save(bankAccount);
-    verifyNoMoreInteractions(bankAccountRepository);
+    verify(recipientRepository).findById(RECIPIENT_ID);
+    verify(recipientRepository).delete(recipient);
+    verifyNoMoreInteractions(recipientRepository);
   }
 
   @Test
-  void shouldBeIdempotent_whenRemovingRecipientTwice() {
-    BankAccount bankAccount = BankAccountFixtures.WITH_ONE_RECIPIENT.create();
-    var recipient = bankAccount.getActiveRecipients().getFirst();
+  void shouldThrowRecipientOwnershipMismatchException_whenOwnershipMismatch() {
+    var recipient = recipient();
+    var anotherBankAccountId = BankAccountId.of(UUID.randomUUID());
+    var command = new RemoveRecipientCommand(anotherBankAccountId, RECIPIENT_ID);
 
-    when(bankAccountRepository.findById(BANK_ACCOUNT_ID))
-      .thenReturn(Optional.of(bankAccount));
+    when(recipientRepository.findById(RECIPIENT_ID))
+      .thenReturn(Optional.of(recipient));
 
-    var command = new RemoveRecipientCommand(
-      BANK_ACCOUNT_ID,
-      recipient.getId()
-    );
+    assertThatThrownBy(() -> commandHandler.handle(command))
+      .isInstanceOf(RecipientOwnershipMismatchException.class);
 
-    assertThatCode(() -> {
-      commandHandler.handle(command);
-      commandHandler.handle(command);
-    }).doesNotThrowAnyException();
-
-    assertThat(bankAccount.getActiveRecipients()).isEmpty();
-    assertThat(bankAccount.getRecipients())
-      .singleElement()
-      .satisfies(removedRecipient -> assertThat(removedRecipient.getStatus()).isEqualTo(RecipientStatus.REMOVED));
-
-    verify(bankAccountRepository, times(2)).findById(BANK_ACCOUNT_ID);
-    verify(bankAccountRepository, times(2)).save(bankAccount);
-    verifyNoMoreInteractions(bankAccountRepository);
+    verify(recipientRepository).findById(RECIPIENT_ID);
+    verify(recipientRepository, never()).delete(recipient);
+    verifyNoMoreInteractions(recipientRepository);
   }
 
   @Test
-  void shouldThrowBankAccountNotFoundException_whenBankAccountDoesNotExist() {
-    when(bankAccountRepository.findById(BANK_ACCOUNT_ID))
+  void shouldThrowRecipientNotFoundException_whenRecipientDoesNotExist() {
+    var command = new RemoveRecipientCommand(BANK_ACCOUNT_ID, RECIPIENT_ID);
+
+    when(recipientRepository.findById(RECIPIENT_ID))
       .thenReturn(Optional.empty());
 
-    var command = new RemoveRecipientCommand(
-      BANK_ACCOUNT_ID,
-      RecipientId.newId()
-    );
-
     assertThatThrownBy(() -> commandHandler.handle(command))
-      .isInstanceOf(BankAccountNotFoundException.class)
-      .hasMessage(BankAccountNotFoundException.BANK_ACCOUNT_NOT_FOUND.formatted(BANK_ACCOUNT_ID.value()));
+      .isInstanceOf(RecipientNotFoundException.class);
 
-    verify(bankAccountRepository).findById(BANK_ACCOUNT_ID);
-    verifyNoMoreInteractions(bankAccountRepository);
+    verify(recipientRepository).findById(RECIPIENT_ID);
+    verifyNoMoreInteractions(recipientRepository);
   }
 
-  @Test
-  void shouldThrowBankAccountNotActiveException_whenBankAccountIsNotActive() {
-    var bankAccount = BankAccount.restore(BANK_ACCOUNT_ID, AccountStatus.BLOCKED, Recipients.empty());
-
-    when(bankAccountRepository.findById(BANK_ACCOUNT_ID))
-      .thenReturn(Optional.of(bankAccount));
-
-    var command = new RemoveRecipientCommand(
+  private static Recipient recipient() {
+    return Recipient.restore(
+      RECIPIENT_ID,
       BANK_ACCOUNT_ID,
-      RecipientId.newId()
+      RECIPIENT_NAME,
+      IBAN,
+      CREATED_AT,
+      0L
     );
-
-    assertThatThrownBy(() -> commandHandler.handle(command))
-      .isInstanceOf(BankAccountNotActiveException.class)
-      .hasMessage(new BankAccountNotActiveException(AccountStatus.BLOCKED).getMessage());
-
-    verify(bankAccountRepository).findById(BANK_ACCOUNT_ID);
-    verify(bankAccountRepository, never()).save(any(BankAccount.class));
-    verifyNoMoreInteractions(bankAccountRepository);
   }
 }

@@ -2,8 +2,8 @@ package com.jcondotta.banking.recipients.application.bankaccount.query.list_reci
 
 import com.jcondotta.banking.recipients.application.bankaccount.query.model.RecipientSummary;
 import com.jcondotta.banking.recipients.domain.recipient.identity.BankAccountId;
-import com.jcondotta.banking.recipients.domain.bankaccount.testsupport.RecipientFixtures;
-import org.junit.jupiter.api.BeforeEach;
+import com.jcondotta.banking.recipients.domain.testsupport.ClockTestFactory;
+import com.jcondotta.banking.recipients.domain.testsupport.RecipientTestData;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -21,7 +21,12 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class ListRecipientsQueryHandlerTest {
 
-  private static final Instant CREATED_AT = Instant.parse("2026-01-01T00:00:00Z");
+  private static final UUID RECIPIENT_ID_JEFFERSON = UUID.randomUUID();
+  private static final UUID RECIPIENT_ID_PATRIZIO = UUID.randomUUID();
+
+  private static final BankAccountId BANK_ACCOUNT_ID = BankAccountId.of(UUID.randomUUID());
+
+  private static final Instant CREATED_AT = ClockTestFactory.FIXED_CLOCK.instant();
 
   @Mock
   private RecipientQueryRepository queryRepository;
@@ -29,51 +34,44 @@ class ListRecipientsQueryHandlerTest {
   @InjectMocks
   private ListRecipientsQueryHandler handler;
 
-  private BankAccountId bankAccountId;
-
-  @BeforeEach
-  void setUp() {
-    bankAccountId = new BankAccountId(UUID.randomUUID());
-  }
-
   @Test
-  void shouldReturnRecipients_whenBankAccountHasActiveRecipients() {
+  void shouldReturnRecipients_whenBankAccountHasRecipients() {
     var recipientsSummary = List.of(
-      new RecipientSummary(
-        UUID.randomUUID(),
-        RecipientFixtures.JEFFERSON.toName().value(),
-        RecipientFixtures.JEFFERSON.toIban().value(),
-        CREATED_AT
-      ),
-      new RecipientSummary(
-        UUID.randomUUID(),
-        RecipientFixtures.PATRIZIO.toName().value(),
-        RecipientFixtures.PATRIZIO.toIban().value(),
-        CREATED_AT
-      )
+      recipientSummary(RECIPIENT_ID_JEFFERSON, RecipientTestData.JEFFERSON),
+      recipientSummary(RECIPIENT_ID_PATRIZIO, RecipientTestData.PATRIZIO)
     );
 
-    when(queryRepository.findActiveByBankAccountId(bankAccountId))
+    when(queryRepository.findByBankAccountId(BANK_ACCOUNT_ID))
       .thenReturn(recipientsSummary);
 
-    var query = new ListRecipientsQuery(bankAccountId);
+    var query = new ListRecipientsQuery(BANK_ACCOUNT_ID);
     var queryResult = handler.handle(query);
 
     assertThat(queryResult.recipients()).containsExactlyElementsOf(recipientsSummary);
 
-    verify(queryRepository).findActiveByBankAccountId(bankAccountId);
+    verify(queryRepository).findByBankAccountId(BANK_ACCOUNT_ID);
   }
 
   @Test
   void shouldReturnEmptyList_whenBankAccountHasNoRecipients() {
-    when(queryRepository.findActiveByBankAccountId(bankAccountId))
+    when(queryRepository.findByBankAccountId(BANK_ACCOUNT_ID))
       .thenReturn(List.of());
 
-    var query = new ListRecipientsQuery(bankAccountId);
+    var query = new ListRecipientsQuery(BANK_ACCOUNT_ID);
     var queryResult = handler.handle(query);
 
     assertThat(queryResult.recipients()).isEmpty();
 
-    verify(queryRepository).findActiveByBankAccountId(bankAccountId);
+    verify(queryRepository).findByBankAccountId(BANK_ACCOUNT_ID);
+  }
+
+  private static RecipientSummary recipientSummary(UUID recipientId, RecipientTestData recipientTestData) {
+    return new RecipientSummary(
+      recipientId,
+      BANK_ACCOUNT_ID.value(),
+      recipientTestData.getName(),
+      recipientTestData.getIban(),
+      CREATED_AT
+    );
   }
 }

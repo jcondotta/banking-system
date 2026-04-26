@@ -2,15 +2,15 @@ package com.jcondotta.banking.recipients.infrastructure.adapters.input.rest.crea
 
 import com.jcondotta.application.command.CommandHandlerWithResult;
 import com.jcondotta.banking.recipients.application.bankaccount.command.create_recipient.CreateRecipientCommand;
+import com.jcondotta.banking.recipients.domain.recipient.identity.BankAccountId;
 import com.jcondotta.banking.recipients.domain.recipient.identity.RecipientId;
-import com.jcondotta.banking.recipients.domain.bankaccount.testsupport.RecipientFixtures;
+import com.jcondotta.banking.recipients.domain.testsupport.RecipientFixtures;
+import com.jcondotta.banking.recipients.infrastructure.adapters.input.rest.create_recipient.mapper.CreateRecipientRestMapper;
 import com.jcondotta.banking.recipients.infrastructure.adapters.input.rest.create_recipient.model.CreateRecipientRestRequest;
 import com.jcondotta.banking.recipients.infrastructure.adapters.input.rest.properties.AccountRecipientsURIProperties;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.ResponseEntity;
@@ -30,6 +30,12 @@ class CreateRecipientControllerImplTest {
   private static final String RECIPIENT_NAME = RecipientFixtures.JEFFERSON.toName().value();
   private static final String IBAN = RecipientFixtures.JEFFERSON.toIban().value();
 
+  private static final CreateRecipientCommand COMMAND = new CreateRecipientCommand(
+    BankAccountId.of(BANK_ACCOUNT_UUID),
+    RecipientFixtures.JEFFERSON.toName(),
+    RecipientFixtures.JEFFERSON.toIban()
+  );
+
   private static final URI EXPECTED_LOCATION_URI =
       URI.create("https://api.jcondotta.com/v1/bank-accounts/" + BANK_ACCOUNT_UUID + "/recipients/" + RECIPIENT_UUID);
 
@@ -39,21 +45,22 @@ class CreateRecipientControllerImplTest {
   @Mock
   private AccountRecipientsURIProperties uriProperties;
 
-  @Captor
-  private ArgumentCaptor<CreateRecipientCommand> commandCaptor;
+  @Mock
+  private CreateRecipientRestMapper mapper;
 
   private CreateRecipientControllerImpl controller;
 
   @BeforeEach
   void setUp() {
-    controller = new CreateRecipientControllerImpl(commandHandler, uriProperties);
+    controller = new CreateRecipientControllerImpl(commandHandler, uriProperties, mapper);
   }
 
   @Test
   void shouldCreateRecipientAndReturnCreatedResponse_whenRequestIsValid() {
     var request = new CreateRecipientRestRequest(RECIPIENT_NAME, IBAN);
 
-    when(commandHandler.handle(commandCaptor.capture())).thenReturn(RecipientId.of(RECIPIENT_UUID));
+    when(mapper.toCommand(BANK_ACCOUNT_UUID, request)).thenReturn(COMMAND);
+    when(commandHandler.handle(COMMAND)).thenReturn(RecipientId.of(RECIPIENT_UUID));
     when(uriProperties.recipientURI(BANK_ACCOUNT_UUID, RECIPIENT_UUID)).thenReturn(EXPECTED_LOCATION_URI);
 
     ResponseEntity<Void> response = controller.createRecipient(BANK_ACCOUNT_UUID, request);
@@ -62,14 +69,9 @@ class CreateRecipientControllerImplTest {
     assertThat(response.getHeaders().getLocation()).isEqualTo(EXPECTED_LOCATION_URI);
     assertThat(response.getBody()).isNull();
 
-    verify(commandHandler).handle(any());
+    verify(mapper).toCommand(BANK_ACCOUNT_UUID, request);
+    verify(commandHandler).handle(COMMAND);
     verify(uriProperties).recipientURI(BANK_ACCOUNT_UUID, RECIPIENT_UUID);
-
-    var capturedCommand = commandCaptor.getValue();
-    assertThat(capturedCommand.bankAccountId().value()).isEqualTo(BANK_ACCOUNT_UUID);
-    assertThat(capturedCommand.recipientName().value()).isEqualTo(RECIPIENT_NAME);
-    assertThat(capturedCommand.iban().value()).isEqualTo(IBAN);
-
-    verifyNoMoreInteractions(commandHandler, uriProperties);
+    verifyNoMoreInteractions(mapper, commandHandler, uriProperties);
   }
 }

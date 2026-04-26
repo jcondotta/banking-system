@@ -7,6 +7,6 @@ import java.util.List;
 
 public interface RecipientQueryRepository {
 
-  List<RecipientSummary> findActiveByBankAccountId(BankAccountId bankAccountId);
+  List<RecipientSummary> findByBankAccountId(BankAccountId bankAccountId);
 
 }

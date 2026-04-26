@@ -5,9 +5,16 @@ import com.jcondotta.domain.exception.DomainNotFoundException;
 
 public final class RecipientNotFoundException extends DomainNotFoundException {
 
-  public static final String RECIPIENT_NOT_FOUND = "Recipient with id '%s' was not found";
+  public static final String MESSAGE = "Recipient not found";
+
+  private final String recipientId;
 
   public RecipientNotFoundException(RecipientId recipientId) {
-    super(RECIPIENT_NOT_FOUND.formatted(recipientId));
+    super(MESSAGE);
+    this.recipientId = recipientId.value().toString();
+  }
+
+  public String getRecipientId() {
+    return recipientId;
   }
 }

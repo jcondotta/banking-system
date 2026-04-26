@@ -4,6 +4,7 @@ import com.jcondotta.banking.infrastructure.adapters.output.rest.exceptionhandle
 import com.jcondotta.banking.infrastructure.adapters.output.rest.exceptionhandler.ProblemTypes;
 import com.jcondotta.banking.infrastructure.adapters.output.rest.exceptionhandler.ValidationErrorMapper;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import java.net.URI;
 import java.util.List;
 
+@Slf4j
 @RestControllerAdvice
 public class MethodArgumentNotValidExceptionHandler {
 
@@ -26,6 +28,17 @@ public class MethodArgumentNotValidExceptionHandler {
     MethodArgumentNotValidException ex, HttpServletRequest request) {
 
     List<FieldMessageError> fieldErrors = ValidationErrorMapper.map(ex.getBindingResult().getFieldErrors());
+
+    log.atWarn()
+      .setMessage("Recipient request validation failed")
+      .addKeyValue("event", "recipient_validation")
+      .addKeyValue("outcome", "failure")
+      .addKeyValue("reason", "validation_error")
+      .addKeyValue("httpStatus", 422)
+      .addKeyValue("path", request.getRequestURI())
+      .addKeyValue("errorCount", fieldErrors.size())
+      .addKeyValue("fields", fieldErrors.stream().map(FieldMessageError::field).toList())
+      .log();
 
     var problemDetail = buildProblemDetail(request, fieldErrors);
 

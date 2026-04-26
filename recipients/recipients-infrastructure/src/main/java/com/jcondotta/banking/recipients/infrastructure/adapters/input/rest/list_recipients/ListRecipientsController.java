@@ -12,7 +12,5 @@ import java.util.UUID;
 public interface ListRecipientsController {
 
   @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-  ResponseEntity<ListRecipientsResponse> listRecipients(
-    @PathVariable("bank-account-id") UUID bankAccountId
-  );
+  ResponseEntity<ListRecipientsResponse> listRecipients(@PathVariable("bank-account-id") UUID bankAccountId);
 }

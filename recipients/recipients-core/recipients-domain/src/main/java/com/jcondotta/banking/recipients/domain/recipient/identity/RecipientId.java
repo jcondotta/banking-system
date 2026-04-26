@@ -1,11 +1,11 @@
 package com.jcondotta.banking.recipients.domain.recipient.identity;
 
-import com.jcondotta.domain.identity.EntityId;
+import com.jcondotta.domain.identity.AggregateId;
 import com.jcondotta.domain.support.DomainPreconditions;
 
 import java.util.UUID;
 
-public record RecipientId(UUID value) implements EntityId<UUID> {
+public record RecipientId(UUID value) implements AggregateId<UUID> {
 
   public static final String ID_NOT_PROVIDED = "recipient id value must be provided";
 

@@ -15,8 +15,8 @@ class RecipientNotFoundExceptionTest {
 
     assertThat(exception)
       .isInstanceOf(RuntimeException.class)
-      .hasMessage(
-        RecipientNotFoundException.RECIPIENT_NOT_FOUND.formatted(recipientId)
-      );
+      .hasMessage(RecipientNotFoundException.MESSAGE);
+
+    assertThat(exception.getRecipientId()).isEqualTo(recipientId.value().toString());
   }
 }

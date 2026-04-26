@@ -1,139 +1,96 @@
 package com.jcondotta.banking.recipients.application.bankaccount.command.create_recipient;
 
-import com.jcondotta.banking.recipients.domain.bankaccount.testsupport.ClockTestFactory;
-import com.jcondotta.banking.recipients.domain.recipient.aggregate.BankAccount;
-import com.jcondotta.banking.recipients.domain.recipient.aggregate.Recipients;
-import com.jcondotta.banking.recipients.domain.recipient.enums.AccountStatus;
-import com.jcondotta.banking.recipients.domain.recipient.exceptions.BankAccountNotActiveException;
-import com.jcondotta.banking.recipients.domain.recipient.exceptions.BankAccountNotFoundException;
-import com.jcondotta.banking.recipients.domain.recipient.exceptions.DuplicateRecipientIbanException;
+import com.jcondotta.banking.recipients.domain.recipient.aggregate.Recipient;
 import com.jcondotta.banking.recipients.domain.recipient.identity.BankAccountId;
-import com.jcondotta.banking.recipients.domain.recipient.repository.BankAccountRepository;
-import com.jcondotta.banking.recipients.domain.bankaccount.testsupport.BankAccountFixtures;
-import com.jcondotta.banking.recipients.domain.bankaccount.testsupport.RecipientFixtures;
+import com.jcondotta.banking.recipients.domain.recipient.repository.RecipientRepository;
+import com.jcondotta.banking.recipients.domain.recipient.value_objects.Iban;
+import com.jcondotta.banking.recipients.domain.recipient.value_objects.RecipientName;
+import com.jcondotta.banking.recipients.domain.testsupport.ClockTestFactory;
+import com.jcondotta.banking.recipients.domain.testsupport.RecipientFixtures;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.Clock;
-import java.util.Optional;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 @ExtendWith(MockitoExtension.class)
 class CreateRecipientCommandHandlerTest {
 
   private static final BankAccountId BANK_ACCOUNT_ID = BankAccountId.of(UUID.randomUUID());
+
+  private static final RecipientName RECIPIENT_NAME = RecipientFixtures.JEFFERSON.toName();
+  private static final Iban IBAN = RecipientFixtures.JEFFERSON.toIban();
+
   private static final Clock CLOCK = ClockTestFactory.FIXED_CLOCK;
 
   @Mock
-  private BankAccountRepository bankAccountRepository;
+  private RecipientRepository recipientRepository;
+
+  @Captor
+  private ArgumentCaptor<Recipient> recipientCaptor;
 
   private CreateRecipientCommandHandler commandHandler;
 
   @BeforeEach
   void setUp() {
-    commandHandler = new CreateRecipientCommandHandler(bankAccountRepository, CLOCK);
+    commandHandler = new CreateRecipientCommandHandler(recipientRepository, CLOCK);
   }
 
   @Test
-  void shouldCreateRecipient_whenCommandIsValidAndBankAccountExists() {
-    BankAccount bankAccount = BankAccountFixtures.WITH_NO_RECIPIENTS.create();
-
-    when(bankAccountRepository.findById(BANK_ACCOUNT_ID))
-      .thenReturn(Optional.of(bankAccount));
-
-    var recipientFixture = RecipientFixtures.JEFFERSON;
+  void shouldCreateRecipient_whenCommandIsValid() {
     var command = new CreateRecipientCommand(
       BANK_ACCOUNT_ID,
-      recipientFixture.toName(),
-      recipientFixture.toIban()
+      RECIPIENT_NAME,
+      IBAN
     );
+
     var recipientId = commandHandler.handle(command);
 
-    assertThat(recipientId).isNotNull();
+    verify(recipientRepository).create(recipientCaptor.capture());
+    var savedRecipient = recipientCaptor.getValue();
 
-    assertThat(bankAccount.getActiveRecipients())
-        .hasSize(1)
-        .singleElement()
-        .satisfies(
-            recipient -> {
-              assertThat(recipient.getId()).isEqualTo(recipientId);
-              assertThat(recipient.getRecipientName()).isEqualTo(recipientFixture.toName());
-              assertThat(recipient.getIban()).isEqualTo(recipientFixture.toIban());
-              assertThat(recipient.getCreatedAt()).isEqualTo(CLOCK.instant());
-            });
-
-    verify(bankAccountRepository).findById(BANK_ACCOUNT_ID);
-    verify(bankAccountRepository).save(bankAccount);
-    verifyNoMoreInteractions(bankAccountRepository);
+    assertThat(savedRecipient.getId()).isEqualTo(recipientId);
+    assertThat(savedRecipient.getBankAccountId()).isEqualTo(BANK_ACCOUNT_ID);
+    assertThat(savedRecipient.getRecipientName()).isEqualTo(RECIPIENT_NAME);
+    assertThat(savedRecipient.getIban()).isEqualTo(IBAN);
+    assertThat(savedRecipient.getCreatedAt()).isEqualTo(CLOCK.instant());
+    assertThat(savedRecipient.getVersion()).isNull();
   }
 
   @Test
-  void shouldThrowBankAccountNotFoundException_whenBankAccountDoesNotExist() {
-    when(bankAccountRepository.findById(BANK_ACCOUNT_ID)).thenReturn(Optional.empty());
-
-    var recipientFixture = RecipientFixtures.JEFFERSON;
+  void shouldCallRepositoryCreate_whenCommandIsValid() {
     var command = new CreateRecipientCommand(
       BANK_ACCOUNT_ID,
-      recipientFixture.toName(),
-      recipientFixture.toIban()
+      RECIPIENT_NAME,
+      IBAN
     );
 
-    assertThatThrownBy(() -> commandHandler.handle(command))
-        .isInstanceOf(BankAccountNotFoundException.class)
-        .hasMessage(BankAccountNotFoundException.BANK_ACCOUNT_NOT_FOUND.formatted(BANK_ACCOUNT_ID.value()));
+    commandHandler.handle(command);
 
-    verify(bankAccountRepository).findById(BANK_ACCOUNT_ID);
-    verifyNoMoreInteractions(bankAccountRepository);
+    verify(recipientRepository).create(recipientCaptor.capture());
+    verifyNoMoreInteractions(recipientRepository);
   }
 
   @Test
-  void shouldThrowDuplicateRecipientException_whenIbanAlreadyExists() {
-    var recipientFixture = RecipientFixtures.JEFFERSON;
-    var bankAccount = BankAccountFixtures.create(recipientFixture);
-
-    when(bankAccountRepository.findById(BANK_ACCOUNT_ID))
-      .thenReturn(Optional.of(bankAccount));
-
+  void shouldReturnRecipientId_whenRecipientIsCreated() {
     var command = new CreateRecipientCommand(
       BANK_ACCOUNT_ID,
-      recipientFixture.toName(),
-      recipientFixture.toIban()
+      RECIPIENT_NAME,
+      IBAN
     );
 
-    assertThatThrownBy(() -> commandHandler.handle(command))
-      .isInstanceOf(DuplicateRecipientIbanException.class)
-      .hasMessage(DuplicateRecipientIbanException.RECIPIENT_WITH_IBAN_ALREADY_EXISTS.formatted(recipientFixture.toIban().value()));
+    var recipientId = commandHandler.handle(command);
 
-    verify(bankAccountRepository).findById(BANK_ACCOUNT_ID);
-    verifyNoMoreInteractions(bankAccountRepository);
-  }
-
-  @Test
-  void shouldThrowBankAccountNotActiveException_whenBankAccountIsNotActive() {
-    var bankAccount = BankAccount.restore(BANK_ACCOUNT_ID, AccountStatus.BLOCKED, Recipients.empty());
-
-    when(bankAccountRepository.findById(BANK_ACCOUNT_ID))
-      .thenReturn(Optional.of(bankAccount));
-
-    var recipientFixture = RecipientFixtures.JEFFERSON;
-    var command = new CreateRecipientCommand(
-      BANK_ACCOUNT_ID,
-      recipientFixture.toName(),
-      recipientFixture.toIban()
-    );
-
-    assertThatThrownBy(() -> commandHandler.handle(command))
-      .isInstanceOf(BankAccountNotActiveException.class)
-      .hasMessage(new BankAccountNotActiveException(AccountStatus.BLOCKED).getMessage());
-
-    verify(bankAccountRepository).findById(BANK_ACCOUNT_ID);
-    verifyNoMoreInteractions(bankAccountRepository);
+    verify(recipientRepository).create(recipientCaptor.capture());
+    assertThat(recipientId).isEqualTo(recipientCaptor.getValue().getId());
   }
 }

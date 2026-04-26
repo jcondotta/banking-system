@@ -10,16 +10,16 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class RecipientIdTest {
 
-  private static final UUID ACCOUNT_RECIPIENT_UUID_1 = UUID.fromString("ff9cdd7f-9a2a-4b0a-9e53-6e9f1d482d4e");
+  private static final UUID RECIPIENT_UUID_1 = UUID.fromString("ff9cdd7f-9a2a-4b0a-9e53-6e9f1d482d4e");
 
   @Test
   void shouldCreateRecipientId_whenValueIsValid() {
-    var recipientId = RecipientId.of(ACCOUNT_RECIPIENT_UUID_1);
+    var recipientId = RecipientId.of(RECIPIENT_UUID_1);
 
     assertThat(recipientId)
         .isNotNull()
         .extracting(RecipientId::value)
-        .isEqualTo(ACCOUNT_RECIPIENT_UUID_1);
+        .isEqualTo(RECIPIENT_UUID_1);
   }
 
   @Test
@@ -31,8 +31,8 @@ class RecipientIdTest {
 
   @Test
   void shouldBeEqual_whenRecipientIdsHaveSameValue() {
-    var recipientId1 = RecipientId.of(ACCOUNT_RECIPIENT_UUID_1);
-    var recipientId2 = RecipientId.of(ACCOUNT_RECIPIENT_UUID_1);
+    var recipientId1 = RecipientId.of(RECIPIENT_UUID_1);
+    var recipientId2 = RecipientId.of(RECIPIENT_UUID_1);
 
     assertThat(recipientId1)
         .isEqualTo(recipientId2)

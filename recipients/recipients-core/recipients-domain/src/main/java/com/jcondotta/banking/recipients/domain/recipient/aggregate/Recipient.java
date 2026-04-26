@@ -1,58 +1,92 @@
 package com.jcondotta.banking.recipients.domain.recipient.aggregate;
 
-import com.jcondotta.banking.recipients.domain.recipient.enums.RecipientStatus;
+import com.jcondotta.banking.recipients.domain.recipient.exceptions.RecipientOwnershipMismatchException;
+import com.jcondotta.banking.recipients.domain.recipient.identity.BankAccountId;
 import com.jcondotta.banking.recipients.domain.recipient.identity.RecipientId;
 import com.jcondotta.banking.recipients.domain.recipient.validation.RecipientError;
 import com.jcondotta.banking.recipients.domain.recipient.value_objects.Iban;
 import com.jcondotta.banking.recipients.domain.recipient.value_objects.RecipientName;
-import com.jcondotta.domain.core.Entity;
+import com.jcondotta.domain.core.AggregateRoot;
 
 import java.time.Instant;
 
 import static com.jcondotta.domain.support.DomainPreconditions.required;
 
-public final class Recipient extends Entity<RecipientId> {
+public final class Recipient extends AggregateRoot<RecipientId> {
 
+  private final BankAccountId bankAccountId;
   private final RecipientName recipientName;
   private final Iban iban;
   private final Instant createdAt;
 
-  private RecipientStatus status;
+  private Long version;
 
-  Recipient(
+  private Recipient(
     RecipientId recipientId,
+    BankAccountId bankAccountId,
     RecipientName recipientName,
     Iban iban,
-    RecipientStatus status,
-    Instant createdAt
+    Instant createdAt,
+    Long version
   ) {
     super(required(recipientId, RecipientError.RECIPIENT_ID_NOT_PROVIDED));
+
+    this.bankAccountId = required(bankAccountId, RecipientError.BANK_ACCOUNT_ID_NOT_PROVIDED);
     this.recipientName = required(recipientName, RecipientError.RECIPIENT_NAME_NOT_PROVIDED);
     this.iban = required(iban, RecipientError.IBAN_NOT_PROVIDED);
-    this.status = required(status, RecipientError.STATUS_NOT_PROVIDED);
     this.createdAt = required(createdAt, RecipientError.CREATED_AT_NOT_PROVIDED);
+    this.version = version;
   }
 
-  static Recipient create(RecipientName recipientName, Iban iban, Instant createdAt) {
-    return new Recipient(RecipientId.newId(), recipientName, iban, RecipientStatus.ACTIVE, createdAt);
-  }
-
-  void remove() {
-    if (RecipientStatus.REMOVED.equals(status)) {
-      return;
-    }
-
-    this.status = RecipientStatus.REMOVED;
+  public static Recipient create(
+    RecipientId recipientId,
+    BankAccountId bankAccountId,
+    RecipientName recipientName,
+    Iban iban,
+    Instant createdAt
+  ) {
+    return new Recipient(
+      recipientId,
+      bankAccountId,
+      recipientName,
+      iban,
+      createdAt,
+      null
+    );
   }
 
   public static Recipient restore(
     RecipientId recipientId,
+    BankAccountId bankAccountId,
     RecipientName recipientName,
     Iban iban,
-    RecipientStatus status,
-    Instant createdAt
+    Instant createdAt,
+    Long version
   ) {
-    return new Recipient(recipientId, recipientName, iban, status, createdAt);
+    return new Recipient(
+      recipientId,
+      bankAccountId,
+      recipientName,
+      iban,
+      createdAt,
+      version
+    );
+  }
+
+  public void assertBelongsTo(BankAccountId other) {
+    required(other, RecipientError.BANK_ACCOUNT_ID_NOT_PROVIDED);
+
+    if (!bankAccountId.equals(other)) {
+      throw new RecipientOwnershipMismatchException(this.getId(), other);
+    }
+  }
+
+  public boolean isPersisted() {
+    return version != null;
+  }
+
+  public BankAccountId getBankAccountId() {
+    return bankAccountId;
   }
 
   public RecipientName getRecipientName() {
@@ -63,15 +97,11 @@ public final class Recipient extends Entity<RecipientId> {
     return iban;
   }
 
-  public RecipientStatus getStatus() {
-    return status;
-  }
-
-  public boolean isActive() {
-    return RecipientStatus.ACTIVE.equals(status);
-  }
-
   public Instant getCreatedAt() {
     return createdAt;
+  }
+
+  public Long getVersion() {
+    return version;
   }
 }

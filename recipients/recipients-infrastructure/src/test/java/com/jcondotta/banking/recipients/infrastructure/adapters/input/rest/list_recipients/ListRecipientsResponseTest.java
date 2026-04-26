@@ -16,10 +16,11 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 class ListRecipientsResponseTest {
 
   private static final UUID RECIPIENT_ID = UUID.randomUUID();
+  private static final UUID BANK_ACCOUNT_ID = UUID.randomUUID();
   private static final Instant CREATED_AT = Instant.parse("2026-01-01T00:00:00Z");
 
   @Test
-  void shouldCreateResponseFromQueryResult() {
+  void shouldCreateResponse_whenQueryResultIsProvided() {
     var queryResult = new ListRecipientsQueryResult(List.of(summary()));
 
     var response = ListRecipientsResponse.from(queryResult);
@@ -35,7 +36,7 @@ class ListRecipientsResponseTest {
   }
 
   @Test
-  void shouldCreateImmutableRecipientsList() {
+  void shouldCreateImmutableRecipientsList_whenRecipientsAreProvided() {
     var recipients = new ArrayList<RecipientRestResponse>();
     recipients.add(RecipientRestResponse.from(summary()));
 
@@ -50,6 +51,7 @@ class ListRecipientsResponseTest {
   private static RecipientSummary summary() {
     return new RecipientSummary(
       RECIPIENT_ID,
+      BANK_ACCOUNT_ID,
       "Jefferson Condotta",
       "ES3801283316232166447417",
       CREATED_AT

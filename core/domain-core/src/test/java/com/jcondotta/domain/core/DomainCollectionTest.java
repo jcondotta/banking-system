@@ -22,28 +22,18 @@ class DomainCollectionTest {
   }
 
   @Test
-  void shouldReturnStreamWithAllElements_whenCallingStream() {
+  void shouldReturnAllElements_whenStreamingCollection() {
     var item1 = createItem();
     var item2 = createItem();
 
     var collection = createCollection(List.of(item1, item2));
 
-    var result = collection.stream().toList();
-
-    assertThat(result)
+    assertThat(collection.stream())
       .containsExactly(item1, item2);
   }
 
   @Test
-  void shouldReturnEmptyStream_whenCollectionIsEmpty() {
-    var collection = createCollection(List.of());
-
-    assertThat(collection.stream())
-      .isEmpty();
-  }
-
-  @Test
-  void shouldIterateOverAllElements() {
+  void shouldIterateOverAllElements_whenUsingIterator() {
     var item1 = createItem();
     var item2 = createItem();
 
@@ -54,41 +44,77 @@ class DomainCollectionTest {
   }
 
   @Test
-  void shouldThrowException_whenModifyingImmutableValuesList() {
+  void shouldThrowException_whenModifyingReturnedValuesList() {
     var item = createItem();
     var collection = createCollection(List.of(item));
 
     var values = collection.values();
 
-    assertThatThrownBy(() -> values.add(item))
+    assertThatThrownBy(() -> values.add(createItem()))
       .isInstanceOf(UnsupportedOperationException.class);
   }
 
   @Test
-  void shouldCreateDefensiveCopy_whenCollectionIsCreatedFromExternalList() {
+  void shouldCreateDefensiveCopy_whenConstructedWithExternalList() {
     var item = createItem();
 
-    var list = new ArrayList<FakeEntity>();
-    list.add(item);
+    var external = new ArrayList<FakeEntity>();
+    external.add(item);
 
-    var collection = createCollection(list);
+    var collection = createCollection(external);
 
-    list.clear();
+    external.clear();
 
     assertThat(collection.values())
       .containsExactly(item);
   }
 
   @Test
-  void shouldThrowException_whenRemovingElementUsingIterator() {
+  void shouldThrowException_whenRemovingElementViaIterator() {
     var item = createItem();
     var collection = createCollection(List.of(item));
 
     var iterator = collection.iterator();
-
     iterator.next();
 
     assertThatThrownBy(iterator::remove)
       .isInstanceOf(UnsupportedOperationException.class);
+  }
+
+  @Test
+  void shouldAddElement_whenUsingInternalMutationMethod() {
+    var collection = new FakeCollection(List.of());
+
+    var item = createItem();
+
+    collection.add(item);
+
+    assertThat(collection.values())
+      .containsExactly(item);
+  }
+
+  @Test
+  void shouldNotChangeInternalState_whenModifyingReturnedList() {
+    var item = createItem();
+    var collection = createCollection(List.of(item));
+
+    var values = collection.values();
+
+    assertThatThrownBy(values::clear)
+      .isInstanceOf(UnsupportedOperationException.class);
+
+    assertThat(collection.values())
+      .containsExactly(item);
+  }
+
+  @Test
+  void shouldReturnNewListInstance_whenAccessingValuesMultipleTimes() {
+    var item = createItem();
+    var collection = createCollection(List.of(item));
+
+    var values1 = collection.values();
+    var values2 = collection.values();
+
+    assertThat(values1).isNotSameAs(values2);
   }
 }

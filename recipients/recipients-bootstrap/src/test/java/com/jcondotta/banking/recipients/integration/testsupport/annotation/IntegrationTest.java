@@ -1,6 +1,6 @@
 package com.jcondotta.banking.recipients.integration.testsupport.annotation;
 
-import com.jcondotta.banking.recipients.integration.testsupport.initializer.AllContainersInitializer;
+import com.jcondotta.banking.recipients.integration.testsupport.initializer.RecipientContainersInitializer;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
@@ -14,6 +14,6 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
 @Documented
 @SpringBootTest(webEnvironment = RANDOM_PORT)
 @ActiveProfiles("test")
-@ContextConfiguration(initializers = AllContainersInitializer.class)
+@ContextConfiguration(initializers = RecipientContainersInitializer.class)
 public @interface IntegrationTest {
 }

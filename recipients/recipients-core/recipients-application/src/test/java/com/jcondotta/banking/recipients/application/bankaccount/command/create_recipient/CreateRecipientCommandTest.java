@@ -1,9 +1,9 @@
 package com.jcondotta.banking.recipients.application.bankaccount.command.create_recipient;
 
 import com.jcondotta.banking.recipients.domain.recipient.identity.BankAccountId;
-import com.jcondotta.banking.recipients.domain.bankaccount.testsupport.RecipientFixtures;
 import com.jcondotta.banking.recipients.domain.recipient.value_objects.Iban;
 import com.jcondotta.banking.recipients.domain.recipient.value_objects.RecipientName;
+import com.jcondotta.banking.recipients.domain.testsupport.RecipientFixtures;
 import org.junit.jupiter.api.Test;
 
 import java.util.UUID;

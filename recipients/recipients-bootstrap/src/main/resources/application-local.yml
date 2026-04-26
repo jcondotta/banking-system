@@ -1,28 +1,17 @@
 spring:
-  kafka:
-    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/recipients_db}
+    username: ${SPRING_DATASOURCE_USERNAME:admin}
+    password: ${SPRING_DATASOURCE_PASSWORD:password}
 
-cloud:
-  aws:
-    region:
-      static: ${AWS_DEFAULT_REGION:us-east-1}
-    credentials:
-      access-key-id: ${AWS_ACCESS_KEY_ID:test}
-      secret-key: ${AWS_SECRET_ACCESS_KEY:test}
-    dynamodb:
-      endpoint: ${AWS_DYNAMODB_ENDPOINT:http://127.0.0.1:4566}
-      tables:
-        account-recipients:
-          table-name: ${AWS_DYNAMODB_ACCOUNT_RECIPIENTS_TABLE_NAME:account-recipients}
+  jpa:
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: false
 
-app:
-  environment: local
-  api:
-    v1:
-      recipients:
-        root-path: '/api/v1/bank-accounts/{bank-account-id}/recipients'
-        recipient-id-path: '/api/v1/bank-accounts/{bank-account-id}/recipients/{recipient-id}'
-  kafka:
-    topics:
-      bank-account-activated:
-        topic-name: ${KAFKA_BANK_ACCOUNT_ACTIVATED_TOPIC_NAME:bank-account-activated}
+management:
+  tracing:
+    sampling:
+      probability: 1.0

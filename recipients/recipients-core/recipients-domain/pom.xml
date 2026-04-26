@@ -18,6 +18,7 @@
             <artifactId>domain-core</artifactId>
         </dependency>
 
+        <!-- test dependencies-->
         <dependency>
             <groupId>com.jcondotta</groupId>
             <artifactId>recipients-test-common</artifactId>

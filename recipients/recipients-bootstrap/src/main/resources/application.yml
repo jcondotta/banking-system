@@ -3,51 +3,84 @@ server:
 
 spring:
   application:
-    name: account-recipients
-  kafka:
-    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    name: recipients
 
-    consumer:
-      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+  datasource:
+    url: ${SPRING_DATASOURCE_URL}
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
+    driver-class-name: org.postgresql.Driver
 
-cloud:
-  aws:
-    region:
-      static: ${AWS_DEFAULT_REGION:us-east-1}
-    dynamodb:
-      tables:
-        account-recipients:
-          table-name: ${AWS_DYNAMODB_ACCOUNT_RECIPIENTS_TABLE_NAME:account-recipients}
+  liquibase:
+    enabled: true
+    change-log: classpath:db/changelog/db.changelog-master.yml
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: false
 
 app:
-  environment: ${APPLICATION_ENV:local}
   api:
     v1:
       recipients:
         root-path: '/api/v1/bank-accounts/{bank-account-id}/recipients'
         recipient-id-path: '/api/v1/bank-accounts/{bank-account-id}/recipients/{recipient-id}'
-  kafka:
-    topics:
-      bank-account-activated:
-        topic-name: ${KAFKA_BANK_ACCOUNT_ACTIVATED_TOPIC_NAME:bank-account-activated}
-        group-id: ${KAFKA_BANK_ACCOUNT_ACTIVATED_GROUP_ID:recipients-service}
 
 management:
   endpoints:
     web:
       exposure:
-        include: health, prometheus, metrics
+        include: health, metrics
+  otlp:
+    metrics:
+      export:
+        url: http://localhost:4318/v1/metrics
+        step: 10s
+
+  observations:
+    annotations:
+      enabled: true
+
+  opentelemetry:
+    tracing:
+      export:
+        otlp:
+          endpoint: ${MANAGEMENT_OPENTELEMETRY_TRACING_EXPORT_OTLP_ENDPOINT:http://localhost:4317}
+          transport: ${MANAGEMENT_OPENTELEMETRY_TRACING_EXPORT_OTLP_TRANSPORT:grpc}
+
+  tracing:
+    enabled: ${MANAGEMENT_TRACING_ENABLED:true}
+    export:
+      enabled: ${MANAGEMENT_TRACING_EXPORT_ENABLED:true}
+      otlp:
+        enabled: ${MANAGEMENT_TRACING_EXPORT_OTLP_ENABLED:true}
+    sampling:
+      probability: ${MANAGEMENT_TRACING_SAMPLING_PROBABILITY:1.0}
 
   metrics:
     tags:
       application: ${spring.application.name}
 
+    enable:
+      recipient.remove.active: false
+      recipient.create.active: false
+      recipient.list.active: false
+      recipient.list.result.size.percentile: false
+
     distribution:
       percentiles-histogram:
         http.server.requests: true
-        bankaccount.*: true
+        recipient.create: true
+        recipient.remove: true
+        recipient.list: true
 
       percentiles:
-        http.server.requests: 0.5, 0.95, 0.99
-        bankaccount.*: 0.5, 0.95, 0.99
+        http.server.requests: 0.5, 0.9, 0.99
+        recipient.create: 0.5, 0.9, 0.99
+        recipient.remove: 0.5, 0.9, 0.99
+        recipient.list: 0.5, 0.9, 0.99

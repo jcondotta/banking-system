@@ -5,6 +5,7 @@ import java.util.UUID;
 
 public record RecipientSummary(
   UUID recipientId,
+  UUID bankAccountId,
   String recipientName,
   String iban,
   Instant createdAt

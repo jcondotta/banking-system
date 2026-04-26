@@ -8,7 +8,7 @@ import java.util.stream.Stream;
 
 public abstract class DomainCollection<T> implements Iterable<T> {
 
-  protected final List<T> values;
+  private final List<T> values;
 
   protected DomainCollection(Collection<T> values) {
     this.values = new ArrayList<>(values);
@@ -18,6 +18,10 @@ public abstract class DomainCollection<T> implements Iterable<T> {
     return List.copyOf(values);
   }
 
+  protected void add(T value) {
+    values.add(value);
+  }
+
   public Stream<T> stream() {
     return values.stream();
   }
@@ -25,6 +29,6 @@ public abstract class DomainCollection<T> implements Iterable<T> {
   @Override
   @SuppressWarnings("all")
   public Iterator<T> iterator() {
-    return List.copyOf(values).iterator();
+    return values().iterator();
   }
 }
