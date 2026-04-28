@@ -4,6 +4,7 @@ server:
 spring:
   application:
     name: recipients
+    version: "@project.version@"
 
   datasource:
     url: ${SPRING_DATASOURCE_URL}

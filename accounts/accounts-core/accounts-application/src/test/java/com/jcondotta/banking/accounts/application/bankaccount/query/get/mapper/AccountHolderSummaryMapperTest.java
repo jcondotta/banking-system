@@ -2,10 +2,9 @@ package com.jcondotta.banking.accounts.application.bankaccount.query.get.mapper;
 
 import com.jcondotta.banking.accounts.application.bankaccount.query.get.model.AccountHolderSummary;
 import com.jcondotta.banking.accounts.domain.bankaccount.aggregate.AccountHolder;
-import com.jcondotta.banking.accounts.domain.bankaccount.testsupport.AccountHolderFixtures;
-import com.jcondotta.banking.accounts.domain.bankaccount.testsupport.BankAccountFixture;
+import com.jcondotta.banking.recipients.domain.testsupport.AccountHolderFixtures;
+import com.jcondotta.banking.recipients.domain.testsupport.BankAccountFixture;
 import org.junit.jupiter.api.Test;
-import org.mapstruct.factory.Mappers;
 
 import java.time.Instant;
 

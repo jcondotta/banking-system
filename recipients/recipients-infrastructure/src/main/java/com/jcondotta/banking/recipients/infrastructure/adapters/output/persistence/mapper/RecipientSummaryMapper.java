@@ -1,6 +1,6 @@
 package com.jcondotta.banking.recipients.infrastructure.adapters.output.persistence.mapper;
 
-import com.jcondotta.banking.recipients.application.bankaccount.query.model.RecipientSummary;
+import com.jcondotta.banking.recipients.application.recipient.query.model.RecipientSummary;
 import com.jcondotta.banking.recipients.infrastructure.adapters.output.persistence.entity.RecipientEntity;
 import org.springframework.stereotype.Component;
 

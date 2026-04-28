@@ -250,14 +250,35 @@ class CreateRecipientIT {
 
   @Test
   void shouldReturn400BadRequest_whenJsonIsMalformed() {
-    given()
+    var problemDetail = given()
       .spec(requestSpecification)
       .pathParam("bank-account-id", bankAccountId)
       .body("{ invalid-json }")
       .when()
       .post()
       .then()
-      .statusCode(HttpStatus.BAD_REQUEST.value());
+      .statusCode(HttpStatus.BAD_REQUEST.value())
+      .extract()
+      .body()
+      .as(ProblemDetail.class);
+
+    assert400ValidationProblem(problemDetail);
+  }
+
+  @Test
+  void shouldReturn400BadRequest_whenRequestBodyIsMissing() {
+    var problemDetail = given()
+      .spec(requestSpecification)
+      .pathParam("bank-account-id", bankAccountId)
+      .when()
+      .post()
+      .then()
+      .statusCode(HttpStatus.BAD_REQUEST.value())
+      .extract()
+      .body()
+      .as(ProblemDetail.class);
+
+    assert400ValidationProblem(problemDetail);
   }
 
   private void assert422ValidationProblem(ProblemDetail problemDetail) {
@@ -265,6 +286,16 @@ class CreateRecipientIT {
       () -> assertThat(problemDetail.getType()).isEqualTo(ProblemTypes.VALIDATION_ERRORS),
       () -> assertThat(problemDetail.getTitle()).isEqualTo("Request validation failed"),
       () -> assertThat(problemDetail.getStatus()).isEqualTo(HttpStatus.UNPROCESSABLE_CONTENT.value()),
+      () -> assertThat(problemDetail.getInstance()).isEqualTo(uriProperties.recipientsURI(bankAccountId))
+    );
+  }
+
+  private void assert400ValidationProblem(ProblemDetail problemDetail) {
+    assertAll(
+      () -> assertThat(problemDetail.getType()).isEqualTo(ProblemTypes.VALIDATION_ERRORS),
+      () -> assertThat(problemDetail.getTitle()).isEqualTo("Request validation failed"),
+      () -> assertThat(problemDetail.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST.value()),
+      () -> assertThat(problemDetail.getDetail()).isEqualTo("Request body could not be read"),
       () -> assertThat(problemDetail.getInstance()).isEqualTo(uriProperties.recipientsURI(bankAccountId))
     );
   }

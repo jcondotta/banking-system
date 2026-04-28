@@ -4,15 +4,18 @@
     <conversionRule conversionWord="clr"
                     converterClass="org.springframework.boot.logging.logback.ColorConverter"/>
 
+    <springProperty name="SERVICE_NAME" source="spring.application.name" defaultValue="unknown"/>
+    <springProperty name="SERVICE_VERSION" source="spring.application.version" defaultValue="unknown"/>
+
     <appender name="LOCAL_CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
-            <pattern>%clr(%d{HH:mm:ss.SSS}){faint} %clr(%-5level) %clr(%logger{36}){cyan} %clr(%msg){white} %kvp%n</pattern>
+            <pattern>%clr(%d{HH:mm:ss.SSS}){faint} %clr(%-5level) %clr(%logger{36}){cyan} %clr([%X{correlationId}]){magenta} %clr(%msg){white} %kvp%n</pattern>
         </encoder>
     </appender>
 
     <appender name="JSON_CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder class="net.logstash.logback.encoder.LogstashEncoder">
-            <customFields>{"application":"recipients"}</customFields>
+            <customFields>{"service":"${SERVICE_NAME}","service_version":"${SERVICE_VERSION}"}</customFields>
             <includeStructuredArguments>true</includeStructuredArguments>
             <fieldNames>
                 <version>[ignore]</version>
@@ -28,10 +31,10 @@
         </http>
         <format>
             <label>
-                <pattern>application=recipients,level=%level</pattern>
+                <pattern>application=${SERVICE_NAME},level=%level</pattern>
             </label>
             <message class="net.logstash.logback.layout.LogstashLayout">
-                <customFields>{"application":"recipients"}</customFields>
+                <customFields>{"service":"${SERVICE_NAME}","service_version":"${SERVICE_VERSION}"}</customFields>
                 <includeStructuredArguments>true</includeStructuredArguments>
                 <includeKeyValuePairs>true</includeKeyValuePairs>
                 <includeMdc>true</includeMdc>
@@ -53,7 +56,7 @@
         <logger name="org.hibernate" level="WARN"/>
         <logger name="org.hibernate.orm.jdbc.error" level="ERROR"/>
         <logger name="com.zaxxer.hikari" level="WARN"/>
-        <logger name="com.jcondotta" level="DEBUG"/>
+        <logger name="com.jcondotta" level="INFO"/>
     </springProfile>
 
     <springProfile name="!local">

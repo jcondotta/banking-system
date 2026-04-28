@@ -1,7 +1,7 @@
 package com.jcondotta.banking.recipients.integration.recipient.list;
 
 import com.jcondotta.application.command.CommandHandler;
-import com.jcondotta.banking.recipients.application.bankaccount.command.remove_recipient.RemoveRecipientCommand;
+import com.jcondotta.banking.recipients.application.recipient.command.remove.RemoveRecipientCommand;
 import com.jcondotta.banking.recipients.domain.recipient.aggregate.Recipient;
 import com.jcondotta.banking.recipients.domain.recipient.identity.BankAccountId;
 import com.jcondotta.banking.recipients.domain.recipient.identity.RecipientId;
@@ -94,9 +94,9 @@ class ListRecipientsIT {
       OTHER_CREATED_AT
     );
 
-    recipientRepository.create(patrizioRecipient);
-    recipientRepository.create(otherAccountRecipient);
-    recipientRepository.create(jeffersonRecipient);
+    recipientRepository.save(patrizioRecipient);
+    recipientRepository.save(otherAccountRecipient);
+    recipientRepository.save(jeffersonRecipient);
 
     var response = getRecipients(bankAccountId.value(), HttpStatus.OK);
 
@@ -126,8 +126,8 @@ class ListRecipientsIT {
       SECOND_CREATED_AT
     );
 
-    recipientRepository.create(activeRecipient);
-    recipientRepository.create(removedRecipient);
+    recipientRepository.save(activeRecipient);
+    recipientRepository.save(removedRecipient);
     removeRecipientHandler.handle(new RemoveRecipientCommand(bankAccountId, removedRecipient.getId()));
 
     var response = getRecipients(bankAccountId.value(), HttpStatus.OK);

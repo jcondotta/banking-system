@@ -1,10 +1,10 @@
 package com.jcondotta.banking.recipients.integration.recipient.remove;
 
 import com.jcondotta.banking.infrastructure.adapters.output.rest.exceptionhandler.ProblemTypes;
-import com.jcondotta.banking.recipients.application.bankaccount.command.remove_recipient.RemoveRecipientCommand;
-import com.jcondotta.banking.recipients.application.bankaccount.command.remove_recipient.RemoveRecipientCommandHandler;
+import com.jcondotta.banking.recipients.application.common.exception.RecipientOptimisticLockException;
+import com.jcondotta.banking.recipients.application.recipient.command.remove.RemoveRecipientCommand;
+import com.jcondotta.banking.recipients.application.recipient.command.remove.RemoveRecipientCommandHandler;
 import com.jcondotta.banking.recipients.domain.recipient.exceptions.RecipientNotFoundException;
-import com.jcondotta.banking.recipients.domain.recipient.exceptions.RecipientOptimisticLockException;
 import com.jcondotta.banking.recipients.domain.recipient.exceptions.RecipientOwnershipMismatchException;
 import com.jcondotta.banking.recipients.domain.recipient.identity.BankAccountId;
 import com.jcondotta.banking.recipients.domain.recipient.identity.RecipientId;
@@ -63,7 +63,7 @@ class RemoveRecipientIT {
   @Test
   void shouldReturn204NoContentAndHardDeleteRecipient_whenRecipientIsRemoved() {
     var recipient = RecipientFixtures.JEFFERSON.toRecipient(bankAccountId);
-    recipientRepository.create(recipient);
+    recipientRepository.save(recipient);
 
     deleteRecipient(bankAccountId.value(), recipient.getId().value(), HttpStatus.NO_CONTENT);
 
@@ -73,7 +73,7 @@ class RemoveRecipientIT {
   @Test
   void shouldReturn404NotFound_whenRecipientIsAlreadyRemoved() {
     var recipient = RecipientFixtures.PATRIZIO.toRecipient(bankAccountId);
-    recipientRepository.create(recipient);
+    recipientRepository.save(recipient);
 
     deleteRecipient(bankAccountId.value(), recipient.getId().value(), HttpStatus.NO_CONTENT);
 
@@ -83,7 +83,7 @@ class RemoveRecipientIT {
       HttpStatus.NOT_FOUND
     );
 
-    var expectedMessage = new RecipientNotFoundException(recipient.getId()).getMessage();
+    var expectedMessage = new RecipientNotFoundException(recipient.getId(), bankAccountId).getMessage();
     assertThat(problemDetail)
       .isNotNull()
       .extracting(ProblemDetail::getDetail)
@@ -100,7 +100,7 @@ class RemoveRecipientIT {
       HttpStatus.NOT_FOUND
     );
 
-    var expectedMessage = new RecipientNotFoundException(RecipientId.of(nonExistentRecipientId)).getMessage();
+    var expectedMessage = new RecipientNotFoundException(RecipientId.of(nonExistentRecipientId), bankAccountId).getMessage();
 
     assertAll(
       () -> assertThat(problemDetail.getType()).hasToString(ProblemTypes.RESOURCE_NOT_FOUND.toString()),
@@ -115,7 +115,7 @@ class RemoveRecipientIT {
   void shouldReturn422UnprocessableEntity_whenRecipientBelongsToAnotherBankAccount() {
     var recipient = RecipientFixtures.VIRGINIO.toRecipient(bankAccountId);
     var otherBankAccountId = UUID.randomUUID();
-    recipientRepository.create(recipient);
+    recipientRepository.save(recipient);
 
     var problemDetail = deleteRecipient(
       otherBankAccountId,
@@ -140,7 +140,7 @@ class RemoveRecipientIT {
   @Test
   void shouldReturn409Conflict_whenRecipientVersionIsStale() {
     var recipient = RecipientFixtures.JEFFERSON.toRecipient(bankAccountId);
-    recipientRepository.create(recipient);
+    recipientRepository.save(recipient);
 
     var command = new RemoveRecipientCommand(bankAccountId, recipient.getId());
     doThrow(new RecipientOptimisticLockException(recipient.getId()))

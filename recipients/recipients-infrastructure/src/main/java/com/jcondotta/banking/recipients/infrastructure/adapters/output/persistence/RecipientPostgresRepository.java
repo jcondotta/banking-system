@@ -1,9 +1,9 @@
 package com.jcondotta.banking.recipients.infrastructure.adapters.output.persistence;
 
+import com.jcondotta.banking.recipients.application.common.exception.RecipientOptimisticLockException;
 import com.jcondotta.banking.recipients.domain.recipient.aggregate.Recipient;
 import com.jcondotta.banking.recipients.domain.recipient.exceptions.DuplicateRecipientIbanException;
 import com.jcondotta.banking.recipients.domain.recipient.exceptions.RecipientAlreadyExistsException;
-import com.jcondotta.banking.recipients.domain.recipient.exceptions.RecipientOptimisticLockException;
 import com.jcondotta.banking.recipients.domain.recipient.identity.RecipientId;
 import com.jcondotta.banking.recipients.domain.recipient.repository.RecipientRepository;
 import com.jcondotta.banking.recipients.infrastructure.adapters.metrics.persistence.RecipientPersistenceMetrics;
@@ -13,7 +13,6 @@ import io.micrometer.observation.annotation.Observed;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,7 +21,6 @@ import java.util.Optional;
 import static com.jcondotta.banking.recipients.infrastructure.adapters.metrics.persistence.RecipientPersistenceConstraint.BANK_ACCOUNT_IBAN;
 import static com.jcondotta.banking.recipients.infrastructure.adapters.metrics.persistence.RecipientPersistenceOperation.CREATE;
 import static com.jcondotta.banking.recipients.infrastructure.adapters.metrics.persistence.RecipientPersistenceOperation.DELETE;
-import static com.jcondotta.banking.recipients.infrastructure.adapters.metrics.persistence.RecipientPersistenceOperation.UPDATE;
 
 @Slf4j
 @Repository
@@ -52,7 +50,7 @@ public class RecipientPostgresRepository implements RecipientRepository {
             "operation", "create"
         }
     )
-    public void create(Recipient recipient) {
+    public void save(Recipient recipient) {
         try {
             repository.saveAndFlush(mapper.toEntity(recipient));
         }
@@ -65,17 +63,17 @@ public class RecipientPostgresRepository implements RecipientRepository {
         }
     }
 
-    @Override
-    @Transactional
-    public void update(Recipient recipient) {
-        try {
-            repository.saveAndFlush(mapper.toEntity(recipient));
-        }
-        catch (ObjectOptimisticLockingFailureException e) {
-            persistenceMetrics.recordOptimisticLockConflict(UPDATE);
-            throw new RecipientOptimisticLockException(recipient.getId());
-        }
-    }
+//    @Override
+//    @Transactional
+//    public void update(Recipient recipient) {
+//        try {
+//            repository.saveAndFlush(mapper.toEntity(recipient));
+//        }
+//        catch (ObjectOptimisticLockingFailureException e) {
+//            persistenceMetrics.recordOptimisticLockConflict(UPDATE);
+//            throw new RecipientOptimisticLockException(recipient.getId());
+//        }
+//    }
 
     @Override
     @Transactional

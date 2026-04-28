@@ -1,4 +1,4 @@
-package com.jcondotta.banking.accounts.domain.bankaccount.testsupport;
+package com.jcondotta.banking.recipients.domain.testsupport;
 
 import com.jcondotta.banking.accounts.domain.bankaccount.aggregate.AccountHolder;
 import com.jcondotta.banking.accounts.domain.bankaccount.aggregate.BankAccount;

@@ -2,23 +2,12 @@ package com.jcondotta.banking.accounts.infrastructure.adapters.input.rest.open;
 
 import com.jcondotta.banking.accounts.domain.bankaccount.enums.AccountType;
 import com.jcondotta.banking.accounts.domain.bankaccount.enums.Currency;
-import com.jcondotta.banking.accounts.domain.bankaccount.repository.BankAccountRepository;
-import com.jcondotta.banking.accounts.domain.bankaccount.testsupport.AccountHolderFixtures;
+import com.jcondotta.banking.recipients.domain.testsupport.AccountHolderFixtures;
 import com.jcondotta.banking.accounts.infrastructure.container.KafkaTestContainer;
 import com.jcondotta.banking.accounts.infrastructure.container.LocalStackTestContainer;
-import com.jcondotta.banking.accounts.infrastructure.properties.BankAccountsURIProperties;
-import io.restassured.RestAssured;
-import io.restassured.builder.RequestSpecBuilder;
-import io.restassured.http.ContentType;
-import io.restassured.specification.RequestSpecification;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
-import tools.jackson.databind.ObjectMapper;
 
 @ActiveProfiles("test")
 @ContextConfiguration(initializers = { LocalStackTestContainer.class, KafkaTestContainer.class })

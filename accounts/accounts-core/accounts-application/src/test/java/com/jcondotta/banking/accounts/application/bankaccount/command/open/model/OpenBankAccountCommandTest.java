@@ -2,7 +2,7 @@ package com.jcondotta.banking.accounts.application.bankaccount.command.open.mode
 
 import com.jcondotta.banking.accounts.domain.bankaccount.enums.AccountType;
 import com.jcondotta.banking.accounts.domain.bankaccount.enums.Currency;
-import com.jcondotta.banking.accounts.domain.bankaccount.testsupport.AccountHolderFixtures;
+import com.jcondotta.banking.recipients.domain.testsupport.AccountHolderFixtures;
 import com.jcondotta.banking.accounts.domain.bankaccount.value_objects.address.Address;
 import com.jcondotta.banking.accounts.domain.bankaccount.value_objects.contact.ContactInfo;
 import com.jcondotta.banking.accounts.domain.bankaccount.value_objects.personal.PersonalInfo;

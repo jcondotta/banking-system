@@ -1,9 +1,9 @@
 package com.jcondotta.banking.recipients.infrastructure.adapters.input.rest.list_recipients;
 
 import com.jcondotta.application.query.QueryHandler;
-import com.jcondotta.banking.recipients.application.bankaccount.query.list_recipients.ListRecipientsQuery;
-import com.jcondotta.banking.recipients.application.bankaccount.query.list_recipients.ListRecipientsQueryResult;
-import com.jcondotta.banking.recipients.application.bankaccount.query.model.RecipientSummary;
+import com.jcondotta.banking.recipients.application.recipient.query.list.ListRecipientsQuery;
+import com.jcondotta.banking.recipients.application.recipient.query.list.ListRecipientsQueryResult;
+import com.jcondotta.banking.recipients.application.recipient.query.model.RecipientSummary;
 import com.jcondotta.banking.recipients.domain.recipient.identity.BankAccountId;
 import com.jcondotta.banking.recipients.domain.testsupport.ClockTestFactory;
 import com.jcondotta.banking.recipients.domain.testsupport.RecipientTestData;

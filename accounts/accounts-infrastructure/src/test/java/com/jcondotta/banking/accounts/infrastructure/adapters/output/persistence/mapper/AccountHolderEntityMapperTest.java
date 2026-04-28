@@ -1,22 +1,11 @@
 package com.jcondotta.banking.accounts.infrastructure.adapters.output.persistence.mapper;
 
 import com.jcondotta.banking.accounts.domain.bankaccount.aggregate.AccountHolder;
-import com.jcondotta.banking.accounts.domain.bankaccount.enums.DocumentCountry;
-import com.jcondotta.banking.accounts.domain.bankaccount.enums.DocumentType;
 import com.jcondotta.banking.accounts.domain.bankaccount.enums.HolderType;
-import com.jcondotta.banking.accounts.domain.bankaccount.identity.AccountHolderId;
 import com.jcondotta.banking.accounts.domain.bankaccount.identity.BankAccountId;
-import com.jcondotta.banking.accounts.domain.bankaccount.testsupport.AccountHolderFixtures;
-import com.jcondotta.banking.accounts.domain.bankaccount.testsupport.AccountHolderTestFactory;
+import com.jcondotta.banking.recipients.domain.testsupport.AccountHolderFixtures;
+import com.jcondotta.banking.recipients.domain.testsupport.AccountHolderTestFactory;
 import com.jcondotta.banking.accounts.domain.bankaccount.value_objects.address.Address;
-import com.jcondotta.banking.accounts.domain.bankaccount.value_objects.contact.ContactInfo;
-import com.jcondotta.banking.accounts.domain.bankaccount.value_objects.contact.Email;
-import com.jcondotta.banking.accounts.domain.bankaccount.value_objects.contact.PhoneNumber;
-import com.jcondotta.banking.accounts.domain.bankaccount.value_objects.personal.AccountHolderName;
-import com.jcondotta.banking.accounts.domain.bankaccount.value_objects.personal.DateOfBirth;
-import com.jcondotta.banking.accounts.domain.bankaccount.value_objects.personal.DocumentNumber;
-import com.jcondotta.banking.accounts.domain.bankaccount.value_objects.personal.IdentityDocument;
-import com.jcondotta.banking.accounts.domain.bankaccount.value_objects.personal.PersonalInfo;
 import com.jcondotta.banking.accounts.infrastructure.adapters.output.persistence.entity.AccountHolderEntityKey;
 import com.jcondotta.banking.accounts.infrastructure.adapters.output.persistence.entity.BankingEntity;
 import com.jcondotta.banking.accounts.infrastructure.adapters.output.persistence.enums.EntityType;

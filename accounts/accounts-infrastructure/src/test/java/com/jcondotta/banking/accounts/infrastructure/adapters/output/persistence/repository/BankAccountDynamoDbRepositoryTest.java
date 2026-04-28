@@ -2,8 +2,8 @@ package com.jcondotta.banking.accounts.infrastructure.adapters.output.persistenc
 
 import com.jcondotta.banking.accounts.domain.bankaccount.enums.HolderType;
 import com.jcondotta.banking.accounts.domain.bankaccount.identity.BankAccountId;
-import com.jcondotta.banking.accounts.domain.bankaccount.testsupport.AccountHolderFixtures;
-import com.jcondotta.banking.accounts.domain.bankaccount.testsupport.BankAccountTestFactory;
+import com.jcondotta.banking.recipients.domain.testsupport.AccountHolderFixtures;
+import com.jcondotta.banking.recipients.domain.testsupport.BankAccountTestFactory;
 import com.jcondotta.banking.accounts.infrastructure.adapters.output.persistence.entity.BankingEntity;
 import com.jcondotta.banking.accounts.infrastructure.adapters.output.outbox.entity.OutboxEntity;
 import com.jcondotta.banking.accounts.infrastructure.adapters.output.persistence.enums.EntityType;
@@ -13,14 +13,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
 import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
 import software.amazon.awssdk.enhanced.dynamodb.model.QueryConditional;
-import software.amazon.awssdk.enhanced.dynamodb.model.TransactWriteItemsEnhancedRequest;
 
 import java.util.List;
 

@@ -1,7 +1,7 @@
 package com.jcondotta.banking.recipients.infrastructure.adapters.input.rest.remove_recipient;
 
 import com.jcondotta.application.command.CommandHandler;
-import com.jcondotta.banking.recipients.application.bankaccount.command.remove_recipient.RemoveRecipientCommand;
+import com.jcondotta.banking.recipients.application.recipient.command.remove.RemoveRecipientCommand;
 import com.jcondotta.banking.recipients.domain.recipient.identity.BankAccountId;
 import com.jcondotta.banking.recipients.domain.recipient.identity.RecipientId;
 import com.jcondotta.banking.recipients.infrastructure.adapters.input.rest.remove_recipient.mapper.RemoveRecipientRestMapper;

@@ -8,11 +8,14 @@ import org.testcontainers.utility.DockerImageName;
 @Slf4j
 public final class PostgreSQLContainerSupport {
 
-    private static final PostgreSQLContainer<?> POSTGRES =
-        new PostgreSQLContainer<>(DockerImageName.parse("postgres:17-alpine"))
+    private static final String POSTGRES_IMAGE_NAME = "postgres:17-alpine";
+    private static final DockerImageName POSTGRES_IMAGE = DockerImageName.parse(POSTGRES_IMAGE_NAME);
+
+    @SuppressWarnings("resource")
+    private static final PostgreSQLContainer<?> POSTGRES = new PostgreSQLContainer<>(POSTGRES_IMAGE)
             .withDatabaseName("recipients")
-            .withUsername("recipients")
-            .withPassword("recipients")
+            .withUsername("admin")
+            .withPassword("password")
             .withLogConsumer(outputFrame -> log.info(outputFrame.getUtf8StringWithoutLineEnding()));
 
     static {

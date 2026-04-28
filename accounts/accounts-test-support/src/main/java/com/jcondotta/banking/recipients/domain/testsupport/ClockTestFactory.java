@@ -1,4 +1,4 @@
-package com.jcondotta.banking.recipients.domain.bankaccount.testsupport;
+package com.jcondotta.banking.recipients.domain.testsupport;
 
 import java.time.Clock;
 import java.time.Instant;

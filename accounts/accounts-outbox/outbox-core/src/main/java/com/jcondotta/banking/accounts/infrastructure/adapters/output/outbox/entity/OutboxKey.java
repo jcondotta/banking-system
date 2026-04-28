@@ -23,10 +23,8 @@ public final class OutboxKey {
   private final String sortKey;
 
   private OutboxKey(String partitionKey, String sortKey) {
-    requiredNotBlank(partitionKey, PARTITION_KEY_REQUIRED);
-    requiredNotBlank(sortKey, SORT_KEY_REQUIRED);
-    this.partitionKey = partitionKey;
-    this.sortKey = sortKey;
+    this.partitionKey = requiredNotBlank(partitionKey, PARTITION_KEY_REQUIRED);
+    this.sortKey = requiredNotBlank(sortKey, SORT_KEY_REQUIRED);
   }
 
   public static OutboxKey of(AggregateId<?> aggregateId, UUID eventId) {

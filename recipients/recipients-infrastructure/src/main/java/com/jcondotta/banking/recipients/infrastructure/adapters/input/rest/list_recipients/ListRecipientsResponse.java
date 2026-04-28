@@ -1,6 +1,6 @@
 package com.jcondotta.banking.recipients.infrastructure.adapters.input.rest.list_recipients;
 
-import com.jcondotta.banking.recipients.application.bankaccount.query.list_recipients.ListRecipientsQueryResult;
+import com.jcondotta.banking.recipients.application.recipient.query.list.ListRecipientsQueryResult;
 
 import java.util.List;
 

@@ -1,9 +1,9 @@
 package com.jcondotta.banking.recipients.infrastructure.adapters.output.persistence;
 
+import com.jcondotta.banking.recipients.application.common.exception.RecipientOptimisticLockException;
 import com.jcondotta.banking.recipients.domain.recipient.aggregate.Recipient;
 import com.jcondotta.banking.recipients.domain.recipient.exceptions.DuplicateRecipientIbanException;
 import com.jcondotta.banking.recipients.domain.recipient.exceptions.RecipientAlreadyExistsException;
-import com.jcondotta.banking.recipients.domain.recipient.exceptions.RecipientOptimisticLockException;
 import com.jcondotta.banking.recipients.domain.recipient.identity.BankAccountId;
 import com.jcondotta.banking.recipients.domain.recipient.identity.RecipientId;
 import com.jcondotta.banking.recipients.domain.testsupport.RecipientFixtures;
@@ -17,7 +17,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.orm.ObjectOptimisticLockingFailureException;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -27,7 +26,6 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static com.jcondotta.banking.recipients.infrastructure.adapters.metrics.persistence.RecipientPersistenceConstraint.BANK_ACCOUNT_IBAN;
 import static com.jcondotta.banking.recipients.infrastructure.adapters.metrics.persistence.RecipientPersistenceOperation.CREATE;
 import static com.jcondotta.banking.recipients.infrastructure.adapters.metrics.persistence.RecipientPersistenceOperation.DELETE;
-import static com.jcondotta.banking.recipients.infrastructure.adapters.metrics.persistence.RecipientPersistenceOperation.UPDATE;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -86,7 +84,7 @@ class RecipientPostgresRepositoryTest {
 
     when(mapper.toEntity(recipient)).thenReturn(entity);
 
-    adapter.create(recipient);
+    adapter.save(recipient);
 
     verify(mapper).toEntity(recipient);
     verify(repository).saveAndFlush(entity);
@@ -102,7 +100,7 @@ class RecipientPostgresRepositoryTest {
     when(repository.saveAndFlush(entity))
       .thenThrow(dataIntegrityViolation("uq_recipient_bank_account_iban"));
 
-    assertThatThrownBy(() -> adapter.create(recipient))
+    assertThatThrownBy(() -> adapter.save(recipient))
       .isInstanceOf(DuplicateRecipientIbanException.class);
 
     verify(persistenceMetrics).recordUniqueConstraintViolation(CREATE, BANK_ACCOUNT_IBAN);
@@ -120,44 +118,12 @@ class RecipientPostgresRepositoryTest {
     when(repository.saveAndFlush(entity))
       .thenThrow(dataIntegrityViolation("recipients_pkey"));
 
-    assertThatThrownBy(() -> adapter.create(recipient))
+    assertThatThrownBy(() -> adapter.save(recipient))
       .isInstanceOf(RecipientAlreadyExistsException.class);
 
     verify(mapper).toEntity(recipient);
     verify(repository).saveAndFlush(entity);
     verifyNoMoreInteractions(repository, mapper);
-  }
-
-  @Test
-  void shouldUpdateRecipient_whenRecipientIsPersisted() {
-    var recipient = recipientWithVersion();
-    var entity = new RecipientEntity();
-
-    when(mapper.toEntity(recipient)).thenReturn(entity);
-
-    adapter.update(recipient);
-
-    verify(mapper).toEntity(recipient);
-    verify(repository).saveAndFlush(entity);
-    verifyNoMoreInteractions(repository, mapper);
-  }
-
-  @Test
-  void shouldThrowOptimisticLockException_whenUpdateFailsWithOptimisticLockingFailure() {
-    var recipient = recipientWithVersion();
-    var entity = new RecipientEntity();
-
-    when(mapper.toEntity(recipient)).thenReturn(entity);
-    when(repository.saveAndFlush(entity))
-      .thenThrow(new ObjectOptimisticLockingFailureException(Recipient.class, recipient.getId().value()));
-
-    assertThatThrownBy(() -> adapter.update(recipient))
-      .isInstanceOf(RecipientOptimisticLockException.class);
-
-    verify(persistenceMetrics).recordOptimisticLockConflict(UPDATE);
-    verify(mapper).toEntity(recipient);
-    verify(repository).saveAndFlush(entity);
-    verifyNoMoreInteractions(repository, mapper, persistenceMetrics);
   }
 
   @Test

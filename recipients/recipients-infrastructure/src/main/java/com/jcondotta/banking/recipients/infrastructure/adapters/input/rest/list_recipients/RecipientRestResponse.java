@@ -1,6 +1,6 @@
 package com.jcondotta.banking.recipients.infrastructure.adapters.input.rest.list_recipients;
 
-import com.jcondotta.banking.recipients.application.bankaccount.query.model.RecipientSummary;
+import com.jcondotta.banking.recipients.application.recipient.query.model.RecipientSummary;
 
 import java.time.Instant;
 import java.util.UUID;

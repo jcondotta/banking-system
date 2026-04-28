@@ -1,10 +1,10 @@
 package com.jcondotta.banking.recipients.domain.recipient.exceptions;
 
+import com.jcondotta.banking.recipients.domain.common.FailureReason;
 import com.jcondotta.banking.recipients.domain.recipient.identity.BankAccountId;
 import com.jcondotta.banking.recipients.domain.recipient.value_objects.Iban;
-import com.jcondotta.domain.exception.DomainConflictException;
 
-public final class DuplicateRecipientIbanException extends DomainConflictException {
+public final class DuplicateRecipientIbanException extends RecipientDomainConflictException {
 
   public static final String MESSAGE = "Recipient IBAN already exists";
 
@@ -15,6 +15,11 @@ public final class DuplicateRecipientIbanException extends DomainConflictExcepti
     super(MESSAGE);
     this.maskedIban = mask(iban.value());
     this.bankAccountId = bankAccountId.value().toString();
+  }
+
+  @Override
+  public FailureReason reason() {
+    return FailureReason.DUPLICATE_IBAN;
   }
 
   public String getMaskedIban() {

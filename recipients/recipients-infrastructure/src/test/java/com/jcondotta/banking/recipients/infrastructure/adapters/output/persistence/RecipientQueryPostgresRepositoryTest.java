@@ -1,6 +1,6 @@
 package com.jcondotta.banking.recipients.infrastructure.adapters.output.persistence;
 
-import com.jcondotta.banking.recipients.application.bankaccount.query.model.RecipientSummary;
+import com.jcondotta.banking.recipients.application.recipient.query.model.RecipientSummary;
 import com.jcondotta.banking.recipients.domain.recipient.identity.BankAccountId;
 import com.jcondotta.banking.recipients.infrastructure.adapters.metrics.RecipientMetrics;
 import com.jcondotta.banking.recipients.infrastructure.adapters.output.persistence.entity.RecipientEntity;

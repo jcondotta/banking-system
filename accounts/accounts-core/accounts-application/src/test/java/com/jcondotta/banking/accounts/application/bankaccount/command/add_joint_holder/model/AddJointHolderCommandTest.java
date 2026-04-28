@@ -6,7 +6,7 @@ import com.jcondotta.banking.accounts.domain.bankaccount.value_objects.contact.C
 import com.jcondotta.banking.accounts.domain.bankaccount.value_objects.personal.PersonalInfo;
 import org.junit.jupiter.api.Test;
 
-import static com.jcondotta.banking.accounts.domain.bankaccount.testsupport.AccountHolderFixtures.JEFFERSON;
+import static com.jcondotta.banking.recipients.domain.testsupport.AccountHolderFixtures.JEFFERSON;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
