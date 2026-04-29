@@ -1,5 +1,12 @@
 package com.jcondotta.banking.recipients.application.recipient.command.create;
 
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.read.ListAppender;
+import com.jcondotta.banking.recipients.application.common.log.LogKey;
+import com.jcondotta.banking.recipients.application.common.log.LogOutcome;
+import com.jcondotta.banking.recipients.application.common.log.RecipientEventType;
+import com.jcondotta.banking.recipients.application.common.log.StructuredLogEventSupport;
 import com.jcondotta.banking.recipients.domain.recipient.aggregate.Recipient;
 import com.jcondotta.banking.recipients.domain.recipient.exceptions.DuplicateRecipientIbanException;
 import com.jcondotta.banking.recipients.domain.recipient.identity.BankAccountId;
@@ -43,11 +50,19 @@ class CreateRecipientCommandHandlerTest {
   @Captor
   private ArgumentCaptor<Recipient> recipientCaptor;
 
+  private ListAppender<ILoggingEvent> logAppender;
+
   private CreateRecipientCommandHandler commandHandler;
 
   @BeforeEach
   void setUp() {
     commandHandler = new CreateRecipientCommandHandler(recipientRepository, CLOCK);
+    logAppender = StructuredLogEventSupport.attachAppender(CreateRecipientCommandHandler.class);
+  }
+
+  @org.junit.jupiter.api.AfterEach
+  void tearDown() {
+    StructuredLogEventSupport.detachAppender(CreateRecipientCommandHandler.class, logAppender);
   }
 
   @Test
@@ -69,6 +84,14 @@ class CreateRecipientCommandHandlerTest {
     assertThat(savedRecipient.getIban()).isEqualTo(IBAN);
     assertThat(savedRecipient.getCreatedAt()).isEqualTo(CLOCK.instant());
     assertThat(savedRecipient.getVersion()).isNull();
+
+    assertThat(StructuredLogEventSupport.lastEvent(logAppender, ILoggingEvent::getLevel))
+      .isEqualTo(Level.INFO);
+    assertThat(StructuredLogEventSupport.lastEventKeyValues(logAppender))
+      .containsEntry(LogKey.EVENT_TYPE, RecipientEventType.CREATE)
+      .containsEntry(LogKey.OUTCOME, LogOutcome.SUCCESS);
+    assertThat(StructuredLogEventSupport.eventTypes(logAppender))
+      .allMatch(eventType -> !eventType.contains(".failed"));
   }
 
   @Test
@@ -117,6 +140,14 @@ class CreateRecipientCommandHandlerTest {
 
     verify(recipientRepository).save(any(Recipient.class));
     verifyNoMoreInteractions(recipientRepository);
+
+    assertThat(StructuredLogEventSupport.lastEvent(logAppender, ILoggingEvent::getLevel))
+      .isEqualTo(Level.WARN);
+    assertThat(StructuredLogEventSupport.lastEventKeyValues(logAppender))
+      .containsEntry(LogKey.EVENT_TYPE, RecipientEventType.CREATE)
+      .containsEntry(LogKey.OUTCOME, LogOutcome.FAILURE);
+    assertThat(StructuredLogEventSupport.eventTypes(logAppender))
+      .allMatch(eventType -> !eventType.contains(".failed"));
   }
 
   @Test
@@ -137,6 +168,14 @@ class CreateRecipientCommandHandlerTest {
 
     verify(recipientRepository).save(any(Recipient.class));
     verifyNoMoreInteractions(recipientRepository);
+
+    assertThat(StructuredLogEventSupport.lastEvent(logAppender, ILoggingEvent::getLevel))
+      .isEqualTo(Level.WARN);
+    assertThat(StructuredLogEventSupport.lastEventKeyValues(logAppender))
+      .containsEntry(LogKey.EVENT_TYPE, RecipientEventType.CREATE)
+      .containsEntry(LogKey.OUTCOME, LogOutcome.FAILURE);
+    assertThat(StructuredLogEventSupport.eventTypes(logAppender))
+      .allMatch(eventType -> !eventType.contains(".failed"));
   }
 
   @Test
@@ -157,6 +196,14 @@ class CreateRecipientCommandHandlerTest {
 
     verify(recipientRepository).save(any(Recipient.class));
     verifyNoMoreInteractions(recipientRepository);
+
+    assertThat(StructuredLogEventSupport.lastEvent(logAppender, ILoggingEvent::getLevel))
+      .isEqualTo(Level.ERROR);
+    assertThat(StructuredLogEventSupport.lastEventKeyValues(logAppender))
+      .containsEntry(LogKey.EVENT_TYPE, RecipientEventType.CREATE)
+      .containsEntry(LogKey.OUTCOME, LogOutcome.FAILURE);
+    assertThat(StructuredLogEventSupport.eventTypes(logAppender))
+      .allMatch(eventType -> !eventType.contains(".failed"));
   }
 
   private static final class TestDomainException extends DomainException {

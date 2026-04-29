@@ -1,5 +1,12 @@
 package com.jcondotta.banking.recipients.application.recipient.command.remove;
 
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.read.ListAppender;
+import com.jcondotta.banking.recipients.application.common.log.LogKey;
+import com.jcondotta.banking.recipients.application.common.log.LogOutcome;
+import com.jcondotta.banking.recipients.application.common.log.RecipientEventType;
+import com.jcondotta.banking.recipients.application.common.log.StructuredLogEventSupport;
 import com.jcondotta.banking.recipients.domain.recipient.aggregate.Recipient;
 import com.jcondotta.banking.recipients.domain.recipient.exceptions.RecipientNotFoundException;
 import com.jcondotta.banking.recipients.domain.recipient.exceptions.RecipientOwnershipMismatchException;
@@ -21,6 +28,7 @@ import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.*;
 
@@ -38,11 +46,19 @@ class RemoveRecipientCommandHandlerTest {
   @Mock
   private RecipientRepository recipientRepository;
 
+  private ListAppender<ILoggingEvent> logAppender;
+
   private RemoveRecipientCommandHandler commandHandler;
 
   @BeforeEach
   void setUp() {
     commandHandler = new RemoveRecipientCommandHandler(recipientRepository);
+    logAppender = StructuredLogEventSupport.attachAppender(RemoveRecipientCommandHandler.class);
+  }
+
+  @org.junit.jupiter.api.AfterEach
+  void tearDown() {
+    StructuredLogEventSupport.detachAppender(RemoveRecipientCommandHandler.class, logAppender);
   }
 
   @Test
@@ -58,6 +74,14 @@ class RemoveRecipientCommandHandlerTest {
     verify(recipientRepository).findById(RECIPIENT_ID);
     verify(recipientRepository).delete(recipient);
     verifyNoMoreInteractions(recipientRepository);
+
+    assertThat(StructuredLogEventSupport.lastEvent(logAppender, ILoggingEvent::getLevel))
+      .isEqualTo(Level.INFO);
+    assertThat(StructuredLogEventSupport.lastEventKeyValues(logAppender))
+      .containsEntry(LogKey.EVENT_TYPE, RecipientEventType.REMOVE)
+      .containsEntry(LogKey.OUTCOME, LogOutcome.SUCCESS);
+    assertThat(StructuredLogEventSupport.eventTypes(logAppender))
+      .allMatch(eventType -> !eventType.contains(".failed"));
   }
 
   @Test
@@ -75,6 +99,14 @@ class RemoveRecipientCommandHandlerTest {
     verify(recipientRepository).findById(RECIPIENT_ID);
     verify(recipientRepository, never()).delete(recipient);
     verifyNoMoreInteractions(recipientRepository);
+
+    assertThat(StructuredLogEventSupport.lastEvent(logAppender, ILoggingEvent::getLevel))
+      .isEqualTo(Level.WARN);
+    assertThat(StructuredLogEventSupport.lastEventKeyValues(logAppender))
+      .containsEntry(LogKey.EVENT_TYPE, RecipientEventType.REMOVE)
+      .containsEntry(LogKey.OUTCOME, LogOutcome.FAILURE);
+    assertThat(StructuredLogEventSupport.eventTypes(logAppender))
+      .allMatch(eventType -> !eventType.contains(".failed"));
   }
 
   @Test
@@ -89,6 +121,14 @@ class RemoveRecipientCommandHandlerTest {
 
     verify(recipientRepository).findById(RECIPIENT_ID);
     verifyNoMoreInteractions(recipientRepository);
+
+    assertThat(StructuredLogEventSupport.lastEvent(logAppender, ILoggingEvent::getLevel))
+      .isEqualTo(Level.WARN);
+    assertThat(StructuredLogEventSupport.lastEventKeyValues(logAppender))
+      .containsEntry(LogKey.EVENT_TYPE, RecipientEventType.REMOVE)
+      .containsEntry(LogKey.OUTCOME, LogOutcome.FAILURE);
+    assertThat(StructuredLogEventSupport.eventTypes(logAppender))
+      .allMatch(eventType -> !eventType.contains(".failed"));
   }
 
   @Test
@@ -104,6 +144,14 @@ class RemoveRecipientCommandHandlerTest {
 
     verify(recipientRepository).findById(RECIPIENT_ID);
     verifyNoMoreInteractions(recipientRepository);
+
+    assertThat(StructuredLogEventSupport.lastEvent(logAppender, ILoggingEvent::getLevel))
+      .isEqualTo(Level.ERROR);
+    assertThat(StructuredLogEventSupport.lastEventKeyValues(logAppender))
+      .containsEntry(LogKey.EVENT_TYPE, RecipientEventType.REMOVE)
+      .containsEntry(LogKey.OUTCOME, LogOutcome.FAILURE);
+    assertThat(StructuredLogEventSupport.eventTypes(logAppender))
+      .allMatch(eventType -> !eventType.contains(".failed"));
   }
 
   private static Recipient recipient() {

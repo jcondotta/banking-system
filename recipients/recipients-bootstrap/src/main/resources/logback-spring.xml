@@ -9,7 +9,7 @@
 
     <appender name="LOCAL_CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
-            <pattern>%clr(%d{HH:mm:ss.SSS}){faint} %clr(%-5level) %clr(%logger{36}){cyan} %clr([%X{correlationId}]){magenta} %clr(%msg){white} %kvp%n</pattern>
+            <pattern>%clr(%d{HH:mm:ss.SSS}){faint} %clr(%-5level) %clr(%logger{36}){cyan} %clr([%X{correlationId}]){magenta} %clr(- %msg){white} %kvp%n</pattern>
         </encoder>
     </appender>
 
@@ -17,6 +17,8 @@
         <encoder class="net.logstash.logback.encoder.LogstashEncoder">
             <customFields>{"service":"${SERVICE_NAME}","service_version":"${SERVICE_VERSION}"}</customFields>
             <includeStructuredArguments>true</includeStructuredArguments>
+            <includeKeyValuePairs>true</includeKeyValuePairs>
+            <includeMdc>true</includeMdc>
             <fieldNames>
                 <version>[ignore]</version>
                 <thread>[ignore]</thread>

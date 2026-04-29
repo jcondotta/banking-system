@@ -54,20 +54,15 @@ public class MethodArgumentNotValidExceptionHandler {
 
     logEvent.log();
 
-    var problemDetail = buildProblemDetail(request, fieldErrors);
-
-    return ResponseEntity.of(problemDetail).build();
-  }
-
-  private ProblemDetail buildProblemDetail(HttpServletRequest request, Object errors) {
     var problemDetail = ProblemDetail.forStatus(HTTP_STATUS_UNPROCESSABLE_CONTENT);
     problemDetail.setType(ProblemTypes.VALIDATION_ERRORS);
     problemDetail.setTitle(TITLE_VALIDATION_FAILED);
     problemDetail.setInstance(URI.create(request.getRequestURI()));
-    problemDetail.setProperty(ERRORS_PROPERTY, errors);
+    problemDetail.setProperty(ERRORS_PROPERTY, fieldErrors);
 
-    return problemDetail;
+    return ResponseEntity.of(problemDetail).build();
   }
+
   private static String bankAccountId(HttpServletRequest request) {
     var variables = request.getAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE);
     if (variables instanceof Map<?, ?> pathVariables) {

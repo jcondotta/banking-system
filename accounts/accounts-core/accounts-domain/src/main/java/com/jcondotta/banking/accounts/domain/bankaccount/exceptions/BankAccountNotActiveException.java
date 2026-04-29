@@ -1,9 +1,9 @@
 package com.jcondotta.banking.accounts.domain.bankaccount.exceptions;
 
 import com.jcondotta.banking.accounts.domain.bankaccount.enums.AccountStatus;
-import com.jcondotta.domain.exception.DomainRuleValidationException;
+import com.jcondotta.domain.exception.DomainRuleViolationException;
 
-public final class BankAccountNotActiveException extends DomainRuleValidationException {
+public final class BankAccountNotActiveException extends DomainRuleViolationException {
 
   public static final String BANK_ACCOUNT_MUST_BE_ACTIVE = "Bank account must be ACTIVE to perform this operation. Current status: %s";
 

@@ -1,7 +1,7 @@
 package com.jcondotta.banking.accounts.infrastructure.adapters.input.rest.common.exception_handler;
 
 import com.jcondotta.banking.infrastructure.adapters.output.rest.exceptionhandler.ProblemTypes;
-import com.jcondotta.domain.exception.DomainRuleValidationException;
+import com.jcondotta.domain.exception.DomainRuleViolationException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
@@ -12,12 +12,12 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import java.net.URI;
 
 @RestControllerAdvice
-public class RuleValidationExceptionHandler {
+public class RuleViolationExceptionHandler {
 
   static final String TITLE_OPERATION_NOT_ALLOWED = "Operation not allowed";
 
-  @ExceptionHandler(DomainRuleValidationException.class)
-  public ResponseEntity<ProblemDetail> handleBusinessRuleViolation(DomainRuleValidationException ex, HttpServletRequest request) {
+  @ExceptionHandler(DomainRuleViolationException.class)
+  public ResponseEntity<ProblemDetail> handleBusinessRuleViolation(DomainRuleViolationException ex, HttpServletRequest request) {
     var problemDetail = ProblemDetail.forStatus(HttpStatus.UNPROCESSABLE_CONTENT);
     problemDetail.setType(ProblemTypes.RULE_VIOLATION);
     problemDetail.setTitle(TITLE_OPERATION_NOT_ALLOWED);

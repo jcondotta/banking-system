@@ -63,7 +63,7 @@ public class ListRecipientsQueryHandler
       var reason = FailureReason.from(ex);
       log.atWarn()
         .setMessage("Recipient listing failed: " + reason.name())
-        .addKeyValue(LogKey.EVENT_TYPE, RecipientEventType.LIST_FAILED)
+        .addKeyValue(LogKey.EVENT_TYPE, RecipientEventType.LIST)
         .addKeyValue(LogKey.OUTCOME, LogOutcome.FAILURE)
         .addKeyValue(LogKey.REASON, reason.normalize())
         .addKeyValue(LogKey.BANK_ACCOUNT_ID, query.bankAccountId().asString())
@@ -75,7 +75,7 @@ public class ListRecipientsQueryHandler
     catch (Exception ex) {
       log.atError()
         .setMessage("Unexpected error during recipient listing")
-        .addKeyValue(LogKey.EVENT_TYPE, RecipientEventType.LIST_FAILED)
+        .addKeyValue(LogKey.EVENT_TYPE, RecipientEventType.LIST)
         .addKeyValue(LogKey.OUTCOME, LogOutcome.FAILURE)
         .addKeyValue(LogKey.REASON, FailureReason.INTERNAL_ERROR.normalize())
         .addKeyValue(LogKey.BANK_ACCOUNT_ID, query.bankAccountId().asString())

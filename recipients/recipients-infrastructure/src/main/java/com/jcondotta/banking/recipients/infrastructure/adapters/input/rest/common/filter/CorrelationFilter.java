@@ -6,22 +6,37 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.util.concurrent.TimeUnit;
 import java.util.Optional;
 import java.util.UUID;
 
 @Component
+@Order(Ordered.HIGHEST_PRECEDENCE)
 public class CorrelationFilter extends OncePerRequestFilter {
+
+  private static final Logger log = LoggerFactory.getLogger(CorrelationFilter.class);
 
   public static final String REQUEST_START_NS_ATTRIBUTE = CorrelationFilter.class.getName() + ".requestStartNs";
 
+  static final String MDC_CORRELATION_ID = "correlationId";
+
+  private static final String EVENT_TYPE = "http.request";
+  private static final String OUTCOME_SUCCESS = "success";
+  private static final String OUTCOME_FAILURE = "failure";
+
   @Override
-  protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain) {
+  protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
+    throws ServletException, IOException {
 
     UUID correlationId;
 
@@ -36,23 +51,46 @@ public class CorrelationFilter extends OncePerRequestFilter {
 
     response.setHeader(HttpHeadersConstants.CORRELATION_ID, correlationId.toString());
 
-    MDC.put("correlationId", correlationId.toString());
-    request.setAttribute(REQUEST_START_NS_ATTRIBUTE, System.nanoTime());
+    var startNs = System.nanoTime();
+    request.setAttribute(REQUEST_START_NS_ATTRIBUTE, startNs);
+
+    MDC.put(MDC_CORRELATION_ID, correlationId.toString());
 
     try {
-      ScopedValue.where(ScopedCorrelationIdProvider.CORRELATION_ID, correlationId)
-        .run(() -> {
-          try {
-            chain.doFilter(request, response);
-          }
-          catch (IOException | ServletException e) {
-            throw new RuntimeException(e);
-          }
-        });
+      doFilterWithScopedCorrelationId(request, response, chain, correlationId);
+
+      log.atInfo()
+        .setMessage("HTTP request completed")
+        .addKeyValue("event_type", EVENT_TYPE)
+        .addKeyValue("outcome", outcome(response.getStatus()))
+        .addKeyValue("method", request.getMethod())
+        .addKeyValue("path", request.getRequestURI())
+        .addKeyValue("http_status", response.getStatus())
+        .addKeyValue("duration_ms", durationMs(startNs))
+        .log();
+    }
+    catch (ServletException | IOException | RuntimeException ex) {
+      log.atError()
+        .setMessage("HTTP request failed before response completion")
+        .addKeyValue("event_type", EVENT_TYPE)
+        .addKeyValue("outcome", OUTCOME_FAILURE)
+        .addKeyValue("method", request.getMethod())
+        .addKeyValue("path", request.getRequestURI())
+        .addKeyValue("http_status", HttpServletResponse.SC_INTERNAL_SERVER_ERROR)
+        .addKeyValue("duration_ms", durationMs(startNs))
+        .setCause(ex)
+        .log();
+
+      throw ex;
     }
     finally {
-      MDC.remove("correlationId");
+      MDC.remove(MDC_CORRELATION_ID);
     }
+  }
+
+  @Override
+  protected boolean shouldNotFilter(HttpServletRequest request) {
+    return request.getRequestURI().startsWith("/actuator");
   }
 
   public static long durationMs(HttpServletRequest request) {
@@ -62,5 +100,53 @@ public class CorrelationFilter extends OncePerRequestFilter {
     }
 
     return 0L;
+  }
+
+  private static long durationMs(long startNs) {
+    return TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startNs);
+  }
+
+  private static String outcome(int httpStatus) {
+    return httpStatus < HttpServletResponse.SC_BAD_REQUEST ? OUTCOME_SUCCESS : OUTCOME_FAILURE;
+  }
+
+  private static void doFilterWithScopedCorrelationId(
+    HttpServletRequest request,
+    HttpServletResponse response,
+    FilterChain chain,
+    UUID correlationId
+  ) throws ServletException, IOException {
+    try {
+      ScopedValue.where(ScopedCorrelationIdProvider.CORRELATION_ID, correlationId)
+        .run(() -> {
+          try {
+            chain.doFilter(request, response);
+          }
+          catch (IOException ex) {
+            throw new UncheckedIOException(ex);
+          }
+          catch (ServletException ex) {
+            throw new FilterChainServletException(ex);
+          }
+        });
+    }
+    catch (UncheckedIOException ex) {
+      throw ex.getCause();
+    }
+    catch (FilterChainServletException ex) {
+      throw ex.getCause();
+    }
+  }
+
+  private static final class FilterChainServletException extends RuntimeException {
+
+    private FilterChainServletException(ServletException cause) {
+      super(cause);
+    }
+
+    @Override
+    public ServletException getCause() {
+      return (ServletException) super.getCause();
+    }
   }
 }

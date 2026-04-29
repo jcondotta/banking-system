@@ -1,5 +1,12 @@
 package com.jcondotta.banking.recipients.application.recipient.query.list;
 
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.read.ListAppender;
+import com.jcondotta.banking.recipients.application.common.log.LogKey;
+import com.jcondotta.banking.recipients.application.common.log.LogOutcome;
+import com.jcondotta.banking.recipients.application.common.log.RecipientEventType;
+import com.jcondotta.banking.recipients.application.common.log.StructuredLogEventSupport;
 import com.jcondotta.banking.recipients.application.recipient.query.model.RecipientSummary;
 import com.jcondotta.banking.recipients.domain.recipient.exceptions.RecipientNotFoundException;
 import com.jcondotta.banking.recipients.domain.recipient.identity.BankAccountId;
@@ -35,11 +42,19 @@ class ListRecipientsQueryHandlerTest {
   @Mock
   private RecipientQueryRepository queryRepository;
 
+  private ListAppender<ILoggingEvent> logAppender;
+
   private ListRecipientsQueryHandler handler;
 
   @BeforeEach
   void setUp() {
     handler = new ListRecipientsQueryHandler(queryRepository);
+    logAppender = StructuredLogEventSupport.attachAppender(ListRecipientsQueryHandler.class);
+  }
+
+  @org.junit.jupiter.api.AfterEach
+  void tearDown() {
+    StructuredLogEventSupport.detachAppender(ListRecipientsQueryHandler.class, logAppender);
   }
 
   @Test
@@ -58,6 +73,15 @@ class ListRecipientsQueryHandlerTest {
     assertThat(queryResult.recipients()).containsExactlyElementsOf(recipientsSummary);
 
     verify(queryRepository).findByBankAccountId(BANK_ACCOUNT_ID);
+    verifyNoMoreInteractions(queryRepository);
+
+    assertThat(StructuredLogEventSupport.lastEvent(logAppender, ILoggingEvent::getLevel))
+      .isEqualTo(Level.INFO);
+    assertThat(StructuredLogEventSupport.lastEventKeyValues(logAppender))
+      .containsEntry(LogKey.EVENT_TYPE, RecipientEventType.LIST)
+      .containsEntry(LogKey.OUTCOME, LogOutcome.SUCCESS);
+    assertThat(StructuredLogEventSupport.eventTypes(logAppender))
+      .allMatch(eventType -> !eventType.contains(".failed"));
   }
 
   @Test
@@ -71,6 +95,15 @@ class ListRecipientsQueryHandlerTest {
     assertThat(queryResult.recipients()).isEmpty();
 
     verify(queryRepository).findByBankAccountId(BANK_ACCOUNT_ID);
+    verifyNoMoreInteractions(queryRepository);
+
+    assertThat(StructuredLogEventSupport.lastEvent(logAppender, ILoggingEvent::getLevel))
+      .isEqualTo(Level.INFO);
+    assertThat(StructuredLogEventSupport.lastEventKeyValues(logAppender))
+      .containsEntry(LogKey.EVENT_TYPE, RecipientEventType.LIST)
+      .containsEntry(LogKey.OUTCOME, LogOutcome.SUCCESS);
+    assertThat(StructuredLogEventSupport.eventTypes(logAppender))
+      .allMatch(eventType -> !eventType.contains(".failed"));
   }
 
   @Test
@@ -87,6 +120,14 @@ class ListRecipientsQueryHandlerTest {
 
     verify(queryRepository).findByBankAccountId(BANK_ACCOUNT_ID);
     verifyNoMoreInteractions(queryRepository);
+
+    assertThat(StructuredLogEventSupport.lastEvent(logAppender, ILoggingEvent::getLevel))
+      .isEqualTo(Level.WARN);
+    assertThat(StructuredLogEventSupport.lastEventKeyValues(logAppender))
+      .containsEntry(LogKey.EVENT_TYPE, RecipientEventType.LIST)
+      .containsEntry(LogKey.OUTCOME, LogOutcome.FAILURE);
+    assertThat(StructuredLogEventSupport.eventTypes(logAppender))
+      .allMatch(eventType -> !eventType.contains(".failed"));
   }
 
   @Test
@@ -102,6 +143,14 @@ class ListRecipientsQueryHandlerTest {
 
     verify(queryRepository).findByBankAccountId(BANK_ACCOUNT_ID);
     verifyNoMoreInteractions(queryRepository);
+
+    assertThat(StructuredLogEventSupport.lastEvent(logAppender, ILoggingEvent::getLevel))
+      .isEqualTo(Level.ERROR);
+    assertThat(StructuredLogEventSupport.lastEventKeyValues(logAppender))
+      .containsEntry(LogKey.EVENT_TYPE, RecipientEventType.LIST)
+      .containsEntry(LogKey.OUTCOME, LogOutcome.FAILURE);
+    assertThat(StructuredLogEventSupport.eventTypes(logAppender))
+      .allMatch(eventType -> !eventType.contains(".failed"));
   }
 
   private static RecipientSummary recipientSummary(UUID recipientId, RecipientTestData recipientTestData) {

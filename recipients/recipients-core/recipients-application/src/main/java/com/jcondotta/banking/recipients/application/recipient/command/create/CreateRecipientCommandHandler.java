@@ -69,26 +69,22 @@ public class CreateRecipientCommandHandler implements CommandHandlerWithResult<C
     catch (DomainException ex) {
       var failureReason = FailureReason.from(ex);
 
-      var logBuilder = log.atWarn()
+      log.atWarn()
         .setMessage("Recipient creation failed")
-        .addKeyValue(LogKey.EVENT_TYPE, RecipientEventType.CREATE_FAILED)
+        .addKeyValue(LogKey.EVENT_TYPE, RecipientEventType.CREATE)
         .addKeyValue(LogKey.OUTCOME, LogOutcome.FAILURE)
         .addKeyValue(LogKey.REASON, failureReason.normalize())
         .addKeyValue(LogKey.BANK_ACCOUNT_ID, command.bankAccountId().asString())
-        .addKeyValue(LogKey.DURATION_MS, durationMs(startNs));
-
-      if (ex instanceof DuplicateRecipientIbanException ibanEx) {
-        logBuilder.addKeyValue(LogKey.MASKED_IBAN, ibanEx.getMaskedIban());
-      }
-
-      logBuilder.log();
+        .addKeyValue(LogKey.DURATION_MS, durationMs(startNs))
+        .addKeyValue(LogKey.MASKED_IBAN, command.iban().masked())
+        .log();
 
       throw ex;
     }
     catch (Exception ex) {
       log.atError()
         .setMessage("Unexpected error during recipient creation")
-        .addKeyValue(LogKey.EVENT_TYPE, RecipientEventType.CREATE_FAILED)
+        .addKeyValue(LogKey.EVENT_TYPE, RecipientEventType.CREATE)
         .addKeyValue(LogKey.OUTCOME, LogOutcome.FAILURE)
         .addKeyValue(LogKey.REASON, FailureReason.INTERNAL_ERROR.normalize())
         .addKeyValue(LogKey.BANK_ACCOUNT_ID, command.bankAccountId().asString())

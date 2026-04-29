@@ -59,7 +59,7 @@ public class RemoveRecipientCommandHandler implements CommandHandler<RemoveRecip
       var reason = FailureReason.from(ex);
       log.atWarn()
         .setMessage("Recipient removal failed")
-        .addKeyValue(LogKey.EVENT_TYPE, RecipientEventType.REMOVE_FAILED)
+        .addKeyValue(LogKey.EVENT_TYPE, RecipientEventType.REMOVE)
         .addKeyValue(LogKey.OUTCOME, LogOutcome.FAILURE)
         .addKeyValue(LogKey.REASON, reason.normalize())
         .addKeyValue(LogKey.BANK_ACCOUNT_ID, command.bankAccountId().asString())
@@ -72,7 +72,7 @@ public class RemoveRecipientCommandHandler implements CommandHandler<RemoveRecip
     catch (Exception ex) {
       log.atError()
         .setMessage("Unexpected error during recipient removal")
-        .addKeyValue(LogKey.EVENT_TYPE, RecipientEventType.REMOVE_FAILED)
+        .addKeyValue(LogKey.EVENT_TYPE, RecipientEventType.REMOVE)
         .addKeyValue(LogKey.OUTCOME, LogOutcome.FAILURE)
         .addKeyValue(LogKey.REASON, FailureReason.INTERNAL_ERROR.normalize())
         .addKeyValue(LogKey.BANK_ACCOUNT_ID, command.bankAccountId().asString())

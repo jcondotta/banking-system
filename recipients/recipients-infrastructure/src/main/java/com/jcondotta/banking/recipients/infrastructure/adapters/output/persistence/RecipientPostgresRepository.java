@@ -56,24 +56,12 @@ public class RecipientPostgresRepository implements RecipientRepository {
         }
         catch (DataIntegrityViolationException e) {
             if (isDuplicateIban(e)) {
-                persistenceMetrics.recordUniqueConstraintViolation(CREATE, BANK_ACCOUNT_IBAN);
+//                persistenceMetrics.recordUniqueConstraintViolation(CREATE, BANK_ACCOUNT_IBAN);
                 throw new DuplicateRecipientIbanException(recipient.getIban(), recipient.getBankAccountId());
             }
             throw new RecipientAlreadyExistsException(recipient.getId());
         }
     }
-
-//    @Override
-//    @Transactional
-//    public void update(Recipient recipient) {
-//        try {
-//            repository.saveAndFlush(mapper.toEntity(recipient));
-//        }
-//        catch (ObjectOptimisticLockingFailureException e) {
-//            persistenceMetrics.recordOptimisticLockConflict(UPDATE);
-//            throw new RecipientOptimisticLockException(recipient.getId());
-//        }
-//    }
 
     @Override
     @Transactional
@@ -86,8 +74,8 @@ public class RecipientPostgresRepository implements RecipientRepository {
             return;
         }
 
-        persistenceMetrics.recordDeleteVersionMiss();
-        persistenceMetrics.recordOptimisticLockConflict(DELETE);
+//        persistenceMetrics.recordDeleteVersionMiss();
+//        persistenceMetrics.recordOptimisticLockConflict(DELETE);
         throw new RecipientOptimisticLockException(recipientId);
     }
 

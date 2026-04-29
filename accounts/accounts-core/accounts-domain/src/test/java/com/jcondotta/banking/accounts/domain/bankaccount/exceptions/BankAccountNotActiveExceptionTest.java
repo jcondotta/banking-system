@@ -1,7 +1,7 @@
 package com.jcondotta.banking.accounts.domain.bankaccount.exceptions;
 
 import com.jcondotta.banking.accounts.domain.bankaccount.enums.AccountStatus;
-import com.jcondotta.domain.exception.DomainRuleValidationException;
+import com.jcondotta.domain.exception.DomainRuleViolationException;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
@@ -15,7 +15,7 @@ class BankAccountNotActiveExceptionTest {
     var exception = new BankAccountNotActiveException(accountStatus);
 
     assertThat(exception)
-      .isInstanceOf(DomainRuleValidationException.class)
+      .isInstanceOf(DomainRuleViolationException.class)
       .hasMessage(BankAccountNotActiveException.BANK_ACCOUNT_MUST_BE_ACTIVE.formatted(accountStatus.name()));
   }
 }
