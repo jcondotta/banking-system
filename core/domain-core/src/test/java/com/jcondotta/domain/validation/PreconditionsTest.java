@@ -1,7 +1,8 @@
 package com.jcondotta.domain.validation;
 
 import com.jcondotta.domain.exception.DomainValidationException;
-import com.jcondotta.domain.support.DomainPreconditions;
+import com.jcondotta.domain.exception.InvalidDomainDataException;
+import com.jcondotta.domain.support.Preconditions;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Constructor;
@@ -9,28 +10,29 @@ import java.lang.reflect.Constructor;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-class DomainPreconditionsTest {
+class PreconditionsTest {
 
   private static final String ERROR_MESSAGE = "error";
   private static final String VALID_VALUE = "valid";
 
   @Test
   void shouldReturnValue_whenRequiredValueIsNotNull() {
-    String result = DomainPreconditions.required(VALID_VALUE, ERROR_MESSAGE);
+    String result = Preconditions.required(VALID_VALUE, ERROR_MESSAGE);
 
     assertThat(result).isEqualTo(VALID_VALUE);
   }
 
   @Test
   void shouldThrowDomainValidationException_whenRequiredValueIsNull() {
-    assertThatThrownBy(() -> DomainPreconditions.required(null, ERROR_MESSAGE))
+    assertThatThrownBy(() -> Preconditions.required(null, ERROR_MESSAGE))
+      .isInstanceOf(InvalidDomainDataException.class)
       .isInstanceOf(DomainValidationException.class)
       .hasMessage(ERROR_MESSAGE);
   }
 
   @Test
   void shouldReturnValue_whenRequiredNotBlankValueIsValid() {
-    String result = DomainPreconditions.requiredNotBlank(VALID_VALUE, ERROR_MESSAGE);
+    String result = Preconditions.requiredNotBlank(VALID_VALUE, ERROR_MESSAGE);
 
     assertThat(result).isEqualTo(VALID_VALUE);
   }
@@ -38,21 +40,23 @@ class DomainPreconditionsTest {
   @Test
   @SuppressWarnings("ConstantConditions")
   void shouldThrowDomainValidationException_whenRequiredNotBlankValueIsNull() {
-    assertThatThrownBy(() -> DomainPreconditions.requiredNotBlank(null, ERROR_MESSAGE))
+    assertThatThrownBy(() -> Preconditions.requiredNotBlank(null, ERROR_MESSAGE))
+      .isInstanceOf(InvalidDomainDataException.class)
       .isInstanceOf(DomainValidationException.class)
       .hasMessage(ERROR_MESSAGE);
   }
 
   @Test
   void shouldThrowDomainValidationException_whenRequiredNotBlankValueIsBlank() {
-    assertThatThrownBy(() -> DomainPreconditions.requiredNotBlank("   ", ERROR_MESSAGE))
+    assertThatThrownBy(() -> Preconditions.requiredNotBlank("   ", ERROR_MESSAGE))
+      .isInstanceOf(InvalidDomainDataException.class)
       .isInstanceOf(DomainValidationException.class)
       .hasMessage(ERROR_MESSAGE);
   }
 
   @Test
   void shouldThrowUnsupportedOperationException_whenInstantiatingUtilityClass() throws Exception {
-    Constructor<DomainPreconditions> constructor = DomainPreconditions.class.getDeclaredConstructor();
+    Constructor<Preconditions> constructor = Preconditions.class.getDeclaredConstructor();
 
     constructor.setAccessible(true);
 

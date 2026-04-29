@@ -1,6 +1,6 @@
 package com.jcondotta.banking.accounts.domain.bankaccount.value_objects.contact;
 
-import static com.jcondotta.domain.support.DomainPreconditions.required;
+import static com.jcondotta.domain.support.Preconditions.required;
 
 public record ContactInfo(Email email, PhoneNumber phoneNumber) {
 

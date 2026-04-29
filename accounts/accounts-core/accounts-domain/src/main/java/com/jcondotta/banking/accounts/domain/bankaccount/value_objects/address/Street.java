@@ -1,8 +1,8 @@
 package com.jcondotta.banking.accounts.domain.bankaccount.value_objects.address;
 
-import com.jcondotta.domain.exception.DomainValidationException;
+import com.jcondotta.domain.exception.InvalidDomainDataException;
 
-import static com.jcondotta.domain.support.DomainPreconditions.requiredNotBlank;
+import static com.jcondotta.domain.support.Preconditions.requiredNotBlank;
 
 public record Street(String value) {
 
@@ -16,7 +16,7 @@ public record Street(String value) {
     requiredNotBlank(value, MUST_NOT_BE_EMPTY);
 
     if (value.length() > MAX_LENGTH) {
-      throw new DomainValidationException(
+      throw new InvalidDomainDataException(
         MUST_NOT_EXCEED_LENGTH.formatted(MAX_LENGTH)
       );
     }

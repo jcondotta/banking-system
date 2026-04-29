@@ -1,23 +1,23 @@
 package com.jcondotta.domain.support;
 
-import com.jcondotta.domain.exception.DomainValidationException;
+import com.jcondotta.domain.exception.InvalidDomainDataException;
 
-public final class DomainPreconditions {
+public final class Preconditions {
 
-  private DomainPreconditions() {
+  private Preconditions() {
     throw new UnsupportedOperationException("No instances allowed for this class");
   }
 
   public static <T> T required(T value, String message) {
     if (value == null) {
-      throw new DomainValidationException(message);
+      throw new InvalidDomainDataException(message);
     }
     return value;
   }
 
   public static String requiredNotBlank(String value, String message) {
     if (value == null || value.isBlank()) {
-      throw new DomainValidationException(message);
+      throw new InvalidDomainDataException(message);
     }
     return value;
   }

@@ -1,7 +1,7 @@
 package com.jcondotta.domain.core;
 
 import com.jcondotta.domain.identity.EntityId;
-import com.jcondotta.domain.support.DomainPreconditions;
+import com.jcondotta.domain.support.Preconditions;
 
 public abstract class Entity<ID extends EntityId<?>> {
 
@@ -10,7 +10,7 @@ public abstract class Entity<ID extends EntityId<?>> {
   private final ID id;
 
   protected Entity(ID id) {
-    this.id = DomainPreconditions.required(id, ID_NOT_PROVIDED);
+    this.id = Preconditions.required(id, ID_NOT_PROVIDED);
   }
 
   public ID getId() {

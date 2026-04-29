@@ -9,6 +9,8 @@ import com.jcondotta.banking.recipients.domain.testsupport.ClockTestFactory;
 import com.jcondotta.banking.recipients.domain.testsupport.RecipientTestData;
 import com.jcondotta.domain.exception.DomainValidationException;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -47,19 +49,27 @@ class RecipientRestoreTest {
       });
   }
 
-  @Test
-  void shouldRestoreRecipient_whenVersionIsNull() {
+  @ParameterizedTest
+  @CsvSource(
+    value = {
+      "NULL, false",
+      "0, true",
+      "1, true"
+    },
+    nullValues = "NULL"
+  )
+  void shouldDefineVersionedState_whenRestoringRecipient(Long version, boolean expectedVersioned) {
     var recipient = Recipient.restore(
       RECIPIENT_ID,
       BANK_ACCOUNT_ID,
       RECIPIENT_NAME,
       IBAN,
       CREATED_AT,
-      null
+      version
     );
 
-    assertThat(recipient.getVersion()).isNull();
-    assertThat(recipient.isPersisted()).isFalse();
+    assertThat(recipient.getVersion()).isEqualTo(version);
+    assertThat(recipient.isVersioned()).isEqualTo(expectedVersioned);
   }
 
   @Test

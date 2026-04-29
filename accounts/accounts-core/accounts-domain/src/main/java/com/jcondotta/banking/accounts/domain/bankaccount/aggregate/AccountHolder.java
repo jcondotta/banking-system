@@ -10,7 +10,7 @@ import com.jcondotta.domain.core.Entity;
 
 import java.time.Instant;
 
-import static com.jcondotta.domain.support.DomainPreconditions.required;
+import static com.jcondotta.domain.support.Preconditions.required;
 
 public final class AccountHolder extends Entity<AccountHolderId> {
 

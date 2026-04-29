@@ -10,7 +10,7 @@ import com.jcondotta.banking.accounts.domain.bankaccount.validation.BankAccountE
 
 import java.util.*;
 
-import static com.jcondotta.domain.support.DomainPreconditions.required;
+import static com.jcondotta.domain.support.Preconditions.required;
 
 public final class AccountHolders {
 

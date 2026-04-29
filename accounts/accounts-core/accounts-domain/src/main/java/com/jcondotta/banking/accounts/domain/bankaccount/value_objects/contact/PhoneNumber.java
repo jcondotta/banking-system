@@ -1,7 +1,7 @@
 package com.jcondotta.banking.accounts.domain.bankaccount.value_objects.contact;
 
-import com.jcondotta.domain.exception.DomainValidationException;
-import com.jcondotta.domain.support.DomainPreconditions;
+import com.jcondotta.domain.exception.InvalidDomainDataException;
+import com.jcondotta.domain.support.Preconditions;
 
 public record PhoneNumber(String value) {
 
@@ -11,12 +11,12 @@ public record PhoneNumber(String value) {
   private static final String E164_REGEX = "^\\+[1-9]\\d{7,14}$";
 
   public PhoneNumber {
-    DomainPreconditions.requiredNotBlank(value, MUST_NOT_BE_EMPTY);
+    Preconditions.requiredNotBlank(value, MUST_NOT_BE_EMPTY);
 
     value = value.trim();
 
     if (!value.matches(E164_REGEX)) {
-      throw new DomainValidationException(INVALID_FORMAT);
+      throw new InvalidDomainDataException(INVALID_FORMAT);
     }
   }
 

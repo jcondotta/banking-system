@@ -10,7 +10,7 @@ import com.jcondotta.domain.core.AggregateRoot;
 
 import java.time.Instant;
 
-import static com.jcondotta.domain.support.DomainPreconditions.required;
+import static com.jcondotta.domain.support.Preconditions.required;
 
 public final class Recipient extends AggregateRoot<RecipientId> {
 
@@ -81,7 +81,7 @@ public final class Recipient extends AggregateRoot<RecipientId> {
     }
   }
 
-  public boolean isPersisted() {
+  public boolean isVersioned() {
     return version != null;
   }
 

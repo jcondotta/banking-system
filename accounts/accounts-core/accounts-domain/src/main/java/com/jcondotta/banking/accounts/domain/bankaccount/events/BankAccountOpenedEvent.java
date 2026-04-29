@@ -11,7 +11,7 @@ import com.jcondotta.domain.validation.DomainEventErrors;
 
 import java.time.Instant;
 
-import static com.jcondotta.domain.support.DomainPreconditions.required;
+import static com.jcondotta.domain.support.Preconditions.required;
 
 public record BankAccountOpenedEvent(
   EventId eventId,

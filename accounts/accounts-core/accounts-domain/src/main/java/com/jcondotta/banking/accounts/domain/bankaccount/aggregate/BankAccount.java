@@ -19,7 +19,7 @@ import com.jcondotta.domain.identity.EventId;
 import java.time.Instant;
 import java.util.List;
 
-import static com.jcondotta.domain.support.DomainPreconditions.required;
+import static com.jcondotta.domain.support.Preconditions.required;
 
 public final class BankAccount extends AggregateRoot<BankAccountId> {
 

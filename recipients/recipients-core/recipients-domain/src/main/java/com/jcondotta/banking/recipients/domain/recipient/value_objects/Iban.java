@@ -1,6 +1,6 @@
 package com.jcondotta.banking.recipients.domain.recipient.value_objects;
 
-import com.jcondotta.domain.exception.DomainValidationException;
+import com.jcondotta.domain.exception.InvalidDomainDataException;
 
 import java.util.Locale;
 
@@ -11,17 +11,17 @@ public record Iban(String value) {
 
   public Iban {
     if (value == null) {
-      throw new DomainValidationException(IBAN_NOT_PROVIDED);
+      throw new InvalidDomainDataException(IBAN_NOT_PROVIDED);
     }
 
     var sanitized = value.replaceAll("\\s+", "").toUpperCase(Locale.ROOT);
 
     if (sanitized.isEmpty()) {
-      throw new DomainValidationException(IBAN_NOT_PROVIDED);
+      throw new InvalidDomainDataException(IBAN_NOT_PROVIDED);
     }
 
     if (!isValid(sanitized)) {
-      throw new DomainValidationException(IBAN_INVALID_FORMAT);
+      throw new InvalidDomainDataException(IBAN_INVALID_FORMAT);
     }
 
     value = sanitized;

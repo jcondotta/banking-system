@@ -1,9 +1,9 @@
 package com.jcondotta.banking.recipients.domain.recipient.value_objects;
 
-import com.jcondotta.domain.exception.DomainValidationException;
+import com.jcondotta.domain.exception.InvalidDomainDataException;
 
-import static com.jcondotta.domain.support.DomainPreconditions.required;
-import static com.jcondotta.domain.support.DomainPreconditions.requiredNotBlank;
+import static com.jcondotta.domain.support.Preconditions.required;
+import static com.jcondotta.domain.support.Preconditions.requiredNotBlank;
 
 public record RecipientName(String value) {
 
@@ -27,7 +27,7 @@ public record RecipientName(String value) {
 
   private static void validateLength(String value) {
     if (value.length() > MAX_LENGTH) {
-      throw new DomainValidationException(
+      throw new InvalidDomainDataException(
         NAME_MUST_NOT_EXCEED_LENGTH.formatted(MAX_LENGTH)
       );
     }

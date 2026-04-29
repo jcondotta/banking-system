@@ -1,7 +1,7 @@
 package com.jcondotta.banking.accounts.domain.bankaccount.value_objects.contact;
 
-import com.jcondotta.domain.exception.DomainValidationException;
-import com.jcondotta.domain.support.DomainPreconditions;
+import com.jcondotta.domain.exception.InvalidDomainDataException;
+import com.jcondotta.domain.support.Preconditions;
 
 import java.util.Locale;
 import java.util.regex.Pattern;
@@ -22,18 +22,18 @@ public record Email(String value) {
     );
 
   public Email {
-    DomainPreconditions.requiredNotBlank(value, MUST_NOT_BE_EMPTY);
+    Preconditions.requiredNotBlank(value, MUST_NOT_BE_EMPTY);
 
     value = value.trim().toLowerCase(Locale.ROOT);
 
     if (value.length() > MAX_LENGTH) {
-      throw new DomainValidationException(
+      throw new InvalidDomainDataException(
         MUST_NOT_EXCEED_LENGTH.formatted(MAX_LENGTH)
       );
     }
 
     if (!EMAIL_REGEX.matcher(value).matches()) {
-      throw new DomainValidationException(INVALID_FORMAT);
+      throw new InvalidDomainDataException(INVALID_FORMAT);
     }
   }
 

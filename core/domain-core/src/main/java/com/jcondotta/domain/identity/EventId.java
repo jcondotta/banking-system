@@ -1,6 +1,6 @@
 package com.jcondotta.domain.identity;
 
-import com.jcondotta.domain.support.DomainPreconditions;
+import com.jcondotta.domain.support.Preconditions;
 
 import java.util.UUID;
 
@@ -9,7 +9,7 @@ public record EventId(UUID value) {
   public static final String EVENT_ID_NOT_PROVIDED = "Event id must be provided.";
 
   public EventId {
-    DomainPreconditions.required(value, EVENT_ID_NOT_PROVIDED);
+    Preconditions.required(value, EVENT_ID_NOT_PROVIDED);
   }
 
   public static EventId newId() {

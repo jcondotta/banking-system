@@ -88,7 +88,7 @@ class CreateRecipientIT {
           () -> assertThat(recipient.getBankAccountId().value()).isEqualTo(bankAccountId),
           () -> assertThat(recipient.getRecipientName().value()).isEqualTo(recipientName),
           () -> assertThat(recipient.getIban().value()).isEqualTo(iban),
-          () -> assertThat(recipient.isPersisted()).isTrue(),
+          () -> assertThat(recipient.isVersioned()).isTrue(),
           () -> assertThat(recipient.getCreatedAt()).isNotNull()
         ))
     );
@@ -163,7 +163,7 @@ class CreateRecipientIT {
       () -> assertThat(secondRecipientId).isNotEqualTo(firstRecipientId),
       () -> assertThat(recipientRepository.findById(RecipientId.of(firstRecipientId))).isEmpty(),
       () -> assertThat(recipientRepository.findById(RecipientId.of(secondRecipientId)))
-        .hasValueSatisfying(recipient -> assertThat(recipient.isPersisted()).isTrue())
+        .hasValueSatisfying(recipient -> assertThat(recipient.isVersioned()).isTrue())
     );
   }
 

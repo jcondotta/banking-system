@@ -4,7 +4,7 @@ import com.jcondotta.banking.accounts.domain.bankaccount.enums.DocumentCountry;
 import com.jcondotta.banking.accounts.domain.bankaccount.enums.DocumentType;
 import com.jcondotta.banking.accounts.domain.bankaccount.value_objects.personal.DocumentNumber;
 
-import java.util.Objects;
+import static com.jcondotta.domain.support.Preconditions.required;
 
 public final class DocumentNumberValidationPolicy {
 
@@ -17,13 +17,13 @@ public final class DocumentNumberValidationPolicy {
   private final DocumentNumberValidatorRegistry registry;
 
   public DocumentNumberValidationPolicy(DocumentNumberValidatorRegistry registry) {
-    this.registry = Objects.requireNonNull(registry, REGISTRY_NOT_PROVIDED);
+    this.registry = required(registry, REGISTRY_NOT_PROVIDED);
   }
 
   public void validate(DocumentCountry country, DocumentType type, DocumentNumber number) {
-    Objects.requireNonNull(country, COUNTRY_NOT_PROVIDED);
-    Objects.requireNonNull(type, TYPE_NOT_PROVIDED);
-    Objects.requireNonNull(number, NUMBER_NOT_PROVIDED);
+    required(country, COUNTRY_NOT_PROVIDED);
+    required(type, TYPE_NOT_PROVIDED);
+    required(number, NUMBER_NOT_PROVIDED);
 
     registry.resolve(country, type).validate(number);
   }

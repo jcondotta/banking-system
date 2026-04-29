@@ -1,8 +1,8 @@
 package com.jcondotta.domain.exception;
 
-public class DomainValidationException extends DomainException {
+public abstract class DomainValidationException extends DomainException {
 
-  public DomainValidationException(String message) {
+  protected DomainValidationException(String message) {
     super(message);
   }
 }
