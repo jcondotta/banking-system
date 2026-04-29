@@ -15,6 +15,7 @@ class DomainValidationExceptionTest {
   }
 
   @Test
+  @SuppressWarnings("all")
   void shouldExtendDomainException_whenInspectedViaReflection() {
     assertThat(DomainException.class.isAssignableFrom(DomainValidationException.class))
       .isTrue();

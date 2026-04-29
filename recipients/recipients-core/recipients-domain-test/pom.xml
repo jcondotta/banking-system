@@ -10,7 +10,7 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <artifactId>recipients-domain-test-support</artifactId>
+    <artifactId>recipients-domain-test</artifactId>
 
     <dependencies>
         <dependency>
@@ -20,7 +20,7 @@
 
         <dependency>
             <groupId>com.jcondotta</groupId>
-            <artifactId>recipients-test-common</artifactId>
+            <artifactId>recipients-common-test</artifactId>
             <scope>compile</scope>
         </dependency>
     </dependencies>

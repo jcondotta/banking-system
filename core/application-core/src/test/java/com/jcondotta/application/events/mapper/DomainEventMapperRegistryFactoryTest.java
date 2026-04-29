@@ -41,7 +41,7 @@ class DomainEventMapperRegistryFactoryTest {
   void shouldThrowException_whenMapperListIsNull() {
 
     assertThatThrownBy(() -> factory.create(null))
-      .isInstanceOf(NullPointerException.class)
+      .isInstanceOf(IllegalArgumentException.class)
       .hasMessage(DomainEventMapperRegistryFactory.DOMAIN_EVENT_MAPPERS_MUST_NOT_BE_NULL);
   }
 
@@ -50,7 +50,7 @@ class DomainEventMapperRegistryFactoryTest {
 
     assertThatThrownBy(() ->
       DomainEventMapperRegistryFactory.of((DomainEventIntegrationEventMapper<?, ?>[]) null))
-      .isInstanceOf(NullPointerException.class)
+      .isInstanceOf(IllegalArgumentException.class)
       .hasMessage(DomainEventMapperRegistryFactory.DOMAIN_EVENT_MAPPERS_MUST_NOT_BE_NULL);
   }
 
@@ -61,7 +61,7 @@ class DomainEventMapperRegistryFactoryTest {
     mappers.add(null);
 
     assertThatThrownBy(() -> factory.create(mappers))
-      .isInstanceOf(NullPointerException.class)
+      .isInstanceOf(IllegalArgumentException.class)
       .hasMessage(DomainEventMapperRegistryFactory.DOMAIN_EVENT_MAPPER_MUST_NOT_BE_NULL);
   }
 
@@ -82,7 +82,7 @@ class DomainEventMapperRegistryFactoryTest {
 
     assertThatThrownBy(() ->
       factory.create(List.of(mapper)))
-      .isInstanceOf(NullPointerException.class)
+      .isInstanceOf(IllegalArgumentException.class)
       .hasMessage(DomainEventMapperRegistryFactory.DOMAIN_EVENT_TYPE_MUST_NOT_BE_NULL);
   }
 

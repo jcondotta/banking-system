@@ -8,7 +8,7 @@ import java.net.URI;
 import java.util.Map;
 import java.util.UUID;
 
-@ConfigurationProperties(prefix = "app.api.v1.recipients")
+@ConfigurationProperties(prefix = "app.api.recipients")
 public record AccountRecipientsURIProperties(
     @NotBlank String rootPath, @NotBlank String recipientIdPath) {
 

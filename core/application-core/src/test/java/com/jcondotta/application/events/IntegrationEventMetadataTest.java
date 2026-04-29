@@ -45,14 +45,14 @@ class IntegrationEventMetadataTest {
   @Test
   void shouldThrowException_whenEventIdIsNull() {
     assertThatThrownBy(() -> IntegrationEventMetadata.of(null, correlationId, eventSource, version, occurredAt))
-      .isInstanceOf(NullPointerException.class)
+      .isInstanceOf(IllegalArgumentException.class)
       .hasMessage(IntegrationEventMetadata.EVENT_ID_REQUIRED);
   }
 
   @Test
   void shouldThrowException_whenCorrelationIdIsNull() {
     assertThatThrownBy(() -> IntegrationEventMetadata.of(eventId, null, eventSource, version, occurredAt))
-      .isInstanceOf(NullPointerException.class)
+      .isInstanceOf(IllegalArgumentException.class)
       .hasMessage(IntegrationEventMetadata.CORRELATION_ID_REQUIRED);
   }
 
@@ -74,7 +74,7 @@ class IntegrationEventMetadataTest {
   @Test
   void shouldThrowException_whenOccurredAtIsNull() {
     assertThatThrownBy(() -> IntegrationEventMetadata.of(eventId, correlationId, eventSource, version, null))
-      .isInstanceOf(NullPointerException.class)
+      .isInstanceOf(IllegalArgumentException.class)
       .hasMessage(IntegrationEventMetadata.OCCURRED_AT_REQUIRED);
   }
 

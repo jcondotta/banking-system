@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import java.lang.reflect.Constructor;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class PreconditionsTest {
@@ -55,9 +56,22 @@ class PreconditionsTest {
   }
 
   @Test
+  void shouldPassSilently_whenCheckArgumentConditionIsTrue() {
+    assertThatCode(() -> Preconditions.checkArgument(true, ERROR_MESSAGE))
+      .doesNotThrowAnyException();
+  }
+
+  @Test
+  void shouldThrowDomainValidationException_whenCheckArgumentConditionIsFalse() {
+    assertThatThrownBy(() -> Preconditions.checkArgument(false, ERROR_MESSAGE))
+      .isInstanceOf(InvalidDomainDataException.class)
+      .isInstanceOf(DomainValidationException.class)
+      .hasMessage(ERROR_MESSAGE);
+  }
+
+  @Test
   void shouldThrowUnsupportedOperationException_whenInstantiatingUtilityClass() throws Exception {
     Constructor<Preconditions> constructor = Preconditions.class.getDeclaredConstructor();
-
     constructor.setAccessible(true);
 
     assertThatThrownBy(constructor::newInstance)

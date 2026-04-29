@@ -32,7 +32,7 @@ import java.util.concurrent.ThreadLocalRandom;
 @Slf4j
 @Profile("local")
 @RestController
-@RequestMapping("${app.api.v1.recipients.root-path}/bulk")
+@RequestMapping("${app.api.recipients.root-path}/bulk")
 public class BulkCreateRecipientController {
 
   private static final Duration REQUEST_TIMEOUT = Duration.ofSeconds(10);
@@ -51,7 +51,7 @@ public class BulkCreateRecipientController {
     this.serverPort = serverPort;
   }
 
-  @PostMapping("/{quantity}")
+  @PostMapping(path = "/{quantity}", version = "1.0")
   public BulkCreateRecipientResponse createBulk(
     @PathVariable("bank-account-id") UUID bankAccountId,
     @PathVariable int quantity

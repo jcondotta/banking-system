@@ -9,8 +9,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class AccountRecipientsURIPropertiesTest {
 
-  private static final String ROOT_PATH = "/api/v1/bank-accounts/{bank-account-id}/recipients";
-  private static final String RECIPIENT_ID_PATH = "/api/v1/bank-accounts/{bank-account-id}/recipients/{recipient-id}";
+  private static final String ROOT_PATH = "/api/bank-accounts/{bank-account-id}/recipients";
+  private static final String RECIPIENT_ID_PATH = "/api/bank-accounts/{bank-account-id}/recipients/{recipient-id}";
 
   private final AccountRecipientsURIProperties properties =
     new AccountRecipientsURIProperties(ROOT_PATH, RECIPIENT_ID_PATH);
@@ -22,7 +22,7 @@ class AccountRecipientsURIPropertiesTest {
     var uri = properties.recipientsURI(bankAccountId);
 
     assertThat(uri)
-      .isEqualTo(URI.create("/api/v1/bank-accounts/" + bankAccountId + "/recipients"));
+      .isEqualTo(URI.create("/api/bank-accounts/" + bankAccountId + "/recipients"));
   }
 
   @Test
@@ -33,6 +33,6 @@ class AccountRecipientsURIPropertiesTest {
     var uri = properties.recipientURI(bankAccountId, recipientId);
 
     assertThat(uri)
-      .isEqualTo(URI.create("/api/v1/bank-accounts/" + bankAccountId + "/recipients/" + recipientId));
+      .isEqualTo(URI.create("/api/bank-accounts/" + bankAccountId + "/recipients/" + recipientId));
   }
 }

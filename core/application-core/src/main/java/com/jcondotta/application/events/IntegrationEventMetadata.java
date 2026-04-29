@@ -21,16 +21,16 @@ public record IntegrationEventMetadata(
 
   public IntegrationEventMetadata {
     if (eventId == null) {
-      throw new NullPointerException(EVENT_ID_REQUIRED);
+      throw new IllegalArgumentException(EVENT_ID_REQUIRED);
     }
     if (correlationId == null) {
-      throw new NullPointerException(CORRELATION_ID_REQUIRED);
+      throw new IllegalArgumentException(CORRELATION_ID_REQUIRED);
     }
     if (eventSource == null || eventSource.isBlank()) {
       throw new IllegalArgumentException(EVENT_SOURCE_REQUIRED);
     }
     if (occurredAt == null) {
-      throw new NullPointerException(OCCURRED_AT_REQUIRED);
+      throw new IllegalArgumentException(OCCURRED_AT_REQUIRED);
     }
     if (version <= 0) {
       throw new IllegalArgumentException(VERSION_MUST_BE_GREATER_THAN_ZERO);

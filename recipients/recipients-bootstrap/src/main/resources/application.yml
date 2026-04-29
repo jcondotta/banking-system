@@ -24,13 +24,19 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: false
+  mvc:
+    apiversion:
+      default: "1.0"
+      supported:
+        - "1.0"
+      use:
+        header: X-API-Version
 
 app:
   api:
-    v1:
-      recipients:
-        root-path: '/api/v1/bank-accounts/{bank-account-id}/recipients'
-        recipient-id-path: '/api/v1/bank-accounts/{bank-account-id}/recipients/{recipient-id}'
+    recipients:
+      root-path: '/api/bank-accounts/{bank-account-id}/recipients'
+      recipient-id-path: '/api/bank-accounts/{bank-account-id}/recipients/{recipient-id}'
 
 management:
   endpoints:

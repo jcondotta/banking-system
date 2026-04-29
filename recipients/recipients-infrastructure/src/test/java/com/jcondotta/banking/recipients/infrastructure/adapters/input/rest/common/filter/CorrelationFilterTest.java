@@ -50,7 +50,7 @@ class CorrelationFilterTest {
   @Test
   void shouldPopulateMdcAndEmitTransportLog_whenRequestCompletesSuccessfully() throws Exception {
     var correlationId = UUID.randomUUID();
-    var request = request("POST", "/api/v1/bank-accounts/123/recipients");
+    var request = request("POST", "/api/bank-accounts/123/recipients");
     request.addHeader(HttpHeadersConstants.CORRELATION_ID, correlationId.toString());
     var response = new MockHttpServletResponse();
 
@@ -72,13 +72,13 @@ class CorrelationFilterTest {
       .containsEntry("event_type", "http.request")
       .containsEntry("outcome", "success")
       .containsEntry("method", "POST")
-      .containsEntry("path", "/api/v1/bank-accounts/123/recipients")
+      .containsEntry("path", "/api/bank-accounts/123/recipients")
       .containsEntry("http_status", "201");
   }
 
   @Test
   void shouldGenerateCorrelationIdAndMarkTransportFailure_whenRequestCompletesWithClientError() throws Exception {
-    var request = request("GET", "/api/v1/bank-accounts/123/recipients");
+    var request = request("GET", "/api/bank-accounts/123/recipients");
     var response = new MockHttpServletResponse();
 
     filter.doFilter(request, response, (req, res) -> {
@@ -99,13 +99,13 @@ class CorrelationFilterTest {
       .containsEntry("event_type", "http.request")
       .containsEntry("outcome", "failure")
       .containsEntry("method", "GET")
-      .containsEntry("path", "/api/v1/bank-accounts/123/recipients")
+      .containsEntry("path", "/api/bank-accounts/123/recipients")
       .containsEntry("http_status", "409");
   }
 
   @Test
   void shouldEmitErrorTransportLog_whenExceptionEscapesFilterChain() {
-    var request = request("DELETE", "/api/v1/bank-accounts/123/recipients/456");
+    var request = request("DELETE", "/api/bank-accounts/123/recipients/456");
     var response = new MockHttpServletResponse();
     var exception = new ServletException("connection reset");
 
@@ -124,7 +124,7 @@ class CorrelationFilterTest {
       .containsEntry("event_type", "http.request")
       .containsEntry("outcome", "failure")
       .containsEntry("method", "DELETE")
-      .containsEntry("path", "/api/v1/bank-accounts/123/recipients/456")
+      .containsEntry("path", "/api/bank-accounts/123/recipients/456")
       .containsEntry("http_status", "500");
   }
 

@@ -11,10 +11,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.util.UUID;
 
-@RequestMapping("${app.api.v1.recipients.root-path}")
+@RequestMapping("${app.api.recipients.root-path}")
 public interface CreateRecipientController {
 
-  @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
+  @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, version = "1.0")
   ResponseEntity<Void> createRecipient(
       @PathVariable("bank-account-id") UUID bankAccountId,
       @Valid @RequestBody CreateRecipientRestRequest request

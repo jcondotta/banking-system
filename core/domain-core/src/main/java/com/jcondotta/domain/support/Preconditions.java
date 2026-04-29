@@ -21,4 +21,10 @@ public final class Preconditions {
     }
     return value;
   }
+
+  public static void checkArgument(boolean condition, String message) {
+    if (!condition) {
+      throw new InvalidDomainDataException(message);
+    }
+  }
 }

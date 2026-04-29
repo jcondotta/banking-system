@@ -7,8 +7,6 @@ import com.jcondotta.domain.events.DomainEvent;
 
 import java.util.Map;
 
-import static java.util.Objects.requireNonNull;
-
 public final class DomainEventMapperRegistry {
 
   static final String REGISTRY_MUST_NOT_BE_NULL = "registry must not be null";
@@ -19,12 +17,16 @@ public final class DomainEventMapperRegistry {
   public DomainEventMapperRegistry(
     Map<Class<? extends DomainEvent<?>>, DomainEventIntegrationEventMapper<?, ?>> registry) {
 
-    requireNonNull(registry, REGISTRY_MUST_NOT_BE_NULL);
+    if (registry == null) {
+      throw new IllegalArgumentException(REGISTRY_MUST_NOT_BE_NULL);
+    }
     this.registry = Map.copyOf(registry);
   }
 
   public IntegrationEvent<?> map(IntegrationEventMetadata metadata, DomainEvent<?> event) {
-    requireNonNull(event, EVENT_MUST_NOT_BE_NULL);
+    if (event == null) {
+      throw new IllegalArgumentException(EVENT_MUST_NOT_BE_NULL);
+    }
 
     var rawMapper = registry.get(event.getClass());
     if (rawMapper == null) {

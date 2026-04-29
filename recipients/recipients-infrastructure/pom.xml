@@ -48,13 +48,7 @@
         <!-- Test -->
         <dependency>
             <groupId>com.jcondotta</groupId>
-            <artifactId>recipients-test-common</artifactId>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>com.jcondotta</groupId>
-            <artifactId>recipients-domain-test-support</artifactId>
+            <artifactId>recipients-domain-test</artifactId>
             <scope>test</scope>
         </dependency>
 

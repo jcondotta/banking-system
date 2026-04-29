@@ -8,9 +8,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.util.UUID;
 
-@RequestMapping("${app.api.v1.recipients.root-path}")
+@RequestMapping("${app.api.recipients.root-path}")
 public interface ListRecipientsController {
 
-  @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
+  @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE, version = "1.0")
   ResponseEntity<ListRecipientsResponse> listRecipients(@PathVariable("bank-account-id") UUID bankAccountId);
 }

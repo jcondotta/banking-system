@@ -7,10 +7,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.util.UUID;
 
-@RequestMapping("${app.api.v1.recipients.recipient-id-path}")
+@RequestMapping("${app.api.recipients.recipient-id-path}")
 public interface RemoveRecipientController {
 
-  @DeleteMapping
+  @DeleteMapping(version = "1.0")
   ResponseEntity<Void> removeRecipient(
     @PathVariable("bank-account-id") UUID bankAccountId,
     @PathVariable("recipient-id") UUID recipientId

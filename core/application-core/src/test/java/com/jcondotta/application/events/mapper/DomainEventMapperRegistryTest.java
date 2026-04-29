@@ -65,20 +65,20 @@ class DomainEventMapperRegistryTest {
   }
 
   @Test
-  void shouldThrowNullPointerException_whenEventIsNull() {
+  void shouldThrowException_whenEventIsNull() {
     var registry = new DomainEventMapperRegistry(
       Map.of(fakeMapper.domainEventType(), fakeMapper)
     );
 
     assertThatThrownBy(() -> registry.map(metadata, null))
-      .isInstanceOf(NullPointerException.class)
+      .isInstanceOf(IllegalArgumentException.class)
       .hasMessage(DomainEventMapperRegistry.EVENT_MUST_NOT_BE_NULL);
   }
 
   @Test
-  void shouldThrowNullPointerException_whenRegistryIsNull() {
+  void shouldThrowException_whenRegistryIsNull() {
     assertThatThrownBy(() -> new DomainEventMapperRegistry(null))
-      .isInstanceOf(NullPointerException.class)
+      .isInstanceOf(IllegalArgumentException.class)
       .hasMessage(DomainEventMapperRegistry.REGISTRY_MUST_NOT_BE_NULL);
   }
 

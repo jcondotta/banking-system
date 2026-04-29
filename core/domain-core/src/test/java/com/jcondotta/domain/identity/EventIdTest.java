@@ -1,7 +1,6 @@
-package com.jcondotta.domain.events;
+package com.jcondotta.domain.identity;
 
 import com.jcondotta.domain.exception.DomainValidationException;
-import com.jcondotta.domain.identity.EventId;
 import org.junit.jupiter.api.Test;
 
 import java.util.UUID;

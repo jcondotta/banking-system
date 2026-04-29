@@ -14,9 +14,9 @@
     <packaging>pom</packaging>
 
     <modules>
-        <module>recipients-test-common</module>
+        <module>recipients-common-test</module>
         <module>recipients-domain</module>
-        <module>recipients-domain-test-support</module>
+        <module>recipients-domain-test</module>
         <module>recipients-application</module>
     </modules>
 

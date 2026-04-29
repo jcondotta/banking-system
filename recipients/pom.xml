@@ -69,14 +69,14 @@
 
             <dependency>
                 <groupId>com.jcondotta</groupId>
-                <artifactId>recipients-test-common</artifactId>
+                <artifactId>recipients-common-test</artifactId>
                 <version>${project.version}</version>
                 <scope>test</scope>
             </dependency>
 
             <dependency>
                 <groupId>com.jcondotta</groupId>
-                <artifactId>recipients-domain-test-support</artifactId>
+                <artifactId>recipients-domain-test</artifactId>
                 <version>${project.version}</version>
                 <scope>test</scope>
             </dependency>

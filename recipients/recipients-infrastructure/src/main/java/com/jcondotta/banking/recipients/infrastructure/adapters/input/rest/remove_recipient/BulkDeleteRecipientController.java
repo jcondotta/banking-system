@@ -32,7 +32,7 @@ import java.util.concurrent.ThreadLocalRandom;
 @Slf4j
 @Profile("local")
 @RestController
-@RequestMapping("/api/v1/recipients/bulk")
+@RequestMapping("/api/recipients/bulk")
 public class BulkDeleteRecipientController {
 
   private static final Duration REQUEST_TIMEOUT = Duration.ofSeconds(10);
@@ -53,7 +53,7 @@ public class BulkDeleteRecipientController {
     this.serverPort = serverPort;
   }
 
-  @DeleteMapping
+  @DeleteMapping(version = "1.0")
   public BulkDeleteRecipientResponse deleteBulk() {
     var recipients = recipientRepository.findAll().stream()
       .map(recipient -> new RecipientTarget(recipient.getBankAccountId(), recipient.getId()))
