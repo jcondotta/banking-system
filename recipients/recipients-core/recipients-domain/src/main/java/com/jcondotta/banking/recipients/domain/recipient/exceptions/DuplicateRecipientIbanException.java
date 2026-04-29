@@ -13,7 +13,7 @@ public final class DuplicateRecipientIbanException extends RecipientDomainConfli
 
   public DuplicateRecipientIbanException(Iban iban, BankAccountId bankAccountId) {
     super(MESSAGE);
-    this.maskedIban = mask(iban.value());
+    this.maskedIban = iban.masked();
     this.bankAccountId = bankAccountId.value().toString();
   }
 
@@ -28,16 +28,5 @@ public final class DuplicateRecipientIbanException extends RecipientDomainConfli
 
   public String getBankAccountId() {
     return bankAccountId;
-  }
-
-  private static String mask(String iban) {
-    if (iban == null || iban.length() < 8) {
-      return "****";
-    }
-
-    var prefix = iban.substring(0, 4);
-    var suffix = iban.substring(iban.length() - 4);
-
-    return prefix + "****" + suffix;
   }
 }

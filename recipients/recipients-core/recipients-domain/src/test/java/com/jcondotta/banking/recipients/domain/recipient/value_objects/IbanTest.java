@@ -3,6 +3,7 @@ package com.jcondotta.banking.recipients.domain.recipient.value_objects;
 import com.jcondotta.banking.recipients.domain.testsupport.BlankValuesSource;
 import com.jcondotta.domain.exception.DomainValidationException;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.ParameterizedTest;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -29,6 +30,18 @@ class IbanTest {
     var iban = Iban.of("  de44 5001 0517 5407 3249 31  ");
 
     assertThat(iban.value()).isEqualTo(VALID_IBAN_1);
+  }
+
+  @ParameterizedTest
+  @CsvSource({
+    "DE44500105175407324931, DE44****4931",
+    "FR1420041010050500013M02606, FR14****2606",
+    "NO9386011117947, NO93****7947",
+  })
+  void shouldMaskIban_whenValueIsValid(String source, String expectedMaskedIban) {
+    var iban = Iban.of(source);
+
+    assertThat(iban.masked()).isEqualTo(expectedMaskedIban);
   }
 
   @Test
