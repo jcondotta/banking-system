@@ -18,7 +18,7 @@ import java.net.URI;
 public class ConflictExceptionHandler {
 
   static final HttpStatus HTTP_STATUS_CONFLICT = HttpStatus.CONFLICT;
-  static final String TITLE_RESOURCE_ALREADY_EXISTS = "Resource already exists";
+  public static final String TITLE_RESOURCE_ALREADY_EXISTS = "Resource already exists";
 
   @ExceptionHandler(DomainConflictException.class)
   public ResponseEntity<ProblemDetail> handleConflict(DomainConflictException ex, HttpServletRequest request) {

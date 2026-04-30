@@ -17,8 +17,9 @@ import java.net.URI;
 @Order(Ordered.HIGHEST_PRECEDENCE)
 public class DomainValidationExceptionHandler {
 
-  static final HttpStatus HTTP_STATUS_BAD_REQUEST = HttpStatus.BAD_REQUEST;
   static final String TITLE_VALIDATION_FAILED = "Request validation failed";
+
+  static final HttpStatus HTTP_STATUS_BAD_REQUEST = HttpStatus.BAD_REQUEST;
 
   @ExceptionHandler(DomainValidationException.class)
   public ResponseEntity<ProblemDetail> handle(DomainValidationException ex, HttpServletRequest request) {

@@ -13,6 +13,7 @@ import com.jcondotta.domain.exception.DomainException;
 import io.micrometer.observation.annotation.Observed;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.resilience.annotation.ConcurrencyLimit;
 import org.springframework.stereotype.Component;
 
 import java.time.Clock;
@@ -41,6 +42,7 @@ public class CreateRecipientCommandHandler implements CommandHandlerWithResult<C
       "operation", "create"
     }
   )
+  @ConcurrencyLimit(limitString = "${app.concurrency.recipients.create-limit}", policy = ConcurrencyLimit.ThrottlePolicy.REJECT)
   public RecipientId handle(CreateRecipientCommand command) {
     var startNs = System.nanoTime();
 

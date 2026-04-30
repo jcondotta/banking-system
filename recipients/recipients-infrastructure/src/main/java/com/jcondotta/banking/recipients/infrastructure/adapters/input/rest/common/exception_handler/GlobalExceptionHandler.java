@@ -5,6 +5,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.ErrorResponseException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -22,5 +23,12 @@ public class GlobalExceptionHandler {
     problemDetail.setTitle(TITLE_INTERNAL_SERVER_ERROR);
     problemDetail.setInstance(URI.create(request.getRequestURI()));
     return ResponseEntity.of(problemDetail).build();
+  }
+
+  @ExceptionHandler(ErrorResponseException.class)
+  public ResponseEntity<ProblemDetail> handleErrorResponseException(ErrorResponseException ex, HttpServletRequest request) {
+    var problemDetail = ex.getBody();
+    problemDetail.setInstance(URI.create(request.getRequestURI()));
+    return ResponseEntity.status(ex.getStatusCode()).body(problemDetail);
   }
 }

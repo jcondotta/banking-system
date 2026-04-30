@@ -8,6 +8,7 @@ public final class ProblemTypes {
   public static final URI VALIDATION_ERRORS = uri("/validation-errors");
   public static final URI RULE_VIOLATION = uri("/rule-violation");
   public static final URI CONFLICT = uri("/conflict");
+  public static final URI TOO_MANY_REQUESTS = uri("/too-many-requests");
   public static final URI INTERNAL_ERROR = uri("/internal-error");
 
   @SuppressWarnings("all")

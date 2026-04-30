@@ -26,8 +26,9 @@ import java.util.stream.Collectors;
 @Order(Ordered.HIGHEST_PRECEDENCE)
 public class MethodArgumentNotValidExceptionHandler {
 
-  private static final String TITLE_VALIDATION_FAILED = "Request validation failed";
-  private static final String ERRORS_PROPERTY = "errors";
+  public static final String TITLE_VALIDATION_FAILED = "Request validation failed";
+  static final String ERRORS_PROPERTY = "errors";
+
   static final HttpStatus HTTP_STATUS_UNPROCESSABLE_CONTENT = HttpStatus.UNPROCESSABLE_CONTENT;
 
   @ExceptionHandler(MethodArgumentNotValidException.class)

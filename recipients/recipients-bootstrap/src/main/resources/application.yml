@@ -7,10 +7,17 @@ spring:
     version: "@project.version@"
 
   datasource:
-    url: ${SPRING_DATASOURCE_URL}
+    url: ${SPRING_DATASOURCE_URL}?connectTimeout=3&socketTimeout=5
     username: ${SPRING_DATASOURCE_USERNAME}
     password: ${SPRING_DATASOURCE_PASSWORD}
     driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 2
+      validation-timeout: 1000
+      connection-timeout: 5000
+      idle-timeout: 600000
+      max-lifetime: 1800000
 
   liquibase:
     enabled: true
@@ -33,6 +40,9 @@ spring:
         header: X-API-Version
 
 app:
+  concurrency:
+    recipients:
+      create-limit: 3
   api:
     recipients:
       root-path: '/api/bank-accounts/{bank-account-id}/recipients'

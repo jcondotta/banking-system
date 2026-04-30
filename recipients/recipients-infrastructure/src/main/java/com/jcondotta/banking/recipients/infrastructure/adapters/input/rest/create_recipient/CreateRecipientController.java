@@ -4,6 +4,7 @@ import com.jcondotta.banking.recipients.infrastructure.adapters.input.rest.creat
 import jakarta.validation.Valid;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.resilience.annotation.ConcurrencyLimit;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;

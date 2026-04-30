@@ -17,8 +17,8 @@ import java.net.URI;
 @Order(Ordered.HIGHEST_PRECEDENCE)
 public class RuleViolationExceptionHandler {
 
+  public static final String TITLE_OPERATION_NOT_ALLOWED = "Operation not allowed";
   static final HttpStatus HTTP_STATUS_UNPROCESSABLE_CONTENT = HttpStatus.UNPROCESSABLE_CONTENT;
-  static final String TITLE_OPERATION_NOT_ALLOWED = "Operation not allowed";
 
   @ExceptionHandler(DomainRuleViolationException.class)
   public ResponseEntity<ProblemDetail> handleRuleViolation(DomainRuleViolationException ex, HttpServletRequest request) {
