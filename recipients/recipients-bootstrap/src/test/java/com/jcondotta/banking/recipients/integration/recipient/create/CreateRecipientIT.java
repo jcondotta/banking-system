@@ -1,5 +1,6 @@
 package com.jcondotta.banking.recipients.integration.recipient.create;
 
+import com.jcondotta.banking.infrastructure.adapters.output.rest.HttpHeadersConstants;
 import com.jcondotta.banking.infrastructure.adapters.output.rest.exceptionhandler.ProblemTypes;
 import com.jcondotta.banking.recipients.domain.recipient.exceptions.DuplicateRecipientIbanException;
 import com.jcondotta.banking.recipients.domain.recipient.identity.RecipientId;
@@ -241,6 +242,7 @@ class CreateRecipientIT {
       .setBasePath(uriProperties.rootPath())
       .setContentType(ContentType.JSON)
       .setAccept(ContentType.JSON)
+      .addHeader(HttpHeadersConstants.API_VERSION, "1.0")
       .build();
   }
 
@@ -257,11 +259,11 @@ class CreateRecipientIT {
   }
 
   private void deleteRecipient(UUID bankAccountId, UUID recipientId) {
+    var specification = buildRequestSpecification()
+      .basePath(uriProperties.recipientIdPath());
+
     given()
-      .baseUri(RestAssured.baseURI)
-      .port(RestAssured.port)
-      .basePath(uriProperties.recipientIdPath())
-      .accept(ContentType.JSON)
+      .spec(specification)
       .pathParam("bank-account-id", bankAccountId)
       .pathParam("recipient-id", recipientId)
       .when()

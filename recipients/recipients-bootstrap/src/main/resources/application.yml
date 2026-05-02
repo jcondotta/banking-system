@@ -7,15 +7,15 @@ spring:
     version: "@project.version@"
 
   datasource:
-    url: ${SPRING_DATASOURCE_URL}?connectTimeout=3&socketTimeout=5
+    url: ${SPRING_DATASOURCE_URL}?connectTimeout=3&socketTimeout=30
     username: ${SPRING_DATASOURCE_USERNAME}
     password: ${SPRING_DATASOURCE_PASSWORD}
     driver-class-name: org.postgresql.Driver
     hikari:
-      maximum-pool-size: 10
-      minimum-idle: 2
-      validation-timeout: 1000
       connection-timeout: 5000
+      maximum-pool-size: 10
+      minimum-idle: 3
+      validation-timeout: 1000
       idle-timeout: 600000
       max-lifetime: 1800000
 
@@ -27,13 +27,10 @@ spring:
     hibernate:
       ddl-auto: validate
     show-sql: false
-    properties:
-      hibernate:
-        dialect: org.hibernate.dialect.PostgreSQLDialect
-        format_sql: false
+
   mvc:
     apiversion:
-      default: "1.0"
+#      default: "1.0"
       supported:
         - "1.0"
       use:

@@ -1,6 +1,7 @@
 package com.jcondotta.banking.recipients.integration.recipient.list;
 
 import com.jcondotta.application.command.CommandHandler;
+import com.jcondotta.banking.infrastructure.adapters.output.rest.HttpHeadersConstants;
 import com.jcondotta.banking.recipients.application.recipient.command.remove.RemoveRecipientCommand;
 import com.jcondotta.banking.recipients.domain.recipient.aggregate.Recipient;
 import com.jcondotta.banking.recipients.domain.recipient.identity.BankAccountId;
@@ -161,6 +162,7 @@ class ListRecipientsIT {
       .setBasePath(uriProperties.rootPath())
       .setContentType(ContentType.JSON)
       .setAccept(ContentType.JSON)
+      .addHeader(HttpHeadersConstants.API_VERSION, "1.0")
       .build();
   }
 

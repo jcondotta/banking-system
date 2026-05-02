@@ -1,5 +1,6 @@
 package com.jcondotta.banking.recipients.integration.recipient.remove;
 
+import com.jcondotta.banking.infrastructure.adapters.output.rest.HttpHeadersConstants;
 import com.jcondotta.banking.infrastructure.adapters.output.rest.exceptionhandler.ProblemTypes;
 import com.jcondotta.banking.recipients.application.common.exception.RecipientOptimisticLockException;
 import com.jcondotta.banking.recipients.application.recipient.command.remove.RemoveRecipientCommand;
@@ -171,6 +172,7 @@ class RemoveRecipientIT {
       .setBaseUri(RestAssured.baseURI)
       .setPort(RestAssured.port)
       .setBasePath(uriProperties.recipientIdPath())
+      .addHeader(HttpHeadersConstants.API_VERSION, "1.0")
       .build();
   }
 }

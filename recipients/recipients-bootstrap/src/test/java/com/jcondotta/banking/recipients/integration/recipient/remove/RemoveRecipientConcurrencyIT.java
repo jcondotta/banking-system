@@ -1,5 +1,6 @@
 package com.jcondotta.banking.recipients.integration.recipient.remove;
 
+import com.jcondotta.banking.infrastructure.adapters.output.rest.HttpHeadersConstants;
 import com.jcondotta.banking.infrastructure.adapters.output.rest.exceptionhandler.ProblemTypes;
 import com.jcondotta.banking.recipients.domain.recipient.aggregate.Recipient;
 import com.jcondotta.banking.recipients.domain.recipient.identity.BankAccountId;
@@ -149,6 +150,7 @@ class RemoveRecipientConcurrencyIT {
       .setBaseUri(RestAssured.baseURI)
       .setPort(RestAssured.port)
       .setBasePath(uriProperties.recipientIdPath())
+      .addHeader(HttpHeadersConstants.API_VERSION, "1.0")
       .build();
   }
 }

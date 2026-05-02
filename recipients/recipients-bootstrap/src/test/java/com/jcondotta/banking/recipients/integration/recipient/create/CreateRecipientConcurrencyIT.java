@@ -1,5 +1,6 @@
 package com.jcondotta.banking.recipients.integration.recipient.create;
 
+import com.jcondotta.banking.infrastructure.adapters.output.rest.HttpHeadersConstants;
 import com.jcondotta.banking.infrastructure.adapters.output.rest.exceptionhandler.ProblemTypes;
 import com.jcondotta.banking.recipients.domain.testsupport.RecipientFixtures;
 import com.jcondotta.banking.recipients.infrastructure.adapters.input.rest.common.exception_handler.TooManyRequestsExceptionHandler;
@@ -125,6 +126,7 @@ class CreateRecipientConcurrencyIT {
       .setBasePath(uriProperties.rootPath())
       .setContentType(ContentType.JSON)
       .setAccept(ContentType.JSON)
+      .addHeader(HttpHeadersConstants.API_VERSION, "1.0")
       .build();
   }
 
