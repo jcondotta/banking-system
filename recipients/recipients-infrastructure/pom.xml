@@ -8,7 +8,6 @@
         <groupId>com.jcondotta</groupId>
         <artifactId>recipients</artifactId>
         <version>1.0.1</version>
-        <relativePath>../pom.xml</relativePath>
     </parent>
 
     <artifactId>recipients-infrastructure</artifactId>
@@ -48,7 +47,8 @@
         <!-- Test -->
         <dependency>
             <groupId>com.jcondotta</groupId>
-            <artifactId>recipients-domain-test</artifactId>
+            <artifactId>recipients-domain</artifactId>
+            <type>test-jar</type>
             <scope>test</scope>
         </dependency>
 

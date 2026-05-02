@@ -1,6 +1,7 @@
 package com.jcondotta.banking.recipients.infrastructure.adapters.input.rest.list_recipients;
 
 import com.jcondotta.banking.recipients.application.recipient.query.list.ListRecipientsQueryResult;
+import com.jcondotta.application.query.PageResult;
 import com.jcondotta.banking.recipients.application.recipient.query.model.RecipientSummary;
 import org.junit.jupiter.api.Test;
 
@@ -21,7 +22,7 @@ class ListRecipientsResponseTest {
 
   @Test
   void shouldCreateResponse_whenQueryResultIsProvided() {
-    var queryResult = new ListRecipientsQueryResult(List.of(summary()));
+    var queryResult = new ListRecipientsQueryResult(new PageResult<>(List.of(summary()), 1, 10, 21, 3));
 
     var response = ListRecipientsResponse.from(queryResult);
 
@@ -30,9 +31,15 @@ class ListRecipientsResponseTest {
       .satisfies(recipient -> assertAll(
         () -> assertThat(recipient.recipientId()).isEqualTo(RECIPIENT_ID),
         () -> assertThat(recipient.recipientName()).isEqualTo("Jefferson Condotta"),
-        () -> assertThat(recipient.iban()).isEqualTo("ES3801283316232166447417"),
+        () -> assertThat(recipient.maskedIban()).isEqualTo("ES3801283316232166447417"),
         () -> assertThat(recipient.createdAt()).isEqualTo(CREATED_AT)
       ));
+    assertThat(response.page()).isEqualTo(1);
+    assertThat(response.size()).isEqualTo(10);
+    assertThat(response.totalElements()).isEqualTo(21);
+    assertThat(response.totalPages()).isEqualTo(3);
+    assertThat(response.hasNext()).isTrue();
+    assertThat(response.hasPrevious()).isTrue();
   }
 
   @Test
@@ -40,7 +47,7 @@ class ListRecipientsResponseTest {
     var recipients = new ArrayList<RecipientRestResponse>();
     recipients.add(RecipientRestResponse.from(summary()));
 
-    var response = new ListRecipientsResponse(recipients);
+    var response = new ListRecipientsResponse(recipients, 0, 20, 1, 1, false, false);
     recipients.clear();
 
     assertThat(response.recipients()).hasSize(1);

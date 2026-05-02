@@ -7,9 +7,11 @@ import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -25,18 +27,17 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.*;
 
 @Slf4j
 @Profile("local")
 @RestController
-@RequestMapping("${app.api.recipients.root-path}/bulk")
+@RequestMapping("/api/recipients/bulk")
 public class BulkCreateRecipientController {
 
   private static final Duration REQUEST_TIMEOUT = Duration.ofSeconds(10);
   private static final String CONTENT_TYPE_JSON = "application/json";
+  private static final String DEFAULT_API_VERSION = "1.0";
   private static final String DUPLICATE_IBAN = "GB82WEST12345698765432";
 
   private final HttpClient httpClient = HttpClient.newHttpClient();
@@ -51,11 +52,12 @@ public class BulkCreateRecipientController {
     this.serverPort = serverPort;
   }
 
-  @PostMapping(path = "/{quantity}", version = "1.0")
+  @PostMapping(path = "/{bank-account-id}/{quantity}", produces = MediaType.APPLICATION_JSON_VALUE, version = "1.0")
   public BulkCreateRecipientResponse createBulk(
     @PathVariable("bank-account-id") UUID bankAccountId,
-    @PathVariable int quantity
-  ) {
+    @PathVariable("quantity") int quantity,
+    @RequestHeader(value = HttpHeadersConstants.API_VERSION, required = false) String apiVersion
+  ) throws ExecutionException, InterruptedException {
     if (quantity < 1) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "quantity must be greater than zero");
     }
@@ -66,19 +68,26 @@ public class BulkCreateRecipientController {
     var results = new ConcurrentLinkedQueue<ScenarioResult>();
     var duplicateSeed = new DuplicateSeed();
 
+    var futures = new ArrayList<Future<?>>();
+
     try (var executor = Executors.newVirtualThreadPerTaskExecutor()) {
       for (int i = 0; i < plannedScenarios.size(); i++) {
         final int index = i;
-        final BulkCreateScenario scenario = plannedScenarios.get(i);
+        final var scenario = plannedScenarios.get(i);
 
-        executor.submit(() -> results.add(executeScenario(
+        futures.add(executor.submit(() -> results.add(executeScenario(
           scenario,
           bankAccountId,
           recipientsUri,
           correlationId,
+          resolvedApiVersion(apiVersion),
           index,
           duplicateSeed
-        )));
+        ))));
+      }
+
+      for (var future : futures) {
+        future.get(); // espera terminar
       }
     }
 
@@ -90,52 +99,71 @@ public class BulkCreateRecipientController {
     UUID bankAccountId,
     URI recipientsUri,
     String correlationId,
+    String apiVersion,
     int index,
     DuplicateSeed duplicateSeed
   ) {
-    return switch (scenario) {
+    var result = switch (scenario) {
       case VALID_CREATE -> new ScenarioResult(
         scenario,
-        sendJson(recipientsUri, correlationId, validRequestBody(index + 1)),
+        sendJson(recipientsUri, correlationId, apiVersion, validRequestBody(index + 1)),
         1
       );
-      case MISSING_BODY -> new ScenarioResult(scenario, sendWithoutBody(recipientsUri, correlationId), 1);
+      case MISSING_BODY -> new ScenarioResult(scenario, sendWithoutBody(recipientsUri, correlationId, apiVersion), 1);
       case MISSING_RECIPIENT_NAME -> new ScenarioResult(
         scenario,
-        sendJson(recipientsUri, correlationId, "{\"iban\":\"" + validIban(index + 1) + "\"}"),
+        sendJson(recipientsUri, correlationId, apiVersion, "{\"iban\":\"" + validIban(index + 1) + "\"}"),
         1
       );
       case MISSING_IBAN -> new ScenarioResult(
         scenario,
-        sendJson(recipientsUri, correlationId, "{\"recipientName\":\"" + validRecipientName(index + 1) + "\"}"),
+        sendJson(recipientsUri, correlationId, apiVersion,
+          "{\"recipientName\":\"" + validRecipientName(index + 1) + "\"}"),
         1
       );
       case INVALID_IBAN -> new ScenarioResult(
         scenario,
-        sendJson(recipientsUri, correlationId, invalidIbanRequestBody(index + 1)),
+        sendJson(recipientsUri, correlationId, apiVersion, invalidIbanRequestBody(index + 1)),
         1
       );
-      case DUPLICATE_IBAN -> createDuplicateIbanScenario(recipientsUri, correlationId, bankAccountId, duplicateSeed);
+      case DUPLICATE_IBAN -> createDuplicateIbanScenario(
+        recipientsUri,
+        correlationId,
+        apiVersion,
+        bankAccountId,
+        duplicateSeed
+      );
     };
+
+//    log.atInfo()
+//      .setMessage("Bulk scenario executed")
+//      .addKeyValue("scenario", result.scenario().code)
+//      .addKeyValue("http_status", result.httpStatus())
+//      .addKeyValue("bank_account_id", bankAccountId)
+//      .log();
+
+    return result;
   }
 
   private ScenarioResult createDuplicateIbanScenario(
     URI recipientsUri,
     String correlationId,
+    String apiVersion,
     UUID bankAccountId,
     DuplicateSeed duplicateSeed
   ) {
-    var setupRequests = duplicateSeed.ensureSeed(recipientsUri, correlationId, bankAccountId);
-    var status = sendJson(recipientsUri, correlationId, duplicateIbanRequestBody());
+    var setupRequests = duplicateSeed.ensureSeed(recipientsUri, correlationId, apiVersion, bankAccountId);
+    var status = sendJson(recipientsUri, correlationId, apiVersion, duplicateIbanRequestBody());
 
     return new ScenarioResult(BulkCreateScenario.DUPLICATE_IBAN, status, setupRequests + 1);
   }
 
-  private int sendWithoutBody(URI recipientsUri, String correlationId) {
+  private int sendWithoutBody(URI recipientsUri, String correlationId, String apiVersion) {
     var requestBuilder = HttpRequest.newBuilder(recipientsUri)
       .timeout(REQUEST_TIMEOUT)
       .header("Accept", CONTENT_TYPE_JSON)
       .header("Content-Type", CONTENT_TYPE_JSON)
+      .header(HttpHeadersConstants.API_VERSION, apiVersion)
       .POST(HttpRequest.BodyPublishers.noBody());
 
     if (correlationId != null) {
@@ -145,11 +173,12 @@ public class BulkCreateRecipientController {
     return send(requestBuilder.build());
   }
 
-  private int sendJson(URI recipientsUri, String correlationId, String body) {
+  private int sendJson(URI recipientsUri, String correlationId, String apiVersion, String body) {
     var requestBuilder = HttpRequest.newBuilder(recipientsUri)
       .timeout(REQUEST_TIMEOUT)
       .header("Accept", CONTENT_TYPE_JSON)
       .header("Content-Type", CONTENT_TYPE_JSON)
+      .header(HttpHeadersConstants.API_VERSION, apiVersion)
       .POST(HttpRequest.BodyPublishers.ofString(body));
 
     if (correlationId != null) {
@@ -157,6 +186,14 @@ public class BulkCreateRecipientController {
     }
 
     return send(requestBuilder.build());
+  }
+
+  private String resolvedApiVersion(String apiVersion) {
+    if (apiVersion == null || apiVersion.isBlank()) {
+      return DEFAULT_API_VERSION;
+    }
+
+    return apiVersion;
   }
 
   private int send(HttpRequest request) {
@@ -267,7 +304,12 @@ public class BulkCreateRecipientController {
   private final class DuplicateSeed {
     private boolean created;
 
-    private synchronized int ensureSeed(URI recipientsUri, String correlationId, UUID bankAccountId) {
+    private synchronized int ensureSeed(
+      URI recipientsUri,
+      String correlationId,
+      String apiVersion,
+      UUID bankAccountId
+    ) {
       if (created) {
         return 0;
       }
@@ -275,6 +317,7 @@ public class BulkCreateRecipientController {
       sendJson(
         recipientsUri,
         correlationId,
+        apiVersion,
         "{\"recipientName\":\"recipient-duplicate-seed-" + bankAccountId + "\",\"iban\":\"" + DUPLICATE_IBAN + "\"}"
       );
       created = true;

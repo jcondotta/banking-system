@@ -7,16 +7,14 @@ import java.util.UUID;
 
 public record RecipientRestResponse(
   UUID recipientId,
-  UUID bankAccountId,
   String recipientName,
-  String iban,
+  String maskedIban,
   Instant createdAt
 ) {
 
   static RecipientRestResponse from(RecipientSummary summary) {
     return new RecipientRestResponse(
       summary.recipientId(),
-      summary.bankAccountId(),
       summary.recipientName(),
       summary.iban(),
       summary.createdAt()

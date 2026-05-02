@@ -10,9 +10,8 @@ public class RecipientSummaryMapper {
   public RecipientSummary fromEntity(RecipientEntity entity) {
     return new RecipientSummary(
       entity.getId(),
-      entity.getBankAccountId(),
       entity.getName(),
-      entity.getIban(),
+      IbanMasker.mask(entity.getIban()),
       entity.getCreatedAt()
     );
   }

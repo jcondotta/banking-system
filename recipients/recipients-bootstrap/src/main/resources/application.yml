@@ -42,7 +42,12 @@ spring:
 app:
   concurrency:
     recipients:
-      create-limit: 3
+      create:
+        limit: 5
+      list:
+        limit: 10
+      remove:
+        limit: 5
   api:
     recipients:
       root-path: '/api/bank-accounts/{bank-account-id}/recipients'
@@ -52,52 +57,52 @@ management:
   endpoints:
     web:
       exposure:
-        include: health, metrics
-  otlp:
-    metrics:
-      export:
-        url: http://localhost:4318/v1/metrics
-        step: 10s
+        include: health #, metrics
 
   observations:
     annotations:
-      enabled: true
+      enabled: false
+#  otlp:
+#    metrics:
+#      export:
+#        url: http://localhost:4318/v1/metrics
+#        step: 10s
 
-  opentelemetry:
-    tracing:
-      export:
-        otlp:
-          endpoint: ${MANAGEMENT_OPENTELEMETRY_TRACING_EXPORT_OTLP_ENDPOINT:http://localhost:4317}
-          transport: ${MANAGEMENT_OPENTELEMETRY_TRACING_EXPORT_OTLP_TRANSPORT:grpc}
-
-  tracing:
-    enabled: ${MANAGEMENT_TRACING_ENABLED:true}
-    export:
-      enabled: ${MANAGEMENT_TRACING_EXPORT_ENABLED:true}
-      otlp:
-        enabled: ${MANAGEMENT_TRACING_EXPORT_OTLP_ENABLED:true}
-    sampling:
-      probability: ${MANAGEMENT_TRACING_SAMPLING_PROBABILITY:1.0}
-
-  metrics:
-    tags:
-      application: ${spring.application.name}
-
-    enable:
-      recipient.remove.active: false
-      recipient.create.active: false
-      recipient.list.active: false
-      recipient.list.result.size.percentile: false
-
-    distribution:
-      percentiles-histogram:
-        http.server.requests: true
-        recipient.create: true
-        recipient.remove: true
-        recipient.list: true
-
-      percentiles:
-        http.server.requests: 0.5, 0.9, 0.99
-        recipient.create: 0.5, 0.9, 0.99
-        recipient.remove: 0.5, 0.9, 0.99
-        recipient.list: 0.5, 0.9, 0.99
+#  opentelemetry:
+#    tracing:
+#      export:
+#        otlp:
+#          endpoint: ${MANAGEMENT_OPENTELEMETRY_TRACING_EXPORT_OTLP_ENDPOINT:http://localhost:4317}
+#          transport: ${MANAGEMENT_OPENTELEMETRY_TRACING_EXPORT_OTLP_TRANSPORT:grpc}
+#
+#  tracing:
+#    enabled: ${MANAGEMENT_TRACING_ENABLED:true}
+#    export:
+#      enabled: ${MANAGEMENT_TRACING_EXPORT_ENABLED:true}
+#      otlp:
+#        enabled: ${MANAGEMENT_TRACING_EXPORT_OTLP_ENABLED:true}
+#    sampling:
+#      probability: ${MANAGEMENT_TRACING_SAMPLING_PROBABILITY:1.0}
+#
+#  metrics:
+#    tags:
+#      application: ${spring.application.name}
+#
+#    enable:
+#      recipients.remove.active: false
+#      recipients.create.active: false
+#      recipients.list.active: false
+#      recipients.list.result.size.percentile: false
+#
+#    distribution:
+#      percentiles-histogram:
+#        http.server.requests: true
+#        recipients.create: true
+#        recipients.remove: true
+#        recipients.list: true
+#
+#      percentiles:
+#        http.server.requests: 0.5, 0.9, 0.99
+#        recipients.create: 0.5, 0.9, 0.99
+#        recipients.remove: 0.5, 0.9, 0.99
+#        recipients.list: 0.5, 0.9, 0.99

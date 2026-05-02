@@ -106,9 +106,6 @@ class ListRecipientsIT {
         jeffersonRecipient.getId().value(),
         patrizioRecipient.getId().value()
       );
-    assertThat(response.recipients())
-      .extracting(RecipientRestResponse::bankAccountId)
-      .containsOnly(bankAccountId.value());
   }
 
   @Test

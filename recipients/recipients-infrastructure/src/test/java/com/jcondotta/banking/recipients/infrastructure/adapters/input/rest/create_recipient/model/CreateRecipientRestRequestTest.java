@@ -56,7 +56,7 @@ class CreateRecipientRestRequestTest {
         .first()
         .satisfies(
             v -> {
-              assertThat(v.getPropertyPath()).hasToString("iban");
+              assertThat(v.getPropertyPath()).hasToString("maskedIban");
               assertThat(v.getMessage()).isEqualTo("must not be blank");
             });
   }

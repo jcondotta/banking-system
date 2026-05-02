@@ -8,7 +8,6 @@
         <groupId>com.jcondotta</groupId>
         <artifactId>recipients</artifactId>
         <version>1.0.1</version>
-        <relativePath>../pom.xml</relativePath>
     </parent>
 
     <artifactId>recipients-bootstrap</artifactId>
@@ -24,10 +23,17 @@
             <artifactId>spring-boot-starter</artifactId>
         </dependency>
 
+        <!--
+        Disabled while testing OpenTelemetry Java Agent auto-instrumentation.
+        The agent provides its own SDK/exporter/instrumentations; keeping this
+        starter enabled makes traces come from Spring Boot/Micrometer instead
+        of showing what the agent creates automatically.
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-opentelemetry</artifactId>
         </dependency>
+        -->
 
         <dependency>
             <groupId>org.projectlombok</groupId>
@@ -59,6 +65,7 @@
             <artifactId>loki-logback-appender</artifactId>
             <version>1.5.2</version>
         </dependency>
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-actuator</artifactId>
@@ -67,16 +74,10 @@
         <!-- test dependencies -->
         <dependency>
             <groupId>com.jcondotta</groupId>
-            <artifactId>recipients-common-test</artifactId>
+            <artifactId>recipients-domain</artifactId>
+            <type>test-jar</type>
             <scope>test</scope>
         </dependency>
-
-        <dependency>
-            <groupId>com.jcondotta</groupId>
-            <artifactId>recipients-domain-test</artifactId>
-            <scope>test</scope>
-        </dependency>
-
 
         <dependency>
             <groupId>org.springframework.boot</groupId>

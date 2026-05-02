@@ -18,7 +18,7 @@ public class MicrometerRecipientPersistenceMetrics implements RecipientPersisten
   @Override
   public void recordOptimisticLockConflict(RecipientPersistenceOperation operation) {
     meterRegistry.counter(
-      "recipient.persistence.optimistic_lock.conflicts",
+      "recipients.persistence.optimistic_lock.conflicts",
       OPERATION_TAG, operation.tagValue(),
       REPOSITORY_TAG, REPOSITORY_POSTGRES
     ).increment();
@@ -30,7 +30,7 @@ public class MicrometerRecipientPersistenceMetrics implements RecipientPersisten
     RecipientPersistenceConstraint constraint
   ) {
     meterRegistry.counter(
-      "recipient.persistence.unique_constraint.violations",
+      "recipients.persistence.unique_constraint.violations",
       OPERATION_TAG, operation.tagValue(),
       CONSTRAINT_TAG, constraint.tagValue()
     ).increment();
@@ -39,7 +39,7 @@ public class MicrometerRecipientPersistenceMetrics implements RecipientPersisten
   @Override
   public void recordDeleteVersionMiss() {
     meterRegistry.counter(
-      "recipient.persistence.delete.version_miss",
+      "recipients.persistence.delete.version_miss",
       OPERATION_TAG, RecipientPersistenceOperation.DELETE.tagValue(),
       REPOSITORY_TAG, REPOSITORY_POSTGRES
     ).increment();

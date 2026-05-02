@@ -2,13 +2,13 @@
 <configuration>
 
     <conversionRule conversionWord="clr"
-                    class="org.springframework.boot.logging.logback.ColorConverter"/>
+                    converterClass="org.springframework.boot.logging.logback.ColorConverter"/>
 
     <springProperty name="SERVICE_NAME" source="spring.application.name" defaultValue="unknown"/>
 
     <appender name="TEST_CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
-            <pattern>%clr(%d{HH:mm:ss.SSS}){faint} %clr(%-5level) %clr(%logger{40}){cyan} %clr([%X{correlationId}]){magenta} %clr(- %msg){white}%n%ex</pattern>
+            <pattern>%clr(%d{HH:mm:ss.SSS}){faint} %clr(%-5level) %clr(%logger{36}){cyan} %clr([%X{correlationId}]){magenta} %msg %clr(%kvp){bright_black}%n%ex</pattern>
         </encoder>
     </appender>
 

@@ -20,8 +20,8 @@ public class ListRecipientsControllerImpl implements ListRecipientsController {
   private final ListRecipientsRestMapper mapper;
 
   @Override
-  public ResponseEntity<ListRecipientsResponse> listRecipients(UUID bankAccountId) {
-    var query = mapper.toQuery(bankAccountId);
+  public ResponseEntity<ListRecipientsResponse> listRecipients(UUID bankAccountId, int page, int size) {
+    var query = mapper.toQuery(bankAccountId, page, size);
     ListRecipientsQueryResult queryResult = queryHandler.handle(query);
 
     return ResponseEntity.ok(ListRecipientsResponse.from(queryResult));

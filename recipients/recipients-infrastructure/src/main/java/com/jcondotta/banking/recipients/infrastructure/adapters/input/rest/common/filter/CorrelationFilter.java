@@ -12,13 +12,14 @@ import org.slf4j.MDC;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
+import org.springframework.web.accept.ApiVersionStrategy;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
-import java.util.concurrent.TimeUnit;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 @Component
 @Order(Ordered.HIGHEST_PRECEDENCE)
@@ -33,6 +34,11 @@ public class CorrelationFilter extends OncePerRequestFilter {
   private static final String EVENT_TYPE = "http.request";
   private static final String OUTCOME_SUCCESS = "success";
   private static final String OUTCOME_FAILURE = "failure";
+  private final ApiVersionStrategy apiVersionStrategy;
+
+  public CorrelationFilter(ApiVersionStrategy apiVersionStrategy) {
+    this.apiVersionStrategy = apiVersionStrategy;
+  }
 
   @Override
   protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
@@ -58,28 +64,30 @@ public class CorrelationFilter extends OncePerRequestFilter {
 
     try {
       doFilterWithScopedCorrelationId(request, response, chain, correlationId);
+      resolvedApiVersion(request).ifPresent(version ->
+        response.setHeader(HttpHeadersConstants.RESOLVED_API_VERSION, version));
 
-      log.atInfo()
-        .setMessage("HTTP request completed")
-        .addKeyValue("event_type", EVENT_TYPE)
-        .addKeyValue("outcome", outcome(response.getStatus()))
-        .addKeyValue("method", request.getMethod())
-        .addKeyValue("path", request.getRequestURI())
-        .addKeyValue("http_status", response.getStatus())
-        .addKeyValue("duration_ms", durationMs(startNs))
-        .log();
+//      log.atInfo()
+//        .setMessage("HTTP request completed")
+//        .addKeyValue("event_type", EVENT_TYPE)
+//        .addKeyValue("outcome", outcome(response.getStatus()))
+//        .addKeyValue("method", request.getMethod())
+//        .addKeyValue("path", request.getRequestURI())
+//        .addKeyValue("http_status", response.getStatus())
+//        .addKeyValue("duration_ms", durationMs(startNs))
+//        .log();
     }
     catch (ServletException | IOException | RuntimeException ex) {
-      log.atError()
-        .setMessage("HTTP request failed before response completion")
-        .addKeyValue("event_type", EVENT_TYPE)
-        .addKeyValue("outcome", OUTCOME_FAILURE)
-        .addKeyValue("method", request.getMethod())
-        .addKeyValue("path", request.getRequestURI())
-        .addKeyValue("http_status", HttpServletResponse.SC_INTERNAL_SERVER_ERROR)
-        .addKeyValue("duration_ms", durationMs(startNs))
-        .setCause(ex)
-        .log();
+//      log.atError()
+//        .setMessage("HTTP request failed before response completion")
+//        .addKeyValue("event_type", EVENT_TYPE)
+//        .addKeyValue("outcome", OUTCOME_FAILURE)
+//        .addKeyValue("method", request.getMethod())
+//        .addKeyValue("path", request.getRequestURI())
+//        .addKeyValue("http_status", HttpServletResponse.SC_INTERNAL_SERVER_ERROR)
+//        .addKeyValue("duration_ms", durationMs(startNs))
+//        .setCause(ex)
+//        .log();
 
       throw ex;
     }
@@ -136,6 +144,15 @@ public class CorrelationFilter extends OncePerRequestFilter {
     catch (FilterChainServletException ex) {
       throw ex.getCause();
     }
+  }
+
+  private Optional<String> resolvedApiVersion(HttpServletRequest request) {
+    if (apiVersionStrategy == null) {
+      return Optional.empty();
+    }
+
+    return Optional.ofNullable(apiVersionStrategy.resolveVersion(request))
+      .or(() -> Optional.ofNullable(apiVersionStrategy.getDefaultVersion()).map(String::valueOf));
   }
 
   private static final class FilterChainServletException extends RuntimeException {

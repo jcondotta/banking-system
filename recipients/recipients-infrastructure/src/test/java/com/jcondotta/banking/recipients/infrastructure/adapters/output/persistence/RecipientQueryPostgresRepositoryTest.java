@@ -1,8 +1,8 @@
 package com.jcondotta.banking.recipients.infrastructure.adapters.output.persistence;
 
+import com.jcondotta.application.query.PageRequest;
 import com.jcondotta.banking.recipients.application.recipient.query.model.RecipientSummary;
 import com.jcondotta.banking.recipients.domain.recipient.identity.BankAccountId;
-import com.jcondotta.banking.recipients.infrastructure.adapters.metrics.RecipientMetrics;
 import com.jcondotta.banking.recipients.infrastructure.adapters.output.persistence.entity.RecipientEntity;
 import com.jcondotta.banking.recipients.infrastructure.adapters.output.persistence.mapper.RecipientSummaryMapper;
 import com.jcondotta.banking.recipients.infrastructure.adapters.output.persistence.repository.RecipientEntityRepository;
@@ -11,6 +11,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 
 import java.time.Instant;
 import java.util.List;
@@ -23,6 +26,7 @@ import static org.mockito.Mockito.*;
 class RecipientQueryPostgresRepositoryTest {
 
   private static final BankAccountId BANK_ACCOUNT_ID = BankAccountId.of(UUID.randomUUID());
+  private static final PageRequest PAGE_REQUEST = new PageRequest(1, 10);
 
   @Mock
   private RecipientEntityRepository repository;
@@ -30,14 +34,11 @@ class RecipientQueryPostgresRepositoryTest {
   @Mock
   private RecipientSummaryMapper summaryMapper;
 
-  @Mock
-  private RecipientMetrics recipientMetrics;
-
   private RecipientQueryPostgresRepository adapter;
 
   @BeforeEach
   void setUp() {
-    adapter = new RecipientQueryPostgresRepository(repository, summaryMapper, recipientMetrics);
+    adapter = new RecipientQueryPostgresRepository(repository, summaryMapper);
   }
 
   @Test
@@ -47,32 +48,57 @@ class RecipientQueryPostgresRepositoryTest {
     var firstSummary = recipientSummary("Jefferson Condotta");
     var secondSummary = recipientSummary("Patrizio Condotta");
 
-    when(repository.findByBankAccountIdOrderByNameAsc(BANK_ACCOUNT_ID.value()))
-      .thenReturn(List.of(firstEntity, secondEntity));
+    when(repository.findByBankAccountId(eq(BANK_ACCOUNT_ID.value()), any(Pageable.class)))
+      .thenReturn(new PageImpl<>(
+        List.of(firstEntity, secondEntity),
+        org.springframework.data.domain.PageRequest.of(1, 10, Sort.by("name").ascending()),
+        21
+      ));
     when(summaryMapper.fromEntity(firstEntity)).thenReturn(firstSummary);
     when(summaryMapper.fromEntity(secondEntity)).thenReturn(secondSummary);
 
-    var result = adapter.findByBankAccountId(BANK_ACCOUNT_ID);
+    var result = adapter.findByBankAccountId(BANK_ACCOUNT_ID, PAGE_REQUEST);
 
-    assertThat(result).containsExactly(firstSummary, secondSummary);
-    verify(repository).findByBankAccountIdOrderByNameAsc(BANK_ACCOUNT_ID.value());
+    assertThat(result.content()).containsExactly(firstSummary, secondSummary);
+    assertThat(result.page()).isEqualTo(1);
+    assertThat(result.size()).isEqualTo(10);
+    assertThat(result.totalElements()).isEqualTo(21);
+    assertThat(result.totalPages()).isEqualTo(3);
+    verify(repository).findByBankAccountId(eq(BANK_ACCOUNT_ID.value()), argThat(pageable ->
+      pageable.getPageNumber() == 1
+        && pageable.getPageSize() == 10
+        && pageable.getSort().getOrderFor("name") != null
+        && pageable.getSort().getOrderFor("name").isAscending()
+    ));
     verify(summaryMapper).fromEntity(firstEntity);
     verify(summaryMapper).fromEntity(secondEntity);
-    verify(recipientMetrics).recordListResultSize(2);
-    verifyNoMoreInteractions(repository, summaryMapper, recipientMetrics);
+    verifyNoMoreInteractions(repository, summaryMapper);
   }
 
   @Test
   void shouldReturnEmptyList_whenBankAccountHasNoRecipients() {
-    when(repository.findByBankAccountIdOrderByNameAsc(BANK_ACCOUNT_ID.value()))
-      .thenReturn(List.of());
+    when(repository.findByBankAccountId(eq(BANK_ACCOUNT_ID.value()), any(Pageable.class)))
+      .thenReturn(new PageImpl<>(
+        List.of(),
+        org.springframework.data.domain.PageRequest.of(1, 10, Sort.by("name").ascending()),
+        0
+      ));
 
-    assertThat(adapter.findByBankAccountId(BANK_ACCOUNT_ID)).isEmpty();
+    var result = adapter.findByBankAccountId(BANK_ACCOUNT_ID, PAGE_REQUEST);
 
-    verify(repository).findByBankAccountIdOrderByNameAsc(BANK_ACCOUNT_ID.value());
-    verify(recipientMetrics).recordListResultSize(0);
+    assertThat(result.content()).isEmpty();
+    assertThat(result.page()).isEqualTo(1);
+    assertThat(result.size()).isEqualTo(10);
+    assertThat(result.totalElements()).isZero();
+    assertThat(result.totalPages()).isZero();
+    verify(repository).findByBankAccountId(eq(BANK_ACCOUNT_ID.value()), argThat(pageable ->
+      pageable.getPageNumber() == 1
+        && pageable.getPageSize() == 10
+        && pageable.getSort().getOrderFor("name") != null
+        && pageable.getSort().getOrderFor("name").isAscending()
+    ));
     verifyNoInteractions(summaryMapper);
-    verifyNoMoreInteractions(repository, recipientMetrics);
+    verifyNoMoreInteractions(repository);
   }
 
   private static RecipientSummary recipientSummary(String name) {

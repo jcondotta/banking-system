@@ -3,11 +3,9 @@ package com.jcondotta.banking.recipients.infrastructure.adapters.output.persiste
 import com.jcondotta.banking.recipients.application.common.exception.RecipientOptimisticLockException;
 import com.jcondotta.banking.recipients.domain.recipient.aggregate.Recipient;
 import com.jcondotta.banking.recipients.domain.recipient.exceptions.DuplicateRecipientIbanException;
-import com.jcondotta.banking.recipients.domain.recipient.exceptions.RecipientAlreadyExistsException;
 import com.jcondotta.banking.recipients.domain.recipient.identity.BankAccountId;
 import com.jcondotta.banking.recipients.domain.recipient.identity.RecipientId;
 import com.jcondotta.banking.recipients.domain.testsupport.RecipientFixtures;
-import com.jcondotta.banking.recipients.infrastructure.adapters.metrics.persistence.RecipientPersistenceMetrics;
 import com.jcondotta.banking.recipients.infrastructure.adapters.output.persistence.entity.RecipientEntity;
 import com.jcondotta.banking.recipients.infrastructure.adapters.output.persistence.mapper.RecipientEntityMapper;
 import com.jcondotta.banking.recipients.infrastructure.adapters.output.persistence.repository.RecipientEntityRepository;
@@ -23,9 +21,6 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static com.jcondotta.banking.recipients.infrastructure.adapters.metrics.persistence.RecipientPersistenceConstraint.BANK_ACCOUNT_IBAN;
-import static com.jcondotta.banking.recipients.infrastructure.adapters.metrics.persistence.RecipientPersistenceOperation.CREATE;
-import static com.jcondotta.banking.recipients.infrastructure.adapters.metrics.persistence.RecipientPersistenceOperation.DELETE;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -39,14 +34,11 @@ class RecipientPostgresRepositoryTest {
   @Mock
   private RecipientEntityMapper mapper;
 
-  @Mock
-  private RecipientPersistenceMetrics persistenceMetrics;
-
   private RecipientPostgresRepository adapter;
 
   @BeforeEach
   void setUp() {
-    adapter = new RecipientPostgresRepository(repository, mapper, persistenceMetrics);
+    adapter = new RecipientPostgresRepository(repository, mapper);
   }
 
   @Test
@@ -103,24 +95,6 @@ class RecipientPostgresRepositoryTest {
     assertThatThrownBy(() -> adapter.save(recipient))
       .isInstanceOf(DuplicateRecipientIbanException.class);
 
-    verify(persistenceMetrics).recordUniqueConstraintViolation(CREATE, BANK_ACCOUNT_IBAN);
-    verify(mapper).toEntity(recipient);
-    verify(repository).saveAndFlush(entity);
-    verifyNoMoreInteractions(repository, mapper, persistenceMetrics);
-  }
-
-  @Test
-  void shouldThrowRecipientAlreadyExistsException_whenCreateFailsWithOtherDataIntegrityViolation() {
-    var recipient = RecipientFixtures.JEFFERSON.toRecipient(BANK_ACCOUNT_ID);
-    var entity = new RecipientEntity();
-
-    when(mapper.toEntity(recipient)).thenReturn(entity);
-    when(repository.saveAndFlush(entity))
-      .thenThrow(dataIntegrityViolation("recipients_pkey"));
-
-    assertThatThrownBy(() -> adapter.save(recipient))
-      .isInstanceOf(RecipientAlreadyExistsException.class);
-
     verify(mapper).toEntity(recipient);
     verify(repository).saveAndFlush(entity);
     verifyNoMoreInteractions(repository, mapper);
@@ -137,7 +111,7 @@ class RecipientPostgresRepositoryTest {
 
     verify(repository).deleteIfVersionMatches(recipient.getId().value(), recipient.getVersion());
     verifyNoMoreInteractions(repository);
-    verifyNoInteractions(mapper, persistenceMetrics);
+    verifyNoInteractions(mapper);
   }
 
   @Test
@@ -153,7 +127,7 @@ class RecipientPostgresRepositoryTest {
     verify(repository).deleteIfVersionMatches(recipient.getId().value(), recipient.getVersion());
     verify(repository).existsById(recipient.getId().value());
     verifyNoMoreInteractions(repository);
-    verifyNoInteractions(mapper, persistenceMetrics);
+    verifyNoInteractions(mapper);
   }
 
   @Test
@@ -167,11 +141,9 @@ class RecipientPostgresRepositoryTest {
     assertThatThrownBy(() -> adapter.delete(recipient))
       .isInstanceOf(RecipientOptimisticLockException.class);
 
-    verify(persistenceMetrics).recordDeleteVersionMiss();
-    verify(persistenceMetrics).recordOptimisticLockConflict(DELETE);
     verify(repository).deleteIfVersionMatches(recipient.getId().value(), recipient.getVersion());
     verify(repository).existsById(recipient.getId().value());
-    verifyNoMoreInteractions(repository, persistenceMetrics);
+    verifyNoMoreInteractions(repository);
     verifyNoInteractions(mapper);
   }
 

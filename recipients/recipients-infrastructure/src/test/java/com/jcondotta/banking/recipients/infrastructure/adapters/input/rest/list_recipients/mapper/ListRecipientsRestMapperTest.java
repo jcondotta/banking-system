@@ -14,8 +14,10 @@ class ListRecipientsRestMapperTest {
 
   @Test
   void shouldMapQuery_whenBankAccountIdIsProvided() {
-    var query = mapper.toQuery(BANK_ACCOUNT_ID);
+    var query = mapper.toQuery(BANK_ACCOUNT_ID, 1, 10);
 
     assertThat(query.bankAccountId().value()).isEqualTo(BANK_ACCOUNT_ID);
+    assertThat(query.pageRequest().page()).isEqualTo(1);
+    assertThat(query.pageRequest().size()).isEqualTo(10);
   }
 }

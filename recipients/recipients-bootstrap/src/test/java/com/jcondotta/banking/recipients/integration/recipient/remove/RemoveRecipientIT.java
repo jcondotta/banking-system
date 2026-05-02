@@ -14,6 +14,7 @@ import com.jcondotta.banking.recipients.infrastructure.adapters.input.rest.prope
 import com.jcondotta.banking.recipients.integration.testsupport.annotation.IntegrationTest;
 import io.restassured.RestAssured;
 import io.restassured.builder.RequestSpecBuilder;
+import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -65,7 +66,8 @@ class RemoveRecipientIT {
     var recipient = RecipientFixtures.JEFFERSON.toRecipient(bankAccountId);
     recipientRepository.save(recipient);
 
-    deleteRecipient(bankAccountId.value(), recipient.getId().value(), HttpStatus.NO_CONTENT);
+    var response = deleteRecipient(bankAccountId.value(), recipient.getId().value());
+    assertThat(response.statusCode()).isEqualTo(HttpStatus.NO_CONTENT.value());
 
     assertThat(recipientRepository.findById(recipient.getId())).isEmpty();
   }
@@ -75,30 +77,27 @@ class RemoveRecipientIT {
     var recipient = RecipientFixtures.PATRIZIO.toRecipient(bankAccountId);
     recipientRepository.save(recipient);
 
-    deleteRecipient(bankAccountId.value(), recipient.getId().value(), HttpStatus.NO_CONTENT);
+    var firstResponse = deleteRecipient(bankAccountId.value(), recipient.getId().value());
+    assertThat(firstResponse.statusCode()).isEqualTo(HttpStatus.NO_CONTENT.value());
 
-    var problemDetail = deleteRecipient(
-      bankAccountId.value(),
-      recipient.getId().value(),
-      HttpStatus.NOT_FOUND
-    );
+    var response = deleteRecipient(bankAccountId.value(), recipient.getId().value());
+    assertThat(response.statusCode()).isEqualTo(HttpStatus.NOT_FOUND.value());
 
-    var expectedMessage = new RecipientNotFoundException(recipient.getId(), bankAccountId).getMessage();
+    var problemDetail = response.as(ProblemDetail.class);
+
     assertThat(problemDetail)
       .isNotNull()
       .extracting(ProblemDetail::getDetail)
-      .isEqualTo(expectedMessage);
+      .isEqualTo(RecipientNotFoundException.MESSAGE);
   }
 
   @Test
   void shouldReturn404NotFound_whenRecipientDoesNotExist() {
     var nonExistentRecipientId = UUID.randomUUID();
 
-    var problemDetail = deleteRecipient(
-      bankAccountId.value(),
-      nonExistentRecipientId,
-      HttpStatus.NOT_FOUND
-    );
+    var response = deleteRecipient(bankAccountId.value(), nonExistentRecipientId);
+    assertThat(response.statusCode()).isEqualTo(HttpStatus.NOT_FOUND.value());
+    var problemDetail = response.as(ProblemDetail.class);
 
     var expectedMessage = new RecipientNotFoundException(RecipientId.of(nonExistentRecipientId), bankAccountId).getMessage();
 
@@ -117,21 +116,15 @@ class RemoveRecipientIT {
     var otherBankAccountId = UUID.randomUUID();
     recipientRepository.save(recipient);
 
-    var problemDetail = deleteRecipient(
-      otherBankAccountId,
-      recipient.getId().value(),
-      HttpStatus.UNPROCESSABLE_CONTENT
-    );
+    var response = deleteRecipient(otherBankAccountId, recipient.getId().value());
+    assertThat(response.statusCode()).isEqualTo(HttpStatus.UNPROCESSABLE_CONTENT.value());
 
-    var expectedMessage = new RecipientOwnershipMismatchException(
-      recipient.getId(),
-      BankAccountId.of(otherBankAccountId)
-    ).getMessage();
+    var problemDetail = response.as(ProblemDetail.class);
 
     assertAll(
       () -> assertThat(problemDetail.getType()).hasToString(ProblemTypes.RULE_VIOLATION.toString()),
       () -> assertThat(problemDetail.getTitle()).isEqualTo("Operation not allowed"),
-      () -> assertThat(problemDetail.getDetail()).isEqualTo(expectedMessage),
+      () -> assertThat(problemDetail.getDetail()).isEqualTo(RecipientOwnershipMismatchException.MESSAGE),
       () -> assertThat(problemDetail.getInstance())
         .isEqualTo(uriProperties.recipientURI(otherBankAccountId, recipient.getId().value()))
     );
@@ -147,40 +140,30 @@ class RemoveRecipientIT {
       .when(removeRecipientCommandHandler)
       .handle(command);
 
-    var problemDetail = deleteRecipient(
-      bankAccountId.value(),
-      recipient.getId().value(),
-      HttpStatus.CONFLICT
-    );
-
-    var expectedMessage = new RecipientOptimisticLockException(recipient.getId()).getMessage();
+    var response = deleteRecipient(bankAccountId.value(), recipient.getId().value());
+    assertThat(response.statusCode()).isEqualTo(HttpStatus.CONFLICT.value());
+    var problemDetail = response.as(ProblemDetail.class);
 
     assertAll(
       () -> assertThat(problemDetail.getType()).hasToString(ProblemTypes.CONFLICT.toString()),
       () -> assertThat(problemDetail.getTitle()).isEqualTo("Resource already exists"),
-      () -> assertThat(problemDetail.getDetail()).isEqualTo(expectedMessage),
+      () -> assertThat(problemDetail.getDetail()).isEqualTo(RecipientOptimisticLockException.RECIPIENT_CONCURRENT_MODIFICATION),
       () -> assertThat(problemDetail.getInstance())
         .isEqualTo(uriProperties.recipientURI(bankAccountId.value(), recipient.getId().value())),
       () -> assertThat(recipientRepository.findById(recipient.getId())).isPresent()
     );
   }
 
-  private ProblemDetail deleteRecipient(UUID bankAccountId, UUID recipientId, HttpStatus expectedStatus) {
-    var response = given()
+  private Response deleteRecipient(UUID bankAccountId, UUID recipientId) {
+    return given()
       .spec(requestSpecification)
       .pathParam("bank-account-id", bankAccountId)
       .pathParam("recipient-id", recipientId)
       .when()
       .delete()
       .then()
-      .statusCode(expectedStatus.value())
-      .extract();
-
-    if (expectedStatus.is2xxSuccessful()) {
-      return null;
-    }
-
-    return response.body().as(ProblemDetail.class);
+      .extract()
+      .response();
   }
 
   private RequestSpecification buildRequestSpecification() {

@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.web.accept.ApiVersionStrategy;
 
 import java.util.List;
 import java.util.Map;
@@ -31,7 +32,7 @@ class CorrelationFilterTest {
 
   @BeforeEach
   void setUp() {
-    filter = new CorrelationFilter();
+    filter = new CorrelationFilter(apiVersionStrategy());
 
     var logger = (Logger) LoggerFactory.getLogger(CorrelationFilter.class);
     logAppender = new ListAppender<>();
@@ -62,6 +63,7 @@ class CorrelationFilterTest {
     });
 
     assertThat(response.getHeader(HttpHeadersConstants.CORRELATION_ID)).isEqualTo(correlationId.toString());
+    assertThat(response.getHeader(HttpHeadersConstants.RESOLVED_API_VERSION)).isEqualTo("1.0");
     assertThat(request.getAttribute(CorrelationFilter.REQUEST_START_NS_ATTRIBUTE)).isInstanceOf(Long.class);
     assertThat(MDC.get(CorrelationFilter.MDC_CORRELATION_ID)).isNull();
 
@@ -92,6 +94,7 @@ class CorrelationFilterTest {
     });
 
     assertThatCodeIsUuid(response.getHeader(HttpHeadersConstants.CORRELATION_ID));
+    assertThat(response.getHeader(HttpHeadersConstants.RESOLVED_API_VERSION)).isEqualTo("1.0");
 
     var event = logAppender.list.getLast();
     assertThat(event.getLevel()).isEqualTo(Level.INFO);
@@ -145,6 +148,34 @@ class CorrelationFilterTest {
     request.setMethod(method);
     request.setRequestURI(uri);
     return request;
+  }
+
+  private static ApiVersionStrategy apiVersionStrategy() {
+    return new ApiVersionStrategy() {
+      @Override
+      public String resolveVersion(jakarta.servlet.http.HttpServletRequest request) {
+        return request.getHeader(HttpHeadersConstants.API_VERSION);
+      }
+
+      @Override
+      public Comparable<?> parseVersion(String version) {
+        return version;
+      }
+
+      @Override
+      public void validateVersion(Comparable<?> requestVersion, jakarta.servlet.http.HttpServletRequest request) {
+      }
+
+      @Override
+      public Comparable<?> getDefaultVersion() {
+        return "1.0";
+      }
+
+      @Override
+      public void handleDeprecations(Comparable<?> version, Object handler, jakarta.servlet.http.HttpServletRequest request,
+                                     jakarta.servlet.http.HttpServletResponse response) {
+      }
+    };
   }
 
   private static Map<String, String> keyValues(ILoggingEvent event) {

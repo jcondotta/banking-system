@@ -2,6 +2,10 @@ app:
   environment: test
 
 spring:
+  output:
+    ansi:
+      enabled: always
+
   datasource:
     url: ${TEST_DATASOURCE_URL}
     username: ${TEST_DATASOURCE_USERNAME}

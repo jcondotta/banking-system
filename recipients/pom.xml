@@ -18,7 +18,8 @@
     </properties>
 
     <modules>
-        <module>recipients-core</module>
+        <module>recipients-domain</module>
+        <module>recipients-application</module>
         <module>recipients-infrastructure</module>
         <module>recipients-bootstrap</module>
     </modules>
@@ -63,21 +64,9 @@
 
             <dependency>
                 <groupId>com.jcondotta</groupId>
-                <artifactId>accounts-contracts</artifactId>
-                <version>${shared-modules.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>com.jcondotta</groupId>
-                <artifactId>recipients-common-test</artifactId>
+                <artifactId>recipients-domain</artifactId>
                 <version>${project.version}</version>
-                <scope>test</scope>
-            </dependency>
-
-            <dependency>
-                <groupId>com.jcondotta</groupId>
-                <artifactId>recipients-domain-test</artifactId>
-                <version>${project.version}</version>
+                <type>test-jar</type>
                 <scope>test</scope>
             </dependency>
         </dependencies>

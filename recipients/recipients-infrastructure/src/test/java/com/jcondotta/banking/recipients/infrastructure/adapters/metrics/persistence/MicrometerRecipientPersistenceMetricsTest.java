@@ -5,9 +5,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static com.jcondotta.banking.recipients.infrastructure.adapters.metrics.persistence.RecipientPersistenceConstraint.BANK_ACCOUNT_IBAN;
-import static com.jcondotta.banking.recipients.infrastructure.adapters.metrics.persistence.RecipientPersistenceOperation.CREATE;
-import static com.jcondotta.banking.recipients.infrastructure.adapters.metrics.persistence.RecipientPersistenceOperation.DELETE;
-import static com.jcondotta.banking.recipients.infrastructure.adapters.metrics.persistence.RecipientPersistenceOperation.UPDATE;
+import static com.jcondotta.banking.recipients.infrastructure.adapters.metrics.persistence.RecipientPersistenceOperation.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class MicrometerRecipientPersistenceMetricsTest {
@@ -25,7 +23,7 @@ class MicrometerRecipientPersistenceMetricsTest {
   void shouldRecordUniqueConstraintViolationWithConstraintTag() {
     metrics.recordUniqueConstraintViolation(CREATE, BANK_ACCOUNT_IBAN);
 
-    var counter = meterRegistry.get("recipient.persistence.unique_constraint.violations")
+    var counter = meterRegistry.get("recipients.persistence.unique_constraint.violations")
       .tag("operation", "create")
       .tag("constraint", "bank_account_iban")
       .counter();
@@ -37,7 +35,7 @@ class MicrometerRecipientPersistenceMetricsTest {
   void shouldRecordOptimisticLockConflictWithUpdateOperationTag() {
     metrics.recordOptimisticLockConflict(UPDATE);
 
-    var counter = meterRegistry.get("recipient.persistence.optimistic_lock.conflicts")
+    var counter = meterRegistry.get("recipients.persistence.optimistic_lock.conflicts")
       .tag("operation", "update")
       .tag("repository", "postgres")
       .counter();
@@ -49,7 +47,7 @@ class MicrometerRecipientPersistenceMetricsTest {
   void shouldRecordOptimisticLockConflictWithDeleteOperationTag() {
     metrics.recordOptimisticLockConflict(DELETE);
 
-    var counter = meterRegistry.get("recipient.persistence.optimistic_lock.conflicts")
+    var counter = meterRegistry.get("recipients.persistence.optimistic_lock.conflicts")
       .tag("operation", "delete")
       .tag("repository", "postgres")
       .counter();
@@ -61,7 +59,7 @@ class MicrometerRecipientPersistenceMetricsTest {
   void shouldRecordDeleteVersionMiss() {
     metrics.recordDeleteVersionMiss();
 
-    var counter = meterRegistry.get("recipient.persistence.delete.version_miss")
+    var counter = meterRegistry.get("recipients.persistence.delete.version_miss")
       .tag("operation", "delete")
       .tag("repository", "postgres")
       .counter();

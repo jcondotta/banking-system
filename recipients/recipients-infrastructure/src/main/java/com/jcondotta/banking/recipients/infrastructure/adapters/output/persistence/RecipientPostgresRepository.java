@@ -3,13 +3,10 @@ package com.jcondotta.banking.recipients.infrastructure.adapters.output.persiste
 import com.jcondotta.banking.recipients.application.common.exception.RecipientOptimisticLockException;
 import com.jcondotta.banking.recipients.domain.recipient.aggregate.Recipient;
 import com.jcondotta.banking.recipients.domain.recipient.exceptions.DuplicateRecipientIbanException;
-import com.jcondotta.banking.recipients.domain.recipient.exceptions.RecipientAlreadyExistsException;
 import com.jcondotta.banking.recipients.domain.recipient.identity.RecipientId;
 import com.jcondotta.banking.recipients.domain.recipient.repository.RecipientRepository;
-import com.jcondotta.banking.recipients.infrastructure.adapters.metrics.persistence.RecipientPersistenceMetrics;
 import com.jcondotta.banking.recipients.infrastructure.adapters.output.persistence.mapper.RecipientEntityMapper;
 import com.jcondotta.banking.recipients.infrastructure.adapters.output.persistence.repository.RecipientEntityRepository;
-import io.micrometer.observation.annotation.Observed;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -17,10 +14,6 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
-
-import static com.jcondotta.banking.recipients.infrastructure.adapters.metrics.persistence.RecipientPersistenceConstraint.BANK_ACCOUNT_IBAN;
-import static com.jcondotta.banking.recipients.infrastructure.adapters.metrics.persistence.RecipientPersistenceOperation.CREATE;
-import static com.jcondotta.banking.recipients.infrastructure.adapters.metrics.persistence.RecipientPersistenceOperation.DELETE;
 
 @Slf4j
 @Repository
@@ -31,7 +24,6 @@ public class RecipientPostgresRepository implements RecipientRepository {
 
     private final RecipientEntityRepository repository;
     private final RecipientEntityMapper mapper;
-    private final RecipientPersistenceMetrics persistenceMetrics;
 
     @Override
     @Transactional(readOnly = true)
@@ -42,24 +34,25 @@ public class RecipientPostgresRepository implements RecipientRepository {
 
     @Override
     @Transactional
+    /*
     @Observed(
-        name = "recipient.persistence.create",
+        name = "recipients.persistence.create",
         contextualName = "createRecipientInPostgres",
         lowCardinalityKeyValues = {
             "repository", "postgres",
             "operation", "create"
         }
     )
+    */
     public void save(Recipient recipient) {
         try {
             repository.saveAndFlush(mapper.toEntity(recipient));
         }
         catch (DataIntegrityViolationException e) {
             if (isDuplicateIban(e)) {
-//                persistenceMetrics.recordUniqueConstraintViolation(CREATE, BANK_ACCOUNT_IBAN);
                 throw new DuplicateRecipientIbanException(recipient.getIban(), recipient.getBankAccountId());
             }
-            throw new RecipientAlreadyExistsException(recipient.getId());
+            throw e;
         }
     }
 
@@ -74,8 +67,6 @@ public class RecipientPostgresRepository implements RecipientRepository {
             return;
         }
 
-//        persistenceMetrics.recordDeleteVersionMiss();
-//        persistenceMetrics.recordOptimisticLockConflict(DELETE);
         throw new RecipientOptimisticLockException(recipientId);
     }
 

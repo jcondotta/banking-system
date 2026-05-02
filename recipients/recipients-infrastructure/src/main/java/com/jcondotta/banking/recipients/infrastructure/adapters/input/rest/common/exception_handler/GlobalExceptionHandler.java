@@ -2,6 +2,7 @@ package com.jcondotta.banking.recipients.infrastructure.adapters.input.rest.comm
 
 import com.jcondotta.banking.infrastructure.adapters.output.rest.exceptionhandler.ProblemTypes;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.net.URI;
 
+@Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
@@ -18,6 +20,13 @@ public class GlobalExceptionHandler {
 
   @ExceptionHandler(Exception.class)
   public ResponseEntity<ProblemDetail> handleUnexpected(Exception ex, HttpServletRequest request) {
+    log.atError()
+      .setMessage("Unhandled exception")
+      .addKeyValue("method", request.getMethod())
+      .addKeyValue("path", request.getRequestURI())
+      .setCause(ex)
+      .log();
+
     var problemDetail = ProblemDetail.forStatus(HttpStatus.INTERNAL_SERVER_ERROR);
     problemDetail.setType(ProblemTypes.INTERNAL_ERROR);
     problemDetail.setTitle(TITLE_INTERNAL_SERVER_ERROR);

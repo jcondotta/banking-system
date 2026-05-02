@@ -30,7 +30,6 @@ class RecipientSummaryMapperTest {
 
     assertAll(
       () -> assertThat(summary.recipientId()).isEqualTo(entity.getId()),
-      () -> assertThat(summary.bankAccountId()).isEqualTo(entity.getBankAccountId()),
       () -> assertThat(summary.recipientName()).isEqualTo(entity.getName()),
       () -> assertThat(summary.iban()).isEqualTo(entity.getIban()),
       () -> assertThat(summary.createdAt()).isEqualTo(entity.getCreatedAt())

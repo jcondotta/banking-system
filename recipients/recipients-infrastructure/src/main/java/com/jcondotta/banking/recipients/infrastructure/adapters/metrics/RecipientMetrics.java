@@ -20,7 +20,7 @@ public class RecipientMetrics {
 
   public void recordException(String operation, String category, Throwable exception, HttpStatus httpStatus) {
     meterRegistry.counter(
-      "recipient.exceptions",
+      "recipients.exceptions",
       AGGREGATE_TAG, AGGREGATE_RECIPIENT,
       OPERATION_TAG, operation,
       CATEGORY_TAG, category,
@@ -31,7 +31,7 @@ public class RecipientMetrics {
 
   public void recordValidationFailure(String source, String category) {
     meterRegistry.counter(
-      "recipient.validation.failures",
+      "recipients.validation.failures",
       AGGREGATE_TAG, AGGREGATE_RECIPIENT,
       "source", source,
       CATEGORY_TAG, category
@@ -40,7 +40,7 @@ public class RecipientMetrics {
 
   public void recordListResultSize(int size) {
     meterRegistry.summary(
-      "recipient.list.result.size",
+      "recipients.list.result.size",
       AGGREGATE_TAG, AGGREGATE_RECIPIENT,
       OPERATION_TAG, "list"
     ).record(size);
