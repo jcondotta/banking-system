@@ -30,7 +30,6 @@ spring:
 
   mvc:
     apiversion:
-#      default: "1.0"
       supported:
         - "1.0"
       use:
