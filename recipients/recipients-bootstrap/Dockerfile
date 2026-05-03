@@ -1,19 +1,18 @@
 # syntax=docker/dockerfile:1.7
 
-FROM maven:3.9.9-eclipse-temurin-25 AS builder
+FROM maven:3.9.15-eclipse-temurin-25 AS builder
 
 WORKDIR /workspace
 
-# This Dockerfile expects the repository root as the build context.
-# Example:
-# docker build -f recipients/recipients-bootstrap/Dockerfile .
-
 COPY pom.xml .
+RUN sed -i 's|<module>accounts</module>||g' pom.xml
+COPY mvnw .
+COPY .mvn .mvn
 COPY core core
 COPY recipients recipients
 
 RUN --mount=type=cache,target=/root/.m2 \
-    mvn -B clean package \
+    ./mvnw -B clean package \
       -pl recipients/recipients-bootstrap \
       -am \
       -DskipTests
@@ -25,14 +24,14 @@ WORKDIR /app
 RUN apt-get update \
     && apt-get install -y --no-install-recommends curl \
     && rm -rf /var/lib/apt/lists/* \
-    && groupadd --system appgroup \
-    && useradd --system --gid appgroup appuser
+    && groupadd --system --gid 10001 appgroup \
+    && useradd --system --uid 10001 --gid appgroup appuser
 
-COPY --from=builder --chown=appuser:appgroup \
+COPY --from=builder --chown=10001:10001 \
   /workspace/recipients/recipients-bootstrap/target/recipients-bootstrap-*.jar \
   /app/app.jar
 
-USER appuser
+USER 10001:10001
 
 EXPOSE 8080
 

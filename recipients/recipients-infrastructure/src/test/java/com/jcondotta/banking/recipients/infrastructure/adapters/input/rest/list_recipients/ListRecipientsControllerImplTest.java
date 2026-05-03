@@ -1,10 +1,10 @@
 package com.jcondotta.banking.recipients.infrastructure.adapters.input.rest.list_recipients;
 
+import com.jcondotta.application.query.PageRequest;
+import com.jcondotta.application.query.PageResult;
 import com.jcondotta.application.query.QueryHandler;
 import com.jcondotta.banking.recipients.application.recipient.query.list.ListRecipientsQuery;
 import com.jcondotta.banking.recipients.application.recipient.query.list.ListRecipientsQueryResult;
-import com.jcondotta.application.query.PageRequest;
-import com.jcondotta.application.query.PageResult;
 import com.jcondotta.banking.recipients.application.recipient.query.model.RecipientSummary;
 import com.jcondotta.banking.recipients.domain.recipient.identity.BankAccountId;
 import com.jcondotta.banking.recipients.domain.testsupport.RecipientTestData;
@@ -50,7 +50,6 @@ class ListRecipientsControllerImplTest {
     var queryResult = new ListRecipientsQueryResult(new PageResult<>(List.of(
       new RecipientSummary(
         UUID.randomUUID(),
-        BANK_ACCOUNT_ID.value(),
         recipientTestData.getName(),
         recipientTestData.getIban(),
         TimeFactory.FIXED_INSTANT

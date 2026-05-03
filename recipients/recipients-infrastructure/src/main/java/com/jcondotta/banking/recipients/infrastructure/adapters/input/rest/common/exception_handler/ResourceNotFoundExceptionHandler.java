@@ -18,13 +18,12 @@ import java.net.URI;
 public class ResourceNotFoundExceptionHandler {
 
   static final HttpStatus HTTP_STATUS_NOT_FOUND = HttpStatus.NOT_FOUND;
-  static final String TITLE_RESOURCE_NOT_FOUND = "Not Found";
 
   @ExceptionHandler(DomainNotFoundException.class)
   public ResponseEntity<ProblemDetail> handleNotFound(DomainNotFoundException ex, HttpServletRequest request) {
     var problemDetail = ProblemDetail.forStatus(HTTP_STATUS_NOT_FOUND);
     problemDetail.setType(ProblemTypes.RESOURCE_NOT_FOUND);
-    problemDetail.setTitle(TITLE_RESOURCE_NOT_FOUND);
+    problemDetail.setTitle(HTTP_STATUS_NOT_FOUND.getReasonPhrase());
     problemDetail.setDetail(ex.getMessage());
     problemDetail.setInstance(URI.create(request.getRequestURI()));
 

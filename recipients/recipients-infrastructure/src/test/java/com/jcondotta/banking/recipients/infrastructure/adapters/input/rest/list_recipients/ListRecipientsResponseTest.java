@@ -1,7 +1,7 @@
 package com.jcondotta.banking.recipients.infrastructure.adapters.input.rest.list_recipients;
 
-import com.jcondotta.banking.recipients.application.recipient.query.list.ListRecipientsQueryResult;
 import com.jcondotta.application.query.PageResult;
+import com.jcondotta.banking.recipients.application.recipient.query.list.ListRecipientsQueryResult;
 import com.jcondotta.banking.recipients.application.recipient.query.model.RecipientSummary;
 import org.junit.jupiter.api.Test;
 
@@ -58,7 +58,6 @@ class ListRecipientsResponseTest {
   private static RecipientSummary summary() {
     return new RecipientSummary(
       RECIPIENT_ID,
-      BANK_ACCOUNT_ID,
       "Jefferson Condotta",
       "ES3801283316232166447417",
       CREATED_AT

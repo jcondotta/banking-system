@@ -18,7 +18,7 @@ import java.net.URI;
 public class TooManyRequestsExceptionHandler {
 
   public static final HttpStatus HTTP_STATUS_TOO_MANY_REQUESTS = HttpStatus.TOO_MANY_REQUESTS;
-  public static final String TITLE_TOO_MANY_REQUESTS = "Too Many Requests";
+
   public static final String DETAIL_CONCURRENCY_LIMIT_REACHED =
     "Request rejected because the concurrency limit was reached";
 
@@ -26,7 +26,7 @@ public class TooManyRequestsExceptionHandler {
   public ResponseEntity<ProblemDetail> handle(InvocationRejectedException ex, HttpServletRequest request) {
     var problemDetail = ProblemDetail.forStatus(HTTP_STATUS_TOO_MANY_REQUESTS);
     problemDetail.setType(ProblemTypes.TOO_MANY_REQUESTS);
-    problemDetail.setTitle(TITLE_TOO_MANY_REQUESTS);
+    problemDetail.setTitle(HTTP_STATUS_TOO_MANY_REQUESTS.getReasonPhrase());
     problemDetail.setDetail(DETAIL_CONCURRENCY_LIMIT_REACHED);
     problemDetail.setInstance(URI.create(request.getRequestURI()));
 

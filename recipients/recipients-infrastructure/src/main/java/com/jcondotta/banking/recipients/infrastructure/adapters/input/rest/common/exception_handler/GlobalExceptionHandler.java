@@ -16,8 +16,6 @@ import java.net.URI;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-  private static final String TITLE_INTERNAL_SERVER_ERROR = "Internal Server Error";
-
   @ExceptionHandler(Exception.class)
   public ResponseEntity<ProblemDetail> handleUnexpected(Exception ex, HttpServletRequest request) {
     log.atError()
@@ -29,7 +27,7 @@ public class GlobalExceptionHandler {
 
     var problemDetail = ProblemDetail.forStatus(HttpStatus.INTERNAL_SERVER_ERROR);
     problemDetail.setType(ProblemTypes.INTERNAL_ERROR);
-    problemDetail.setTitle(TITLE_INTERNAL_SERVER_ERROR);
+    problemDetail.setTitle(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase());
     problemDetail.setInstance(URI.create(request.getRequestURI()));
     return ResponseEntity.of(problemDetail).build();
   }

@@ -1,0 +1,64 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: recipients-postgres
+  namespace: prod
+spec:
+  serviceName: recipients-postgres
+  replicas: 1
+  selector:
+    matchLabels:
+      app: recipients-postgres
+  template:
+    metadata:
+      labels:
+        app: recipients-postgres
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:17-alpine
+          ports:
+            - name: postgres
+              containerPort: 5432
+          env:
+            - name: POSTGRES_DB
+              value: recipients_db
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: recipients-postgres-secret
+                  key: POSTGRES_USERNAME
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: recipients-postgres-secret
+                  key: POSTGRES_PASSWORD
+          readinessProbe:
+            exec:
+              command: [ "sh", "-c", "pg_isready -U \"$POSTGRES_USER\" -d recipients_db" ]
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            exec:
+              command: [ "sh", "-c", "pg_isready -U \"$POSTGRES_USER\" -d recipients_db" ]
+            initialDelaySeconds: 30
+            periodSeconds: 20
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/postgresql/data
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 1Gi

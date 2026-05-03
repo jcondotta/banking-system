@@ -104,7 +104,6 @@ class RecipientQueryPostgresRepositoryTest {
   private static RecipientSummary recipientSummary(String name) {
     return new RecipientSummary(
       UUID.randomUUID(),
-      BANK_ACCOUNT_ID.value(),
       name,
       "ES3801283316232166447417",
       Instant.parse("2026-04-17T08:00:00Z")

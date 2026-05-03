@@ -5,7 +5,6 @@ import com.jcondotta.application.query.PageResult;
 import com.jcondotta.banking.recipients.application.recipient.query.list.RecipientQueryRepository;
 import com.jcondotta.banking.recipients.application.recipient.query.model.RecipientSummary;
 import com.jcondotta.banking.recipients.domain.recipient.identity.BankAccountId;
-import com.jcondotta.banking.recipients.infrastructure.adapters.metrics.RecipientMetrics;
 import com.jcondotta.banking.recipients.infrastructure.adapters.output.persistence.mapper.RecipientSummaryMapper;
 import com.jcondotta.banking.recipients.infrastructure.adapters.output.persistence.repository.RecipientEntityRepository;
 import lombok.RequiredArgsConstructor;
