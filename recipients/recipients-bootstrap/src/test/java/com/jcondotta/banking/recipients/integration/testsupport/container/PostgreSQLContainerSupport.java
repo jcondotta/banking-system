@@ -41,4 +41,16 @@ public final class PostgreSQLContainerSupport {
     public static String password() {
         return POSTGRES.getPassword();
     }
+
+    public static void pause() {
+        POSTGRES.getDockerClient()
+            .pauseContainerCmd(POSTGRES.getContainerId())
+            .exec();
+    }
+
+    public static void unpause() {
+        POSTGRES.getDockerClient()
+            .unpauseContainerCmd(POSTGRES.getContainerId())
+            .exec();
+    }
 }

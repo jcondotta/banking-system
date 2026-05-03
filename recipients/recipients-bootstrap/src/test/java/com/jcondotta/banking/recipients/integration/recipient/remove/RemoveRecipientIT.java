@@ -1,7 +1,6 @@
 package com.jcondotta.banking.recipients.integration.recipient.remove;
 
 import com.jcondotta.banking.infrastructure.adapters.output.rest.HttpHeadersConstants;
-import com.jcondotta.banking.infrastructure.adapters.output.rest.exceptionhandler.ProblemTypes;
 import com.jcondotta.banking.recipients.application.common.exception.RecipientOptimisticLockException;
 import com.jcondotta.banking.recipients.application.recipient.command.remove.RemoveRecipientCommand;
 import com.jcondotta.banking.recipients.application.recipient.command.remove.RemoveRecipientCommandHandler;
@@ -30,7 +29,6 @@ import java.util.UUID;
 
 import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.mockito.Mockito.doThrow;
 
 @IntegrationTest

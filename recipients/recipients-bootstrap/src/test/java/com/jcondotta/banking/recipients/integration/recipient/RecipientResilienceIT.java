@@ -7,6 +7,7 @@ import com.jcondotta.banking.recipients.domain.testsupport.RecipientFixtures;
 import com.jcondotta.banking.recipients.infrastructure.adapters.input.rest.create_recipient.model.CreateRecipientRestRequest;
 import com.jcondotta.banking.recipients.infrastructure.adapters.input.rest.properties.AccountRecipientsURIProperties;
 import com.jcondotta.banking.recipients.integration.testsupport.annotation.IntegrationTest;
+import com.jcondotta.banking.recipients.integration.testsupport.container.PostgreSQLContainerSupport;
 import io.restassured.RestAssured;
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.http.ContentType;
@@ -17,7 +18,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.dao.QueryTimeoutException;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
@@ -32,6 +32,9 @@ import static org.mockito.Mockito.doThrow;
 @IntegrationTest
 class RecipientResilienceIT {
 
+  private static final String RECIPIENT_NAME = RecipientFixtures.JEFFERSON.toName().value();
+  private static final String RECIPIENT_IBAN = RecipientFixtures.JEFFERSON.toIban().value();
+
   @MockitoSpyBean
   private RecipientRepository recipientRepository;
 
@@ -39,8 +42,6 @@ class RecipientResilienceIT {
   private AccountRecipientsURIProperties uriProperties;
 
   private UUID bankAccountId;
-  private String recipientName;
-  private String iban;
 
   private RequestSpecification requestSpecification;
 
@@ -51,25 +52,29 @@ class RecipientResilienceIT {
 
   @BeforeEach
   void beforeEach(@LocalServerPort int port) {
-    RestAssured.baseURI = "http://localhost";
-    RestAssured.port = port;
-
     bankAccountId = UUID.randomUUID();
-    recipientName = RecipientFixtures.JEFFERSON.toName().value();
-    iban = RecipientFixtures.JEFFERSON.toIban().value();
 
-    requestSpecification = buildRequestSpecification();
+    requestSpecification = new RequestSpecBuilder()
+      .setBaseUri("http://localhost")
+      .setPort(port)
+      .setBasePath(uriProperties.rootPath())
+      .setContentType(ContentType.JSON)
+      .setAccept(ContentType.JSON)
+      .addHeader(HttpHeadersConstants.API_VERSION, "1.0")
+      .build();
   }
 
   @Test
-  void shouldReturn503ServiceUnavailable_whenDatabaseIsDown() {
-    doThrow(new DataAccessResourceFailureException("Database unavailable"))
-      .when(recipientRepository)
-      .save(any(Recipient.class));
+  void shouldReturn503ServiceUnavailable_whenPostgresIsUnavailable() {
+    try {
+      PostgreSQLContainerSupport.pause();
 
-    var response = postRecipient(new CreateRecipientRestRequest(recipientName, iban));
-
-    assertThat(response.statusCode()).isEqualTo(HttpStatus.SERVICE_UNAVAILABLE.value());
+      var response = postRecipient(new CreateRecipientRestRequest(RECIPIENT_NAME, RECIPIENT_IBAN));
+      assertThat(response.statusCode()).isEqualTo(HttpStatus.SERVICE_UNAVAILABLE.value());
+    }
+    finally {
+      PostgreSQLContainerSupport.unpause();
+    }
   }
 
   @Test
@@ -78,7 +83,7 @@ class RecipientResilienceIT {
       .when(recipientRepository)
       .save(any(Recipient.class));
 
-    var response = postRecipient(new CreateRecipientRestRequest(recipientName, iban));
+    var response = postRecipient(new CreateRecipientRestRequest(RECIPIENT_NAME, RECIPIENT_IBAN));
     assertThat(response.statusCode()).isEqualTo(HttpStatus.GATEWAY_TIMEOUT.value());
   }
 
@@ -92,16 +97,5 @@ class RecipientResilienceIT {
       .then()
       .extract()
       .response();
-  }
-
-  private RequestSpecification buildRequestSpecification() {
-    return new RequestSpecBuilder()
-      .setBaseUri(RestAssured.baseURI)
-      .setPort(RestAssured.port)
-      .setBasePath(uriProperties.rootPath())
-      .setContentType(ContentType.JSON)
-      .setAccept(ContentType.JSON)
-      .addHeader(HttpHeadersConstants.API_VERSION, "1.0")
-      .build();
   }
 }

@@ -10,6 +10,8 @@ public final class ProblemTypes {
   public static final URI CONFLICT = uri("/conflict");
   public static final URI TOO_MANY_REQUESTS = uri("/too-many-requests");
   public static final URI INTERNAL_ERROR = uri("/internal-error");
+  public static final URI DATABASE_UNAVAILABLE = uri("/database-unavailable");
+  public static final URI DATABASE_TIMEOUT = uri("/database-timeout");
 
   @SuppressWarnings("all")
   private static final String BASE_PATH = "https://api.jcondotta.com/problems";

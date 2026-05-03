@@ -36,9 +36,6 @@ public class ListRecipientsQueryHandler
     var logContext = LogContext.timed(LOGGER, RecipientEventType.LIST)
       .with(LogKey.BANK_ACCOUNT_ID, query.bankAccountId().asString());
 
-    logContext.debug("Recipient listing started")
-      .log();
-
     try {
       var result = new ListRecipientsQueryResult(
         queryRepository.findByBankAccountId(query.bankAccountId(), query.pageRequest())

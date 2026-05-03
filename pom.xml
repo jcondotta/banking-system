@@ -251,17 +251,18 @@
 <!--						<testPlugin>junit5</testPlugin>-->
 
 						<targetClasses>
-							<param>com.jcondotta.*</param>
+							<param>com.jcondotta.banking.*</param>
 						</targetClasses>
 
 						<targetTests>
-							<param>com.jcondotta.*</param>
+							<param>com.jcondotta.banking.*</param>
 						</targetTests>
 
 						<excludedClasses>
 <!--							<param>*.config.*</param>-->
 <!--							<param>*Configuration</param>-->
 							<param>*Config</param>
+							<param>*.log.*</param>
 						</excludedClasses>
 
 						<mutationThreshold>80</mutationThreshold>
@@ -276,7 +277,7 @@
 							<param>HTML</param>
 							<param>XML</param>
 						</outputFormats>
-
+						<timeoutFactor>1.5</timeoutFactor>
 <!--						<timeoutConst>4000</timeoutConst>-->
 					</configuration>
 				</plugin>

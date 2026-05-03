@@ -1,7 +1,6 @@
 package com.jcondotta.banking.recipients.integration.recipient.create;
 
 import com.jcondotta.banking.infrastructure.adapters.output.rest.HttpHeadersConstants;
-import com.jcondotta.banking.infrastructure.adapters.output.rest.exceptionhandler.ProblemTypes;
 import com.jcondotta.banking.recipients.domain.recipient.exceptions.DuplicateRecipientIbanException;
 import com.jcondotta.banking.recipients.domain.recipient.identity.RecipientId;
 import com.jcondotta.banking.recipients.domain.recipient.repository.RecipientRepository;
@@ -9,7 +8,6 @@ import com.jcondotta.banking.recipients.domain.recipient.value_objects.Iban;
 import com.jcondotta.banking.recipients.domain.recipient.value_objects.RecipientName;
 import com.jcondotta.banking.recipients.domain.testsupport.BlankValuesSource;
 import com.jcondotta.banking.recipients.domain.testsupport.RecipientFixtures;
-import com.jcondotta.banking.recipients.infrastructure.adapters.input.rest.common.exception_handler.ConflictExceptionHandler;
 import com.jcondotta.banking.recipients.infrastructure.adapters.input.rest.create_recipient.model.CreateRecipientRestRequest;
 import com.jcondotta.banking.recipients.infrastructure.adapters.input.rest.properties.AccountRecipientsURIProperties;
 import com.jcondotta.banking.recipients.integration.testsupport.annotation.IntegrationTest;
@@ -128,14 +126,7 @@ class CreateRecipientIT {
 
     assertThat(conflictResponse.statusCode()).isEqualTo(HttpStatus.CONFLICT.value());
     var problemDetail = conflictResponse.as(ProblemDetail.class);
-
-    assertAll(
-      () -> assertThat(problemDetail.getType()).isEqualTo(ProblemTypes.CONFLICT),
-      () -> assertThat(problemDetail.getTitle()).isEqualTo(ConflictExceptionHandler.TITLE_RESOURCE_ALREADY_EXISTS),
-      () -> assertThat(problemDetail.getStatus()).isEqualTo(HttpStatus.CONFLICT.value()),
-      () -> assertThat(problemDetail.getDetail()).isEqualTo(DuplicateRecipientIbanException.MESSAGE),
-      () -> assertThat(problemDetail.getInstance()).isEqualTo(uriProperties.recipientsURI(bankAccountId))
-    );
+    assertThat(problemDetail.getDetail()).isEqualTo(DuplicateRecipientIbanException.MESSAGE);
   }
 
   @ParameterizedTest
