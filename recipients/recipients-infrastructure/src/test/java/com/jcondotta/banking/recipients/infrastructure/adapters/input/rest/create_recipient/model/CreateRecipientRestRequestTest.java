@@ -32,7 +32,7 @@ class CreateRecipientRestRequestTest {
   @ParameterizedTest
   @NullSource
   @BlankValuesSource
-  void shouldDetectConstraintViolation__whenRecipientNameIsBlank(String invalidName) {
+  void shouldDetectConstraintViolation_whenRecipientNameIsBlank(String invalidName) {
     var request = new CreateRecipientRestRequest(invalidName, VALID_IBAN);
 
     assertThat(VALIDATOR.validate(request))
@@ -56,7 +56,7 @@ class CreateRecipientRestRequestTest {
         .first()
         .satisfies(
             v -> {
-              assertThat(v.getPropertyPath()).hasToString("maskedIban");
+              assertThat(v.getPropertyPath()).hasToString("iban");
               assertThat(v.getMessage()).isEqualTo("must not be blank");
             });
   }
