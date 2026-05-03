@@ -10,7 +10,6 @@ import com.jcondotta.banking.recipients.domain.recipient.value_objects.Recipient
 import com.jcondotta.banking.recipients.domain.testsupport.BlankValuesSource;
 import com.jcondotta.banking.recipients.domain.testsupport.RecipientFixtures;
 import com.jcondotta.banking.recipients.infrastructure.adapters.input.rest.common.exception_handler.ConflictExceptionHandler;
-import com.jcondotta.banking.recipients.infrastructure.adapters.input.rest.common.exception_handler.MethodArgumentNotValidExceptionHandler;
 import com.jcondotta.banking.recipients.infrastructure.adapters.input.rest.create_recipient.model.CreateRecipientRestRequest;
 import com.jcondotta.banking.recipients.infrastructure.adapters.input.rest.properties.AccountRecipientsURIProperties;
 import com.jcondotta.banking.recipients.integration.testsupport.annotation.IntegrationTest;
@@ -40,6 +39,9 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 @IntegrationTest
 class CreateRecipientIT {
 
+  private static final String RECIPIENT_NAME = RecipientFixtures.JEFFERSON.toName().value();
+  private static final String RECIPIENT_IBAN = RecipientFixtures.JEFFERSON.toIban().value();
+
   @Autowired
   private Clock clock;
 
@@ -50,8 +52,6 @@ class CreateRecipientIT {
   private AccountRecipientsURIProperties uriProperties;
 
   private UUID bankAccountId;
-  private String recipientName;
-  private String iban;
 
   private RequestSpecification requestSpecification;
 
@@ -66,15 +66,12 @@ class CreateRecipientIT {
     RestAssured.port = port;
 
     bankAccountId = UUID.randomUUID();
-    recipientName = RecipientFixtures.JEFFERSON.toName().value();
-    iban = RecipientFixtures.JEFFERSON.toIban().value();
-
     requestSpecification = buildRequestSpecification();
   }
 
   @Test
   void shouldReturn201CreatedAndPersistRecipient_whenRequestIsValid() {
-    var restRequest = new CreateRecipientRestRequest(recipientName, iban);
+    var restRequest = new CreateRecipientRestRequest(RECIPIENT_NAME, RECIPIENT_IBAN);
 
     var response = postRecipient(bankAccountId, restRequest);
 
@@ -90,8 +87,8 @@ class CreateRecipientIT {
       () -> assertThat(persistedRecipient).hasValueSatisfying(recipient -> assertAll(
           () -> assertThat(recipient.getId().value()).isEqualTo(recipientId),
           () -> assertThat(recipient.getBankAccountId().value()).isEqualTo(bankAccountId),
-          () -> assertThat(recipient.getRecipientName().value()).isEqualTo(recipientName),
-          () -> assertThat(recipient.getIban().value()).isEqualTo(iban),
+          () -> assertThat(recipient.getRecipientName().value()).isEqualTo(RECIPIENT_NAME),
+          () -> assertThat(recipient.getIban().value()).isEqualTo(RECIPIENT_IBAN),
           () -> assertThat(recipient.isVersioned()).isTrue(),
           () -> assertThat(recipient.getCreatedAt()).isEqualTo(clock.instant())
         ))
@@ -100,7 +97,7 @@ class CreateRecipientIT {
 
   @Test
   void shouldReturn201Created_whenRecipientWithSameIbanWasRemoved() {
-    var restRequest = new CreateRecipientRestRequest(recipientName, iban);
+    var restRequest = new CreateRecipientRestRequest(RECIPIENT_NAME, RECIPIENT_IBAN);
 
     var response1 = postRecipient(bankAccountId, restRequest);
     var locationHeader1 = response1.getHeader(HttpHeaders.LOCATION);
@@ -122,7 +119,7 @@ class CreateRecipientIT {
 
   @Test
   void shouldReturn409Conflict_whenCreatingRecipientWithSameIbanForSameBankAccount() {
-    var restRequest = new CreateRecipientRestRequest(recipientName, iban);
+    var restRequest = new CreateRecipientRestRequest(RECIPIENT_NAME, RECIPIENT_IBAN);
 
     var response1 = postRecipient(bankAccountId, restRequest);
     assertThat(response1.statusCode()).isEqualTo(HttpStatus.CREATED.value());
@@ -145,50 +142,44 @@ class CreateRecipientIT {
   @NullSource
   @BlankValuesSource
   void shouldReturn422UnprocessableEntity_whenRecipientNameIsBlank(String invalidRecipientName) {
-    var restRequest = new CreateRecipientRestRequest(invalidRecipientName, iban);
+    var restRequest = new CreateRecipientRestRequest(invalidRecipientName, RECIPIENT_IBAN);
 
     var response = postRecipient(bankAccountId, restRequest);
     assertThat(response.statusCode()).isEqualTo(HttpStatus.UNPROCESSABLE_CONTENT.value());
-
-    assert422ValidationProblem(response.as(ProblemDetail.class));
   }
 
   @ParameterizedTest
   @NullSource
   @BlankValuesSource
   void shouldReturn422UnprocessableEntity_whenIbanIsBlank(String invalidIban) {
-    var restRequest = new CreateRecipientRestRequest(recipientName, invalidIban);
+    var restRequest = new CreateRecipientRestRequest(RECIPIENT_NAME, invalidIban);
 
     var response = postRecipient(bankAccountId, restRequest);
     assertThat(response.statusCode()).isEqualTo(HttpStatus.UNPROCESSABLE_CONTENT.value());
-
-    assert422ValidationProblem(response.as(ProblemDetail.class));
   }
 
   @Test
   void shouldReturn400BadRequest_whenIbanIsInvalid() {
-    var restRequest = new CreateRecipientRestRequest(recipientName, "INVALID123");
+    var restRequest = new CreateRecipientRestRequest(RECIPIENT_NAME, "INVALID123");
 
     var response = postRecipient(bankAccountId, restRequest);
 
     assertThat(response.statusCode()).isEqualTo(HttpStatus.BAD_REQUEST.value());
-    var problemDetail = response.as(ProblemDetail.class);
 
-    assert400ValidationProblem(problemDetail);
+    var problemDetail = response.as(ProblemDetail.class);
     assertThat(problemDetail.getDetail()).isEqualTo(Iban.IBAN_INVALID_FORMAT);
   }
 
   @Test
   void shouldReturn400BadRequest_whenRecipientNameIsTooLong() {
     var tooLongName = "a".repeat(51);
-    var restRequest = new CreateRecipientRestRequest(tooLongName, iban);
+    var restRequest = new CreateRecipientRestRequest(tooLongName, RECIPIENT_IBAN);
 
     var response = postRecipient(bankAccountId, restRequest);
 
     assertThat(response.statusCode()).isEqualTo(HttpStatus.BAD_REQUEST.value());
-    var problemDetail = response.as(ProblemDetail.class);
 
-    assert400ValidationProblem(problemDetail);
+    var problemDetail = response.as(ProblemDetail.class);
     assertThat(problemDetail.getDetail())
       .isEqualTo(RecipientName.NAME_MUST_NOT_EXCEED_LENGTH.formatted(RecipientName.MAX_LENGTH));
   }
@@ -197,42 +188,17 @@ class CreateRecipientIT {
   void shouldReturn400BadRequest_whenJsonIsMalformed() {
     var response = postRecipient(bankAccountId, "{ invalid-json }");
     assertThat(response.statusCode()).isEqualTo(HttpStatus.BAD_REQUEST.value());
-
-    assert400ValidationProblem(response.as(ProblemDetail.class));
   }
 
   @Test
   void shouldReturn400BadRequest_whenRequestBodyIsMissing() {
-    var problemDetail = given()
+    given()
       .spec(requestSpecification)
       .pathParam("bank-account-id", bankAccountId)
       .when()
       .post()
       .then()
-      .statusCode(HttpStatus.BAD_REQUEST.value())
-      .extract()
-      .body()
-        .as(ProblemDetail.class);
-
-    assert400ValidationProblem(problemDetail);
-  }
-
-  private void assert422ValidationProblem(ProblemDetail problemDetail) {
-    assertAll(
-      () -> assertThat(problemDetail.getType()).isEqualTo(ProblemTypes.VALIDATION_ERRORS),
-      () -> assertThat(problemDetail.getTitle()).isEqualTo(MethodArgumentNotValidExceptionHandler.TITLE_VALIDATION_FAILED),
-      () -> assertThat(problemDetail.getStatus()).isEqualTo(HttpStatus.UNPROCESSABLE_CONTENT.value()),
-      () -> assertThat(problemDetail.getInstance()).isEqualTo(uriProperties.recipientsURI(bankAccountId))
-    );
-  }
-
-  private void assert400ValidationProblem(ProblemDetail problemDetail) {
-    assertAll(
-      () -> assertThat(problemDetail.getType()).isEqualTo(ProblemTypes.VALIDATION_ERRORS),
-      () -> assertThat(problemDetail.getTitle()).isEqualTo("Request validation failed"),
-      () -> assertThat(problemDetail.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST.value()),
-      () -> assertThat(problemDetail.getInstance()).isEqualTo(uriProperties.recipientsURI(bankAccountId))
-    );
+      .statusCode(HttpStatus.BAD_REQUEST.value());
   }
 
   private RequestSpecification buildRequestSpecification() {

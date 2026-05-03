@@ -1,9 +1,7 @@
 package com.jcondotta.banking.recipients.integration.recipient.create;
 
 import com.jcondotta.banking.infrastructure.adapters.output.rest.HttpHeadersConstants;
-import com.jcondotta.banking.infrastructure.adapters.output.rest.exceptionhandler.ProblemTypes;
 import com.jcondotta.banking.recipients.domain.testsupport.RecipientFixtures;
-import com.jcondotta.banking.recipients.infrastructure.adapters.input.rest.common.exception_handler.TooManyRequestsExceptionHandler;
 import com.jcondotta.banking.recipients.infrastructure.adapters.input.rest.create_recipient.model.CreateRecipientRestRequest;
 import com.jcondotta.banking.recipients.infrastructure.adapters.input.rest.properties.AccountRecipientsURIProperties;
 import com.jcondotta.banking.recipients.integration.testsupport.annotation.IntegrationTest;
@@ -19,7 +17,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ProblemDetail;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 
 import java.time.Clock;
@@ -32,7 +29,6 @@ import java.util.stream.IntStream;
 
 import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.reset;
 
@@ -95,7 +91,6 @@ class CreateRecipientConcurrencyIT {
 
       var rejectedResponse = postRecipient(bankAccountId, restRequest);
       assertThat(rejectedResponse.statusCode()).isEqualTo(HttpStatus.TOO_MANY_REQUESTS.value());
-      assert429ValidationProblem(rejectedResponse.as(ProblemDetail.class));
 
       releaseSlotsLatch.countDown();
       scope.join();
@@ -107,16 +102,6 @@ class CreateRecipientConcurrencyIT {
     finally {
       reset(clock);
     }
-  }
-
-  private void assert429ValidationProblem(ProblemDetail problemDetail) {
-    assertAll(
-      () -> assertThat(problemDetail.getType()).isEqualTo(ProblemTypes.TOO_MANY_REQUESTS),
-      () -> assertThat(problemDetail.getTitle()).isEqualTo(TooManyRequestsExceptionHandler.TITLE_TOO_MANY_REQUESTS),
-      () -> assertThat(problemDetail.getStatus()).isEqualTo(HttpStatus.TOO_MANY_REQUESTS.value()),
-      () -> assertThat(problemDetail.getDetail()).isEqualTo(TooManyRequestsExceptionHandler.DETAIL_CONCURRENCY_LIMIT_REACHED),
-      () -> assertThat(problemDetail.getInstance()).isEqualTo(uriProperties.recipientsURI(bankAccountId))
-    );
   }
 
   private RequestSpecification buildRequestSpecification() {

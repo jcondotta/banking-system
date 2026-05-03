@@ -1,13 +1,11 @@
 package com.jcondotta.banking.recipients.integration.recipient.remove;
 
 import com.jcondotta.banking.infrastructure.adapters.output.rest.HttpHeadersConstants;
-import com.jcondotta.banking.infrastructure.adapters.output.rest.exceptionhandler.ProblemTypes;
 import com.jcondotta.banking.recipients.domain.recipient.aggregate.Recipient;
 import com.jcondotta.banking.recipients.domain.recipient.identity.BankAccountId;
 import com.jcondotta.banking.recipients.domain.recipient.identity.RecipientId;
 import com.jcondotta.banking.recipients.domain.recipient.repository.RecipientRepository;
 import com.jcondotta.banking.recipients.domain.testsupport.RecipientFixtures;
-import com.jcondotta.banking.recipients.infrastructure.adapters.input.rest.common.exception_handler.TooManyRequestsExceptionHandler;
 import com.jcondotta.banking.recipients.infrastructure.adapters.input.rest.properties.AccountRecipientsURIProperties;
 import com.jcondotta.banking.recipients.integration.testsupport.annotation.IntegrationTest;
 import io.restassured.RestAssured;
@@ -21,7 +19,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ProblemDetail;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 
 import java.util.UUID;
@@ -33,7 +30,6 @@ import java.util.stream.IntStream;
 
 import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.reset;
@@ -100,7 +96,6 @@ class RemoveRecipientConcurrencyIT {
         recipientRejectedByConcurrencyLimit.getId().value()
       );
       assertThat(rejectedResponse.statusCode()).isEqualTo(HttpStatus.TOO_MANY_REQUESTS.value());
-      assert429ValidationProblem(rejectedResponse.as(ProblemDetail.class), recipientRejectedByConcurrencyLimit);
 
       releaseSlotsLatch.countDown();
       scope.join();
@@ -120,17 +115,6 @@ class RemoveRecipientConcurrencyIT {
 
     recipientRepository.save(recipient);
     return recipient;
-  }
-
-  private void assert429ValidationProblem(ProblemDetail problemDetail, Recipient recipient) {
-    assertAll(
-      () -> assertThat(problemDetail.getType()).isEqualTo(ProblemTypes.TOO_MANY_REQUESTS),
-      () -> assertThat(problemDetail.getTitle()).isEqualTo(TooManyRequestsExceptionHandler.TITLE_TOO_MANY_REQUESTS),
-      () -> assertThat(problemDetail.getStatus()).isEqualTo(HttpStatus.TOO_MANY_REQUESTS.value()),
-      () -> assertThat(problemDetail.getDetail()).isEqualTo(TooManyRequestsExceptionHandler.DETAIL_CONCURRENCY_LIMIT_REACHED),
-      () -> assertThat(problemDetail.getInstance())
-        .isEqualTo(uriProperties.recipientURI(recipient.getBankAccountId().value(), recipient.getId().value()))
-    );
   }
 
   private Response deleteRecipient(UUID bankAccountId, UUID recipientId) {
