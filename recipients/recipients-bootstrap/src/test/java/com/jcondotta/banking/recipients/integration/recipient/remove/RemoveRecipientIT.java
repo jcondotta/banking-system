@@ -7,7 +7,6 @@ import com.jcondotta.banking.recipients.application.recipient.command.remove.Rem
 import com.jcondotta.banking.recipients.domain.recipient.exceptions.RecipientNotFoundException;
 import com.jcondotta.banking.recipients.domain.recipient.exceptions.RecipientOwnershipMismatchException;
 import com.jcondotta.banking.recipients.domain.recipient.identity.BankAccountId;
-import com.jcondotta.banking.recipients.domain.recipient.identity.RecipientId;
 import com.jcondotta.banking.recipients.domain.recipient.repository.RecipientRepository;
 import com.jcondotta.banking.recipients.domain.testsupport.RecipientFixtures;
 import com.jcondotta.banking.recipients.infrastructure.adapters.input.rest.properties.AccountRecipientsURIProperties;
@@ -28,6 +27,8 @@ import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import java.util.UUID;
 
 import static io.restassured.RestAssured.given;
+import static com.jcondotta.banking.recipients.integration.testsupport.rest.RestAssuredTestConstants.API_VERSION_1;
+import static com.jcondotta.banking.recipients.integration.testsupport.rest.RestAssuredTestConstants.BASE_URI;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.doThrow;
 
@@ -53,7 +54,7 @@ class RemoveRecipientIT {
 
   @BeforeEach
   void beforeEach(@LocalServerPort int port) {
-    RestAssured.baseURI = "http://localhost";
+    RestAssured.baseURI = BASE_URI;
     RestAssured.port = port;
 
     bankAccountId = BankAccountId.of(UUID.randomUUID());
@@ -141,7 +142,7 @@ class RemoveRecipientIT {
       .setBaseUri(RestAssured.baseURI)
       .setPort(RestAssured.port)
       .setBasePath(uriProperties.recipientIdPath())
-      .addHeader(HttpHeadersConstants.API_VERSION, "1.0")
+      .addHeader(HttpHeadersConstants.API_VERSION, API_VERSION_1)
       .build();
   }
 }

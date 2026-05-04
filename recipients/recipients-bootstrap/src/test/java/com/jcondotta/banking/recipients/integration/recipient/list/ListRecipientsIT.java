@@ -29,6 +29,8 @@ import java.time.Instant;
 import java.util.UUID;
 
 import static io.restassured.RestAssured.given;
+import static com.jcondotta.banking.recipients.integration.testsupport.rest.RestAssuredTestConstants.API_VERSION_1;
+import static com.jcondotta.banking.recipients.integration.testsupport.rest.RestAssuredTestConstants.BASE_URI;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @IntegrationTest
@@ -66,7 +68,7 @@ class ListRecipientsIT {
 
   @BeforeEach
   void beforeEach(@LocalServerPort int port) {
-    RestAssured.baseURI = "http://localhost";
+    RestAssured.baseURI = BASE_URI;
     RestAssured.port = port;
 
     bankAccountId = BankAccountId.of(UUID.randomUUID());
@@ -162,7 +164,7 @@ class ListRecipientsIT {
       .setBasePath(uriProperties.rootPath())
       .setContentType(ContentType.JSON)
       .setAccept(ContentType.JSON)
-      .addHeader(HttpHeadersConstants.API_VERSION, "1.0")
+      .addHeader(HttpHeadersConstants.API_VERSION, API_VERSION_1)
       .build();
   }
 

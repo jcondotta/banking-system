@@ -25,6 +25,8 @@ import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import java.util.UUID;
 
 import static io.restassured.RestAssured.given;
+import static com.jcondotta.banking.recipients.integration.testsupport.rest.RestAssuredTestConstants.API_VERSION_1;
+import static com.jcondotta.banking.recipients.integration.testsupport.rest.RestAssuredTestConstants.BASE_URI;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
@@ -55,12 +57,12 @@ class RecipientResilienceIT {
     bankAccountId = UUID.randomUUID();
 
     requestSpecification = new RequestSpecBuilder()
-      .setBaseUri("http://localhost")
+      .setBaseUri(BASE_URI)
       .setPort(port)
       .setBasePath(uriProperties.rootPath())
       .setContentType(ContentType.JSON)
       .setAccept(ContentType.JSON)
-      .addHeader(HttpHeadersConstants.API_VERSION, "1.0")
+      .addHeader(HttpHeadersConstants.API_VERSION, API_VERSION_1)
       .build();
   }
 

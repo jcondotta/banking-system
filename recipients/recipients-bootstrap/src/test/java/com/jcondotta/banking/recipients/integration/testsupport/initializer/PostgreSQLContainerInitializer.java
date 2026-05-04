@@ -6,20 +6,21 @@ import org.springframework.boot.test.util.TestPropertyValues;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 
+import java.util.Map;
+
 public class PostgreSQLContainerInitializer
-    implements ApplicationContextInitializer<ConfigurableApplicationContext> {
+  implements ApplicationContextInitializer<ConfigurableApplicationContext> {
 
     @Override
     public void initialize(@NotNull ConfigurableApplicationContext ctx) {
-        TestPropertyValues.of(
-            "TEST_DATASOURCE_URL=" + appendJdbcParameters(PostgreSQLContainerSupport.jdbcUrl()),
-            "TEST_DATASOURCE_USERNAME=" + PostgreSQLContainerSupport.username(),
-            "TEST_DATASOURCE_PASSWORD=" + PostgreSQLContainerSupport.password()
-        ).applyTo(ctx.getEnvironment());
+        TestPropertyValues.of(buildProperties()).applyTo(ctx.getEnvironment());
     }
 
-    private static String appendJdbcParameters(String jdbcUrl) {
-        var separator = jdbcUrl.contains("?") ? "&" : "?";
-        return jdbcUrl + separator + "connectTimeout=1&socketTimeout=1";
+    private static Map<String, String> buildProperties() {
+        return Map.of(
+          "SPRING_DATASOURCE_URL",      PostgreSQLContainerSupport.jdbcUrl(),
+          "SPRING_DATASOURCE_USERNAME", PostgreSQLContainerSupport.username(),
+          "SPRING_DATASOURCE_PASSWORD", PostgreSQLContainerSupport.password()
+        );
     }
 }

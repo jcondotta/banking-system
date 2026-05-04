@@ -29,6 +29,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.IntStream;
 
 import static io.restassured.RestAssured.given;
+import static com.jcondotta.banking.recipients.integration.testsupport.rest.RestAssuredTestConstants.API_VERSION_1;
+import static com.jcondotta.banking.recipients.integration.testsupport.rest.RestAssuredTestConstants.BASE_URI;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
@@ -55,7 +57,7 @@ class RemoveRecipientConcurrencyIT {
 
   @BeforeEach
   void beforeEach(@LocalServerPort int port) {
-    RestAssured.baseURI = "http://localhost";
+    RestAssured.baseURI = BASE_URI;
     RestAssured.port = port;
 
     requestSpecification = buildRequestSpecification();
@@ -134,7 +136,7 @@ class RemoveRecipientConcurrencyIT {
       .setBaseUri(RestAssured.baseURI)
       .setPort(RestAssured.port)
       .setBasePath(uriProperties.recipientIdPath())
-      .addHeader(HttpHeadersConstants.API_VERSION, "1.0")
+      .addHeader(HttpHeadersConstants.API_VERSION, API_VERSION_1)
       .build();
   }
 }

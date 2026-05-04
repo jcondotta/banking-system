@@ -7,10 +7,6 @@ spring:
       enabled: always
 
   datasource:
-    url: ${TEST_DATASOURCE_URL}
-    username: ${TEST_DATASOURCE_USERNAME}
-    password: ${TEST_DATASOURCE_PASSWORD}
-    driver-class-name: org.postgresql.Driver
     hikari:
       connection-timeout: 1000
       validation-timeout: 500
