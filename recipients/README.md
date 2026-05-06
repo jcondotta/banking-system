@@ -52,30 +52,29 @@ This service is a focused backend system for practicing production-oriented engi
 
 ## Architecture
 
-The service is split into Maven modules with one dependency direction:
-
-```text
-recipients-bootstrap
-  -> recipients-infrastructure
-      -> recipients-application
-          -> recipients-domain
-```
-
-`recipients-domain` does not depend on Spring or infrastructure code. It contains the `Recipient` aggregate, value objects, identities, domain exceptions, and repository contracts.
-
-`recipients-application` contains command/query handlers. It orchestrates use cases and logs business events. This module uses Spring annotations pragmatically for component discovery, observations, and concurrency limiting, but business rules remain in the domain.
-
-`recipients-infrastructure` contains REST controllers, request/response mappers, exception handlers, correlation filtering, PostgreSQL repositories, JPA entities, and persistence mappers.
-
-`recipients-bootstrap` is the Spring Boot executable module. It owns runtime configuration, Docker packaging, Liquibase changelogs, logging configuration, and application startup.
+The service is split into Maven modules with a single dependency rule: outer modules may depend on inner modules, but inner modules must not depend on outer modules.
 
 ```text
 recipients/
-├── recipients-domain
-├── recipients-application
-├── recipients-infrastructure
-└── recipients-bootstrap
+├── recipients-domain          # Aggregate, value objects, identities, domain exceptions, repository ports
+├── recipients-application     # Command/query handlers, use-case orchestration, structured business events
+├── recipients-infrastructure  # REST adapters, exception handlers, persistence adapters, JPA repositories
+└── recipients-bootstrap       # Spring Boot runtime, configuration, Liquibase, Docker packaging
 ```
+
+```mermaid
+flowchart LR
+    Bootstrap["bootstrap"]
+    Infrastructure["infrastructure"]
+    Application["application"]
+    Domain["domain"]
+
+    Bootstrap --> Infrastructure
+    Infrastructure --> Application
+    Application --> Domain
+```
+
+`recipients-domain` does not depend on Spring or infrastructure code. The application layer uses selected Spring/Micrometer annotations pragmatically for wiring, observations, and concurrency limiting, while business rules remain in the domain.
 
 ```mermaid
 flowchart TD
