@@ -5,15 +5,18 @@ FROM maven:3.9.15-eclipse-temurin-25 AS builder
 WORKDIR /workspace
 
 COPY pom.xml .
-RUN sed -i 's|<module>accounts</module>||g' pom.xml
-COPY mvnw .
-COPY .mvn .mvn
 COPY core core
 COPY recipients recipients
 
 RUN --mount=type=cache,target=/root/.m2 \
-    ./mvnw -B clean package \
-      -pl recipients/recipients-bootstrap \
+    mvn -B -N -f pom.xml install -DskipTests
+
+RUN --mount=type=cache,target=/root/.m2 \
+    mvn -B -f core/pom.xml clean install -DskipTests
+
+RUN --mount=type=cache,target=/root/.m2 \
+    mvn -B -f recipients/pom.xml clean package \
+      -pl recipients-bootstrap \
       -am \
       -DskipTests
 
@@ -38,4 +41,4 @@ EXPOSE 8080
 HEALTHCHECK --interval=30s --timeout=5s --retries=3 \
   CMD curl -f http://localhost:8080/actuator/health || exit 1
 
-ENTRYPOINT ["java","-XX:+UseG1GC","-XX:+ExitOnOutOfMemoryError","-jar","/app/app.jar"]
+ENTRYPOINT ["java","-XX:+UseG1GC","-XX:+ExitOnOutOfMemoryError","-XX:MaxRAMPercentage=75","-jar","/app/app.jar"]

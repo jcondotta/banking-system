@@ -23,17 +23,15 @@
             <artifactId>spring-boot-starter</artifactId>
         </dependency>
 
-        <!--
-        Disabled while testing OpenTelemetry Java Agent auto-instrumentation.
-        The agent provides its own SDK/exporter/instrumentations; keeping this
-        starter enabled makes traces come from Spring Boot/Micrometer instead
-        of showing what the agent creates automatically.
-
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-opentelemetry</artifactId>
         </dependency>
-        -->
+
+        <dependency>
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-registry-prometheus</artifactId>
+        </dependency>
 
         <dependency>
             <groupId>org.projectlombok</groupId>
@@ -52,18 +50,10 @@
             <artifactId>spring-boot-starter-liquibase</artifactId>
         </dependency>
 
-        <!-- ANalisar -->
-
         <dependency>
             <groupId>net.logstash.logback</groupId>
             <artifactId>logstash-logback-encoder</artifactId>
             <version>8.0</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.github.loki4j</groupId>
-            <artifactId>loki-logback-appender</artifactId>
-            <version>1.5.2</version>
         </dependency>
 
         <dependency>
