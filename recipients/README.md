@@ -52,7 +52,7 @@ This service is a focused backend system for practicing production-oriented engi
 
 ## Architecture
 
-The service is split into Maven modules with a single dependency rule: outer modules may depend on inner modules, but inner modules must not depend on outer modules.
+The service is split into Maven modules with a single dependency rule: outer modules may depend on inner modules, but inner modules must not depend on outer modules. The domain module stays free of Spring and infrastructure concerns; framework usage is kept at the application, infrastructure, and bootstrap layers where it supports wiring, observability, persistence, and runtime behavior.
 
 ```text
 recipients/
@@ -73,8 +73,6 @@ flowchart LR
     Infrastructure --> Application
     Application --> Domain
 ```
-
-`recipients-domain` does not depend on Spring or infrastructure code. The application layer uses selected Spring/Micrometer annotations pragmatically for wiring, observations, and concurrency limiting, while business rules remain in the domain.
 
 ```mermaid
 flowchart TD
