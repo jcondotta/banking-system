@@ -1,10 +1,35 @@
 # Recipients Service
 
+![Java](https://img.shields.io/badge/Java-25-orange)
+![Spring Boot](https://img.shields.io/badge/Spring_Boot-4-brightgreen)
+![Docker](https://img.shields.io/badge/Docker-ready-blue)
+![Kubernetes](https://img.shields.io/badge/Kubernetes-ready-326CE5)
+
 Backend service responsible for managing payment recipients associated with bank accounts.
 
 The service is intentionally small, but engineered as a production-oriented bounded context. It uses DDD, CQRS, and hexagonal architecture to keep domain rules, use-case orchestration, persistence, HTTP adapters, and runtime wiring separated. The current implementation focuses on recipient creation, listing, removal, operational visibility, and failure handling around PostgreSQL-backed persistence.
 
 The architecture exists to keep the domain model testable and independent while still using Spring Boot pragmatically where it improves delivery: HTTP adapters, validation, observability, database integration, and runtime configuration.
+
+## Table of Contents
+
+- [Why This Project Exists](#why-this-project-exists)
+- [Tech Stack](#tech-stack)
+- [Architecture](#architecture)
+- [Features](#features)
+- [Observability](#observability)
+- [Running Locally](#running-locally)
+- [Docker](#docker)
+- [Kubernetes](#kubernetes)
+- [Testing Strategy](#testing-strategy)
+- [Configuration](#configuration)
+- [Example API Requests](#example-api-requests)
+- [Roadmap](#roadmap)
+- [Engineering Notes](#engineering-notes)
+
+## Why This Project Exists
+
+This service is a focused backend system for practicing production-oriented engineering without hiding behind unnecessary platform complexity. It is used to explore backend architecture, operational readiness, observability-first design, and realistic testing practices in a bounded context that remains small enough to reason about.
 
 ## Tech Stack
 
@@ -18,7 +43,7 @@ The architecture exists to keep the domain model testable and independent while 
 | Architecture | DDD, CQRS, Hexagonal Architecture |
 | Runtime | Docker, Kubernetes manifests |
 | Observability | Structured logging, Micrometer, OpenTelemetry |
-| Metrics | Prometheus-compatible Actuator endpoint |
+| Metrics | Prometheus-compatible Micrometer metrics |
 | Logs | JSON console logs, Grafana/Loki-compatible structure |
 | Tracing | OpenTelemetry support through Spring Boot/Micrometer |
 | Testing | JUnit 5, Mockito, Rest Assured, Testcontainers |
@@ -43,6 +68,14 @@ recipients-bootstrap
 `recipients-infrastructure` contains REST controllers, request/response mappers, exception handlers, correlation filtering, PostgreSQL repositories, JPA entities, and persistence mappers.
 
 `recipients-bootstrap` is the Spring Boot executable module. It owns runtime configuration, Docker packaging, Liquibase changelogs, logging configuration, and application startup.
+
+```text
+recipients/
+├── recipients-domain
+├── recipients-application
+├── recipients-infrastructure
+└── recipients-bootstrap
+```
 
 ```mermaid
 flowchart TD
