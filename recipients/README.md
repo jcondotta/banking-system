@@ -74,20 +74,6 @@ flowchart LR
     Application --> Domain
 ```
 
-```mermaid
-flowchart TD
-    Client["HTTP Client"] --> Rest["REST Controllers"]
-    Rest --> App["Command / Query Handlers"]
-    App --> Domain["Domain Model"]
-    App --> Port["Repository Port"]
-    Port --> Repo["PostgreSQL Repository Adapter"]
-    Repo --> DB[("PostgreSQL")]
-
-    Bootstrap["recipients-bootstrap"] --> Rest
-    Bootstrap --> Repo
-    Bootstrap --> Obs["Logging / Metrics / Tracing"]
-```
-
 ## Features
 
 - Create recipients for a bank account.
