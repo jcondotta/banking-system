@@ -1,4 +1,4 @@
-name: Banking system CI
+name: Banking system - CI
 
 on:
   pull_request:
