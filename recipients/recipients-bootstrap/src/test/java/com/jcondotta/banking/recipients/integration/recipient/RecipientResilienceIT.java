@@ -13,8 +13,10 @@ import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
+import org.junit.Ignore;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.web.server.LocalServerPort;
@@ -67,6 +69,7 @@ class RecipientResilienceIT {
   }
 
   @Test
+  @Disabled("This test closes all connections from the Hikari pool.")
   void shouldReturn503ServiceUnavailable_whenPostgresIsUnavailable() {
     try {
       PostgreSQLContainerSupport.pause();
