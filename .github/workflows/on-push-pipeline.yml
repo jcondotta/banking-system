@@ -23,7 +23,7 @@ jobs:
         run: chmod +x mvnw
 
       - name: Run unit tests
-        run: ./mvnw -B clean test
+        run: ./mvnw -B clean test -pl recipients/recipients-bootstrap --also-make
 
   integration-tests:
     name: Integration Tests
@@ -41,5 +41,23 @@ jobs:
       - name: Make Maven wrapper executable
         run: chmod +x mvnw
 
+      - name: Cache Docker images
+        id: cache-docker
+        uses: actions/cache@v4
+        with:
+          path: /tmp/docker-cache
+          key: docker-postgres-17-alpine
+
+      - name: Load cached images
+        if: steps.cache-docker.outputs.cache-hit == 'true'
+        run: docker load -i /tmp/docker-cache/postgres.tar
+
+      - name: Pull and save images
+        if: steps.cache-docker.outputs.cache-hit != 'true'
+        run: |
+          mkdir -p /tmp/docker-cache
+          docker pull postgres:17-alpine
+          docker save postgres:17-alpine -o /tmp/docker-cache/postgres.tar
+
       - name: Run integration tests
-        run: ./mvnw -B clean verify -DskipUnitTests -pl recipients/recipients-bootstrap -am
+        run: ./mvnw -B clean verify -DskipUnitTests -pl recipients/recipients-bootstrap --also-make
