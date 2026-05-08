@@ -6,11 +6,6 @@ spring:
     ansi:
       enabled: always
 
-  datasource:
-    hikari:
-      connection-timeout: 1000
-      validation-timeout: 500
-
   jpa:
     hibernate:
       ddl-auto: none
