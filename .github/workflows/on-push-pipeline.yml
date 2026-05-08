@@ -29,6 +29,7 @@ jobs:
     name: Integration Tests
     runs-on: ubuntu-latest
     needs: unit-tests
+
     steps:
       - uses: actions/checkout@v4
 
@@ -46,18 +47,24 @@ jobs:
         uses: actions/cache@v4
         with:
           path: /tmp/docker-cache
-          key: docker-postgres-17-alpine
+          key: docker-images-postgres17-ryuk012
 
       - name: Load cached images
         if: steps.cache-docker.outputs.cache-hit == 'true'
-        run: docker load -i /tmp/docker-cache/postgres.tar
+        run: |
+          docker load -i /tmp/docker-cache/postgres.tar
+          docker load -i /tmp/docker-cache/ryuk.tar
 
       - name: Pull and save images
         if: steps.cache-docker.outputs.cache-hit != 'true'
         run: |
           mkdir -p /tmp/docker-cache
+
           docker pull postgres:17-alpine
           docker save postgres:17-alpine -o /tmp/docker-cache/postgres.tar
+
+          docker pull testcontainers/ryuk:0.12.0
+          docker save testcontainers/ryuk:0.12.0 -o /tmp/docker-cache/ryuk.tar
 
       - name: Run integration tests
         run: ./mvnw -B clean verify -DskipUnitTests -pl recipients/recipients-bootstrap --also-make
