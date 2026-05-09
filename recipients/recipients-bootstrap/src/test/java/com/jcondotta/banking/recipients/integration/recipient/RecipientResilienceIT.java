@@ -13,10 +13,8 @@ import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
-import org.junit.Ignore;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.web.server.LocalServerPort;
@@ -26,9 +24,9 @@ import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 
 import java.util.UUID;
 
-import static io.restassured.RestAssured.given;
 import static com.jcondotta.banking.recipients.integration.testsupport.rest.RestAssuredTestConstants.API_VERSION_1;
 import static com.jcondotta.banking.recipients.integration.testsupport.rest.RestAssuredTestConstants.BASE_URI;
+import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
@@ -69,16 +67,15 @@ class RecipientResilienceIT {
   }
 
   @Test
-  @Disabled("This test closes all connections from the Hikari pool.")
   void shouldReturn503ServiceUnavailable_whenPostgresIsUnavailable() {
     try {
-      PostgreSQLContainerSupport.pause();
+      PostgreSQLContainerSupport.cutConnection();
 
       var response = postRecipient(new CreateRecipientRestRequest(RECIPIENT_NAME, RECIPIENT_IBAN));
       assertThat(response.statusCode()).isEqualTo(HttpStatus.SERVICE_UNAVAILABLE.value());
     }
     finally {
-      PostgreSQLContainerSupport.unpause();
+      PostgreSQLContainerSupport.restoreConnection();
     }
   }
 
