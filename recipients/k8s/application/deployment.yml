@@ -24,7 +24,7 @@ spec:
         runAsNonRoot: true
       containers:
         - name: recipients
-          image: jcondotta/recipients:1.0.0
+          image: jcondotta/recipients:1.0.1
           imagePullPolicy: IfNotPresent
           securityContext:
             allowPrivilegeEscalation: false

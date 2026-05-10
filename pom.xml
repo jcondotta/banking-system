@@ -41,6 +41,7 @@
 		<testcontainers.version>2.0.5</testcontainers.version>
 		<rest-assured.version>6.0.0</rest-assured.version>
 		<instancio-junit.version>5.5.1</instancio-junit.version>
+		<archunit.version>1.4.1</archunit.version>
 
 		<springdoc-openapi-starter-webmvc-ui.version>3.0.2</springdoc-openapi-starter-webmvc-ui.version>
 		<maven-surefire-plugin.version>3.5.2</maven-surefire-plugin.version>
@@ -180,6 +181,13 @@
 				<groupId>org.instancio</groupId>
 				<artifactId>instancio-junit</artifactId>
 				<version>${instancio-junit.version}</version>
+				<scope>test</scope>
+			</dependency>
+
+			<dependency>
+				<groupId>com.tngtech.archunit</groupId>
+				<artifactId>archunit</artifactId>
+				<version>${archunit.version}</version>
 				<scope>test</scope>
 			</dependency>
 		</dependencies>

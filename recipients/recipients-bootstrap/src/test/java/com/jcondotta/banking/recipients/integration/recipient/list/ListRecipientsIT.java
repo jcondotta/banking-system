@@ -9,23 +9,30 @@ import com.jcondotta.banking.recipients.domain.recipient.identity.RecipientId;
 import com.jcondotta.banking.recipients.domain.recipient.repository.RecipientRepository;
 import com.jcondotta.banking.recipients.domain.recipient.value_objects.Iban;
 import com.jcondotta.banking.recipients.domain.recipient.value_objects.RecipientName;
+import com.jcondotta.banking.recipients.domain.testsupport.BlankValuesSource;
+import com.jcondotta.banking.recipients.domain.testsupport.RecipientFixtures;
 import com.jcondotta.banking.recipients.domain.testsupport.RecipientTestData;
+import com.jcondotta.banking.recipients.domain.testsupport.TimeFactory;
 import com.jcondotta.banking.recipients.infrastructure.adapters.input.rest.list_recipients.ListRecipientsResponse;
 import com.jcondotta.banking.recipients.infrastructure.adapters.input.rest.list_recipients.RecipientRestResponse;
+import com.jcondotta.banking.recipients.infrastructure.adapters.input.rest.list_recipients.model.ListRecipientsRequest;
 import com.jcondotta.banking.recipients.infrastructure.adapters.input.rest.properties.AccountRecipientsURIProperties;
 import com.jcondotta.banking.recipients.integration.testsupport.annotation.IntegrationTest;
 import io.restassured.RestAssured;
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.http.ContentType;
+import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.HttpStatus;
 
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.UUID;
 
 import static io.restassured.RestAssured.given;
@@ -36,18 +43,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 @IntegrationTest
 class ListRecipientsIT {
 
-  private static final Instant FIRST_CREATED_AT = Instant.parse("2026-04-17T08:00:00Z");
-  private static final Instant SECOND_CREATED_AT = Instant.parse("2026-04-17T09:00:00Z");
-  private static final Instant OTHER_CREATED_AT = Instant.parse("2026-04-17T07:00:00Z");
+  private static final Instant BASE_CREATED_AT = TimeFactory.FIXED_INSTANT;
+  private static final Instant ONE_MINUTE_LATER_CREATED_AT = TimeFactory.FIXED_INSTANT.plus(1, ChronoUnit.MINUTES);
+  private static final Instant TEN_MINUTES_LATER_CREATED_AT = TimeFactory.FIXED_INSTANT.plus(10, ChronoUnit.MINUTES);
 
-  private static final String RECIPIENT_NAME_JEFFERSON = RecipientTestData.JEFFERSON.getName();
-  private static final String IBAN_JEFFERSON = RecipientTestData.JEFFERSON.getIban();
-
-  private static final String RECIPIENT_NAME_PATRIZIO = RecipientTestData.PATRIZIO.getName();
-  private static final String IBAN_PATRIZIO = RecipientTestData.PATRIZIO.getIban();
-
-  private static final String RECIPIENT_NAME_VIRGINIO = RecipientTestData.VIRGINIO.getName();
-  private static final String IBAN_VIRGINIO = RecipientTestData.VIRGINIO.getIban();
+  private static final int DEFAULT_PAGE = 0;
+  private static final int DEFAULT_SIZE = 20;
 
   @Autowired
   private RecipientRepository recipientRepository;
@@ -77,33 +78,20 @@ class ListRecipientsIT {
 
   @Test
   void shouldReturnRecipientsOrderedByNameAsc_whenBankAccountHasRecipients() {
-    // Patrizio created first but Jefferson sorts earlier alphabetically (J < P)
-    var patrizioRecipient = recipient(
-      bankAccountId,
-      RECIPIENT_NAME_PATRIZIO,
-      IBAN_PATRIZIO,
-      FIRST_CREATED_AT
-    );
-    var jeffersonRecipient = recipient(
-      bankAccountId,
-      RECIPIENT_NAME_JEFFERSON,
-      IBAN_JEFFERSON,
-      SECOND_CREATED_AT
-    );
-    var otherAccountRecipient = recipient(
-      BankAccountId.of(UUID.randomUUID()),
-      RECIPIENT_NAME_VIRGINIO,
-      IBAN_VIRGINIO,
-      OTHER_CREATED_AT
-    );
+    var patrizioRecipient = recipient(bankAccountId, RecipientFixtures.PATRIZIO, BASE_CREATED_AT);
+    var jeffersonRecipient = recipient(bankAccountId, RecipientFixtures.JEFFERSON, ONE_MINUTE_LATER_CREATED_AT);
 
-    recipientRepository.save(patrizioRecipient);
-    recipientRepository.save(otherAccountRecipient);
-    recipientRepository.save(jeffersonRecipient);
+    var otherBankAccountId = BankAccountId.of(UUID.randomUUID());
+    var otherAccountRecipient = recipient(otherBankAccountId, RecipientFixtures.VIRGINIO, TEN_MINUTES_LATER_CREATED_AT);
 
-    var response = getRecipients(bankAccountId.value(), HttpStatus.OK);
+    saveRecipients(patrizioRecipient, otherAccountRecipient, jeffersonRecipient);
 
-    assertThat(response.recipients())
+    var request = new ListRecipientsRequest(DEFAULT_PAGE, DEFAULT_SIZE, null);
+    var response = getRecipients(bankAccountId.value(), request);
+    assertThat(response.statusCode()).isEqualTo(HttpStatus.OK.value());
+
+    var body = response.as(ListRecipientsResponse.class);
+    assertThat(body.recipients())
       .extracting(RecipientRestResponse::recipientId)
       .containsExactly(
         jeffersonRecipient.getId().value(),
@@ -113,48 +101,136 @@ class ListRecipientsIT {
 
   @Test
   void shouldReturnOnlyActiveRecipients_whenBankAccountHasActiveAndRemovedRecipients() {
-    var activeRecipient = recipient(
-      bankAccountId,
-      RECIPIENT_NAME_JEFFERSON,
-      IBAN_JEFFERSON,
-      FIRST_CREATED_AT
-    );
-    var removedRecipient = recipient(
-      bankAccountId,
-      RECIPIENT_NAME_PATRIZIO,
-      IBAN_PATRIZIO,
-      SECOND_CREATED_AT
-    );
+    var jeffersonRecipient = recipient(bankAccountId, RecipientFixtures.JEFFERSON, BASE_CREATED_AT);
+    var patrizioRecipient = recipient(bankAccountId, RecipientFixtures.PATRIZIO, ONE_MINUTE_LATER_CREATED_AT);
 
-    recipientRepository.save(activeRecipient);
-    recipientRepository.save(removedRecipient);
-    removeRecipientHandler.handle(new RemoveRecipientCommand(bankAccountId, removedRecipient.getId()));
+    saveRecipients(jeffersonRecipient, patrizioRecipient);
+    removeRecipientHandler.handle(new RemoveRecipientCommand(bankAccountId, jeffersonRecipient.getId()));
 
-    var response = getRecipients(bankAccountId.value(), HttpStatus.OK);
+    var request = new ListRecipientsRequest(DEFAULT_PAGE, DEFAULT_SIZE, null);
+    var response = getRecipients(bankAccountId.value(), request);
+    assertThat(response.statusCode()).isEqualTo(HttpStatus.OK.value());
 
-    assertThat(response.recipients())
+    var body = response.as(ListRecipientsResponse.class);
+    assertThat(body.recipients())
       .singleElement()
-      .satisfies(recipient -> assertThat(recipient.recipientId()).isEqualTo(activeRecipient.getId().value()));
+      .satisfies(recipient -> assertThat(recipient.recipientId()).isEqualTo(patrizioRecipient.getId().value()));
   }
 
   @Test
   void shouldReturnEmptyList_whenBankAccountHasNoRecipients() {
-    var response = getRecipients(bankAccountId.value(), HttpStatus.OK);
+    var request = new ListRecipientsRequest(DEFAULT_PAGE, DEFAULT_SIZE, null);
+    var response = getRecipients(bankAccountId.value(), request);
+    assertThat(response.statusCode()).isEqualTo(HttpStatus.OK.value());
 
-    assertThat(response.recipients()).isEmpty();
+    var body = response.as(ListRecipientsResponse.class);
+    assertThat(body.recipients()).isEmpty();
   }
 
-  private ListRecipientsResponse getRecipients(UUID bankAccountId, HttpStatus expectedStatus) {
-    return given()
+  @Test
+  void shouldReturnRecipientsFilteredByName_whenNameFilterIsProvided() {
+    var jeffersonRecipient = recipient(bankAccountId, RecipientFixtures.JEFFERSON, BASE_CREATED_AT);
+    var patrizioRecipient = recipient(bankAccountId, RecipientFixtures.PATRIZIO, ONE_MINUTE_LATER_CREATED_AT);
+    var virginioRecipient = recipient(bankAccountId, RecipientFixtures.VIRGINIO, TEN_MINUTES_LATER_CREATED_AT);
+
+    saveRecipients(patrizioRecipient, virginioRecipient, jeffersonRecipient);
+
+    var request = new ListRecipientsRequest(DEFAULT_PAGE, DEFAULT_SIZE, "jef");
+    var response = getRecipients(bankAccountId.value(), request);
+    assertThat(response.statusCode()).isEqualTo(HttpStatus.OK.value());
+
+    var body = response.as(ListRecipientsResponse.class);
+    assertThat(body.recipients())
+      .singleElement()
+      .satisfies(recipient -> assertThat(recipient.recipientId()).isEqualTo(jeffersonRecipient.getId().value()));
+  }
+
+  @Test
+  void shouldFilterRecipientsByNameIgnoringCase() {
+    var jeffersonRecipient = recipient(bankAccountId, RecipientFixtures.JEFFERSON, BASE_CREATED_AT);
+    var patrizioRecipient = recipient(bankAccountId, RecipientFixtures.PATRIZIO, ONE_MINUTE_LATER_CREATED_AT);
+
+    saveRecipients(patrizioRecipient, jeffersonRecipient);
+
+    var request = new ListRecipientsRequest(DEFAULT_PAGE, DEFAULT_SIZE, "JEFFERSON");
+    var response = getRecipients(bankAccountId.value(), request);
+    assertThat(response.statusCode()).isEqualTo(HttpStatus.OK.value());
+
+    var body = response.as(ListRecipientsResponse.class);
+    assertThat(body.recipients())
+      .singleElement()
+      .satisfies(recipient -> assertThat(recipient.recipientId()).isEqualTo(jeffersonRecipient.getId().value()));
+  }
+
+  @ParameterizedTest
+  @BlankValuesSource
+  void shouldReturnRecipientsNotApplyingFilterName_whenNameFilterIsBlank(String nameFilter) {
+    var patrizioRecipient = recipient(bankAccountId, RecipientFixtures.PATRIZIO, BASE_CREATED_AT);
+    var jeffersonRecipient = recipient(bankAccountId, RecipientFixtures.JEFFERSON, ONE_MINUTE_LATER_CREATED_AT);
+
+    saveRecipients(patrizioRecipient, jeffersonRecipient);
+
+    var request = new ListRecipientsRequest(DEFAULT_PAGE, DEFAULT_SIZE, nameFilter);
+    var response = getRecipients(bankAccountId.value(), request);
+    assertThat(response.statusCode()).isEqualTo(HttpStatus.OK.value());
+
+    var body = response.as(ListRecipientsResponse.class);
+    assertThat(body.recipients())
+      .extracting(RecipientRestResponse::recipientId)
+      .containsExactly(
+        jeffersonRecipient.getId().value(),
+        patrizioRecipient.getId().value()
+      );
+  }
+
+  @Test
+  void shouldKeepPagination_whenNameFilterIsProvided() {
+    var jeffersonRecipient = recipient(bankAccountId, RecipientFixtures.JEFFERSON, BASE_CREATED_AT);
+    var patrizioRecipient = recipient(bankAccountId, RecipientFixtures.PATRIZIO, ONE_MINUTE_LATER_CREATED_AT);
+    var virginioRecipient = recipient(bankAccountId, RecipientFixtures.VIRGINIO, TEN_MINUTES_LATER_CREATED_AT);
+
+    saveRecipients(jeffersonRecipient, patrizioRecipient, virginioRecipient);
+
+    var request = new ListRecipientsRequest(0, 2, "condotta");
+    var response = getRecipients(bankAccountId.value(), request);
+    assertThat(response.statusCode()).isEqualTo(HttpStatus.OK.value());
+
+    var body = response.as(ListRecipientsResponse.class);
+    assertThat(body.recipients())
+      .extracting(RecipientRestResponse::recipientName)
+      .containsExactly(jeffersonRecipient.getRecipientName().value(), patrizioRecipient.getRecipientName().value());
+
+    assertThat(body.page()).isZero();
+    assertThat(body.size()).isEqualTo(2);
+    assertThat(body.totalElements()).isEqualTo(3);
+    assertThat(body.totalPages()).isEqualTo(2);
+    assertThat(body.hasNext()).isTrue();
+    assertThat(body.hasPrevious()).isFalse();
+  }
+
+  private Response getRecipients(UUID bankAccountId, ListRecipientsRequest listRecipientsRequest) {
+    var request = given()
       .spec(requestSpecification)
       .pathParam("bank-account-id", bankAccountId)
+      .queryParam("page", listRecipientsRequest.page())
+      .queryParam("size", listRecipientsRequest.size());
+
+    if (listRecipientsRequest.name() != null) {
+      request.queryParam("name", listRecipientsRequest.name());
+    }
+
+    return request
       .when()
       .get()
       .then()
-      .statusCode(expectedStatus.value())
       .extract()
-      .body()
-      .as(ListRecipientsResponse.class);
+      .response();
+  }
+
+  private void saveRecipients(Recipient... recipients) {
+    for (var recipient : recipients) {
+      recipientRepository.save(recipient);
+    }
   }
 
   private RequestSpecification buildRequestSpecification() {
@@ -168,12 +244,7 @@ class ListRecipientsIT {
       .build();
   }
 
-  private static Recipient recipient(
-    BankAccountId bankAccountId,
-    String recipientName,
-    String iban,
-    Instant createdAt
-  ) {
+  private static Recipient recipient(BankAccountId bankAccountId, String recipientName, String iban, Instant createdAt) {
     return Recipient.create(
       RecipientId.newId(),
       bankAccountId,
@@ -181,5 +252,9 @@ class ListRecipientsIT {
       Iban.of(iban),
       createdAt
     );
+  }
+
+  private static Recipient recipient(BankAccountId bankAccountId, RecipientFixtures fixtures, Instant createdAt) {
+    return recipient(bankAccountId, fixtures.toName().value(), fixtures.toIban().value(), createdAt);
   }
 }

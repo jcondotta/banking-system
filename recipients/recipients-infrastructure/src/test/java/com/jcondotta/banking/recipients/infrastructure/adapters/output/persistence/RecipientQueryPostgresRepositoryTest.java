@@ -1,6 +1,7 @@
 package com.jcondotta.banking.recipients.infrastructure.adapters.output.persistence;
 
 import com.jcondotta.application.query.PageRequest;
+import com.jcondotta.banking.recipients.application.recipient.query.list.ListRecipientsFilter;
 import com.jcondotta.banking.recipients.application.recipient.query.model.RecipientSummary;
 import com.jcondotta.banking.recipients.domain.recipient.identity.BankAccountId;
 import com.jcondotta.banking.recipients.infrastructure.adapters.output.persistence.entity.RecipientEntity;
@@ -27,6 +28,7 @@ class RecipientQueryPostgresRepositoryTest {
 
   private static final BankAccountId BANK_ACCOUNT_ID = BankAccountId.of(UUID.randomUUID());
   private static final PageRequest PAGE_REQUEST = new PageRequest(1, 10);
+  private static final ListRecipientsFilter NO_FILTER = ListRecipientsFilter.none();
 
   @Mock
   private RecipientEntityRepository repository;
@@ -57,7 +59,7 @@ class RecipientQueryPostgresRepositoryTest {
     when(summaryMapper.fromEntity(firstEntity)).thenReturn(firstSummary);
     when(summaryMapper.fromEntity(secondEntity)).thenReturn(secondSummary);
 
-    var result = adapter.findByBankAccountId(BANK_ACCOUNT_ID, PAGE_REQUEST);
+    var result = adapter.findByBankAccountId(BANK_ACCOUNT_ID, PAGE_REQUEST, NO_FILTER);
 
     assertThat(result.content()).containsExactly(firstSummary, secondSummary);
     assertThat(result.page()).isEqualTo(1);
@@ -84,7 +86,7 @@ class RecipientQueryPostgresRepositoryTest {
         0
       ));
 
-    var result = adapter.findByBankAccountId(BANK_ACCOUNT_ID, PAGE_REQUEST);
+    var result = adapter.findByBankAccountId(BANK_ACCOUNT_ID, PAGE_REQUEST, NO_FILTER);
 
     assertThat(result.content()).isEmpty();
     assertThat(result.page()).isEqualTo(1);
@@ -99,6 +101,38 @@ class RecipientQueryPostgresRepositoryTest {
     ));
     verifyNoInteractions(summaryMapper);
     verifyNoMoreInteractions(repository);
+  }
+
+  @Test
+  void shouldReturnFilteredRecipientSummaries_whenNameFilterIsProvided() {
+    var entity = new RecipientEntity();
+    var summary = recipientSummary("Jefferson Condotta");
+    var filter = ListRecipientsFilter.byName("jef");
+
+    when(repository.findByBankAccountIdAndNameContainingIgnoreCase(eq(BANK_ACCOUNT_ID.value()), eq("jef"), any(Pageable.class)))
+      .thenReturn(new PageImpl<>(
+        List.of(entity),
+        org.springframework.data.domain.PageRequest.of(1, 10, Sort.by("name").ascending()),
+        21
+      ));
+    when(summaryMapper.fromEntity(entity)).thenReturn(summary);
+
+    var result = adapter.findByBankAccountId(BANK_ACCOUNT_ID, PAGE_REQUEST, filter);
+
+    assertThat(result.content()).containsExactly(summary);
+    assertThat(result.page()).isEqualTo(1);
+    assertThat(result.size()).isEqualTo(10);
+    assertThat(result.totalElements()).isEqualTo(21);
+    assertThat(result.totalPages()).isEqualTo(3);
+    verify(repository).findByBankAccountIdAndNameContainingIgnoreCase(eq(BANK_ACCOUNT_ID.value()), eq("jef"), argThat(pageable ->
+      pageable.getPageNumber() == 1
+        && pageable.getPageSize() == 10
+        && pageable.getSort().getOrderFor("name") != null
+        && pageable.getSort().getOrderFor("name").isAscending()
+    ));
+    verify(repository, never()).findByBankAccountId(any(), any());
+    verify(summaryMapper).fromEntity(entity);
+    verifyNoMoreInteractions(repository, summaryMapper);
   }
 
   private static RecipientSummary recipientSummary(String name) {

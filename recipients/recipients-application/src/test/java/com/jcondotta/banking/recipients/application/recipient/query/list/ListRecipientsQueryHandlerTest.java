@@ -37,6 +37,7 @@ class ListRecipientsQueryHandlerTest {
 
   private static final BankAccountId BANK_ACCOUNT_ID = BankAccountId.of(UUID.randomUUID());
   private static final PageRequest PAGE_REQUEST = new PageRequest(0, 20);
+  private static final ListRecipientsFilter FILTER = ListRecipientsFilter.none();
 
   private static final Instant CREATED_AT = TimeFactory.FIXED_INSTANT;
 
@@ -67,23 +68,24 @@ class ListRecipientsQueryHandlerTest {
 
     var page = new PageResult<>(recipientsSummary, 0, 20, 2, 1);
 
-    when(queryRepository.findByBankAccountId(BANK_ACCOUNT_ID, PAGE_REQUEST))
+    when(queryRepository.findByBankAccountId(BANK_ACCOUNT_ID, PAGE_REQUEST, FILTER))
       .thenReturn(page);
 
-    var query = new ListRecipientsQuery(BANK_ACCOUNT_ID, PAGE_REQUEST);
+    var query = new ListRecipientsQuery(BANK_ACCOUNT_ID, PAGE_REQUEST, FILTER);
     var queryResult = handler.handle(query);
 
     assertThat(queryResult.recipients()).containsExactlyElementsOf(recipientsSummary);
     assertThat(queryResult.page()).isEqualTo(page);
 
-    verify(queryRepository).findByBankAccountId(BANK_ACCOUNT_ID, PAGE_REQUEST);
+    verify(queryRepository).findByBankAccountId(BANK_ACCOUNT_ID, PAGE_REQUEST, FILTER);
     verifyNoMoreInteractions(queryRepository);
 
     assertThat(StructuredLogEventSupport.lastEvent(logAppender, ILoggingEvent::getLevel))
       .isEqualTo(Level.INFO);
     assertThat(StructuredLogEventSupport.lastEventKeyValues(logAppender))
       .containsEntry(LogKey.EVENT_TYPE, RecipientEventType.LIST)
-      .containsEntry(LogKey.OUTCOME, LogOutcome.SUCCESS);
+      .containsEntry(LogKey.OUTCOME, LogOutcome.SUCCESS)
+      .containsEntry(LogKey.FILTER_NAME_PRESENT, "false");
     assertThat(StructuredLogEventSupport.eventTypes(logAppender))
       .allMatch(eventType -> !eventType.contains(".failed"));
   }
@@ -92,40 +94,41 @@ class ListRecipientsQueryHandlerTest {
   void shouldReturnEmptyList_whenBankAccountHasNoRecipients() {
     var page = new PageResult<RecipientSummary>(List.of(), 0, 20, 0, 0);
 
-    when(queryRepository.findByBankAccountId(BANK_ACCOUNT_ID, PAGE_REQUEST))
+    when(queryRepository.findByBankAccountId(BANK_ACCOUNT_ID, PAGE_REQUEST, FILTER))
       .thenReturn(page);
 
-    var query = new ListRecipientsQuery(BANK_ACCOUNT_ID, PAGE_REQUEST);
+    var query = new ListRecipientsQuery(BANK_ACCOUNT_ID, PAGE_REQUEST, FILTER);
     var queryResult = handler.handle(query);
 
     assertThat(queryResult.recipients()).isEmpty();
     assertThat(queryResult.page()).isEqualTo(page);
 
-    verify(queryRepository).findByBankAccountId(BANK_ACCOUNT_ID, PAGE_REQUEST);
+    verify(queryRepository).findByBankAccountId(BANK_ACCOUNT_ID, PAGE_REQUEST, FILTER);
     verifyNoMoreInteractions(queryRepository);
 
     assertThat(StructuredLogEventSupport.lastEvent(logAppender, ILoggingEvent::getLevel))
       .isEqualTo(Level.INFO);
     assertThat(StructuredLogEventSupport.lastEventKeyValues(logAppender))
       .containsEntry(LogKey.EVENT_TYPE, RecipientEventType.LIST)
-      .containsEntry(LogKey.OUTCOME, LogOutcome.SUCCESS);
+      .containsEntry(LogKey.OUTCOME, LogOutcome.SUCCESS)
+      .containsEntry(LogKey.FILTER_NAME_PRESENT, "false");
     assertThat(StructuredLogEventSupport.eventTypes(logAppender))
       .allMatch(eventType -> !eventType.contains(".failed"));
   }
 
   @Test
   void shouldThrowDomainException_whenRepositoryThrowsDomainException() {
-    var query = new ListRecipientsQuery(BANK_ACCOUNT_ID, PAGE_REQUEST);
+    var query = new ListRecipientsQuery(BANK_ACCOUNT_ID, PAGE_REQUEST, FILTER);
     var recipientId = RecipientId.newId();
     var exception = new RecipientNotFoundException(recipientId, BANK_ACCOUNT_ID);
 
-    when(queryRepository.findByBankAccountId(BANK_ACCOUNT_ID, PAGE_REQUEST))
+    when(queryRepository.findByBankAccountId(BANK_ACCOUNT_ID, PAGE_REQUEST, FILTER))
       .thenThrow(exception);
 
     assertThatThrownBy(() -> handler.handle(query))
       .isSameAs(exception);
 
-    verify(queryRepository).findByBankAccountId(BANK_ACCOUNT_ID, PAGE_REQUEST);
+    verify(queryRepository).findByBankAccountId(BANK_ACCOUNT_ID, PAGE_REQUEST, FILTER);
     verifyNoMoreInteractions(queryRepository);
 
     assertThat(StructuredLogEventSupport.lastEvent(logAppender, ILoggingEvent::getLevel))
@@ -139,16 +142,16 @@ class ListRecipientsQueryHandlerTest {
 
   @Test
   void shouldThrowUnexpectedException_whenRepositoryThrowsUnexpectedException() {
-    var query = new ListRecipientsQuery(BANK_ACCOUNT_ID, PAGE_REQUEST);
+    var query = new ListRecipientsQuery(BANK_ACCOUNT_ID, PAGE_REQUEST, FILTER);
     var exception = new IllegalStateException("database unavailable");
 
-    when(queryRepository.findByBankAccountId(BANK_ACCOUNT_ID, PAGE_REQUEST))
+    when(queryRepository.findByBankAccountId(BANK_ACCOUNT_ID, PAGE_REQUEST, FILTER))
       .thenThrow(exception);
 
     assertThatThrownBy(() -> handler.handle(query))
       .isSameAs(exception);
 
-    verify(queryRepository).findByBankAccountId(BANK_ACCOUNT_ID, PAGE_REQUEST);
+    verify(queryRepository).findByBankAccountId(BANK_ACCOUNT_ID, PAGE_REQUEST, FILTER);
     verifyNoMoreInteractions(queryRepository);
 
     assertThat(StructuredLogEventSupport.lastEvent(logAppender, ILoggingEvent::getLevel))

@@ -14,6 +14,18 @@ public interface RecipientEntityRepository extends JpaRepository<RecipientEntity
 
     Page<RecipientEntity> findByBankAccountId(UUID bankAccountId, Pageable pageable);
 
+    @Query("""
+        SELECT r
+        FROM RecipientEntity r
+        WHERE r.bankAccountId = :bankAccountId
+          AND LOWER(r.name) LIKE LOWER(CONCAT('%', :name, '%'))
+        """)
+    Page<RecipientEntity> findByBankAccountIdAndNameContainingIgnoreCase(
+        @Param("bankAccountId") UUID bankAccountId,
+        @Param("name") String name,
+        Pageable pageable
+    );
+
     @Modifying(flushAutomatically = true, clearAutomatically = true)
     @Query("DELETE FROM RecipientEntity r WHERE r.id = :id AND r.version = :version")
     int deleteIfVersionMatches(@Param("id") UUID id, @Param("version") long version);

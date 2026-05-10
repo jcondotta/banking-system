@@ -4,6 +4,7 @@ import com.jcondotta.application.query.QueryHandler;
 import com.jcondotta.banking.recipients.application.recipient.query.list.ListRecipientsQuery;
 import com.jcondotta.banking.recipients.application.recipient.query.list.ListRecipientsQueryResult;
 import com.jcondotta.banking.recipients.infrastructure.adapters.input.rest.list_recipients.mapper.ListRecipientsRestMapper;
+import com.jcondotta.banking.recipients.infrastructure.adapters.input.rest.list_recipients.model.ListRecipientsRequest;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -20,8 +21,8 @@ public class ListRecipientsControllerImpl implements ListRecipientsController {
   private final ListRecipientsRestMapper mapper;
 
   @Override
-  public ResponseEntity<ListRecipientsResponse> listRecipients(UUID bankAccountId, int page, int size) {
-    var query = mapper.toQuery(bankAccountId, page, size);
+  public ResponseEntity<ListRecipientsResponse> listRecipients(UUID bankAccountId, ListRecipientsRequest request) {
+    var query = mapper.toQuery(bankAccountId, request);
     ListRecipientsQueryResult queryResult = queryHandler.handle(query);
 
     return ResponseEntity.ok(ListRecipientsResponse.from(queryResult));

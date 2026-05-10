@@ -9,7 +9,8 @@ public interface RecipientQueryRepository {
 
   PageResult<RecipientSummary> findByBankAccountId(
     BankAccountId bankAccountId,
-    PageRequest pageRequest
+    PageRequest pageRequest,
+    ListRecipientsFilter filter
   );
 
 }

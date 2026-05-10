@@ -12,6 +12,7 @@ public final class LogKey {
   public static final String RESULT_COUNT    = "result_count";
   public static final String PAGE            = "page";
   public static final String SIZE            = "size";
+  public static final String FILTER_NAME_PRESENT = "filter_name_present";
 
   public static final String MASKED_IBAN     = "masked_iban";
 

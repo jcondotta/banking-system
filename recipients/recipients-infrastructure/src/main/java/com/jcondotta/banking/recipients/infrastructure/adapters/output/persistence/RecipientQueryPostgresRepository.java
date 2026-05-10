@@ -2,6 +2,7 @@ package com.jcondotta.banking.recipients.infrastructure.adapters.output.persiste
 
 import com.jcondotta.application.query.PageRequest;
 import com.jcondotta.application.query.PageResult;
+import com.jcondotta.banking.recipients.application.recipient.query.list.ListRecipientsFilter;
 import com.jcondotta.banking.recipients.application.recipient.query.list.RecipientQueryRepository;
 import com.jcondotta.banking.recipients.application.recipient.query.model.RecipientSummary;
 import com.jcondotta.banking.recipients.domain.recipient.identity.BankAccountId;
@@ -19,14 +20,20 @@ public class RecipientQueryPostgresRepository implements RecipientQueryRepositor
     private final RecipientSummaryMapper summaryMapper;
 
     @Override
-    public PageResult<RecipientSummary> findByBankAccountId(BankAccountId bankAccountId, PageRequest pageRequest) {
+    public PageResult<RecipientSummary> findByBankAccountId(
+        BankAccountId bankAccountId,
+        PageRequest pageRequest,
+        ListRecipientsFilter filter
+    ) {
         var pageable = org.springframework.data.domain.PageRequest.of(
             pageRequest.page(),
             pageRequest.size(),
             Sort.by("name").ascending()
         );
 
-        var page = repository.findByBankAccountId(bankAccountId.value(), pageable);
+        var page = filter.name()
+            .map(name -> repository.findByBankAccountIdAndNameContainingIgnoreCase(bankAccountId.value(), name, pageable))
+            .orElseGet(() -> repository.findByBankAccountId(bankAccountId.value(), pageable));
         var recipients = page.getContent().stream()
             .map(summaryMapper::fromEntity)
             .toList();

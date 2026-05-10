@@ -3,6 +3,7 @@ package com.jcondotta.banking.recipients.infrastructure.adapters.input.rest.list
 import com.jcondotta.application.query.PageRequest;
 import com.jcondotta.application.query.PageResult;
 import com.jcondotta.application.query.QueryHandler;
+import com.jcondotta.banking.recipients.application.recipient.query.list.ListRecipientsFilter;
 import com.jcondotta.banking.recipients.application.recipient.query.list.ListRecipientsQuery;
 import com.jcondotta.banking.recipients.application.recipient.query.list.ListRecipientsQueryResult;
 import com.jcondotta.banking.recipients.application.recipient.query.model.RecipientSummary;
@@ -10,6 +11,7 @@ import com.jcondotta.banking.recipients.domain.recipient.identity.BankAccountId;
 import com.jcondotta.banking.recipients.domain.testsupport.RecipientTestData;
 import com.jcondotta.banking.recipients.domain.testsupport.TimeFactory;
 import com.jcondotta.banking.recipients.infrastructure.adapters.input.rest.list_recipients.mapper.ListRecipientsRestMapper;
+import com.jcondotta.banking.recipients.infrastructure.adapters.input.rest.list_recipients.model.ListRecipientsRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -28,8 +30,11 @@ class ListRecipientsControllerImplTest {
   private static final BankAccountId BANK_ACCOUNT_ID = BankAccountId.of(UUID.randomUUID());
   private static final int PAGE = 1;
   private static final int SIZE = 10;
+  private static final String NAME_FILTER = "jef";
+  private static final ListRecipientsRequest REQUEST = new ListRecipientsRequest(PAGE, SIZE, NAME_FILTER);
   private static final PageRequest PAGE_REQUEST = new PageRequest(PAGE, SIZE);
-  private static final ListRecipientsQuery QUERY = new ListRecipientsQuery(BANK_ACCOUNT_ID, PAGE_REQUEST);
+  private static final ListRecipientsQuery QUERY =
+    new ListRecipientsQuery(BANK_ACCOUNT_ID, PAGE_REQUEST, ListRecipientsFilter.byName(NAME_FILTER));
 
   @Mock
   private QueryHandler<ListRecipientsQuery, ListRecipientsQueryResult> queryHandler;
@@ -56,10 +61,10 @@ class ListRecipientsControllerImplTest {
       )
     ), PAGE, SIZE, 1, 1));
 
-    when(mapper.toQuery(BANK_ACCOUNT_ID.value(), PAGE, SIZE)).thenReturn(QUERY);
+    when(mapper.toQuery(BANK_ACCOUNT_ID.value(), REQUEST)).thenReturn(QUERY);
     when(queryHandler.handle(QUERY)).thenReturn(queryResult);
 
-    var response = controller.listRecipients(BANK_ACCOUNT_ID.value(), PAGE, SIZE);
+    var response = controller.listRecipients(BANK_ACCOUNT_ID.value(), REQUEST);
 
     assertThat(response.getStatusCode().value()).isEqualTo(200);
     assertThat(response.getBody()).isNotNull();
@@ -72,17 +77,17 @@ class ListRecipientsControllerImplTest {
     assertThat(response.getBody().totalElements()).isEqualTo(1);
     assertThat(response.getBody().totalPages()).isEqualTo(1);
 
-    verify(mapper).toQuery(BANK_ACCOUNT_ID.value(), PAGE, SIZE);
+    verify(mapper).toQuery(BANK_ACCOUNT_ID.value(), REQUEST);
     verify(queryHandler).handle(QUERY);
     verifyNoMoreInteractions(mapper, queryHandler);
   }
 
   @Test
   void shouldReturnOkResponse_whenRecipientsAreEmpty() {
-    when(mapper.toQuery(BANK_ACCOUNT_ID.value(), PAGE, SIZE)).thenReturn(QUERY);
+    when(mapper.toQuery(BANK_ACCOUNT_ID.value(), REQUEST)).thenReturn(QUERY);
     when(queryHandler.handle(QUERY)).thenReturn(new ListRecipientsQueryResult(new PageResult<>(List.of(), PAGE, SIZE, 0, 0)));
 
-    var response = controller.listRecipients(BANK_ACCOUNT_ID.value(), PAGE, SIZE);
+    var response = controller.listRecipients(BANK_ACCOUNT_ID.value(), REQUEST);
 
     assertThat(response.getStatusCode().value()).isEqualTo(200);
     assertThat(response.getBody()).isNotNull();
@@ -92,7 +97,7 @@ class ListRecipientsControllerImplTest {
     assertThat(response.getBody().totalElements()).isZero();
     assertThat(response.getBody().totalPages()).isZero();
 
-    verify(mapper).toQuery(BANK_ACCOUNT_ID.value(), PAGE, SIZE);
+    verify(mapper).toQuery(BANK_ACCOUNT_ID.value(), REQUEST);
     verify(queryHandler).handle(QUERY);
     verifyNoMoreInteractions(mapper, queryHandler);
   }

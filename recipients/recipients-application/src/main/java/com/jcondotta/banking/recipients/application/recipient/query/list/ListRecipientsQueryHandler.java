@@ -38,11 +38,12 @@ public class ListRecipientsQueryHandler
 
     try {
       var result = new ListRecipientsQueryResult(
-        queryRepository.findByBankAccountId(query.bankAccountId(), query.pageRequest())
+        queryRepository.findByBankAccountId(query.bankAccountId(), query.pageRequest(), query.filter())
       );
 
       logContext.info("Recipients listed")
         .success()
+        .with(LogKey.FILTER_NAME_PRESENT, query.filter().hasName())
         .with(LogKey.RESULT_COUNT, result.page().content().size())
         .with(LogKey.PAGE, result.page().page())
         .with(LogKey.SIZE, result.page().size())

@@ -119,7 +119,7 @@ Example JSON log:
   "logger_name": "com.jcondotta.banking.recipients.application.recipient.command.create.CreateRecipientCommandHandler",
   "message": "Recipient created",
   "service": "recipients",
-  "service_version": "1.0.0",
+  "service_version": "1.0.1",
   "correlationId": "5d83107d-9e7f-46f2-99a7-6cf7c51cf319",
   "event_type": "recipients.create",
   "outcome": "success",
@@ -285,7 +285,7 @@ cd /Users/jcondotta/development/banking-system
 
 docker build \
   -f recipients/recipients-bootstrap/Dockerfile \
-  -t jcondotta/recipients:1.0.0 \
+  -t jcondotta/recipients:1.0.1 \
   .
 ```
 
@@ -299,7 +299,7 @@ docker run --rm \
   -e SPRING_DATASOURCE_URL='jdbc:postgresql://host.docker.internal:5432/recipients_db?connectTimeout=3&socketTimeout=30' \
   -e SPRING_DATASOURCE_USERNAME=admin \
   -e SPRING_DATASOURCE_PASSWORD=password \
-  jcondotta/recipients:1.0.0
+  jcondotta/recipients:1.0.1
 ```
 
 Build and push a multi-architecture image:
@@ -308,7 +308,7 @@ Build and push a multi-architecture image:
 docker buildx build \
   --platform linux/amd64,linux/arm64 \
   -f recipients/recipients-bootstrap/Dockerfile \
-  -t jcondotta/recipients:1.0.0 \
+  -t jcondotta/recipients:1.0.1 \
   -t jcondotta/recipients:latest \
   --push \
   .
@@ -317,7 +317,7 @@ docker buildx build \
 Inspect published platforms:
 
 ```bash
-docker buildx imagetools inspect jcondotta/recipients:1.0.0
+docker buildx imagetools inspect jcondotta/recipients:1.0.1
 ```
 
 ## Kubernetes
