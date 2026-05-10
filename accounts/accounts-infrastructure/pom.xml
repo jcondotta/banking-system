@@ -5,7 +5,7 @@
     <parent>
         <groupId>com.jcondotta</groupId>
         <artifactId>accounts</artifactId>
-        <version>1.0.0</version>
+        <version>1.0.1</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -70,7 +70,8 @@
         <!-- Test -->
         <dependency>
             <groupId>com.jcondotta</groupId>
-            <artifactId>accounts-test-support</artifactId>
+            <artifactId>accounts-domain</artifactId>
+            <type>test-jar</type>
             <scope>test</scope>
         </dependency>
 

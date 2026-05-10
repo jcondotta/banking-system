@@ -5,7 +5,7 @@
     <parent>
         <groupId>com.jcondotta</groupId>
         <artifactId>banking-system</artifactId>
-        <version>1.0.0</version>
+        <version>1.0.1</version>
     </parent>
 
     <artifactId>accounts</artifactId>
@@ -14,8 +14,8 @@
     <packaging>pom</packaging>
 
     <modules>
-        <module>accounts-core</module>
-        <module>accounts-test-support</module>
+        <module>accounts-domain</module>
+        <module>accounts-application</module>
         <module>accounts-contracts</module>
         <module>accounts-infrastructure</module>
         <module>accounts-outbox</module>
@@ -62,8 +62,9 @@
 
             <dependency>
                 <groupId>com.jcondotta</groupId>
-                <artifactId>accounts-test-support</artifactId>
+                <artifactId>accounts-domain</artifactId>
                 <version>${project.version}</version>
+                <type>test-jar</type>
                 <scope>test</scope>
             </dependency>
         </dependencies>

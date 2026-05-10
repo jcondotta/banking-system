@@ -24,7 +24,7 @@ spec:
         runAsNonRoot: true
       containers:
         - name: bank-accounts
-          image: jcondotta/bank-accounts-system:1.0.0
+          image: jcondotta/bank-accounts-system:1.0.1
           imagePullPolicy: Always
           securityContext:
             allowPrivilegeEscalation: false

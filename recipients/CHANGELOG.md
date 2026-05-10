@@ -13,7 +13,7 @@ All notable changes to the recipients service are documented in this file.
 
 ### Changed
 
-- Updated recipients module version from `1.0.0` to `1.0.1`.
+- Updated project/module versions from `1.0.0` to `1.0.1`.
 - Updated Docker and Kubernetes documentation examples to use image tag `1.0.1`.
 
 ### Verified
