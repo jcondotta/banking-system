@@ -1,24 +1,32 @@
 package com.jcondotta.banking.accounts.application.bankaccount.command.activate;
 
 import com.jcondotta.application.command.CommandHandler;
+import com.jcondotta.banking.accounts.application.common.log.BankAccountEventType;
+import com.jcondotta.application.logging.LogContext;
+import com.jcondotta.application.logging.LogKey;
+import com.jcondotta.banking.accounts.application.common.log.BankAccountLogKey;
 import com.jcondotta.banking.accounts.application.bankaccount.command.activate.model.ActivateBankAccountCommand;
+import com.jcondotta.banking.accounts.domain.common.FailureReason;
 import com.jcondotta.banking.accounts.domain.bankaccount.exceptions.BankAccountNotFoundException;
 import com.jcondotta.banking.accounts.domain.bankaccount.repository.BankAccountRepository;
+import com.jcondotta.domain.exception.DomainException;
 import io.micrometer.observation.annotation.Observed;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-@Slf4j
 @Component
 @RequiredArgsConstructor
 public class ActivateBankAccountCommandHandler implements CommandHandler<ActivateBankAccountCommand> {
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(ActivateBankAccountCommandHandler.class);
 
   private final BankAccountRepository bankAccountRepository;
 
   @Override
   @Observed(
-    name = "bankaccount.activate",
+    name = "accounts.activate",
     contextualName = "activateBankAccount",
     lowCardinalityKeyValues = {
       "aggregate", "bankAccount",
@@ -26,15 +34,37 @@ public class ActivateBankAccountCommandHandler implements CommandHandler<Activat
     }
   )
   public void handle(ActivateBankAccountCommand command) {
-    var bankAccount = bankAccountRepository.findById(command.bankAccountId())
-      .orElseThrow(() -> new BankAccountNotFoundException(command.bankAccountId()));
+    var logContext = LogContext.timed(LOGGER, BankAccountEventType.ACTIVATE)
+      .with(BankAccountLogKey.BANK_ACCOUNT_ID, command.bankAccountId().value().toString());
 
-    bankAccount.activate();
-    bankAccountRepository.save(bankAccount);
+    try {
+      var bankAccount = bankAccountRepository.findById(command.bankAccountId())
+        .orElseThrow(() -> new BankAccountNotFoundException(command.bankAccountId()));
 
-    log.atInfo()
-      .setMessage("Bank account activated successfully.")
-      .addKeyValue("id", bankAccount.getId())
-      .log();
+      bankAccount.activate();
+      bankAccountRepository.save(bankAccount);
+
+      logContext.info("Bank account activated")
+        .success()
+        .log();
+    }
+    catch (DomainException ex) {
+      var reason = FailureReason.from(ex);
+
+      logContext.warn("Bank account activation failed")
+        .failure()
+        .with(LogKey.REASON, reason.normalize())
+        .log();
+
+      throw ex;
+    }
+    catch (Exception ex) {
+      logContext.error("Unexpected error during bank account activation", ex)
+        .failure()
+        .with(LogKey.REASON, FailureReason.INTERNAL_ERROR.normalize())
+        .log();
+
+      throw ex;
+    }
   }
 }

@@ -3,7 +3,7 @@ package com.jcondotta.banking.accounts.domain.bankaccount.aggregate;
 import com.jcondotta.banking.accounts.domain.bankaccount.enums.AccountStatus;
 import com.jcondotta.banking.accounts.domain.bankaccount.enums.AccountType;
 import com.jcondotta.banking.accounts.domain.bankaccount.enums.Currency;
-import com.jcondotta.banking.accounts.domain.bankaccount.events.BankAccountBlockedEvent;
+import com.jcondotta.banking.accounts.domain.bankaccount.events.BankAccountStatusChangedEvent;
 import com.jcondotta.banking.accounts.domain.bankaccount.exceptions.InvalidBankAccountStateTransitionException;
 import com.jcondotta.banking.accounts.domain.bankaccount.factory.ClockTestFactory;
 import com.jcondotta.banking.accounts.domain.bankaccount.fixtures.AccountHolderFixtures;
@@ -43,8 +43,10 @@ class BankAccountBlockTest {
     assertThat(events)
       .hasSize(1)
       .singleElement()
-      .isInstanceOfSatisfying(BankAccountBlockedEvent.class, event -> {
+      .isInstanceOfSatisfying(BankAccountStatusChangedEvent.class, event -> {
         assertThat(event.aggregateId()).isEqualTo(bankAccount.getId());
+        assertThat(event.previousStatus()).isEqualTo(AccountStatus.ACTIVE);
+        assertThat(event.currentStatus()).isEqualTo(AccountStatus.BLOCKED);
         assertThat(event.occurredAt()).isNotNull();
       });
   }

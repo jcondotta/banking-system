@@ -31,6 +31,10 @@ public record Iban(String value) {
     return new Iban(value);
   }
 
+  public String masked() {
+    return value.substring(0, 4) + "****" + value.substring(value.length() - 4);
+  }
+
   private static boolean isValid(String iban) {
     if (iban.length() < 15 || iban.length() > 34) {
       return false;

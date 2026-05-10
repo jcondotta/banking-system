@@ -5,10 +5,11 @@ import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
 import com.jcondotta.application.query.PageRequest;
 import com.jcondotta.application.query.PageResult;
-import com.jcondotta.banking.recipients.application.common.log.LogKey;
-import com.jcondotta.banking.recipients.application.common.log.LogOutcome;
+import com.jcondotta.application.logging.LogKey;
+import com.jcondotta.banking.recipients.application.common.log.RecipientLogKey;
+import com.jcondotta.application.logging.LogOutcome;
 import com.jcondotta.banking.recipients.application.common.log.RecipientEventType;
-import com.jcondotta.banking.recipients.application.common.log.StructuredLogEventSupport;
+import com.jcondotta.application.logging.StructuredLogEventSupport;
 import com.jcondotta.banking.recipients.application.recipient.query.model.RecipientSummary;
 import com.jcondotta.banking.recipients.domain.recipient.exceptions.RecipientNotFoundException;
 import com.jcondotta.banking.recipients.domain.recipient.identity.BankAccountId;
@@ -85,7 +86,7 @@ class ListRecipientsQueryHandlerTest {
     assertThat(StructuredLogEventSupport.lastEventKeyValues(logAppender))
       .containsEntry(LogKey.EVENT_TYPE, RecipientEventType.LIST)
       .containsEntry(LogKey.OUTCOME, LogOutcome.SUCCESS)
-      .containsEntry(LogKey.FILTER_NAME_PRESENT, "false");
+      .containsEntry(RecipientLogKey.FILTER_NAME_PRESENT, "false");
     assertThat(StructuredLogEventSupport.eventTypes(logAppender))
       .allMatch(eventType -> !eventType.contains(".failed"));
   }
@@ -111,7 +112,7 @@ class ListRecipientsQueryHandlerTest {
     assertThat(StructuredLogEventSupport.lastEventKeyValues(logAppender))
       .containsEntry(LogKey.EVENT_TYPE, RecipientEventType.LIST)
       .containsEntry(LogKey.OUTCOME, LogOutcome.SUCCESS)
-      .containsEntry(LogKey.FILTER_NAME_PRESENT, "false");
+      .containsEntry(RecipientLogKey.FILTER_NAME_PRESENT, "false");
     assertThat(StructuredLogEventSupport.eventTypes(logAppender))
       .allMatch(eventType -> !eventType.contains(".failed"));
   }

@@ -1,6 +1,14 @@
 package com.jcondotta.banking.accounts.application.bankaccount.command.close;
 
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.read.ListAppender;
 import com.jcondotta.application.command.CommandHandler;
+import com.jcondotta.banking.accounts.application.common.log.BankAccountEventType;
+import com.jcondotta.application.logging.LogKey;
+import com.jcondotta.banking.accounts.application.common.log.BankAccountLogKey;
+import com.jcondotta.application.logging.LogOutcome;
+import com.jcondotta.application.logging.StructuredLogEventSupport;
 import com.jcondotta.banking.accounts.application.bankaccount.command.close.model.CloseBankAccountCommand;
 import com.jcondotta.banking.accounts.domain.bankaccount.enums.AccountStatus;
 import com.jcondotta.banking.accounts.domain.bankaccount.exceptions.BankAccountNotFoundException;
@@ -26,11 +34,19 @@ class CloseBankAccountCommandHandlerTest {
   @Mock
   private BankAccountRepository bankAccountRepository;
 
+  private ListAppender<ILoggingEvent> logAppender;
+
   private CommandHandler<CloseBankAccountCommand> useCase;
 
   @BeforeEach
   void setUp() {
     useCase = new CloseBankAccountCommandHandler(bankAccountRepository);
+    logAppender = StructuredLogEventSupport.attachAppender(CloseBankAccountCommandHandler.class);
+  }
+
+  @org.junit.jupiter.api.AfterEach
+  void tearDown() {
+    StructuredLogEventSupport.detachAppender(CloseBankAccountCommandHandler.class, logAppender);
   }
 
   @Test
@@ -51,6 +67,15 @@ class CloseBankAccountCommandHandlerTest {
     verify(bankAccountRepository).findById(bankAccount.getId());
     verify(bankAccountRepository).save(bankAccount);
     verifyNoMoreInteractions(bankAccountRepository);
+
+    assertThat(StructuredLogEventSupport.lastEvent(logAppender, ILoggingEvent::getLevel))
+      .isEqualTo(Level.INFO);
+    assertThat(StructuredLogEventSupport.lastEventKeyValues(logAppender))
+      .containsEntry(LogKey.EVENT_TYPE, BankAccountEventType.CLOSE)
+      .containsEntry(LogKey.OUTCOME, LogOutcome.SUCCESS)
+      .containsEntry(BankAccountLogKey.BANK_ACCOUNT_ID, bankAccount.getId().value().toString());
+    assertThat(StructuredLogEventSupport.eventTypes(logAppender))
+      .allMatch(eventType -> !eventType.contains(".failed"));
   }
 
   @Test
@@ -67,5 +92,40 @@ class CloseBankAccountCommandHandlerTest {
 
     verify(bankAccountRepository).findById(bankAccountId);
     verifyNoMoreInteractions(bankAccountRepository);
+
+    assertThat(StructuredLogEventSupport.lastEvent(logAppender, ILoggingEvent::getLevel))
+      .isEqualTo(Level.WARN);
+    assertThat(StructuredLogEventSupport.lastEventKeyValues(logAppender))
+      .containsEntry(LogKey.EVENT_TYPE, BankAccountEventType.CLOSE)
+      .containsEntry(LogKey.OUTCOME, LogOutcome.FAILURE)
+      .containsEntry(LogKey.REASON, "not_found");
+    assertThat(StructuredLogEventSupport.eventTypes(logAppender))
+      .allMatch(eventType -> !eventType.contains(".failed"));
+  }
+
+  @Test
+  void shouldThrowUnexpectedException_whenRepositoryThrowsUnexpectedException() {
+    var bankAccountId = BankAccountId.newId();
+    var exception = new IllegalStateException("database unavailable");
+
+    when(bankAccountRepository.findById(bankAccountId))
+      .thenThrow(exception);
+
+    var command = new CloseBankAccountCommand(bankAccountId);
+
+    assertThatThrownBy(() -> useCase.handle(command))
+      .isSameAs(exception);
+
+    verify(bankAccountRepository).findById(bankAccountId);
+    verifyNoMoreInteractions(bankAccountRepository);
+
+    assertThat(StructuredLogEventSupport.lastEvent(logAppender, ILoggingEvent::getLevel))
+      .isEqualTo(Level.ERROR);
+    assertThat(StructuredLogEventSupport.lastEventKeyValues(logAppender))
+      .containsEntry(LogKey.EVENT_TYPE, BankAccountEventType.CLOSE)
+      .containsEntry(LogKey.OUTCOME, LogOutcome.FAILURE)
+      .containsEntry(LogKey.REASON, "internal_error");
+    assertThat(StructuredLogEventSupport.eventTypes(logAppender))
+      .allMatch(eventType -> !eventType.contains(".failed"));
   }
 }

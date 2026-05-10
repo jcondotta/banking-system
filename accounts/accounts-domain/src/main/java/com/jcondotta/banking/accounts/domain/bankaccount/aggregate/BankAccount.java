@@ -3,7 +3,10 @@ package com.jcondotta.banking.accounts.domain.bankaccount.aggregate;
 import com.jcondotta.banking.accounts.domain.bankaccount.enums.AccountStatus;
 import com.jcondotta.banking.accounts.domain.bankaccount.enums.AccountType;
 import com.jcondotta.banking.accounts.domain.bankaccount.enums.Currency;
-import com.jcondotta.banking.accounts.domain.bankaccount.events.*;
+import com.jcondotta.banking.accounts.domain.bankaccount.events.BankAccountJointHolderAddedEvent;
+import com.jcondotta.banking.accounts.domain.bankaccount.events.BankAccountJointHolderDeactivatedEvent;
+import com.jcondotta.banking.accounts.domain.bankaccount.events.BankAccountOpenedEvent;
+import com.jcondotta.banking.accounts.domain.bankaccount.events.BankAccountStatusChangedEvent;
 import com.jcondotta.banking.accounts.domain.bankaccount.exceptions.BankAccountNotActiveException;
 import com.jcondotta.banking.accounts.domain.bankaccount.exceptions.InvalidBankAccountStateTransitionException;
 import com.jcondotta.banking.accounts.domain.bankaccount.identity.AccountHolderId;
@@ -116,8 +119,9 @@ public final class BankAccount extends AggregateRoot<BankAccountId> {
       throw new InvalidBankAccountStateTransitionException(accountStatus, AccountStatus.ACTIVE);
     }
 
+    var previousStatus = this.accountStatus;
     this.accountStatus = AccountStatus.ACTIVE;
-    registerEvent(new BankAccountActivatedEvent(EventId.newId(), this.getId(), Instant.now()));
+    registerEvent(new BankAccountStatusChangedEvent(EventId.newId(), getId(), previousStatus, AccountStatus.ACTIVE, Instant.now()));
   }
 
   public void block() {
@@ -126,14 +130,12 @@ public final class BankAccount extends AggregateRoot<BankAccountId> {
     }
 
     if (accountStatus != AccountStatus.ACTIVE) {
-      throw new InvalidBankAccountStateTransitionException(
-        accountStatus,
-        AccountStatus.BLOCKED
-      );
+      throw new InvalidBankAccountStateTransitionException(accountStatus, AccountStatus.BLOCKED);
     }
 
+    var previousStatus = this.accountStatus;
     this.accountStatus = AccountStatus.BLOCKED;
-    registerEvent(new BankAccountBlockedEvent(EventId.newId(), this.getId(), Instant.now()));
+    registerEvent(new BankAccountStatusChangedEvent(EventId.newId(), getId(), previousStatus, AccountStatus.BLOCKED, Instant.now()));
   }
 
   public void unblock() {
@@ -145,8 +147,9 @@ public final class BankAccount extends AggregateRoot<BankAccountId> {
       throw new InvalidBankAccountStateTransitionException(accountStatus, AccountStatus.ACTIVE);
     }
 
+    var previousStatus = this.accountStatus;
     this.accountStatus = AccountStatus.ACTIVE;
-    registerEvent(new BankAccountUnblockedEvent(EventId.newId(), this.getId(), Instant.now()));
+    registerEvent(new BankAccountStatusChangedEvent(EventId.newId(), getId(), previousStatus, AccountStatus.ACTIVE, Instant.now()));
   }
 
   public void addJointHolder(PersonalInfo personalInfo, ContactInfo contactInfo, Address address) {
@@ -174,9 +177,9 @@ public final class BankAccount extends AggregateRoot<BankAccountId> {
       throw new InvalidBankAccountStateTransitionException(accountStatus, AccountStatus.CLOSED);
     }
 
+    var previousStatus = this.accountStatus;
     this.accountStatus = AccountStatus.CLOSED;
-
-    registerEvent(new BankAccountClosedEvent(EventId.newId(), this.getId(), Instant.now()));
+    registerEvent(new BankAccountStatusChangedEvent(EventId.newId(), getId(), previousStatus, AccountStatus.CLOSED, Instant.now()));
   }
 
   public AccountHolder getPrimaryHolder() {

@@ -18,14 +18,8 @@ app:
     topics:
       bank-account-opened:
         topic-name: ${KAFKA_BANK_ACCOUNT_OPENED_TOPIC_NAME:bank-account-opened}
-      bank-account-activated:
-        topic-name: ${KAFKA_BANK_ACCOUNT_ACTIVATED_TOPIC_NAME:bank-account-activated}
-      bank-account-blocked:
-        topic-name: ${KAFKA_BANK_ACCOUNT_BLOCKED_TOPIC_NAME:bank-account-blocked}
-      bank-account-unblocked:
-        topic-name: ${KAFKA_BANK_ACCOUNT_UNBLOCKED_TOPIC_NAME:bank-account-unblocked}
-      bank-account-closed:
-        topic-name: ${KAFKA_BANK_ACCOUNT_CLOSED_TOPIC_NAME:bank-account-closed}
+      bank-account-status-changed:
+        topic-name: ${KAFKA_BANK_ACCOUNT_STATUS_CHANGED_TOPIC_NAME:bank-account-status-changed}
       joint-account-holder-added:
         topic-name: ${KAFKA_JOINT_ACCOUNT_HOLDER_ADDED_TOPIC_NAME:joint-account-holder-added}
 

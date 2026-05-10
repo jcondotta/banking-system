@@ -5,8 +5,8 @@ import com.jcondotta.banking.accounts.application.bankaccount.query.get.model.Ba
 import com.jcondotta.banking.accounts.domain.bankaccount.aggregate.BankAccount;
 import com.jcondotta.banking.accounts.domain.bankaccount.identity.BankAccountId;
 import com.jcondotta.banking.accounts.domain.bankaccount.repository.BankAccountRepository;
-import com.jcondotta.banking.recipients.domain.testsupport.AccountHolderFixtures;
-import com.jcondotta.banking.recipients.domain.testsupport.BankAccountTestFactory;
+import com.jcondotta.banking.accounts.domain.testsupport.AccountHolderFixtures;
+import com.jcondotta.banking.accounts.domain.testsupport.BankAccountTestFactory;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

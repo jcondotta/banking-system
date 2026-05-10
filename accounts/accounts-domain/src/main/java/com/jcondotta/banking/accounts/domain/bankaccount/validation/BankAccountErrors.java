@@ -12,4 +12,6 @@ public final class BankAccountErrors {
   public static final String IBAN_MUST_BE_PROVIDED = "iban must be provided";
   public static final String ACCOUNT_HOLDERS_MUST_BE_PROVIDED = "accountHolders must be provided";
   public static final String CREATED_AT_MUST_BE_PROVIDED = "created at must be provided";
+  public static final String PREVIOUS_STATUS_MUST_BE_PROVIDED = "previous status must be provided";
+  public static final String CURRENT_STATUS_MUST_BE_PROVIDED = "current status must be provided";
 }

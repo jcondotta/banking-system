@@ -3,7 +3,7 @@ package com.jcondotta.banking.accounts.domain.bankaccount.aggregate;
 import com.jcondotta.banking.accounts.domain.bankaccount.enums.AccountStatus;
 import com.jcondotta.banking.accounts.domain.bankaccount.enums.AccountType;
 import com.jcondotta.banking.accounts.domain.bankaccount.enums.Currency;
-import com.jcondotta.banking.accounts.domain.bankaccount.events.BankAccountClosedEvent;
+import com.jcondotta.banking.accounts.domain.bankaccount.events.BankAccountStatusChangedEvent;
 import com.jcondotta.banking.accounts.domain.bankaccount.exceptions.InvalidBankAccountStateTransitionException;
 import com.jcondotta.banking.accounts.domain.bankaccount.factory.ClockTestFactory;
 import com.jcondotta.banking.accounts.domain.bankaccount.fixtures.AccountHolderFixtures;
@@ -43,9 +43,11 @@ class BankAccountCloseTest {
     assertThat(events)
       .hasSize(1)
       .singleElement()
-      .isInstanceOfSatisfying(BankAccountClosedEvent.class, event -> {
+      .isInstanceOfSatisfying(BankAccountStatusChangedEvent.class, event -> {
         assertThat(event.eventId()).isNotNull();
         assertThat(event.aggregateId()).isEqualTo(bankAccount.getId());
+        assertThat(event.previousStatus()).isEqualTo(AccountStatus.ACTIVE);
+        assertThat(event.currentStatus()).isEqualTo(AccountStatus.CLOSED);
         assertThat(event.occurredAt()).isNotNull();
       });
   }

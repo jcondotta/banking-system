@@ -5,6 +5,7 @@ import com.jcondotta.domain.exception.DomainValidationException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ArgumentsSource;
+import org.junit.jupiter.params.provider.CsvSource;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -13,6 +14,8 @@ class IbanTest {
 
   private static final String VALID_IBAN_1 = "DE44500105175407324931";
   private static final String VALID_IBAN_2 = "FR1420041010050500013M02606";
+  private static final String MIN_LENGTH_IBAN = "NO9386011117947";
+  private static final String MAX_LENGTH_IBAN = "AA75000000000000000000000000000000";
 
   @Test
   void shouldCreateIban_whenValueIsValid() {
@@ -28,6 +31,19 @@ class IbanTest {
     var iban = Iban.of("  de44 5001 0517 5407 3249 31  ");
 
     assertThat(iban.value()).isEqualTo(VALID_IBAN_1);
+  }
+
+  @ParameterizedTest
+  @CsvSource({
+    "DE44500105175407324931, DE44****4931",
+    "FR1420041010050500013M02606, FR14****2606",
+    "NO9386011117947, NO93****7947",
+    "AA75000000000000000000000000000000, AA75****0000"
+  })
+  void shouldMaskIban_whenValueIsValid(String source, String expectedMaskedIban) {
+    var iban = Iban.of(source);
+
+    assertThat(iban.masked()).isEqualTo(expectedMaskedIban);
   }
 
   @Test
@@ -75,6 +91,20 @@ class IbanTest {
     assertThatThrownBy(() -> Iban.of("DE44500105175407324932"))
       .isInstanceOf(DomainValidationException.class)
       .hasMessage(Iban.IBAN_INVALID_FORMAT);
+  }
+
+  @Test
+  void shouldCreateIban_whenIbanHasMinimumLength() {
+    var iban = Iban.of(MIN_LENGTH_IBAN);
+
+    assertThat(iban.value()).hasSize(15);
+  }
+
+  @Test
+  void shouldCreateIban_whenIbanHasMaximumLength() {
+    var iban = Iban.of(MAX_LENGTH_IBAN);
+
+    assertThat(iban.value()).hasSize(34);
   }
 
   @Test
