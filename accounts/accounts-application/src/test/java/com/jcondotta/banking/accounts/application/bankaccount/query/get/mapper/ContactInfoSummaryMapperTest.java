@@ -31,4 +31,10 @@ class ContactInfoSummaryMapperTest {
 
     assertThat(details).isNull();
   }
+
+  @Test
+  void shouldReturnNull_whenContactInfoValueObjectsAreNull() {
+    assertThat(mapper.map((Email) null)).isNull();
+    assertThat(mapper.map((PhoneNumber) null)).isNull();
+  }
 }

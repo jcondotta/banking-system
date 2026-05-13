@@ -1,7 +1,7 @@
 package com.jcondotta.banking.accounts.domain.bankaccount.aggregate;
 
 import com.jcondotta.banking.accounts.domain.bankaccount.enums.HolderType;
-import com.jcondotta.banking.accounts.domain.bankaccount.factory.ClockTestFactory;
+import com.jcondotta.banking.accounts.domain.testsupport.TimeTestFactory;
 import com.jcondotta.banking.accounts.domain.bankaccount.fixtures.AccountHolderFixtures;
 import com.jcondotta.banking.accounts.domain.bankaccount.validation.AccountHolderErrors;
 import com.jcondotta.domain.exception.DomainValidationException;
@@ -19,7 +19,7 @@ class AccountHolderCreateTest {
   private static final AccountHolderFixtures PRIMARY_ACCOUNT_HOLDER = AccountHolderFixtures.JEFFERSON;
   private static final AccountHolderFixtures JOINT_ACCOUNT_HOLDER = AccountHolderFixtures.PATRIZIO;
 
-  private static final Instant CREATED_AT = Instant.now(ClockTestFactory.FIXED_CLOCK);
+  private static final Instant CREATED_AT = TimeTestFactory.FIXED_INSTANT;
 
   @ParameterizedTest
   @EnumSource(HolderType.class)

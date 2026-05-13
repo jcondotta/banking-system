@@ -5,7 +5,7 @@ import com.jcondotta.banking.accounts.domain.bankaccount.enums.AccountType;
 import com.jcondotta.banking.accounts.domain.bankaccount.enums.Currency;
 import com.jcondotta.banking.accounts.domain.bankaccount.exceptions.AccountHolderNotFoundException;
 import com.jcondotta.banking.accounts.domain.bankaccount.exceptions.CannotDeactivatePrimaryHolderException;
-import com.jcondotta.banking.accounts.domain.bankaccount.factory.ClockTestFactory;
+import com.jcondotta.banking.accounts.domain.testsupport.TimeTestFactory;
 import com.jcondotta.banking.accounts.domain.bankaccount.fixtures.AccountHolderFixtures;
 import com.jcondotta.banking.accounts.domain.bankaccount.fixtures.BankAccountTestFixture;
 import com.jcondotta.banking.accounts.domain.bankaccount.identity.AccountHolderId;
@@ -22,7 +22,7 @@ class BankAccountDeactivateAccountHolderTest {
   private static final AccountHolderFixtures PRIMARY_ACCOUNT_HOLDER = AccountHolderFixtures.JEFFERSON;
   private static final AccountHolderFixtures JOINT_ACCOUNT_HOLDER = AccountHolderFixtures.PATRIZIO;
 
-  private static final Instant ACCOUNT_CREATED_AT = Instant.now(ClockTestFactory.FIXED_CLOCK);
+  private static final Instant ACCOUNT_CREATED_AT = TimeTestFactory.FIXED_INSTANT;
 
   @Test
   void shouldDeactivateJointAccountHolder_whenAccountHolderIsJoint() {

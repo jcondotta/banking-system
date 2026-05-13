@@ -5,6 +5,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.PastOrPresent;
+import jakarta.validation.constraints.Size;
 
 import java.time.LocalDate;
 
@@ -12,6 +14,7 @@ import java.time.LocalDate;
 public record PersonalInfoRequest(
 
   @NotBlank
+  @Size(max = 255)
   @Schema(
     description = "First name of the account holder.",
     example = "Jefferson",
@@ -20,6 +23,7 @@ public record PersonalInfoRequest(
   String firstName,
 
   @NotBlank
+  @Size(max = 255)
   @Schema(
     description = "Last name of the account holder.",
     example = "Condotta",
@@ -36,6 +40,7 @@ public record PersonalInfoRequest(
   IdentityDocumentRequest identityDocument,
 
   @NotNull
+  @PastOrPresent
   @JsonFormat(pattern = "yyyy-MM-dd")
   @Schema(
     description = "Date of birth of the account holder.",

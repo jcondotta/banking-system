@@ -1,12 +1,21 @@
 package com.jcondotta.banking.accounts.outbox.infrastructure.adapters.output.outbox.dispatcher;
 
+import com.jcondotta.application.logging.LogContext;
+import com.jcondotta.application.logging.LogKey;
+import com.jcondotta.banking.accounts.outbox.infrastructure.adapters.output.outbox.OutboxPublishException;
+import com.jcondotta.banking.accounts.outbox.infrastructure.adapters.output.outbox.log.OutboxEventType;
+import com.jcondotta.banking.accounts.outbox.infrastructure.adapters.output.outbox.log.OutboxLogKey;
+import com.jcondotta.banking.accounts.outbox.infrastructure.adapters.output.outbox.concurrency.exceptions.ShardExecutionException;
+import com.jcondotta.banking.accounts.outbox.infrastructure.adapters.output.outbox.concurrency.exceptions.ShardTimeoutException;
 import com.jcondotta.banking.accounts.outbox.infrastructure.adapters.output.outbox.processor.OutboxEventShardProcessor;
 import com.jcondotta.banking.accounts.outbox.infrastructure.adapters.output.outbox.store.OutboxEventStore;
+import com.jcondotta.banking.accounts.outbox.infrastructure.adapters.output.outbox.store.exceptions.OutboxEventAlreadyProcessedException;
 import com.jcondotta.banking.accounts.infrastructure.adapters.output.outbox.store.OutboxQuery;
 import com.jcondotta.banking.accounts.outbox.infrastructure.properties.OutboxShardsProperties;
+import io.micrometer.observation.annotation.Observed;
 import jakarta.annotation.PreDestroy;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.util.concurrent.ExecutorService;
@@ -15,10 +24,10 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
-@Slf4j
 @Component
-@RequiredArgsConstructor
 public class VirtualThreadOutboxDispatcher implements OutboxDispatcher {
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(VirtualThreadOutboxDispatcher.class);
 
   private final OutboxEventStore eventStore;
   private final OutboxEventShardProcessor eventShardProcessor;
@@ -29,10 +38,34 @@ public class VirtualThreadOutboxDispatcher implements OutboxDispatcher {
   private final AtomicBoolean dispatching = new AtomicBoolean(false);
   private final AtomicInteger inFlightTasks = new AtomicInteger(0);
 
+  public VirtualThreadOutboxDispatcher(
+    OutboxEventStore eventStore,
+    OutboxEventShardProcessor eventShardProcessor,
+    OutboxShardsProperties shardsProperties
+  ) {
+    this.eventStore = eventStore;
+    this.eventShardProcessor = eventShardProcessor;
+    this.shardsProperties = shardsProperties;
+  }
+
   @Override
+  @Observed(
+    name = "accounts.outbox.dispatch",
+    contextualName = "dispatchOutboxEvents",
+    lowCardinalityKeyValues = {
+      "component", "outbox",
+      "operation", "dispatch"
+    }
+  )
   public void dispatch() {
+    var logContext = LogContext.timed(LOGGER, OutboxEventType.DISPATCH);
+
     if (!dispatching.compareAndSet(false, true)) {
-      log.warn("Previous dispatch cycle still in progress ({} tasks in flight), skipping", inFlightTasks.get());
+      logContext.warn("Outbox dispatch skipped")
+        .failure()
+        .with(LogKey.REASON, "dispatch_in_progress")
+        .with(OutboxLogKey.IN_FLIGHT_TASKS, inFlightTasks.get())
+        .log();
       return;
     }
 
@@ -53,8 +86,19 @@ public class VirtualThreadOutboxDispatcher implements OutboxDispatcher {
             try {
               eventShardProcessor.process(event);
             }
+            catch (ShardTimeoutException | ShardExecutionException | OutboxPublishException | OutboxEventAlreadyProcessedException ex) {
+              // The processor/completer already logs expected outbox failures with event context.
+            }
             catch (Exception ex) {
-              log.error("[shard={}] unhandled exception processing event {}", event.getShard(), event.getEventId(), ex);
+              LogContext.timed(LOGGER, OutboxEventType.PROCESS)
+                .with(OutboxLogKey.SHARD, event.getShard())
+                .with(OutboxLogKey.EVENT_ID, event.getEventId())
+                .with(OutboxLogKey.AGGREGATE_ID, event.getAggregateId())
+                .with(OutboxLogKey.OUTBOX_EVENT_TYPE, event.getEventType())
+                .error("Unexpected error processing outbox event", ex)
+                .failure()
+                .with(LogKey.REASON, "unhandled_error")
+                .log();
             }
             finally {
               releaseIfDone();
@@ -64,7 +108,10 @@ public class VirtualThreadOutboxDispatcher implements OutboxDispatcher {
       }
     }
     catch (Exception ex) {
-      log.error("Unexpected error during outbox dispatch", ex);
+      logContext.error("Unexpected error during outbox dispatch", ex)
+        .failure()
+        .with(LogKey.REASON, "internal_error")
+        .log();
     }
     finally {
       // Release the "submission loop" hold — allows the last in-flight task to close the cycle
@@ -75,17 +122,14 @@ public class VirtualThreadOutboxDispatcher implements OutboxDispatcher {
   private void releaseIfDone() {
     if (inFlightTasks.decrementAndGet() == 0) {
       dispatching.set(false);
-      log.debug("Dispatch cycle complete");
     }
   }
 
   @PreDestroy
   public void shutdown() {
-    log.info("Shutting down outbox dispatcher executor");
     executor.shutdown();
     try {
       if (!executor.awaitTermination(30, TimeUnit.SECONDS)) {
-        log.warn("Outbox executor did not terminate within 30s, forcing shutdown");
         executor.shutdownNow();
       }
     }

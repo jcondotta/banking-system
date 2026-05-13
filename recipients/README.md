@@ -86,7 +86,6 @@ flowchart LR
 - Prometheus-compatible `/actuator/prometheus` endpoint.
 - OpenTelemetry metrics/tracing support.
 - Concurrency limiting for create/remove operations.
-- PostgreSQL resilience handling for unavailable database scenarios.
 - Kubernetes readiness/liveness probes.
 - Docker multi-stage build with non-root runtime user.
 - Testcontainers-backed integration tests.
@@ -249,14 +248,6 @@ Run integration tests:
 mvn verify -pl recipients-bootstrap -am
 ```
 
-Run a specific integration test:
-
-```bash
-mvn test -pl recipients-bootstrap -am \
-  -Dtest=RecipientResilienceIT \
-  -Dsurefire.failIfNoSpecifiedTests=false
-```
-
 Run mutation testing for the domain module:
 
 ```bash
@@ -363,7 +354,7 @@ Application tests validate command/query handlers, logging behavior, repository 
 
 Infrastructure tests validate REST mappers, controllers, exception handlers, PostgreSQL repositories, and persistence mapping.
 
-Integration tests use Spring Boot, Rest Assured, and Testcontainers. They cover HTTP flows, PostgreSQL behavior, database-unavailable resilience, and concurrency limiting.
+Integration tests use Spring Boot, Rest Assured, and Testcontainers. They cover HTTP flows, PostgreSQL behavior, and concurrency limiting.
 
 Mutation testing is configured through PIT. Domain and application modules are expected to maintain high mutation confidence because they carry the core business behavior.
 

@@ -1,8 +1,6 @@
 package com.jcondotta.banking.accounts.outbox.infrastructure.config.aws.dynamodb;
 
 import com.jcondotta.banking.infrastructure.adapters.config.aws.EndpointOverride;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -19,8 +17,6 @@ import java.net.URI;
 @SuppressWarnings("all")
 public class DynamoDbClientConfig {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(DynamoDbClientConfig.class);
-
   @Bean
   public DynamoDbClient dynamoDbClient(
     Region region,
@@ -30,10 +26,7 @@ public class DynamoDbClientConfig {
 
     credentialsProvider.ifAvailable(builder::credentialsProvider);
 
-    endpointOverride.ifAvailable(e -> {
-      LOGGER.info("Initializing DynamoDbClient with custom endpoint: {}", e.uri());
-      builder.endpointOverride(e.uri());
-    });
+    endpointOverride.ifAvailable(e -> builder.endpointOverride(e.uri()));
 
     return builder.build();
   }

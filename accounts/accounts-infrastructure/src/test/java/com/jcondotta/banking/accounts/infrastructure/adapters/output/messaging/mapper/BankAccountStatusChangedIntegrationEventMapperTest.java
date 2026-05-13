@@ -6,7 +6,7 @@ import com.jcondotta.banking.accounts.contracts.status.BankAccountStatusChangedI
 import com.jcondotta.banking.accounts.domain.bankaccount.enums.AccountStatus;
 import com.jcondotta.banking.accounts.domain.bankaccount.events.BankAccountStatusChangedEvent;
 import com.jcondotta.banking.accounts.domain.bankaccount.identity.BankAccountId;
-import com.jcondotta.banking.accounts.infrastructure.config.ClockTestFactory;
+import com.jcondotta.banking.accounts.domain.testsupport.TimeTestFactory;
 import com.jcondotta.banking.accounts.infrastructure.fixtures.IntegrationEventMetadataFixture;
 import com.jcondotta.domain.identity.EventId;
 import org.junit.jupiter.api.Test;
@@ -20,7 +20,7 @@ class BankAccountStatusChangedIntegrationEventMapperTest {
   private static final EventId EVENT_ID = EventId.newId();
   private static final BankAccountId BANK_ACCOUNT_ID = BankAccountId.newId();
 
-  private final Instant NOW = Instant.now(ClockTestFactory.FIXED_CLOCK);
+  private final Instant NOW = TimeTestFactory.FIXED_INSTANT;
 
   private final BankAccountStatusChangedIntegrationEventMapper mapper =
     new BankAccountStatusChangedIntegrationEventMapper();

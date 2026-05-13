@@ -1,7 +1,12 @@
 package com.jcondotta.banking.accounts.application.bankaccount.query.get.mapper;
 
 import com.jcondotta.banking.accounts.application.bankaccount.query.get.model.AddressSummary;
+import com.jcondotta.banking.accounts.domain.bankaccount.value_objects.address.AddressComplement;
 import com.jcondotta.banking.accounts.domain.bankaccount.value_objects.address.Address;
+import com.jcondotta.banking.accounts.domain.bankaccount.value_objects.address.City;
+import com.jcondotta.banking.accounts.domain.bankaccount.value_objects.address.PostalCode;
+import com.jcondotta.banking.accounts.domain.bankaccount.value_objects.address.Street;
+import com.jcondotta.banking.accounts.domain.bankaccount.value_objects.address.StreetNumber;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -47,5 +52,14 @@ class AddressSummaryMapperTest {
     var details = mapper.toSummary(null);
 
     assertThat(details).isNull();
+  }
+
+  @Test
+  void shouldReturnNull_whenAddressValueObjectsAreNull() {
+    assertThat(mapper.map((Street) null)).isNull();
+    assertThat(mapper.map((StreetNumber) null)).isNull();
+    assertThat(mapper.map((AddressComplement) null)).isNull();
+    assertThat(mapper.map((PostalCode) null)).isNull();
+    assertThat(mapper.map((City) null)).isNull();
   }
 }

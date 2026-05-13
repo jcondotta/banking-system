@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.util.UUID;
 
-@RequestMapping("${api.v1.bank-accounts.bank-account-id-path}")
+@RequestMapping("${api.bank-accounts.bank-account-id-path}")
 public interface CloseBankAccountController {
 
   @Operation(

@@ -3,13 +3,13 @@ package com.jcondotta.banking.accounts.outbox.infrastructure.adapters.output.out
 import com.jcondotta.banking.accounts.outbox.infrastructure.adapters.output.outbox.dispatcher.OutboxDispatcher;
 import com.jcondotta.banking.accounts.outbox.infrastructure.properties.OutboxPollingProperties;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
-@Slf4j
 @Component
+@ConditionalOnProperty(prefix = "app.outbox.worker", name = "enabled", havingValue = "true", matchIfMissing = true)
 @RequiredArgsConstructor
 public class OutboxWorkerRunner implements ApplicationRunner {
 
@@ -18,11 +18,9 @@ public class OutboxWorkerRunner implements ApplicationRunner {
 
   @Override
   public void run(ApplicationArguments args) {
-    Thread.ofPlatform() // 👈 FIX PRINCIPAL (non-daemon)
+    Thread.ofPlatform()
       .name("outbox-worker")
       .start(this::workerLoop);
-
-    log.info("Outbox worker started with polling interval: {}", pollingProperties.interval());
   }
 
   private void workerLoop() {
@@ -31,15 +29,16 @@ public class OutboxWorkerRunner implements ApplicationRunner {
     while (!Thread.currentThread().isInterrupted()) {
       try {
         dispatcher.dispatch();
-      } catch (Exception e) {
-        log.error("Outbox dispatch failed, will retry after interval", e);
+      }
+      catch (Exception ignored) {
+        // The dispatcher logs failures with structured context.
       }
 
       try {
-        Thread.sleep(interval.toMillis()); // 👈 FIX (Duration → millis)
-      } catch (InterruptedException e) {
+        Thread.sleep(interval.toMillis());
+      }
+      catch (InterruptedException e) {
         Thread.currentThread().interrupt();
-        log.info("Outbox worker interrupted, shutting down");
         break;
       }
     }

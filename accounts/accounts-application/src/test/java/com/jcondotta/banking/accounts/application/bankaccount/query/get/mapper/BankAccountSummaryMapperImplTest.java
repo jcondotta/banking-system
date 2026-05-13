@@ -1,13 +1,24 @@
 package com.jcondotta.banking.accounts.application.bankaccount.query.get.mapper;
 
 import com.jcondotta.banking.accounts.application.bankaccount.query.get.model.AccountHolderSummary;
+import com.jcondotta.banking.accounts.domain.bankaccount.aggregate.BankAccount;
+import com.jcondotta.banking.accounts.domain.bankaccount.enums.AccountStatus;
+import com.jcondotta.banking.accounts.domain.bankaccount.enums.AccountType;
+import com.jcondotta.banking.accounts.domain.bankaccount.enums.Currency;
 import com.jcondotta.banking.accounts.domain.bankaccount.enums.HolderType;
+import com.jcondotta.banking.accounts.domain.bankaccount.identity.BankAccountId;
 import com.jcondotta.banking.accounts.domain.testsupport.AccountHolderFixtures;
 import com.jcondotta.banking.accounts.domain.testsupport.BankAccountFixture;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.time.Instant;
+import java.util.List;
+
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 class BankAccountSummaryMapperImplTest {
 
@@ -63,5 +74,45 @@ class BankAccountSummaryMapperImplTest {
   @Test
   void shouldReturnNull_whenBankAccountIsNull() {
     assertThat(bankAccountMapper.toSummary(null)).isNull();
+  }
+
+  @Test
+  void shouldThrowNullPointerException_whenBankAccountIbanIsNull() {
+    var bankAccount = mock(BankAccount.class);
+    mockRequiredValues(bankAccount);
+
+    assertThatThrownBy(() -> bankAccountMapper.toSummary(bankAccount))
+      .isInstanceOf(NullPointerException.class)
+      .hasMessage("iban must be provided");
+  }
+
+  @Test
+  void shouldThrowNullPointerException_whenBankAccountIdIsNull() {
+    var bankAccount = mock(BankAccount.class);
+
+    assertThatThrownBy(() -> bankAccountMapper.toSummary(bankAccount))
+      .isInstanceOf(NullPointerException.class)
+      .hasMessage("id must be provided");
+  }
+
+  @Test
+  void shouldThrowNullPointerException_whenBankAccountHoldersAreNull() {
+    var bankAccount = mock(BankAccount.class);
+    mockRequiredValues(bankAccount);
+    when(bankAccount.getIban()).thenReturn(BankAccountFixture.VALID_IBAN);
+    when(bankAccount.getActiveHolders()).thenReturn(null);
+
+    assertThatThrownBy(() -> bankAccountMapper.toSummary(bankAccount))
+      .isInstanceOf(NullPointerException.class)
+      .hasMessage("holders must be provided");
+  }
+
+  private static void mockRequiredValues(BankAccount bankAccount) {
+    when(bankAccount.getId()).thenReturn(BankAccountId.newId());
+    when(bankAccount.getAccountType()).thenReturn(AccountType.CHECKING);
+    when(bankAccount.getCurrency()).thenReturn(Currency.EUR);
+    when(bankAccount.getAccountStatus()).thenReturn(AccountStatus.PENDING);
+    when(bankAccount.getCreatedAt()).thenReturn(Instant.now());
+    when(bankAccount.getActiveHolders()).thenReturn(List.of());
   }
 }

@@ -18,11 +18,7 @@ create_topic() {
 }
 
 create_topic "bank-account-opened"
-create_topic "bank-account-activated"
+create_topic "bank-account-status-changed"
 create_topic "joint-account-holder-added"
-
-create_topic "bank-account-blocked"
-create_topic "bank-account-unblocked"
-create_topic "bank-account-closed"
 
 echo "✅ Kafka topics created successfully"

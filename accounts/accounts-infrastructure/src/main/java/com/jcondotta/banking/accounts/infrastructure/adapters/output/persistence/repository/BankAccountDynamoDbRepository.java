@@ -48,7 +48,6 @@ public class BankAccountDynamoDbRepository implements BankAccountRepository {
     }
 
     var bankAccount = bankAccountEntityMapper.restore(bankingEntities);
-    log.info("BankAccount restored successfully. id={}", bankAccount.getId().value());
     return Optional.of(bankAccount);
   }
 
@@ -63,7 +62,5 @@ public class BankAccountDynamoDbRepository implements BankAccountRepository {
     appenders.forEach(appender -> appender.append(bankAccount, transactionContext));
 
     dynamoDbClient.transactWriteItems(transactionContext.builder().build());
-
-    log.info("BankAccount persisted successfully. id={}", bankAccount.getId().value());
   }
 }

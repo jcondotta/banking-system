@@ -2,15 +2,23 @@ spring:
   kafka:
     bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
 
+management:
+  otlp:
+    metrics:
+      export:
+        enabled: true
+        url: http://localhost:4318/v1/metrics
+        step: 10s
+
 app:
   kafka:
     topics:
       bank-account-opened:
-        topic-name: ${KAFKA_BANK_ACCOUNT_OPENED_TOPIC_NAME:bank-account-opened}
+        topic-name: bank-account-opened
       bank-account-status-changed:
-        topic-name: ${KAFKA_BANK_ACCOUNT_STATUS_CHANGED_TOPIC_NAME:bank-account-status-changed}
+        topic-name: bank-account-status-changed
       joint-account-holder-added:
-        topic-name: ${KAFKA_JOINT_ACCOUNT_HOLDER_ADDED_TOPIC_NAME:joint-account-holder-added}
+        topic-name: joint-account-holder-added
 
 cloud:
   aws:

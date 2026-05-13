@@ -1,6 +1,6 @@
 package com.jcondotta.banking.accounts.domain.bankaccount.aggregate;
 
-import com.jcondotta.banking.accounts.domain.bankaccount.factory.ClockTestFactory;
+import com.jcondotta.banking.accounts.domain.testsupport.TimeTestFactory;
 import com.jcondotta.banking.accounts.domain.bankaccount.fixtures.AccountHolderFixtures;
 import com.jcondotta.banking.accounts.domain.bankaccount.fixtures.BankAccountTestFixture;
 import org.junit.jupiter.api.Test;
@@ -11,7 +11,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class AccountHolderDeactivateTest {
 
-  private static final Instant CREATED_AT = Instant.now(ClockTestFactory.FIXED_CLOCK);
+  private static final Instant CREATED_AT = TimeTestFactory.FIXED_INSTANT;
 
   @Test
   void shouldDeactivateAccountHolder_whenAccountHolderIsActive() {

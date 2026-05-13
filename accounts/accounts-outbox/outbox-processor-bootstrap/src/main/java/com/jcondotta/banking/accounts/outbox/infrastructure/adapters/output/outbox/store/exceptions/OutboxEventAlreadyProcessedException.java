@@ -2,7 +2,11 @@ package com.jcondotta.banking.accounts.outbox.infrastructure.adapters.output.out
 
 public class OutboxEventAlreadyProcessedException extends RuntimeException {
 
-  public OutboxEventAlreadyProcessedException(String eventId) {
+  public OutboxEventAlreadyProcessedException(Object eventId) {
     super("outbox event already processed: " + eventId);
+  }
+
+  public OutboxEventAlreadyProcessedException(Object eventId, Throwable cause) {
+    super("outbox event already processed: " + eventId, cause);
   }
 }

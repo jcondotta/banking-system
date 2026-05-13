@@ -3,7 +3,6 @@ package com.jcondotta.banking.accounts.outbox.infrastructure.adapters.output.out
 import com.jcondotta.banking.accounts.outbox.infrastructure.adapters.output.outbox.concurrency.exceptions.ShardExecutionException;
 import com.jcondotta.banking.accounts.outbox.infrastructure.adapters.output.outbox.concurrency.exceptions.ShardNotFoundException;
 import com.jcondotta.banking.accounts.outbox.infrastructure.adapters.output.outbox.concurrency.exceptions.ShardTimeoutException;
-import lombok.extern.slf4j.Slf4j;
 
 import java.time.Duration;
 import java.util.Map;
@@ -13,7 +12,6 @@ import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
-@Slf4j
 public class SemaphoreConcurrencyPolicy<K> implements ConcurrencyPolicy<K> {
 
   private final Map<K, Semaphore> shardSemaphores;
@@ -39,7 +37,6 @@ public class SemaphoreConcurrencyPolicy<K> implements ConcurrencyPolicy<K> {
     }
 
     if (!acquired) {
-      log.warn("[shard={}] timed out waiting for semaphore permit after {}ms", shard, timeout.toMillis());
       throw new ShardTimeoutException(shard, timeout.toMillis());
     }
 

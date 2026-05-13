@@ -13,12 +13,11 @@ import com.jcondotta.banking.accounts.domain.testsupport.BankAccountTestFactory;
 import com.jcondotta.banking.accounts.infrastructure.adapters.output.persistence.entity.BankAccountEntityKey;
 import com.jcondotta.banking.accounts.infrastructure.adapters.output.persistence.entity.BankingEntity;
 import com.jcondotta.banking.accounts.infrastructure.adapters.output.persistence.enums.EntityType;
-import com.jcondotta.banking.accounts.infrastructure.arguments_provider.AccountTypeAndCurrencyArgumentsProvider;
+import com.jcondotta.banking.accounts.domain.testsupport.AccountTypeAndCurrencySource;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ArgumentsSource;
 
 import java.util.List;
 
@@ -41,7 +40,7 @@ class BankAccountEntityMapperImplTest {
     class ToEntities {
 
         @ParameterizedTest
-        @ArgumentsSource(AccountTypeAndCurrencyArgumentsProvider.class)
+        @AccountTypeAndCurrencySource
         void shouldReturnTwoEntities_whenBankAccountHasOnlyPrimaryHolder(AccountType accountType, Currency currency) {
             BankAccount bankAccount = BankAccountTestFactory.withPrimary(BankAccountId.newId(), accountType, currency, PRIMARY_FIXTURE);
 
@@ -65,7 +64,7 @@ class BankAccountEntityMapperImplTest {
         }
 
         @ParameterizedTest
-        @ArgumentsSource(AccountTypeAndCurrencyArgumentsProvider.class)
+        @AccountTypeAndCurrencySource
         void shouldPlaceBankAccountEntityFirst_whenMappingToEntities(AccountType accountType, Currency currency) {
             BankAccount bankAccount = BankAccountTestFactory.withPrimary(BankAccountId.newId(), accountType, currency, PRIMARY_FIXTURE);
 
@@ -75,7 +74,7 @@ class BankAccountEntityMapperImplTest {
         }
 
         @ParameterizedTest
-        @ArgumentsSource(AccountTypeAndCurrencyArgumentsProvider.class)
+        @AccountTypeAndCurrencySource
         void shouldMapBankAccountEntityFields_whenMappingToEntities(AccountType accountType, Currency currency) {
             BankAccount bankAccount = BankAccountTestFactory.withPrimary(BankAccountId.newId(), accountType, currency, PRIMARY_FIXTURE);
 
@@ -93,7 +92,7 @@ class BankAccountEntityMapperImplTest {
         }
 
         @ParameterizedTest
-        @ArgumentsSource(AccountTypeAndCurrencyArgumentsProvider.class)
+        @AccountTypeAndCurrencySource
         void shouldMapAllAccountStatuses_whenMappingToEntities(AccountType accountType, Currency currency) {
             for (AccountStatus status : AccountStatus.values()) {
                 BankAccount bankAccount = BankAccountTestFactory.build(BankAccountId.newId(), accountType, currency, status,
@@ -109,7 +108,7 @@ class BankAccountEntityMapperImplTest {
     class Restore {
 
         @ParameterizedTest
-        @ArgumentsSource(AccountTypeAndCurrencyArgumentsProvider.class)
+        @AccountTypeAndCurrencySource
         void shouldRestoreBankAccount_whenMappingToEntitiesAndRestoringBack(AccountType accountType, Currency currency) {
             BankAccount original = BankAccountTestFactory.withPrimary(BankAccountId.newId(), accountType, currency, PRIMARY_FIXTURE);
 
@@ -170,7 +169,7 @@ class BankAccountEntityMapperImplTest {
     class RoundTrip {
 
         @ParameterizedTest
-        @ArgumentsSource(AccountTypeAndCurrencyArgumentsProvider.class)
+        @AccountTypeAndCurrencySource
         void shouldPreserveAllBankAccountFields_whenMappingToEntitiesAndRestoringToDomain(AccountType accountType, Currency currency) {
             BankAccount original = BankAccountTestFactory.withPrimaryAndJoint(
               BankAccountId.newId(),

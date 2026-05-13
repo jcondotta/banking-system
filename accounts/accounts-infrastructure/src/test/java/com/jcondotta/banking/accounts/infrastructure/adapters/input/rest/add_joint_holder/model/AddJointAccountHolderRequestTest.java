@@ -1,214 +1,81 @@
 package com.jcondotta.banking.accounts.infrastructure.adapters.input.rest.add_joint_holder.model;
 
+import com.jcondotta.banking.accounts.domain.testsupport.ContactInfoFixtures;
+import com.jcondotta.banking.accounts.domain.testsupport.IdentityDocumentFixtures;
+import com.jcondotta.banking.accounts.domain.testsupport.PersonalInfoFixtures;
+import com.jcondotta.banking.accounts.infrastructure.adapters.input.rest.add_joint_holder.model.AddJointHolderRequest;
+import com.jcondotta.banking.accounts.infrastructure.adapters.input.rest.common.*;
+import com.jcondotta.banking.accounts.infrastructure.config.ValidatorTestFactory;
+import jakarta.validation.Validator;
+import org.junit.jupiter.api.Test;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
 class AddJointAccountHolderRequestTest {
 
-//  private static final Validator VALIDATOR = ValidatorTestFactory.getValidator();
-//
-//  private static final String VALID_NAME = AccountHolderFixtures.JEFFERSON.getAccountHolderName().value();
-//  private static final String VALID_PASSPORT = AccountHolderFixtures.JEFFERSON.getPassportNumber().value();
-//  private static final LocalDate VALID_DATE_OF_BIRTH = AccountHolderFixtures.JEFFERSON.getDateOfBirth().value();
-//  private static final String VALID_EMAIL = AccountHolderFixtures.JEFFERSON.getEmail().value();
-//
-//  @Test
-//  void shouldNotDetectConstraintViolation_whenRequestIsValid() {
-//    var request = new AddJointAccountHolderRequest(
-//      VALID_NAME,
-//      VALID_PASSPORT,
-//      VALID_DATE_OF_BIRTH,
-//      VALID_EMAIL
-//    );
-//
-//    assertThat(VALIDATOR.validate(request)).isEmpty();
-//  }
-//
-//  @ParameterizedTest
-//  @ArgumentsSource(BlankValuesArgumentProvider.class)
-//  void shouldDetectConstraintViolation_whenAccountHolderNameIsBlank(String blankName) {
-//    var request = new AddJointAccountHolderRequest(
-//      blankName,
-//      VALID_PASSPORT,
-//      VALID_DATE_OF_BIRTH,
-//      VALID_EMAIL
-//    );
-//
-//    assertThat(VALIDATOR.validate(request))
-//      .hasSize(1)
-//      .first()
-//      .satisfies(violation ->
-//        assertThat(violation.getPropertyPath()).hasToString("holderName")
-//      );
-//  }
-//
-//  @Test
-//  void shouldDetectConstraintViolation_whenAccountHolderNameExceedsMaxLength() {
-//    var longName = "A".repeat(AccountHolderName.MAX_LENGTH + 1);
-//
-//    var request = new AddJointAccountHolderRequest(
-//      longName,
-//      VALID_PASSPORT,
-//      VALID_DATE_OF_BIRTH,
-//      VALID_EMAIL
-//    );
-//
-//    assertThat(VALIDATOR.validate(request))
-//      .hasSize(1)
-//      .first()
-//      .satisfies(violation ->
-//        assertThat(violation.getPropertyPath()).hasToString("holderName")
-//      );
-//  }
-//
-//  @Test
-//  void shouldDetectConstraintViolation_whenPassportNumberIsNull() {
-//    var request = new AddJointAccountHolderRequest(
-//      VALID_NAME,
-//      null,
-//      VALID_DATE_OF_BIRTH,
-//      VALID_EMAIL
-//    );
-//
-//    assertThat(VALIDATOR.validate(request))
-//      .hasSize(1)
-//      .first()
-//      .satisfies(violation ->
-//        assertThat(violation.getPropertyPath()).hasToString("passportNumber")
-//      );
-//  }
-//
-//  @Test
-//  void shouldDetectConstraintViolation_whenPassportNumberLengthIsInvalid() {
-//    var invalidPassport = "A".repeat(PassportNumber.LENGTH - 1);
-//
-//    var request = new AddJointAccountHolderRequest(
-//      VALID_NAME,
-//      invalidPassport,
-//      VALID_DATE_OF_BIRTH,
-//      VALID_EMAIL
-//    );
-//
-//    assertThat(VALIDATOR.validate(request))
-//      .hasSize(1)
-//      .first()
-//      .satisfies(violation ->
-//        assertThat(violation.getPropertyPath()).hasToString("passportNumber")
-//      );
-//  }
-//
-//  @Test
-//  void shouldDetectConstraintViolation_whenDateOfBirthIsNull() {
-//    var request = new AddJointAccountHolderRequest(
-//      VALID_NAME,
-//      VALID_PASSPORT,
-//      null,
-//      VALID_EMAIL
-//    );
-//
-//    assertThat(VALIDATOR.validate(request))
-//      .hasSize(1)
-//      .first()
-//      .satisfies(violation ->
-//        assertThat(violation.getPropertyPath()).hasToString("dateOfBirth")
-//      );
-//  }
-//
-//  @Test
-//  void shouldDetectConstraintViolation_whenDateOfBirthIsInTheFuture() {
-//    var futureDate = LocalDate.now().plusDays(1);
-//
-//    var request = new AddJointAccountHolderRequest(
-//      VALID_NAME,
-//      VALID_PASSPORT,
-//      futureDate,
-//      VALID_EMAIL
-//    );
-//
-//    assertThat(VALIDATOR.validate(request))
-//      .hasSize(1)
-//      .first()
-//      .satisfies(violation ->
-//        assertThat(violation.getPropertyPath()).hasToString("dateOfBirth")
-//      );
-//  }
-//
-////  @Test
-////  void shouldDetectConstraintViolation_whenEmailFormatIsInvalid() {
-////    var invalidEmail = "invalid-email-format";
-////
-////    var request = new AddJointAccountHolderRequest(
-////      VALID_NAME,
-////      VALID_PASSPORT,
-////      VALID_DATE_OF_BIRTH,
-////      invalidEmail
-////    );
-////
-////    assertThat(VALIDATOR.validate(request))
-////      .hasSize(1)
-////      .first()
-////      .satisfies(violation ->
-////        assertThat(violation.getPropertyPath()).hasToString("email")
-////      );
-////  }
-//
-//  @ParameterizedTest
-//  @ArgumentsSource(BlankValuesArgumentProvider.class)
-//  void shouldDetectConstraintViolation_whenEmailIsBlank(String blankEmail) {
-//    var request = new AddJointAccountHolderRequest(
-//      VALID_NAME,
-//      VALID_PASSPORT,
-//      VALID_DATE_OF_BIRTH,
-//      blankEmail
-//    );
-//
-//    assertThat(VALIDATOR.validate(request))
-//      .hasSize(1)
-//      .first()
-//      .satisfies(violation ->
-//        assertThat(violation.getPropertyPath()).hasToString("email")
-//      );
-//  }
-//
-////  @ParameterizedTest
-////  @ValueSource(strings = {
-////    "plainaddress",
-////    "missingatsign.com",
-////    "@missinglocal.com",
-////    "missingdomain@",
-////    "missingdot@domain",
-////  })
-////  void shouldDetectConstraintViolation_whenEmailFormatIsInvalid(String invalidEmail) {
-////    var request = new AddJointAccountHolderRequest(
-////      VALID_NAME,
-////      VALID_PASSPORT,
-////      VALID_DATE_OF_BIRTH,
-////      invalidEmail
-////    );
-////
-////    assertThat(VALIDATOR.validate(request))
-////      .hasSize(1)
-////      .first()
-////      .satisfies(violation ->
-////        assertThat(violation.getPropertyPath()).hasToString("email")
-////      );
-////  }
-//
-//  @Test
-//  void shouldDetectConstraintViolation_whenEmailExceedsMaxLength() {
-//    var longEmail = "a".repeat(
-//      com.jcondotta.bankaccounts.domain.value_objects.contact.Email.MAX_LENGTH + 1
-//    ) + "@email.com";
-//
-//    var request = new AddJointAccountHolderRequest(
-//      VALID_NAME,
-//      VALID_PASSPORT,
-//      VALID_DATE_OF_BIRTH,
-//      longEmail
-//    );
-//
-//    assertThat(VALIDATOR.validate(request))
-//      .hasSize(1)
-//      .first()
-//      .satisfies(violation ->
-//        assertThat(violation.getPropertyPath()).hasToString("email")
-//      );
-//  }
+  private static final Validator VALIDATOR = ValidatorTestFactory.getValidator();
+
+  private static final PersonalInfoRequest VALID_PERSONAL_INFO = new PersonalInfoRequest(
+    PersonalInfoFixtures.JEFFERSON.accountHolderName().firstName(),
+    PersonalInfoFixtures.JEFFERSON.accountHolderName().lastName(),
+    new IdentityDocumentRequest(
+      DocumentTypeRequest.FOREIGNER_ID,
+      DocumentCountryRequest.SPAIN,
+      IdentityDocumentFixtures.SPANISH_NIE.documentNumber().value()
+    ),
+    PersonalInfoFixtures.JEFFERSON.dateOfBirth().value()
+  );
+
+  private static final ContactInfoRequest VALID_CONTACT_INFO = new ContactInfoRequest(
+    ContactInfoFixtures.JEFFERSON.email().value(),
+    ContactInfoFixtures.JEFFERSON.phoneNumber().value()
+  );
+
+  private static final AddressRequest VALID_ADDRESS =
+    new AddressRequest("Carrer de Mallorca", "401", null, "08013", "Barcelona");
+
+  @Test
+  void shouldNotDetectConstraintViolation_whenRequestIsValid() {
+    var request = new AddJointHolderRequest(VALID_PERSONAL_INFO, VALID_CONTACT_INFO, VALID_ADDRESS);
+
+    assertThat(VALIDATOR.validate(request)).isEmpty();
+  }
+
+  @Test
+  void shouldDetectConstraintViolation_whenPersonalInfoIsNull() {
+    var request = new AddJointHolderRequest(null, VALID_CONTACT_INFO, VALID_ADDRESS);
+
+    assertThat(VALIDATOR.validate(request))
+      .hasSize(1)
+      .first()
+      .satisfies(violation -> assertThat(violation.getPropertyPath()).hasToString("personalInfo"));
+  }
+
+  @Test
+  void shouldDetectConstraintViolation_whenContactInfoIsNull() {
+    var request = new AddJointHolderRequest(VALID_PERSONAL_INFO, null, VALID_ADDRESS);
+
+    assertThat(VALIDATOR.validate(request))
+      .hasSize(1)
+      .first()
+      .satisfies(violation -> assertThat(violation.getPropertyPath()).hasToString("contactInfo"));
+  }
+
+  @Test
+  void shouldDetectConstraintViolation_whenAddressIsNull() {
+    var request = new AddJointHolderRequest(VALID_PERSONAL_INFO, VALID_CONTACT_INFO, null);
+
+    assertThat(VALIDATOR.validate(request))
+      .hasSize(1)
+      .first()
+      .satisfies(violation -> assertThat(violation.getPropertyPath()).hasToString("address"));
+  }
+
+  @Test
+  void shouldDetectConstraintViolation_whenPersonalInfoIsInvalid() {
+    var invalidPersonalInfo = new PersonalInfoRequest(null, null, null, null);
+    var request = new AddJointHolderRequest(invalidPersonalInfo, VALID_CONTACT_INFO, VALID_ADDRESS);
+
+    assertThat(VALIDATOR.validate(request)).isNotEmpty();
+  }
 }

@@ -1,7 +1,5 @@
 package com.jcondotta.banking.recipients.integration.testsupport.container;
 
-import com.jcondotta.banking.recipients.integration.testsupport.container.toxiproxy.ProxiedService;
-import com.jcondotta.banking.recipients.integration.testsupport.container.toxiproxy.ToxiproxyContainerSupport;
 import lombok.extern.slf4j.Slf4j;
 import org.testcontainers.lifecycle.Startables;
 import org.testcontainers.postgresql.PostgreSQLContainer;
@@ -19,8 +17,6 @@ public final class PostgreSQLContainerSupport {
     private static final String DATABASE_USERNAME = "admin";
     private static final String DATABASE_PASSWORD = "password";
 
-    private static final String JDBC_URL_TEMPLATE = "jdbc:postgresql://%s:%d/%s";
-
     @SuppressWarnings("resource")
     private static final PostgreSQLContainer POSTGRES = new PostgreSQLContainer(POSTGRES_IMAGE)
       .withDatabaseName(DATABASE_NAME)
@@ -30,17 +26,10 @@ public final class PostgreSQLContainerSupport {
       .withNetworkAliases(POSTGRES_NETWORK_ALIAS)
       .withLogConsumer(outputFrame -> log.info(outputFrame.getUtf8StringWithoutLineEnding()));
 
-    private static final ProxiedService POSTGRES_PROXY;
-    private static final String JDBC_URL;
-
     static {
         try {
             Startables.deepStart(POSTGRES).join();
-
-            POSTGRES_PROXY = ToxiproxyContainerSupport.proxy("postgres", POSTGRES_NETWORK_ALIAS, PostgreSQLContainer.POSTGRESQL_PORT);
-            JDBC_URL = JDBC_URL_TEMPLATE.formatted(POSTGRES_PROXY.host(), POSTGRES_PROXY.port(), DATABASE_NAME);
-
-            log.info("PostgreSQL JDBC URL through Toxiproxy: {}", JDBC_URL);
+            log.info("PostgreSQL JDBC URL: {}", POSTGRES.getJdbcUrl());
         }
         catch (Exception e) {
             log.error("Failed to start PostgreSQL container: {}", e.getMessage());
@@ -51,7 +40,7 @@ public final class PostgreSQLContainerSupport {
     private PostgreSQLContainerSupport() {}
 
     public static String jdbcUrl() {
-        return JDBC_URL;
+        return POSTGRES.getJdbcUrl();
     }
 
     public static String username() {
@@ -60,13 +49,5 @@ public final class PostgreSQLContainerSupport {
 
     public static String password() {
         return POSTGRES.getPassword();
-    }
-
-    public static void cutConnection() {
-        POSTGRES_PROXY.cutConnection();
-    }
-
-    public static void restoreConnection() {
-        POSTGRES_PROXY.restoreConnection();
     }
 }

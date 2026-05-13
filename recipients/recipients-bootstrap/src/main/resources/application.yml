@@ -69,6 +69,10 @@ management:
         url: ${MANAGEMENT_OTLP_METRICS_EXPORT_URL:http://localhost:4318/v1/metrics}
         step: 10s
 
+  loki:
+    logging:
+      url: ${MANAGEMENT_LOKI_LOGGING_URL:http://localhost:3100/loki/api/v1/push}
+
   metrics:
     tags:
       application: ${spring.application.name}

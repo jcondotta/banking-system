@@ -36,7 +36,7 @@
 		<micrometer.version>1.16.4</micrometer.version>
 
 		<commons-validator.version>1.10.1</commons-validator.version>
-		<commons-lang3.version>3.14.0</commons-lang3.version>
+		<commons-lang3.version>3.20.0</commons-lang3.version>
 		<iban4j.version>3.2.1</iban4j.version>
 		<testcontainers.version>2.0.5</testcontainers.version>
 		<rest-assured.version>6.0.0</rest-assured.version>

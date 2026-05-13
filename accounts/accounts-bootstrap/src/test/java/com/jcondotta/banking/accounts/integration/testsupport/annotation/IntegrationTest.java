@@ -1,7 +1,6 @@
 package com.jcondotta.banking.accounts.integration.testsupport.annotation;
 
-import com.jcondotta.banking.accounts.integration.testsupport.container.KafkaTestContainer;
-import com.jcondotta.banking.accounts.integration.testsupport.container.LocalStackTestContainer;
+import com.jcondotta.banking.accounts.integration.testsupport.initializer.AccountsContainersInitializer;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
@@ -19,6 +18,6 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
 @Documented
 @SpringBootTest(webEnvironment = RANDOM_PORT)
 @ActiveProfiles("test")
-@ContextConfiguration(initializers = { LocalStackTestContainer.class, KafkaTestContainer.class })
+@ContextConfiguration(initializers = AccountsContainersInitializer.class)
 public @interface IntegrationTest {
 }

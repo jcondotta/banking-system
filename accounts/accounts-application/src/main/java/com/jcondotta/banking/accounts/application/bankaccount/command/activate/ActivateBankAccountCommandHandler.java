@@ -1,26 +1,24 @@
 package com.jcondotta.banking.accounts.application.bankaccount.command.activate;
 
 import com.jcondotta.application.command.CommandHandler;
-import com.jcondotta.banking.accounts.application.common.log.BankAccountEventType;
 import com.jcondotta.application.logging.LogContext;
 import com.jcondotta.application.logging.LogKey;
-import com.jcondotta.banking.accounts.application.common.log.BankAccountLogKey;
 import com.jcondotta.banking.accounts.application.bankaccount.command.activate.model.ActivateBankAccountCommand;
-import com.jcondotta.banking.accounts.domain.common.FailureReason;
+import com.jcondotta.banking.accounts.application.common.log.BankAccountEventType;
+import com.jcondotta.banking.accounts.application.common.log.BankAccountLogKey;
 import com.jcondotta.banking.accounts.domain.bankaccount.exceptions.BankAccountNotFoundException;
 import com.jcondotta.banking.accounts.domain.bankaccount.repository.BankAccountRepository;
+import com.jcondotta.banking.accounts.domain.common.FailureReason;
 import com.jcondotta.domain.exception.DomainException;
 import io.micrometer.observation.annotation.Observed;
 import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class ActivateBankAccountCommandHandler implements CommandHandler<ActivateBankAccountCommand> {
-
-  private static final Logger LOGGER = LoggerFactory.getLogger(ActivateBankAccountCommandHandler.class);
 
   private final BankAccountRepository bankAccountRepository;
 
@@ -34,7 +32,7 @@ public class ActivateBankAccountCommandHandler implements CommandHandler<Activat
     }
   )
   public void handle(ActivateBankAccountCommand command) {
-    var logContext = LogContext.timed(LOGGER, BankAccountEventType.ACTIVATE)
+    var logContext = LogContext.timed(log, BankAccountEventType.ACTIVATE)
       .with(BankAccountLogKey.BANK_ACCOUNT_ID, command.bankAccountId().value().toString());
 
     try {

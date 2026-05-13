@@ -1,15 +1,6 @@
 package com.jcondotta.banking.accounts.application.bankaccount.command.open;
 
-import ch.qos.logback.classic.Level;
-import ch.qos.logback.classic.spi.ILoggingEvent;
-import ch.qos.logback.core.read.ListAppender;
 import com.jcondotta.application.command.CommandHandlerWithResult;
-import com.jcondotta.banking.accounts.application.common.log.BankAccountEventType;
-import com.jcondotta.application.logging.LogKey;
-import com.jcondotta.banking.accounts.application.common.log.BankAccountLogKey;
-import com.jcondotta.application.logging.LogOutcome;
-import com.jcondotta.application.logging.StructuredLogEventSupport;
-import com.jcondotta.banking.accounts.application.bankaccount.argument_provider.AccountTypeAndCurrencyArgumentsProvider;
 import com.jcondotta.banking.accounts.application.bankaccount.command.open.model.OpenBankAccountCommand;
 import com.jcondotta.banking.accounts.application.bankaccount.ports.output.facade.IbanGeneratorFacade;
 import com.jcondotta.banking.accounts.domain.bankaccount.aggregate.BankAccount;
@@ -24,8 +15,6 @@ import com.jcondotta.domain.exception.DomainException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ArgumentsSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
@@ -49,8 +38,6 @@ class OpenBankAccountCommandHandlerTest {
   @Captor
   private ArgumentCaptor<BankAccount> bankAccountCaptor;
 
-  private ListAppender<ILoggingEvent> logAppender;
-
   private CommandHandlerWithResult<OpenBankAccountCommand, BankAccountId> commandHandler;
 
   @BeforeEach
@@ -59,17 +46,29 @@ class OpenBankAccountCommandHandlerTest {
       bankAccountRepository,
       ibanGeneratorFacade
     );
-    logAppender = StructuredLogEventSupport.attachAppender(OpenBankAccountCommandHandler.class);
   }
 
-  @org.junit.jupiter.api.AfterEach
-  void tearDown() {
-    StructuredLogEventSupport.detachAppender(OpenBankAccountCommandHandler.class, logAppender);
+  @Test
+  void shouldOpenCheckingEuroBankAccount_whenCommandIsValid() {
+    shouldOpenBankAccount_whenCommandIsValid(AccountType.CHECKING, Currency.EUR);
   }
 
-  @ParameterizedTest
-  @ArgumentsSource(AccountTypeAndCurrencyArgumentsProvider.class)
-  void shouldOpenBankAccount_whenCommandIsValid(AccountType accountType, Currency currency) {
+  @Test
+  void shouldOpenCheckingUsdBankAccount_whenCommandIsValid() {
+    shouldOpenBankAccount_whenCommandIsValid(AccountType.CHECKING, Currency.USD);
+  }
+
+  @Test
+  void shouldOpenSavingsEuroBankAccount_whenCommandIsValid() {
+    shouldOpenBankAccount_whenCommandIsValid(AccountType.SAVINGS, Currency.EUR);
+  }
+
+  @Test
+  void shouldOpenSavingsUsdBankAccount_whenCommandIsValid() {
+    shouldOpenBankAccount_whenCommandIsValid(AccountType.SAVINGS, Currency.USD);
+  }
+
+  private void shouldOpenBankAccount_whenCommandIsValid(AccountType accountType, Currency currency) {
     when(ibanGeneratorFacade.generate()).thenReturn(GENERATED_IBAN);
 
     var personalInfo = AccountHolderFixtures.JEFFERSON.personalInfo();
@@ -113,20 +112,10 @@ class OpenBankAccountCommandHandlerTest {
             assertThat(accountHolder.getCreatedAt()).isNotNull();
           });
       });
-
-    assertThat(StructuredLogEventSupport.lastEvent(logAppender, ILoggingEvent::getLevel))
-      .isEqualTo(Level.INFO);
-    assertThat(StructuredLogEventSupport.lastEventKeyValues(logAppender))
-      .containsEntry(LogKey.EVENT_TYPE, BankAccountEventType.OPEN)
-      .containsEntry(LogKey.OUTCOME, LogOutcome.SUCCESS)
-      .containsEntry(BankAccountLogKey.BANK_ACCOUNT_ID, bankAccountCaptor.getValue().getId().value().toString())
-      .containsEntry(BankAccountLogKey.MASKED_IBAN, GENERATED_IBAN.masked());
-    assertThat(StructuredLogEventSupport.eventTypes(logAppender))
-      .allMatch(eventType -> !eventType.contains(".failed"));
   }
 
   @Test
-  void shouldThrowDomainExceptionAndLogMaskedIban_whenRepositoryThrowsDomainException() {
+  void shouldThrowDomainException_whenRepositoryThrowsDomainException() {
     when(ibanGeneratorFacade.generate()).thenReturn(GENERATED_IBAN);
 
     var exception = new TestDomainException();
@@ -143,20 +132,10 @@ class OpenBankAccountCommandHandlerTest {
     verify(ibanGeneratorFacade).generate();
     verify(bankAccountRepository).save(any(BankAccount.class));
     verifyNoMoreInteractions(ibanGeneratorFacade, bankAccountRepository);
-
-    assertThat(StructuredLogEventSupport.lastEvent(logAppender, ILoggingEvent::getLevel))
-      .isEqualTo(Level.WARN);
-    assertThat(StructuredLogEventSupport.lastEventKeyValues(logAppender))
-      .containsEntry(LogKey.EVENT_TYPE, BankAccountEventType.OPEN)
-      .containsEntry(LogKey.OUTCOME, LogOutcome.FAILURE)
-      .containsEntry(LogKey.REASON, "domain_error")
-      .containsEntry(BankAccountLogKey.MASKED_IBAN, GENERATED_IBAN.masked());
-    assertThat(StructuredLogEventSupport.eventTypes(logAppender))
-      .allMatch(eventType -> !eventType.contains(".failed"));
   }
 
   @Test
-  void shouldThrowUnexpectedExceptionAndLogMaskedIban_whenRepositoryThrowsUnexpectedException() {
+  void shouldThrowUnexpectedException_whenRepositoryThrowsUnexpectedException() {
     when(ibanGeneratorFacade.generate()).thenReturn(GENERATED_IBAN);
 
     var exception = new IllegalStateException("database unavailable");
@@ -173,20 +152,10 @@ class OpenBankAccountCommandHandlerTest {
     verify(ibanGeneratorFacade).generate();
     verify(bankAccountRepository).save(any(BankAccount.class));
     verifyNoMoreInteractions(ibanGeneratorFacade, bankAccountRepository);
-
-    assertThat(StructuredLogEventSupport.lastEvent(logAppender, ILoggingEvent::getLevel))
-      .isEqualTo(Level.ERROR);
-    assertThat(StructuredLogEventSupport.lastEventKeyValues(logAppender))
-      .containsEntry(LogKey.EVENT_TYPE, BankAccountEventType.OPEN)
-      .containsEntry(LogKey.OUTCOME, LogOutcome.FAILURE)
-      .containsEntry(LogKey.REASON, "internal_error")
-      .containsEntry(BankAccountLogKey.MASKED_IBAN, GENERATED_IBAN.masked());
-    assertThat(StructuredLogEventSupport.eventTypes(logAppender))
-      .allMatch(eventType -> !eventType.contains(".failed"));
   }
 
   @Test
-  void shouldOmitMaskedIban_whenUnexpectedExceptionHappensBeforeIbanIsGenerated() {
+  void shouldThrowUnexpectedException_whenIbanGenerationFails() {
     var exception = new IllegalStateException("iban generator unavailable");
 
     when(ibanGeneratorFacade.generate())
@@ -199,16 +168,6 @@ class OpenBankAccountCommandHandlerTest {
 
     verify(ibanGeneratorFacade).generate();
     verifyNoInteractions(bankAccountRepository);
-
-    assertThat(StructuredLogEventSupport.lastEvent(logAppender, ILoggingEvent::getLevel))
-      .isEqualTo(Level.ERROR);
-    assertThat(StructuredLogEventSupport.lastEventKeyValues(logAppender))
-      .containsEntry(LogKey.EVENT_TYPE, BankAccountEventType.OPEN)
-      .containsEntry(LogKey.OUTCOME, LogOutcome.FAILURE)
-      .containsEntry(LogKey.REASON, "internal_error")
-      .doesNotContainKey(BankAccountLogKey.MASKED_IBAN);
-    assertThat(StructuredLogEventSupport.eventTypes(logAppender))
-      .allMatch(eventType -> !eventType.contains(".failed"));
   }
 
   private static OpenBankAccountCommand command(AccountType accountType, Currency currency) {

@@ -3,10 +3,10 @@ package com.jcondotta.banking.accounts.outbox.infrastructure.adapters.output.out
 import com.jcondotta.banking.accounts.infrastructure.adapters.output.outbox.entity.OutboxEntity;
 import com.jcondotta.banking.accounts.infrastructure.adapters.output.outbox.store.OutboxQuery;
 import com.jcondotta.banking.accounts.infrastructure.adapters.output.outbox.store.OutboxQueryKey;
+import com.jcondotta.banking.accounts.outbox.infrastructure.adapters.output.outbox.store.exceptions.OutboxEventAlreadyProcessedException;
 import com.jcondotta.banking.accounts.outbox.infrastructure.properties.OutboxProcessingProperties;
 import com.jcondotta.banking.accounts.outbox.infrastructure.properties.OutboxTableProperties;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
 import software.amazon.awssdk.enhanced.dynamodb.Expression;
@@ -23,7 +23,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-@Slf4j
 @Repository
 @RequiredArgsConstructor
 public class OutboxEventStoreImpl implements OutboxEventStore {
@@ -65,7 +64,6 @@ public class OutboxEventStoreImpl implements OutboxEventStore {
       }
     }
 
-    log.debug("[shard={}] fetched {} pending events", query.shard(), items.size());
     return items;
   }
 
@@ -92,7 +90,6 @@ public class OutboxEventStoreImpl implements OutboxEventStore {
 
     try {
       outboxTable.updateItem(request);
-      log.info("Outbox event claimed. eventId={}, gsi1sk={}, retryCount={}", updatedItem.getEventId(), updatedItem.getGsi1sk(), updatedItem.getRetryCount());
       return Optional.of(updatedItem);
 
     }
@@ -120,18 +117,14 @@ public class OutboxEventStoreImpl implements OutboxEventStore {
 
     try {
       outboxTable.deleteItem(request);
-      log.info("Outbox event deleted after publish. eventId={}, aggregateId={}", item.getEventId(), item.getAggregateId());
     }
     catch (ConditionalCheckFailedException e) {
-      log.warn("Outbox event delete skipped — lease was re-claimed before delete completed. eventId={}", item.getEventId());
+      throw new OutboxEventAlreadyProcessedException(item.getEventId(), e);
     }
   }
 
   @Override
   public void deadLetterEvent(OutboxEntity item) {
-    log.error("Outbox event exceeded max retries, moving to dead letter. eventId={}, aggregateId={}, eventType={}, retryCount={}",
-      item.getEventId(), item.getAggregateId(), item.getEventType(), item.getRetryCount());
-
     outboxTable.deleteItem(item);
   }
 }

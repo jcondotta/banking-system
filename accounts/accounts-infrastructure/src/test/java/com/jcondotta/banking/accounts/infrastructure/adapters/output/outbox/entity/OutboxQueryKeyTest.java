@@ -1,7 +1,7 @@
 package com.jcondotta.banking.accounts.infrastructure.adapters.output.outbox.entity;
 
 import com.jcondotta.banking.accounts.infrastructure.adapters.output.outbox.store.OutboxQueryKey;
-import com.jcondotta.banking.accounts.infrastructure.config.ClockTestFactory;
+import com.jcondotta.banking.accounts.domain.testsupport.TimeTestFactory;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -14,7 +14,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 class OutboxQueryKeyTest {
 
   private static final int SHARD = 2;
-  private static final Instant NEXT_ATTEMPT_AT = Instant.now(ClockTestFactory.FIXED_CLOCK);
+  private static final Instant NEXT_ATTEMPT_AT = TimeTestFactory.FIXED_INSTANT;
 
   @Test
   void shouldCreateKey_whenShardAndNextAttemptAtAreValid() {

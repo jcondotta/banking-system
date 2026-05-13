@@ -4,6 +4,7 @@ server:
 spring:
   application:
     name: accounts-outbox-service
+    version: "@project.version@"
   kafka:
     bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS}
     producer:
@@ -56,27 +57,44 @@ app:
         topic-name: ${KAFKA_JOINT_ACCOUNT_HOLDER_ADDED_TOPIC_NAME}
 
 management:
+  endpoint:
+    health:
+      probes:
+        enabled: true
+
   endpoints:
     web:
       exposure:
-        include: health, prometheus, metrics
+        include: health, metrics, prometheus
+
+  observations:
+    annotations:
+      enabled: true
+
+  otlp:
+    metrics:
+      export:
+        enabled: ${MANAGEMENT_OTLP_METRICS_EXPORT_ENABLED:false}
+        url: ${MANAGEMENT_OTLP_METRICS_EXPORT_URL:http://localhost:4318/v1/metrics}
+        step: 10s
+
   metrics:
     tags:
       application: ${spring.application.name}
+
+    enable:
+      accounts.outbox.dispatch.active: false
+      accounts.outbox.process.active: false
+      accounts.outbox.publish.active: false
+
     distribution:
       percentiles-histogram:
         http.server.requests: true
-        outbox.process.duration: true
-        outbox.publish.duration: true
-        outbox.shard.wait.duration: true
+        accounts.outbox.dispatch: true
+        accounts.outbox.process: true
+        accounts.outbox.publish: true
       percentiles:
-        http.server.requests: 0.5, 0.95, 0.99
-        outbox.process.duration: 0.5, 0.95, 0.99
-        outbox.publish.duration: 0.5, 0.95, 0.99
-        outbox.shard.wait.duration: 0.5, 0.95, 0.99
-      expiry:
-        outbox.publish.duration: 5m
-        outbox.shard.wait.duration: 5m
-      buffer-length:
-        outbox.publish.duration: 3
-        outbox.shard.wait.duration: 3
+        http.server.requests: 0.5, 0.9, 0.99
+        accounts.outbox.dispatch: 0.5, 0.9, 0.99
+        accounts.outbox.process: 0.5, 0.9, 0.99
+        accounts.outbox.publish: 0.5, 0.9, 0.99

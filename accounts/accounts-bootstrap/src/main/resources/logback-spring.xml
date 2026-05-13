@@ -1,17 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <configuration>
 
-    <springProperty scope="context" name="appName" source="spring.application.name"/>
+    <conversionRule conversionWord="clr"
+                    class="org.springframework.boot.logging.logback.ColorConverter"/>
 
-    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
-        <encoder>
-            <pattern>%cyan(%d{HH:mm:ss.SSS}) %white([%thread]) %highlight(%-5level) %yellow(${appName}) %magenta(%logger{36}) - %msg%n</pattern>
-        </encoder>
+    <springProperty name="SERVICE_NAME" source="spring.application.name" defaultValue="unknown"/>
+    <springProperty name="SERVICE_VERSION" source="spring.application.version" defaultValue="unknown"/>
+    <springProperty name="LOKI_URL" source="management.loki.logging.url" defaultValue="http://localhost:3100/loki/api/v1/push"/>
+
+    <appender name="LOKI" class="com.github.loki4j.logback.Loki4jAppender">
+        <http>
+            <url>${LOKI_URL}</url>
+        </http>
+        <format>
+            <label>
+                <pattern>application=${SERVICE_NAME},level=%level</pattern>
+            </label>
+            <message class="net.logstash.logback.layout.LogstashLayout">
+                <customFields>{"service":"${SERVICE_NAME}","service_version":"${SERVICE_VERSION}"}</customFields>
+                <includeStructuredArguments>true</includeStructuredArguments>
+                <includeKeyValuePairs>true</includeKeyValuePairs>
+                <includeMdc>true</includeMdc>
+                <fieldNames>
+                    <version>[ignore]</version>
+                    <thread>[ignore]</thread>
+                    <levelValue>[ignore]</levelValue>
+                </fieldNames>
+            </message>
+        </format>
     </appender>
 
-    <root level="INFO">
-        <appender-ref ref="STDOUT"/>
-    </root>
+    <springProfile name="local">
+        <appender name="LOCAL_CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+            <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+                <pattern>%clr(%d{HH:mm:ss.SSS}){faint} %clr(%-5level) %clr(%logger{36}){cyan} %clr([%X{correlationId}]){magenta} %msg %clr(%kvp){bright_black}%n</pattern>
+            </encoder>
+        </appender>
 
-    <logger name="com.jcondotta.banking.accounts.infrastructure" level="DEBUG"/>
+        <root level="INFO">
+            <appender-ref ref="LOCAL_CONSOLE"/>
+            <appender-ref ref="LOKI"/>
+        </root>
+        <logger name="org.springframework" level="WARN"/>
+        <logger name="software.amazon.awssdk" level="WARN"/>
+        <logger name="org.apache.kafka" level="WARN"/>
+        <logger name="com.jcondotta" level="INFO"/>
+    </springProfile>
+
+    <springProfile name="!local">
+        <appender name="JSON_CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+            <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+                <customFields>{"service":"${SERVICE_NAME}","service_version":"${SERVICE_VERSION}"}</customFields>
+                <includeStructuredArguments>true</includeStructuredArguments>
+                <includeKeyValuePairs>true</includeKeyValuePairs>
+                <includeMdc>true</includeMdc>
+                <fieldNames>
+                    <version>[ignore]</version>
+                    <thread>[ignore]</thread>
+                    <levelValue>[ignore]</levelValue>
+                </fieldNames>
+            </encoder>
+        </appender>
+
+        <root level="INFO">
+            <appender-ref ref="JSON_CONSOLE"/>
+            <appender-ref ref="LOKI"/>
+        </root>
+        <logger name="org.springframework" level="WARN"/>
+        <logger name="software.amazon.awssdk" level="WARN"/>
+        <logger name="org.apache.kafka" level="WARN"/>
+        <logger name="com.jcondotta" level="INFO"/>
+    </springProfile>
 
 </configuration>

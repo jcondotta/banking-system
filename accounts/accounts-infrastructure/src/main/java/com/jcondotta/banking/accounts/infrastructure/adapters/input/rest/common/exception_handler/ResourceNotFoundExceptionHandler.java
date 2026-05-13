@@ -3,31 +3,30 @@ package com.jcondotta.banking.accounts.infrastructure.adapters.input.rest.common
 import com.jcondotta.banking.infrastructure.adapters.output.rest.exceptionhandler.ProblemTypes;
 import com.jcondotta.domain.exception.DomainNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.net.URI;
 
 @RestControllerAdvice
+@Order(Ordered.HIGHEST_PRECEDENCE)
 public class ResourceNotFoundExceptionHandler {
 
-  static final String TITLE_RESOURCE_NOT_FOUND = "Not Found";
+  static final HttpStatus HTTP_STATUS_NOT_FOUND = HttpStatus.NOT_FOUND;
 
-  @ResponseStatus(HttpStatus.NOT_FOUND)
   @ExceptionHandler(DomainNotFoundException.class)
-  public ResponseEntity<ProblemDetail> handleResourceNotFound(DomainNotFoundException ex, HttpServletRequest request) {
-    var problemDetail = ProblemDetail.forStatus(HttpStatus.NOT_FOUND);
+  public ResponseEntity<ProblemDetail> handleNotFound(DomainNotFoundException ex, HttpServletRequest request) {
+    var problemDetail = ProblemDetail.forStatus(HTTP_STATUS_NOT_FOUND);
     problemDetail.setType(ProblemTypes.RESOURCE_NOT_FOUND);
-    problemDetail.setTitle(TITLE_RESOURCE_NOT_FOUND);
+    problemDetail.setTitle(HTTP_STATUS_NOT_FOUND.getReasonPhrase());
     problemDetail.setDetail(ex.getMessage());
     problemDetail.setInstance(URI.create(request.getRequestURI()));
 
-    return ResponseEntity
-      .status(HttpStatus.NOT_FOUND.value())
-      .body(problemDetail);
+    return ResponseEntity.of(problemDetail).build();
   }
 }

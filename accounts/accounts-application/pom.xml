@@ -99,6 +99,11 @@
             <plugin>
                 <groupId>org.pitest</groupId>
                 <artifactId>pitest-maven</artifactId>
+                <configuration>
+                    <avoidCallsTo>
+                        <param>com.jcondotta.application.logging.LogEvent</param>
+                    </avoidCallsTo>
+                </configuration>
             </plugin>
         </plugins>
     </build>

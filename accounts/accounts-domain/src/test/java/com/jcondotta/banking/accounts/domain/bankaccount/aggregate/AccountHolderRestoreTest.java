@@ -1,7 +1,7 @@
 package com.jcondotta.banking.accounts.domain.bankaccount.aggregate;
 
 import com.jcondotta.banking.accounts.domain.bankaccount.enums.HolderType;
-import com.jcondotta.banking.accounts.domain.bankaccount.factory.ClockTestFactory;
+import com.jcondotta.banking.accounts.domain.testsupport.TimeTestFactory;
 import com.jcondotta.banking.accounts.domain.bankaccount.fixtures.AccountHolderFixtures;
 import com.jcondotta.banking.accounts.domain.bankaccount.identity.AccountHolderId;
 import com.jcondotta.banking.accounts.domain.bankaccount.validation.AccountHolderErrors;
@@ -18,7 +18,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 class AccountHolderRestoreTest {
 
   private static final AccountHolderFixtures PRIMARY_ACCOUNT_HOLDER = AccountHolderFixtures.JEFFERSON;
-  private static final Instant CREATED_AT = Instant.now(ClockTestFactory.FIXED_CLOCK);
+  private static final Instant CREATED_AT = TimeTestFactory.FIXED_INSTANT;
 
   @ParameterizedTest
   @EnumSource(HolderType.class)

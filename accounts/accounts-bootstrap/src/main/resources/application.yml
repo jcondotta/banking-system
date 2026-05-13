@@ -3,7 +3,14 @@ server:
 
 spring:
   application:
-    name: accounts-service
+    name: accounts
+    version: "@project.version@"
+  mvc:
+    apiversion:
+      supported:
+        - "1.0"
+      use:
+        header: X-API-Version
   kafka:
     bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS}
     producer:
@@ -17,6 +24,14 @@ spring:
         spring.json.write-dates-as-timestamps: false
 
 app:
+  kafka:
+    topics:
+      bank-account-opened:
+        topic-name: ${KAFKA_BANK_ACCOUNT_OPENED_TOPIC_NAME}
+      bank-account-status-changed:
+        topic-name: ${KAFKA_BANK_ACCOUNT_STATUS_CHANGED_TOPIC_NAME}
+      joint-account-holder-added:
+        topic-name: ${KAFKA_JOINT_ACCOUNT_HOLDER_ADDED_TOPIC_NAME}
   outbox:
     shards:
       count: 4
@@ -35,31 +50,69 @@ cloud:
           table-name: ${AWS_DYNAMODB_BANK_ACCOUNTS_TABLE_NAME}
 
 api:
-  v1:
-    bank-accounts:
-      root-path: '/api/v1/bank-accounts'
-      bank-account-id-path: '/api/v1/bank-accounts/{bank-account-id}'
-      account-holders-path: '/api/v1/bank-accounts/{bank-account-id}/account-holders'
+  bank-accounts:
+    root-path: '/api/bank-accounts'
+    bank-account-id-path: '/api/bank-accounts/{bank-account-id}'
+    account-holders-path: '/api/bank-accounts/{bank-account-id}/account-holders'
 
 management:
+  endpoint:
+    health:
+      probes:
+        enabled: true
+
   endpoints:
     web:
       exposure:
-        include: health, prometheus, metrics
+        include: health, metrics, prometheus
+
+  observations:
+    annotations:
+      enabled: true
+
+  otlp:
+    metrics:
+      export:
+        enabled: ${MANAGEMENT_OTLP_METRICS_EXPORT_ENABLED:false}
+        url: ${MANAGEMENT_OTLP_METRICS_EXPORT_URL:http://localhost:4318/v1/metrics}
+        step: 10s
+
+  loki:
+    logging:
+      url: ${MANAGEMENT_LOKI_LOGGING_URL:http://localhost:3100/loki/api/v1/push}
+
   metrics:
     tags:
       application: ${spring.application.name}
+
+    enable:
+      accounts.open.active: false
+      accounts.activate.active: false
+      accounts.block.active: false
+      accounts.unblock.active: false
+      accounts.close.active: false
+      accounts.addJointHolder.active: false
+      accounts.getById.active: false
+
     distribution:
       percentiles-histogram:
         http.server.requests: true
-        bankAccounts.open: true
-        bankAccounts.activate: true
-        bankAccounts.block: true
+        accounts.open: true
+        accounts.activate: true
+        accounts.block: true
+        accounts.unblock: true
+        accounts.close: true
+        accounts.addJointHolder: true
+        accounts.getById: true
       percentiles:
-        http.server.requests: 0.5, 0.95, 0.99
-        bankAccounts.open: 0.5, 0.95, 0.99
-        bankAccounts.activate: 0.5, 0.95, 0.99
-        bankAccounts.block: 0.5, 0.95, 0.99
+        http.server.requests: 0.5, 0.9, 0.99
+        accounts.open: 0.5, 0.9, 0.99
+        accounts.activate: 0.5, 0.9, 0.99
+        accounts.block: 0.5, 0.9, 0.99
+        accounts.unblock: 0.5, 0.9, 0.99
+        accounts.close: 0.5, 0.9, 0.99
+        accounts.addJointHolder: 0.5, 0.9, 0.99
+        accounts.getById: 0.5, 0.9, 0.99
 #      expiry:
 #        outbox.publish.duration: 5m
 #        outbox.shard.wait.duration: 5m

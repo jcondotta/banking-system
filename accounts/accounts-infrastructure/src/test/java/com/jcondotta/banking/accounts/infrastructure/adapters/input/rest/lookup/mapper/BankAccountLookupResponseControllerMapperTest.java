@@ -1,69 +1,90 @@
 package com.jcondotta.banking.accounts.infrastructure.adapters.input.rest.lookup.mapper;
 
+import com.jcondotta.banking.accounts.application.bankaccount.query.get.model.*;
+import com.jcondotta.banking.accounts.domain.bankaccount.enums.AccountStatus;
+import com.jcondotta.banking.accounts.domain.bankaccount.enums.AccountType;
+import com.jcondotta.banking.accounts.domain.bankaccount.enums.Currency;
+import com.jcondotta.banking.accounts.domain.bankaccount.enums.HolderType;
+import com.jcondotta.banking.accounts.domain.testsupport.AddressFixtures;
+import com.jcondotta.banking.accounts.domain.testsupport.ContactInfoFixtures;
+import com.jcondotta.banking.accounts.domain.testsupport.IdentityDocumentFixtures;
+import com.jcondotta.banking.accounts.domain.testsupport.PersonalInfoFixtures;
+import com.jcondotta.banking.accounts.infrastructure.adapters.input.rest.lookup.model.AccountHolderDetailsResponse;
+import com.jcondotta.banking.accounts.infrastructure.adapters.input.rest.lookup.model.BankAccountDetailsResponse;
+import com.jcondotta.banking.accounts.domain.testsupport.TimeTestFactory;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
+
+import java.time.Instant;
+import java.util.List;
+import java.util.UUID;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
 class BankAccountLookupResponseControllerMapperTest {
 
-//  private static final BankAccountId BANK_ACCOUNT_ID = BankAccountId.newId();
-//  private static final AccountType ACCOUNT_TYPE_CHECKING = AccountType.CHECKING;
-//  private static final Currency CURRENCY_EUR = Currency.EUR;
-//  private static final AccountStatus ACCOUNT_STATUS_ACTIVE = AccountStatus.ACTIVE;
-//
-//  private static final AccountHolderId ACCOUNT_HOLDER_ID = AccountHolderId.newId();
-//
-//  private static final AccountHolderName VALID_NAME = AccountHolderFixtures.JEFFERSON.getAccountHolderName();
-//  private static final PassportNumber VALID_PASSPORT = AccountHolderFixtures.JEFFERSON.getPassportNumber();
-//  private static final DateOfBirth VALID_DATE_OF_BIRTH = AccountHolderFixtures.JEFFERSON.getDateOfBirth();
-//  private static final Email VALID_EMAIL = AccountHolderFixtures.JEFFERSON.getEmail();
-//
-//  private static final Instant CREATED_AT = Instant.now(ClockTestFactory.FIXED_CLOCK);
-//
-//  public static final Iban VALID_IBAN = Iban.of("ES3801283316232166447417");
-//
-//  private final BankAccountLookupResponseControllerMapper mapper =
-//    new BankAccountLookupResponseControllerMapperImpl(new AccountHolderDetailsResponseMapperImpl());
-//
-//  @ParameterizedTest
-//  @EnumSource(AccountHolderType.class)
-//  void shouldMapBankAccountDetailsToLookupResponse_whenValuesAreValid(AccountHolderType type) {
-//    AccountHolderDetails accountHolderDetails = new AccountHolderDetails(
-//      ACCOUNT_HOLDER_ID,
-//      VALID_NAME,
-//      VALID_PASSPORT,
-//      VALID_DATE_OF_BIRTH,
-//      VALID_EMAIL,
-//      type,
-//      CREATED_AT
-//    );
-//
-//    BankAccountDetails bankAccountDetails = new BankAccountDetails(
-//      BANK_ACCOUNT_ID,
-//      ACCOUNT_TYPE_CHECKING,
-//      CURRENCY_EUR,
-//      VALID_IBAN,
-//      ACCOUNT_STATUS_ACTIVE,
-//      CREATED_AT,
-//      List.of(accountHolderDetails)
-//    );
-//
-//    BankAccountLookupResponse response = mapper.toResponse(bankAccountDetails);
-//
-//    assertThat(response).isNotNull();
-//
-//    BankAccountDetailsResponse details = response.bankAccount();
-//    assertThat(details.id()).isEqualTo(BANK_ACCOUNT_ID.value());
-//    assertThat(details.accountType()).isEqualTo(ACCOUNT_TYPE_CHECKING);
-//    assertThat(details.currency()).isEqualTo(CURRENCY_EUR);
-//    assertThat(details.iban()).isEqualTo(VALID_IBAN.value());
-//    assertThat(details.createdAt()).isEqualTo(CREATED_AT);
-//    assertThat(details.accountStatus()).isEqualTo(ACCOUNT_STATUS_ACTIVE);
-//
-//    assertThat(details.holders()).hasSize(1);
-//    AccountHolderDetailsResponse holder = details.holders().getFirst();
-//    assertThat(holder.id()).isEqualTo(ACCOUNT_HOLDER_ID.value());
-//    assertThat(holder.holderName()).isEqualTo(VALID_NAME.value());
-//    assertThat(holder.passportNumber()).isEqualTo(VALID_PASSPORT.value());
-//    assertThat(holder.dateOfBirth()).isEqualTo(VALID_DATE_OF_BIRTH.value());
-//    assertThat(holder.email()).isEqualTo(VALID_EMAIL.value());
-//    assertThat(holder.type()).isEqualTo(type);
-//    assertThat(holder.createdAt()).isEqualTo(CREATED_AT);
-//  }
+  private static final UUID BANK_ACCOUNT_ID = UUID.randomUUID();
+  private static final UUID ACCOUNT_HOLDER_ID = UUID.randomUUID();
+  private static final String VALID_IBAN = "ES3801283316232166447417";
+  private static final Instant CREATED_AT = TimeTestFactory.FIXED_INSTANT;
+
+  private final BankAccountLookupResponseControllerMapper mapper =
+    new BankAccountLookupResponseControllerMapperImpl(new AccountHolderDetailsResponseMapperImpl());
+
+  @ParameterizedTest
+  @EnumSource(HolderType.class)
+  void shouldMapBankAccountSummaryToBankAccountDetailsResponse_whenValuesAreValid(HolderType holderType) {
+    var identityDocument = new IdentityDocumentSummary(
+      IdentityDocumentFixtures.SPANISH_NIE.country().name(),
+      IdentityDocumentFixtures.SPANISH_NIE.documentType().name(),
+      IdentityDocumentFixtures.SPANISH_NIE.documentNumber().value()
+    );
+    var personalInfo = new PersonalInfoSummary(
+      PersonalInfoFixtures.JEFFERSON.accountHolderName().firstName(),
+      PersonalInfoFixtures.JEFFERSON.accountHolderName().lastName(),
+      identityDocument,
+      PersonalInfoFixtures.JEFFERSON.dateOfBirth().value()
+    );
+    var contactInfo = new ContactInfoSummary(
+      ContactInfoFixtures.JEFFERSON.email().value(),
+      ContactInfoFixtures.JEFFERSON.phoneNumber().value()
+    );
+    var address = new AddressSummary(
+      AddressFixtures.BARCELONA_APT.address().street().value(),
+      AddressFixtures.BARCELONA_APT.address().streetNumber().value(),
+      AddressFixtures.BARCELONA_APT.address().addressComplement().value(),
+      AddressFixtures.BARCELONA_APT.address().postalCode().value(),
+      AddressFixtures.BARCELONA_APT.address().city().value()
+    );
+    var holderSummary = new AccountHolderSummary(ACCOUNT_HOLDER_ID, personalInfo, contactInfo, address, holderType, CREATED_AT);
+    var bankAccountSummary = new BankAccountSummary(
+      BANK_ACCOUNT_ID,
+      AccountType.CHECKING,
+      Currency.EUR,
+      VALID_IBAN,
+      AccountStatus.ACTIVE,
+      CREATED_AT,
+      List.of(holderSummary)
+    );
+
+    BankAccountDetailsResponse response = mapper.toBankAccountDetailsResponse(bankAccountSummary);
+
+    assertThat(response).isNotNull();
+    assertThat(response.id()).isEqualTo(BANK_ACCOUNT_ID);
+    assertThat(response.accountType().name()).isEqualTo(AccountType.CHECKING.name());
+    assertThat(response.currency().name()).isEqualTo(Currency.EUR.name());
+    assertThat(response.iban()).isEqualTo(VALID_IBAN);
+    assertThat(response.accountStatus().name()).isEqualTo(AccountStatus.ACTIVE.name());
+    assertThat(response.createdAt()).isEqualTo(CREATED_AT);
+
+    assertThat(response.holders()).hasSize(1);
+    AccountHolderDetailsResponse holder = response.holders().getFirst();
+    assertThat(holder.id()).isEqualTo(ACCOUNT_HOLDER_ID);
+    assertThat(holder.type().name()).isEqualTo(holderType.name());
+    assertThat(holder.personalInfo().firstName()).isEqualTo(personalInfo.firstName());
+    assertThat(holder.personalInfo().lastName()).isEqualTo(personalInfo.lastName());
+    assertThat(holder.contactInfo().email()).isEqualTo(contactInfo.email());
+    assertThat(holder.address().street()).isEqualTo(address.street());
+    assertThat(holder.createdAt()).isEqualTo(CREATED_AT);
+  }
 }

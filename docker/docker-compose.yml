@@ -1,34 +1,24 @@
-services:
+name: banking
 
-  localstack:
-    container_name: "banking-system-localstack-4.6.0"
-    image: localstack/localstack:4.6.0
+services:
+  lgtm:
+    image: grafana/otel-lgtm:latest
     ports:
-      - '127.0.0.1:4566:4566'
-    environment:
-      SERVICES: dynamodb
-      AWS_ACCESS_KEY_ID: test
-      AWS_SECRET_ACCESS_KEY: test
-      AWS_DEFAULT_REGION: us-east-1
-      LS_LOG: ${LS_LOG:-debug}
-    healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:4566/_localstack/health" ]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    networks:
-      - banking_system_network
+      - "3000:3000"   # Grafana
+      - "4317:4317"   # OTLP gRPC
+      - "4318:4318"   # OTLP HTTP
+      - "3100:3100"   # Loki
     volumes:
-      - '/var/run/docker.sock:/var/run/docker.sock'
-      - ./localstack:/etc/localstack/init/ready.d
-      - banking_system_localstack_volume:/var/lib/localstack
+      - lgtm_data:/data
+    networks:
+      - banking_network
 
   kafka-1:
     image: confluentinc/cp-kafka:7.6.0
-    container_name: bank-accounts-kafka-1
+    container_name: banking-kafka-1
     hostname: kafka-1
     networks:
-      - banking_system_network
+      - banking_network
     ports:
       - "9092:9092"
     environment:
@@ -62,25 +52,24 @@ services:
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
 
       KAFKA_LOG_DIRS: /var/lib/kafka/data
-
     volumes:
-      - banking_system_kafka_1_volume:/var/lib/kafka/data
+      - kafka_1_data:/var/lib/kafka/data
 
   kafka-init:
     image: confluentinc/cp-kafka:7.6.0
-    container_name: bank-accounts-kafka-init
+    container_name: banking-kafka-init
     restart: no
     depends_on:
       - kafka-1
     networks:
-      - banking_system_network
+      - banking_network
     volumes:
       - ./kafka/01-create-topics.sh:/usr/local/bin/01-create-topics.sh
     entrypoint: [ "/bin/bash", "/usr/local/bin/01-create-topics.sh" ]
 
   kafka-ui:
     image: provectuslabs/kafka-ui:latest
-    container_name: bank-accounts-kafka-ui
+    container_name: banking-kafka-ui
     ports:
       - "8085:8080"
     environment:
@@ -88,14 +77,14 @@ services:
       KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: >
         kafka-1:29092
     networks:
-      - banking_system_network
+      - banking_network
 
 volumes:
-  banking_system_localstack_volume:
-    name: banking-system-localstack-data
-  banking_system_kafka_1_volume:
-    name: banking-system-kafka-1-data
+  lgtm_data:
+    name: banking-lgtm-data
+  kafka_1_data:
+    name: banking-kafka-1-data
 
 networks:
-  banking_system_network:
-    name: banking-system_network
+  banking_network:
+    name: banking_network

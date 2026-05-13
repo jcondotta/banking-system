@@ -5,7 +5,7 @@ import com.jcondotta.banking.accounts.domain.bankaccount.enums.AccountType;
 import com.jcondotta.banking.accounts.domain.bankaccount.enums.Currency;
 import com.jcondotta.banking.accounts.domain.bankaccount.events.BankAccountStatusChangedEvent;
 import com.jcondotta.banking.accounts.domain.bankaccount.exceptions.InvalidBankAccountStateTransitionException;
-import com.jcondotta.banking.accounts.domain.bankaccount.factory.ClockTestFactory;
+import com.jcondotta.banking.accounts.domain.testsupport.TimeTestFactory;
 import com.jcondotta.banking.accounts.domain.bankaccount.fixtures.AccountHolderFixtures;
 import com.jcondotta.banking.accounts.domain.bankaccount.fixtures.BankAccountTestFixture;
 import com.jcondotta.banking.accounts.domain.bankaccount.identity.BankAccountId;
@@ -27,7 +27,7 @@ class BankAccountCloseTest {
   private static final AccountType ACCOUNT_TYPE_SAVINGS = AccountType.SAVINGS;
   private static final Currency CURRENCY_USD = Currency.USD;
 
-  private static final Instant ACCOUNT_CREATED_AT = Instant.now(ClockTestFactory.FIXED_CLOCK);
+  private static final Instant ACCOUNT_CREATED_AT = TimeTestFactory.FIXED_INSTANT;
 
   @Test
   void shouldCloseBankAccount_whenStatusIsActive() {

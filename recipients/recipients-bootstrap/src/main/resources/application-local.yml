@@ -1,3 +1,6 @@
+server:
+  port: 8081
+
 spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/recipients_db?connectTimeout=3&socketTimeout=5
@@ -8,6 +11,10 @@ spring:
     show-sql: false
 
 management:
+  loki:
+    logging:
+      url: http://localhost:3100/loki/api/v1/push
+
   otlp:
     metrics:
       export:

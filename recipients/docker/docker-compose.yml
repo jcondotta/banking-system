@@ -1,5 +1,5 @@
+name: recipients
 services:
-
   postgres:
     image: postgres:17-alpine
     container_name: recipients-postgres-17
@@ -15,22 +15,15 @@ services:
       timeout: 5s
       retries: 5
     networks:
-      - recipients_network
+      - banking_network
     volumes:
       - recipients_postgres_volume:/var/lib/postgresql/data
-
-  lgtm:
-    image: grafana/otel-lgtm:latest
-    ports:
-      - "3000:3000"   # Grafana
-      - "4317:4317"   # OTLP gRPC
-      - "4318:4318"   # OTLP HTTP
-      - "3100:3100"   # Loki
 
 volumes:
   recipients_postgres_volume:
     name: recipients-postgres-data
 
 networks:
-  recipients_network:
-    name: recipients_network
+  banking_network:
+    external: true
+    name: banking_network

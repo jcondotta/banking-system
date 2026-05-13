@@ -1,5 +1,7 @@
 package com.jcondotta.banking.accounts.infrastructure.adapters.input.rest.block;
 
+import com.jcondotta.application.command.CommandHandler;
+import com.jcondotta.banking.accounts.application.bankaccount.command.block.model.BlockBankAccountCommand;
 import com.jcondotta.banking.accounts.domain.bankaccount.identity.BankAccountId;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -18,31 +20,31 @@ import static org.mockito.Mockito.verify;
 @ExtendWith(MockitoExtension.class)
 class BlockBankAccountControllerImplTest {
 
-//  private static final UUID BANK_ACCOUNT_UUID = BankAccountId.newId().value();
-//
-//  @Mock
-//  private BlockBankAccountUseCase useCase;
-//
-//  @Captor
-//  ArgumentCaptor<BlockBankAccountCommand> commandCaptor;
-//
-//  private BlockBankAccountControllerImpl controller;
-//
-//  @BeforeEach
-//  void setUp() {
-//    controller = new BlockBankAccountControllerImpl(useCase);
-//  }
-//
-//  @Test
-//  void shouldBlockBankAccountAndReturnNoContent() {
-//    ResponseEntity<Void> response = controller.block(BANK_ACCOUNT_UUID);
-//
-//    verify(useCase).execute(commandCaptor.capture());
-//
-//    BlockBankAccountCommand command = commandCaptor.getValue();
-//    assertThat(command.bankAccountId()).isEqualTo(BankAccountId.of(BANK_ACCOUNT_UUID));
-//
-//    assertThat(response.getStatusCode().value()).isEqualTo(204);
-//    assertThat(response.getBody()).isNull();
-//  }
+  private static final UUID BANK_ACCOUNT_UUID = BankAccountId.newId().value();
+
+  @Mock
+  private CommandHandler<BlockBankAccountCommand> commandHandler;
+
+  @Captor
+  ArgumentCaptor<BlockBankAccountCommand> commandCaptor;
+
+  private BlockBankAccountControllerImpl controller;
+
+  @BeforeEach
+  void setUp() {
+    controller = new BlockBankAccountControllerImpl(commandHandler);
+  }
+
+  @Test
+  void shouldBlockBankAccountAndReturnNoContent() {
+    ResponseEntity<Void> response = controller.block(BANK_ACCOUNT_UUID);
+
+    verify(commandHandler).handle(commandCaptor.capture());
+
+    BlockBankAccountCommand command = commandCaptor.getValue();
+    assertThat(command.bankAccountId()).isEqualTo(BankAccountId.of(BANK_ACCOUNT_UUID));
+
+    assertThat(response.getStatusCode().value()).isEqualTo(204);
+    assertThat(response.getBody()).isNull();
+  }
 }

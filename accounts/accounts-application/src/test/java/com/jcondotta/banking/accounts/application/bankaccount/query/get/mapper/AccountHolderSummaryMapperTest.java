@@ -9,6 +9,8 @@ import org.junit.jupiter.api.Test;
 import java.time.Instant;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.mock;
 
 class AccountHolderSummaryMapperTest {
 
@@ -41,6 +43,15 @@ class AccountHolderSummaryMapperTest {
   @Test
   void shouldReturnNull_whenAccountHolderIsNull() {
     assertThat(mapper.toSummary(null)).isNull();
+  }
+
+  @Test
+  void shouldThrowNullPointerException_whenAccountHolderIdIsNull() {
+    var accountHolder = mock(AccountHolder.class);
+
+    assertThatThrownBy(() -> mapper.toSummary(accountHolder))
+      .isInstanceOf(NullPointerException.class)
+      .hasMessage("id must be provided");
   }
 
   private void assertPersonalInfo(AccountHolderSummary details, AccountHolder accountHolder) {

@@ -1,73 +1,72 @@
 package com.jcondotta.banking.accounts.infrastructure.adapters.input.rest.open.mapper;
 
+import com.jcondotta.banking.accounts.application.bankaccount.command.open.model.OpenBankAccountCommand;
+import com.jcondotta.banking.accounts.domain.bankaccount.enums.AccountType;
+import com.jcondotta.banking.accounts.domain.bankaccount.enums.Currency;
+import com.jcondotta.banking.accounts.domain.testsupport.ContactInfoFixtures;
+import com.jcondotta.banking.accounts.domain.testsupport.IdentityDocumentFixtures;
+import com.jcondotta.banking.accounts.domain.testsupport.PersonalInfoFixtures;
+import com.jcondotta.banking.accounts.infrastructure.adapters.input.rest.common.*;
+import com.jcondotta.banking.accounts.infrastructure.adapters.input.rest.open.model.AccountTypeRequest;
+import com.jcondotta.banking.accounts.infrastructure.adapters.input.rest.open.model.CurrencyRequest;
+import com.jcondotta.banking.accounts.infrastructure.adapters.input.rest.open.model.OpenBankAccountRequest;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
+import org.mapstruct.factory.Mappers;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
 class OpenBankAccountRequestControllerMapperTest {
 
-//  private static final String VALID_NAME = AccountHolderFixtures.JEFFERSON.getAccountHolderName().value();
-//  private static final String VALID_PASSPORT = AccountHolderFixtures.JEFFERSON.getPassportNumber().value();
-//  private static final LocalDate VALID_DATE_OF_BIRTH = AccountHolderFixtures.JEFFERSON.getDateOfBirth().value();
-//  private static final String VALID_EMAIL = AccountHolderFixtures.JEFFERSON.getEmail().value();
-//
-//  private final OpenBankAccountRequestControllerMapper mapper = Mappers.getMapper(OpenBankAccountRequestControllerMapper.class);
-//
-//  @ParameterizedTest
-//  @ArgumentsSource(AccountTypeAndCurrencyArgumentsProvider.class)
-//  void shouldMapOpenBankAccountRequestToCommand_whenValueAreValid(AccountType accountType, Currency currency) {
-//    var accountHolderRequest = new PrimaryAccountHolderRequest(
-//        VALID_NAME,
-//        VALID_PASSPORT,
-//        VALID_DATE_OF_BIRTH,
-//        VALID_EMAIL
-//      );
-//
-//    OpenBankAccountRequest request = new OpenBankAccountRequest(
-//        accountType,
-//        currency,
-//        accountHolderRequest
-//      );
-//
-//    OpenBankAccountCommand command = mapper.toCommand(request);
-//
-//    assertThat(command).isNotNull();
-//    assertThat(command.holderName().value()).isEqualTo(VALID_NAME);
-//    assertThat(command.passportNumber().value()).isEqualTo(VALID_PASSPORT);
-//    assertThat(command.dateOfBirth().value()).isEqualTo(VALID_DATE_OF_BIRTH);
-//    assertThat(command.email().value()).isEqualTo(VALID_EMAIL);
-//
-//    assertThat(command.accountType()).isEqualTo(accountType);
-//    assertThat(command.currency()).isEqualTo(currency);
-//  }
-//
-//  @Test
-//  void shouldConvertStringToAccountHolderName_whenValueIsValid() {
-//    AccountHolderName accountHolderName = mapper.toAccountHolderName(VALID_NAME);
-//
-//    assertThat(accountHolderName.value()).isEqualTo(VALID_NAME);
-//  }
-//
-//  @Test
-//  void shouldConvertStringToPassportNumber_whenValueIsValid() {
-//    PassportNumber passportNumber = mapper.toPassportNumber(VALID_PASSPORT);
-//
-//    assertThat(passportNumber.value()).isEqualTo(VALID_PASSPORT);
-//  }
-//
-//  @Test
-//  void shouldConvertLocalDateToDateOfBirth_whenValueIsValid() {
-//    DateOfBirth dateOfBirth = mapper.toDateOfBirth(VALID_DATE_OF_BIRTH);
-//
-//    assertThat(dateOfBirth.value()).isEqualTo(VALID_DATE_OF_BIRTH);
-//  }
-//
-//  @Test
-//  void shouldConvertStringToEmail_whenValueIsValid() {
-//    Email email = mapper.toEmail(VALID_EMAIL);
-//
-//    assertThat(email.value()).isEqualTo(VALID_EMAIL);
-//  }
-//
-//  @Test
-//  void shouldReturn_whenMappedRequestIsNull() {
-//    OpenBankAccountCommand command = mapper.toCommand(null);
-//    assertThat(command).isNull();
-//  }
+  private final OpenBankAccountRequestControllerMapper mapper =
+    Mappers.getMapper(OpenBankAccountRequestControllerMapper.class);
+
+  private static final String VALID_FIRST_NAME = PersonalInfoFixtures.JEFFERSON.accountHolderName().firstName();
+  private static final String VALID_LAST_NAME = PersonalInfoFixtures.JEFFERSON.accountHolderName().lastName();
+  private static final String VALID_DOCUMENT_NUMBER = IdentityDocumentFixtures.SPANISH_NIE.documentNumber().value();
+  private static final String VALID_EMAIL = ContactInfoFixtures.JEFFERSON.email().value();
+  private static final String VALID_PHONE = ContactInfoFixtures.JEFFERSON.phoneNumber().value();
+
+  @ParameterizedTest
+  @EnumSource(AccountTypeRequest.class)
+  void shouldMapOpenBankAccountRequestToCommand_whenValuesAreValid(AccountTypeRequest accountType) {
+    var request = buildValidRequest(accountType, CurrencyRequest.EUR);
+
+    OpenBankAccountCommand command = mapper.toCommand(request);
+
+    assertThat(command).isNotNull();
+    assertThat(command.personalInfo().holderName().firstName()).isEqualTo(VALID_FIRST_NAME);
+    assertThat(command.personalInfo().holderName().lastName()).isEqualTo(VALID_LAST_NAME);
+    assertThat(command.personalInfo().identityDocument().number().value()).isEqualTo(VALID_DOCUMENT_NUMBER);
+    assertThat(command.contactInfo().email().value()).isEqualTo(VALID_EMAIL);
+    assertThat(command.contactInfo().phoneNumber().value()).isEqualTo(VALID_PHONE);
+    assertThat(command.accountType()).isEqualTo(AccountType.valueOf(accountType.name()));
+    assertThat(command.currency()).isEqualTo(Currency.EUR);
+  }
+
+  @Test
+  void shouldReturnNull_whenMappedRequestIsNull() {
+    OpenBankAccountCommand command = mapper.toCommand(null);
+
+    assertThat(command).isNull();
+  }
+
+  private OpenBankAccountRequest buildValidRequest(AccountTypeRequest accountType, CurrencyRequest currency) {
+    var identityDoc = new IdentityDocumentRequest(
+      DocumentTypeRequest.FOREIGNER_ID,
+      DocumentCountryRequest.SPAIN,
+      VALID_DOCUMENT_NUMBER
+    );
+    var personalInfo = new PersonalInfoRequest(
+      VALID_FIRST_NAME,
+      VALID_LAST_NAME,
+      identityDoc,
+      PersonalInfoFixtures.JEFFERSON.dateOfBirth().value()
+    );
+    var contactInfo = new ContactInfoRequest(VALID_EMAIL, VALID_PHONE);
+    var address = new AddressRequest("Carrer de Mallorca", "401", null, "08013", "Barcelona");
+    var holder = new AccountHolderRequest(personalInfo, contactInfo, address);
+    return new OpenBankAccountRequest(accountType, currency, holder);
+  }
 }

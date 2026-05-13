@@ -34,4 +34,10 @@ class IdentityDocumentSummaryMapperTest {
 
     assertThat(details).isNull();
   }
+
+  @Test
+  void shouldReturnNull_whenIdentityDocumentValuesAreNull() {
+    assertThat(mapper.map((Enum<?>) null)).isNull();
+    assertThat(mapper.map((DocumentNumber) null)).isNull();
+  }
 }

@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+    <conversionRule conversionWord="clr"
+                    class="org.springframework.boot.logging.logback.ColorConverter"/>
+
+    <springProperty name="SERVICE_NAME" source="spring.application.name" defaultValue="unknown"/>
+    <springProperty name="SERVICE_VERSION" source="spring.application.version" defaultValue="unknown"/>
+
+    <springProfile name="local">
+        <appender name="LOCAL_CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+            <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+                <pattern>%clr(%d{HH:mm:ss.SSS}){faint} %clr(%-5level) %clr(%logger{36}){cyan} %clr([%X{correlationId}]){magenta} %msg %clr(%kvp){bright_black}%n</pattern>
+            </encoder>
+        </appender>
+
+        <root level="INFO">
+            <appender-ref ref="LOCAL_CONSOLE"/>
+        </root>
+        <logger name="org.springframework" level="WARN"/>
+        <logger name="software.amazon.awssdk" level="WARN"/>
+        <logger name="org.apache.kafka" level="WARN"/>
+        <logger name="com.jcondotta" level="INFO"/>
+    </springProfile>
+
+    <springProfile name="!local">
+        <appender name="JSON_CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+            <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+                <customFields>{"service":"${SERVICE_NAME}","service_version":"${SERVICE_VERSION}"}</customFields>
+                <includeStructuredArguments>true</includeStructuredArguments>
+                <includeKeyValuePairs>true</includeKeyValuePairs>
+                <includeMdc>true</includeMdc>
+                <fieldNames>
+                    <version>[ignore]</version>
+                    <thread>[ignore]</thread>
+                    <levelValue>[ignore]</levelValue>
+                </fieldNames>
+            </encoder>
+        </appender>
+
+        <root level="INFO">
+            <appender-ref ref="JSON_CONSOLE"/>
+        </root>
+        <logger name="org.springframework" level="WARN"/>
+        <logger name="software.amazon.awssdk" level="WARN"/>
+        <logger name="org.apache.kafka" level="WARN"/>
+        <logger name="com.jcondotta" level="INFO"/>
+    </springProfile>
+
+</configuration>

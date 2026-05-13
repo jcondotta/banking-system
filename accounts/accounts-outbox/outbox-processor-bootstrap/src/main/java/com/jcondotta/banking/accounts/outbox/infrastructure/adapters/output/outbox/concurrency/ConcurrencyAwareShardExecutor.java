@@ -1,13 +1,10 @@
 package com.jcondotta.banking.accounts.outbox.infrastructure.adapters.output.outbox.concurrency;
 
-import lombok.extern.slf4j.Slf4j;
-
 import java.time.Duration;
 import java.util.function.Supplier;
 
 import static com.jcondotta.banking.accounts.infrastructure.support.Preconditions.required;
 
-@Slf4j
 public class ConcurrencyAwareShardExecutor<K> implements ShardExecutor<K> {
 
   static final String ERROR_POLICY_REQUIRED = "policy must be provided";
@@ -32,8 +29,6 @@ public class ConcurrencyAwareShardExecutor<K> implements ShardExecutor<K> {
     if (timeout == null) {
       throw new IllegalArgumentException(ERROR_TIMEOUT_REQUIRED);
     }
-
-    log.debug("[shard={}] submitting task with acquireTimeout={}ms", shard, timeout.toMillis());
 
     return policy.execute(shard, timeout, task);
   }

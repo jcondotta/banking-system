@@ -1,10 +1,9 @@
 package com.jcondotta.banking.accounts.domain.bankaccount.value_objects.address;
 
-import com.jcondotta.banking.accounts.domain.bankaccount.arguments_provider.BlankValuesArgumentProvider;
+import com.jcondotta.banking.accounts.domain.testsupport.BlankValuesSource;
 import com.jcondotta.domain.exception.DomainValidationException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ArgumentsSource;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -37,7 +36,7 @@ class PostalCodeTest {
   }
 
   @ParameterizedTest
-  @ArgumentsSource(BlankValuesArgumentProvider.class)
+  @BlankValuesSource
   void shouldThrowException_whenValueIsBlank(String blankPostalCode) {
     assertThatThrownBy(() -> PostalCode.of(blankPostalCode))
       .isInstanceOf(DomainValidationException.class)

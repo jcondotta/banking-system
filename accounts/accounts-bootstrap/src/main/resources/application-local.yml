@@ -6,11 +6,11 @@ app:
   kafka:
     topics:
       bank-account-opened:
-        topic-name: ${KAFKA_BANK_ACCOUNT_OPENED_TOPIC_NAME:bank-account-opened}
+        topic-name: bank-account-opened
       bank-account-status-changed:
-        topic-name: ${KAFKA_BANK_ACCOUNT_STATUS_CHANGED_TOPIC_NAME:bank-account-status-changed}
+        topic-name: bank-account-status-changed
       joint-account-holder-added:
-        topic-name: ${KAFKA_JOINT_ACCOUNT_HOLDER_ADDED_TOPIC_NAME:joint-account-holder-added}
+        topic-name: joint-account-holder-added
 
 cloud:
   aws:
@@ -30,3 +30,15 @@ cloud:
           indexes:
             gsi1:
               name: ${AWS_DYNAMODB_OUTBOX_GSI1_NAME:gsi-outbox-status}
+
+management:
+  loki:
+    logging:
+      url: http://localhost:3100/loki/api/v1/push
+
+  otlp:
+    metrics:
+      export:
+        enabled: true
+        url: http://localhost:4318/v1/metrics
+        step: 10s

@@ -6,6 +6,29 @@
 
     <springProperty name="SERVICE_NAME" source="spring.application.name" defaultValue="unknown"/>
     <springProperty name="SERVICE_VERSION" source="spring.application.version" defaultValue="unknown"/>
+    <springProperty name="LOKI_URL" source="management.loki.logging.url" defaultValue="http://localhost:3100/loki/api/v1/push"/>
+
+    <appender name="LOKI" class="com.github.loki4j.logback.Loki4jAppender">
+        <http>
+            <url>${LOKI_URL}</url>
+        </http>
+        <format>
+            <label>
+                <pattern>application=${SERVICE_NAME},level=%level</pattern>
+            </label>
+            <message class="net.logstash.logback.layout.LogstashLayout">
+                <customFields>{"service":"${SERVICE_NAME}","service_version":"${SERVICE_VERSION}"}</customFields>
+                <includeStructuredArguments>true</includeStructuredArguments>
+                <includeKeyValuePairs>true</includeKeyValuePairs>
+                <includeMdc>true</includeMdc>
+                <fieldNames>
+                    <version>[ignore]</version>
+                    <thread>[ignore]</thread>
+                    <levelValue>[ignore]</levelValue>
+                </fieldNames>
+            </message>
+        </format>
+    </appender>
 
     <springProfile name="local">
         <appender name="LOCAL_CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
@@ -16,6 +39,7 @@
 
         <root level="INFO">
             <appender-ref ref="LOCAL_CONSOLE"/>
+            <appender-ref ref="LOKI"/>
         </root>
         <logger name="org.springframework" level="WARN"/>
         <logger name="org.hibernate" level="WARN"/>
@@ -41,6 +65,7 @@
 
         <root level="INFO">
             <appender-ref ref="JSON_CONSOLE"/>
+            <appender-ref ref="LOKI"/>
         </root>
         <logger name="org.springframework" level="WARN"/>
         <logger name="org.hibernate" level="WARN"/>

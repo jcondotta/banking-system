@@ -1,5 +1,7 @@
 package com.jcondotta.banking.accounts.infrastructure.adapters.input.rest.close;
 
+import com.jcondotta.application.command.CommandHandler;
+import com.jcondotta.banking.accounts.application.bankaccount.command.close.model.CloseBankAccountCommand;
 import com.jcondotta.banking.accounts.domain.bankaccount.identity.BankAccountId;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -20,29 +22,29 @@ class CloseBankAccountControllerImplTest {
 
   private static final UUID BANK_ACCOUNT_UUID = BankAccountId.newId().value();
 
-//  @Mock
-//  private CloseBankAccountUseCase useCase;
-//
-//  @Captor
-//  ArgumentCaptor<CloseBankAccountCommand> commandCaptor;
-//
-//  private CloseBankAccountControllerImpl controller;
-//
-//  @BeforeEach
-//  void setUp() {
-//    controller = new CloseBankAccountControllerImpl(useCase);
-//  }
-//
-//  @Test
-//  void shouldCloseBankAccountAndReturnNoContent() {
-//    ResponseEntity<Void> response = controller.close(BANK_ACCOUNT_UUID);
-//
-//    verify(useCase).execute(commandCaptor.capture());
-//
-//    CloseBankAccountCommand command = commandCaptor.getValue();
-//    assertThat(command.bankAccountId()).isEqualTo(BankAccountId.of(BANK_ACCOUNT_UUID));
-//
-//    assertThat(response.getStatusCode().value()).isEqualTo(204);
-//    assertThat(response.getBody()).isNull();
-//  }
+  @Mock
+  private CommandHandler<CloseBankAccountCommand> commandHandler;
+
+  @Captor
+  ArgumentCaptor<CloseBankAccountCommand> commandCaptor;
+
+  private CloseBankAccountControllerImpl controller;
+
+  @BeforeEach
+  void setUp() {
+    controller = new CloseBankAccountControllerImpl(commandHandler);
+  }
+
+  @Test
+  void shouldCloseBankAccountAndReturnNoContent() {
+    ResponseEntity<Void> response = controller.close(BANK_ACCOUNT_UUID);
+
+    verify(commandHandler).handle(commandCaptor.capture());
+
+    CloseBankAccountCommand command = commandCaptor.getValue();
+    assertThat(command.bankAccountId()).isEqualTo(BankAccountId.of(BANK_ACCOUNT_UUID));
+
+    assertThat(response.getStatusCode().value()).isEqualTo(204);
+    assertThat(response.getBody()).isNull();
+  }
 }
