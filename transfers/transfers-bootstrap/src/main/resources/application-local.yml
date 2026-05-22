@@ -1,0 +1,23 @@
+server:
+  port: 8082
+
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5433/transfers_db?connectTimeout=3&socketTimeout=5
+    username: admin
+    password: password
+
+  jpa:
+    show-sql: false
+
+management:
+  loki:
+    logging:
+      url: http://localhost:3100/loki/api/v1/push
+
+  otlp:
+    metrics:
+      export:
+        enabled: true
+        url: http://localhost:4318/v1/metrics
+        step: 10s

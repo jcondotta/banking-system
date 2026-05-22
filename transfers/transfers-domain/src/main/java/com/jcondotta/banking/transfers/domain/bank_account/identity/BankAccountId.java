@@ -1,0 +1,19 @@
+package com.jcondotta.banking.transfers.domain.bank_account.identity;
+
+import com.jcondotta.domain.identity.EntityId;
+import com.jcondotta.domain.support.Preconditions;
+
+import java.util.UUID;
+
+public record BankAccountId(UUID value) implements EntityId<UUID> {
+
+  public static final String ID_NOT_PROVIDED = "bank account id value must be provided";
+
+  public BankAccountId {
+    Preconditions.required(value, ID_NOT_PROVIDED);
+  }
+
+  public static BankAccountId of(UUID value) {
+    return new BankAccountId(value);
+  }
+}

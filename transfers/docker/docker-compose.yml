@@ -1,0 +1,29 @@
+name: transfers
+services:
+  postgres:
+    image: postgres:17-alpine
+    container_name: transfers-postgres-17
+    ports:
+      - "127.0.0.1:5433:5432"
+    environment:
+      POSTGRES_DB: transfers_db
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: password
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U admin -d transfers_db" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - banking_network
+    volumes:
+      - transfers_postgres_volume:/var/lib/postgresql/data
+
+volumes:
+  transfers_postgres_volume:
+    name: transfers-postgres-data
+
+networks:
+  banking_network:
+    external: true
+    name: banking_network

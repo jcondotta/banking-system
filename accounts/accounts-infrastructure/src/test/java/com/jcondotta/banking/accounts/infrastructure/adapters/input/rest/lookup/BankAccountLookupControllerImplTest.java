@@ -2,6 +2,7 @@ package com.jcondotta.banking.accounts.infrastructure.adapters.input.rest.lookup
 
 import com.jcondotta.application.query.QueryHandler;
 import com.jcondotta.banking.accounts.application.bankaccount.query.get.GetBankAccountByIdQuery;
+import com.jcondotta.banking.accounts.application.bankaccount.query.get.GetBankAccountByIbanQuery;
 import com.jcondotta.banking.accounts.application.bankaccount.query.get.model.BankAccountSummary;
 import com.jcondotta.banking.accounts.domain.bankaccount.identity.BankAccountId;
 import com.jcondotta.banking.accounts.infrastructure.adapters.input.rest.lookup.mapper.BankAccountLookupResponseControllerMapper;
@@ -30,6 +31,9 @@ class BankAccountLookupControllerImplTest {
   private QueryHandler<GetBankAccountByIdQuery, BankAccountSummary> queryHandler;
 
   @Mock
+  private QueryHandler<GetBankAccountByIbanQuery, BankAccountSummary> getByIbanQueryHandler;
+
+  @Mock
   private BankAccountLookupResponseControllerMapper mapper;
 
   @Mock
@@ -45,7 +49,7 @@ class BankAccountLookupControllerImplTest {
 
   @BeforeEach
   void setUp() {
-    controller = new BankAccountLookupControllerImpl(queryHandler, mapper);
+    controller = new BankAccountLookupControllerImpl(queryHandler, getByIbanQueryHandler, mapper);
   }
 
   @Test
@@ -54,7 +58,7 @@ class BankAccountLookupControllerImplTest {
       .thenReturn(bankAccountSummary);
     when(mapper.toBankAccountDetailsResponse(bankAccountSummary)).thenReturn(bankAccountDetailsResponse);
 
-    ResponseEntity<BankAccountDetailsResponse> result = controller.getBankAccount(BANK_ACCOUNT_UUID);
+    ResponseEntity<BankAccountDetailsResponse> result = controller.getBankAccountById(BANK_ACCOUNT_UUID);
 
     verify(queryHandler).handle(queryCaptor.capture());
     assertThat(queryCaptor.getValue().bankAccountId()).isEqualTo(new BankAccountId(BANK_ACCOUNT_UUID));

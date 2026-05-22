@@ -1,0 +1,95 @@
+server:
+  port: ${SERVER_PORT:8080}
+
+spring:
+  application:
+    name: transfers
+    version: "@project.version@"
+
+  datasource:
+    url: ${SPRING_DATASOURCE_URL}
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      connection-timeout: 5000
+      maximum-pool-size: 10
+      minimum-idle: 3
+      validation-timeout: 1000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+
+  liquibase:
+    enabled: true
+    change-log: classpath:db/changelog/db.changelog-master.yml
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+    open-in-view: false
+
+  mvc:
+    apiversion:
+      supported:
+        - "1.0"
+      use:
+        header: X-API-Version
+
+  http:
+    serviceclient:
+      accounts:
+        base-url: ${ACCOUNTS_BASE_URL:http://localhost:8080}
+        api-version: ${ACCOUNTS_API_VERSION:1.0}
+
+app:
+  api:
+    transfers:
+      internal-transfer-path: /api/transfers/internal
+
+  concurrency:
+    transfers:
+      request-internal:
+        limit: 5
+
+management:
+  endpoint:
+    health:
+      probes:
+        enabled: true
+
+  endpoints:
+    web:
+      exposure:
+        include: health, metrics, prometheus
+
+  observations:
+    annotations:
+      enabled: true
+
+  otlp:
+    metrics:
+      export:
+        enabled: ${MANAGEMENT_OTLP_METRICS_EXPORT_ENABLED:false}
+        url: ${MANAGEMENT_OTLP_METRICS_EXPORT_URL:http://localhost:4318/v1/metrics}
+        step: 10s
+
+  loki:
+    logging:
+      url: ${MANAGEMENT_LOKI_LOGGING_URL:http://localhost:3100/loki/api/v1/push}
+
+  metrics:
+    tags:
+      application: ${spring.application.name}
+
+    enable:
+      transfers.requestInternal.active: false
+
+    distribution:
+      percentiles-histogram:
+        http.server.requests: true
+        transfers.requestInternal: true
+
+      percentiles:
+        http.server.requests: 0.5, 0.9, 0.99
+        transfers.requestInternal: 0.5, 0.9, 0.99

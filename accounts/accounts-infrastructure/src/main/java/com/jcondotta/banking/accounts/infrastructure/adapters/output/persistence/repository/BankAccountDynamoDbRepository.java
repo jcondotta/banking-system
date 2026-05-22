@@ -1,5 +1,6 @@
 package com.jcondotta.banking.accounts.infrastructure.adapters.output.persistence.repository;
 
+import com.jcondotta.banking.accounts.domain.bankaccount.value_objects.Iban;
 import com.jcondotta.banking.infrastructure.adapters.config.aws.dynamodb.DynamoDbTransactionContext;
 import com.jcondotta.banking.accounts.application.outbound.TransactionalAppender;
 import com.jcondotta.banking.accounts.domain.bankaccount.aggregate.BankAccount;
@@ -49,6 +50,15 @@ public class BankAccountDynamoDbRepository implements BankAccountRepository {
 
     var bankAccount = bankAccountEntityMapper.restore(bankingEntities);
     return Optional.of(bankAccount);
+  }
+
+  @Override
+  public Optional<BankAccount> findByIban(Iban iban) {
+    BankingEntity bankingEntity = bankingTable.scan().items().stream().
+      findFirst()
+      .get();
+
+    return findById(BankAccountId.of(bankingEntity.getBankAccountId()));
   }
 
   @Override

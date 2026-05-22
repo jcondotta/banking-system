@@ -9,6 +9,7 @@ public final class BankAccountEventType {
   public static final String CLOSE = "accounts.close";
   public static final String ADD_JOINT_HOLDER = "accounts.addJointHolder";
   public static final String GET_BY_ID = "accounts.getById";
+  public static final String GET_BY_IBAN = "accounts.getByIban";
 
   private BankAccountEventType() {}
 }
