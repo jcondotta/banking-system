@@ -32,13 +32,11 @@ cloud:
               name: ${AWS_DYNAMODB_OUTBOX_GSI1_NAME:gsi-outbox-status}
 
 management:
-  loki:
+  data-prepper:
     logging:
-      url: http://localhost:3100/loki/api/v1/push
+      url: http://localhost:2021/log/ingest/
 
   otlp:
     metrics:
       export:
-        enabled: true
-        url: http://localhost:4318/v1/metrics
-        step: 10s
+        enabled: false

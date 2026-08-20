@@ -1,0 +1,34 @@
+package com.jcondotta.banking.recipients.infrastructure.adapters.input.rest.create_recipient;
+
+import com.jcondotta.application.command.CommandHandlerWithResult;
+import com.jcondotta.banking.recipients.application.recipient.command.create.CreateRecipientCommand;
+import com.jcondotta.banking.recipients.domain.recipient.identity.RecipientId;
+import com.jcondotta.banking.recipients.infrastructure.adapters.input.rest.create_recipient.mapper.CreateRecipientRestMapper;
+import com.jcondotta.banking.recipients.infrastructure.adapters.input.rest.create_recipient.model.CreateRecipientRestRequest;
+import com.jcondotta.banking.recipients.infrastructure.adapters.input.rest.properties.RecipientsURIProperties;
+import lombok.AllArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.util.UUID;
+
+@Validated
+@RestController
+@AllArgsConstructor
+public class CreateRecipientControllerImpl implements CreateRecipientController {
+
+  private final CommandHandlerWithResult<CreateRecipientCommand, RecipientId> commandHandler;
+  private final RecipientsURIProperties uriProperties;
+  private final CreateRecipientRestMapper mapper;
+
+  @Override
+  public ResponseEntity<Void> createRecipient(UUID bankAccountId, CreateRecipientRestRequest request) {
+    var command = mapper.toCommand(bankAccountId, request);
+    var recipientId = commandHandler.handle(command);
+
+    return ResponseEntity
+      .created(uriProperties.recipientURI(bankAccountId, recipientId.value()))
+      .build();
+  }
+}

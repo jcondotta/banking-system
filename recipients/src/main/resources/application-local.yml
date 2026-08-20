@@ -1,9 +1,9 @@
 server:
-  port: 8082
+  port: 8081
 
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5433/transfers_db?connectTimeout=3&socketTimeout=5
+    url: jdbc:postgresql://localhost:5432/recipients_db?connectTimeout=3&socketTimeout=5
     username: admin
     password: password
 

@@ -1,15 +1,53 @@
 name: banking
 
 services:
-  lgtm:
-    image: grafana/otel-lgtm:latest
+  opensearch:
+    image: opensearchproject/opensearch:2.13.0
+    container_name: banking-opensearch
     ports:
-      - "3000:3000"   # Grafana
-      - "4317:4317"   # OTLP gRPC
-      - "4318:4318"   # OTLP HTTP
-      - "3100:3100"   # Loki
+      - "9200:9200"
+      - "9600:9600"
+    environment:
+      - discovery.type=single-node
+      - OPENSEARCH_INITIAL_ADMIN_PASSWORD=password
+      - DISABLE_SECURITY_PLUGIN=true
+      - OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m
     volumes:
-      - lgtm_data:/data
+      - opensearch_data:/usr/share/opensearch/data
+    networks:
+      - banking_network
+    healthcheck:
+      test: [ "CMD-SHELL", "curl --silent --fail http://localhost:9200/_cluster/health || exit 1" ]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
+
+  opensearch-dashboards:
+    image: opensearchproject/opensearch-dashboards:2.13.0
+    container_name: banking-opensearch-dashboards
+    ports:
+      - "5601:5601"
+    environment:
+      - OPENSEARCH_HOSTS=["http://opensearch:9200"]
+      - DISABLE_SECURITY_DASHBOARDS_PLUGIN=true
+    depends_on:
+      opensearch:
+        condition: service_healthy
+    networks:
+      - banking_network
+
+  data-prepper:
+    image: opensearchproject/data-prepper:2.8.0
+    container_name: banking-data-prepper
+    ports:
+      - "2021:2021"
+    volumes:
+      - ./data-prepper/data-prepper-config.yaml:/usr/share/data-prepper/config/data-prepper-config.yaml
+      - ./data-prepper/pipelines.yaml:/usr/share/data-prepper/pipelines/pipelines.yaml
+    depends_on:
+      opensearch:
+        condition: service_healthy
     networks:
       - banking_network
 
@@ -80,8 +118,8 @@ services:
       - banking_network
 
 volumes:
-  lgtm_data:
-    name: banking-lgtm-data
+  opensearch_data:
+    name: banking-opensearch-data
   kafka_1_data:
     name: banking-kafka-1-data
 

@@ -1,0 +1,12 @@
+banking-logs-pipeline:
+  source:
+    http:
+      port: 2021
+      path: /log/ingest/
+      health_check_service: true
+      unauthenticated_health_check: true
+  sink:
+    - opensearch:
+        hosts: ["http://opensearch:9200"]
+        index_type: custom
+        index: banking-logs

@@ -39,12 +39,12 @@ This service is a focused backend system for practicing production-oriented engi
 | Framework | Spring Boot 4 |
 | Persistence | PostgreSQL, Spring Data JPA, Hibernate |
 | Database migrations | Liquibase |
-| Build | Maven multi-module |
+| Build | Maven single module |
 | Architecture | DDD, CQRS, Hexagonal Architecture |
 | Runtime | Docker, Kubernetes manifests |
 | Observability | Structured logging, Micrometer, OpenTelemetry |
 | Metrics | Prometheus-compatible Micrometer metrics |
-| Logs | JSON console logs, Grafana/Loki-compatible structure |
+| Logs | JSON console logs, OpenSearch/Data Prepper-compatible local ingestion |
 | Tracing | OpenTelemetry support through Spring Boot/Micrometer |
 | Testing | JUnit 5, Mockito, Rest Assured, Testcontainers |
 | Mutation testing | PIT |
@@ -52,24 +52,28 @@ This service is a focused backend system for practicing production-oriented engi
 
 ## Architecture
 
-The service is split into Maven modules with a single dependency rule: outer modules may depend on inner modules, but inner modules must not depend on outer modules. The domain module stays free of Spring and infrastructure concerns; framework usage is kept at the application, infrastructure, and bootstrap layers where it supports wiring, observability, persistence, and runtime behavior.
+The service is a single Maven module with package-level architecture boundaries. Domain, application, and infrastructure code compile together, but dependencies still point inward: infrastructure may depend on application and domain, application may depend on domain, and domain stays free of Spring and infrastructure concerns.
 
 ```text
 recipients/
-├── recipients-domain          # Aggregate, value objects, identities, domain exceptions, repository ports
-├── recipients-application     # Command/query handlers, use-case orchestration, structured business events
-├── recipients-infrastructure  # REST adapters, exception handlers, persistence adapters, JPA repositories
-└── recipients-bootstrap       # Spring Boot runtime, configuration, Liquibase, Docker packaging
+├── src/main/java/com/jcondotta/banking/recipients
+│   ├── domain          # Aggregate, value objects, identities, domain exceptions, repository ports
+│   ├── application     # Commands, queries, handlers, structured business events
+│   ├── infrastructure  # REST, exception handlers, persistence adapters, JPA, config
+│   └── RecipientsApplication.java
+├── src/main/resources  # Spring config, Liquibase changelogs, logging config
+├── src/test/java       # Unit and integration tests
+├── docker              # Local PostgreSQL Compose
+├── k8s                 # Kubernetes manifests
+└── Dockerfile          # Service image build
 ```
 
 ```mermaid
 flowchart LR
-    Bootstrap["bootstrap"]
     Infrastructure["infrastructure"]
     Application["application"]
     Domain["domain"]
 
-    Bootstrap --> Infrastructure
     Infrastructure --> Application
     Application --> Domain
 ```
@@ -118,7 +122,7 @@ Example JSON log:
   "logger_name": "com.jcondotta.banking.recipients.application.recipient.command.create.CreateRecipientCommandHandler",
   "message": "Recipient created",
   "service": "recipients",
-  "service_version": "1.0.1",
+  "service_version": "1.1.0",
   "correlationId": "5d83107d-9e7f-46f2-99a7-6cf7c51cf319",
   "event_type": "recipients.create",
   "outcome": "success",
@@ -199,17 +203,23 @@ docker compose -f docker/docker-compose.yml up -d
 This starts:
 
 - PostgreSQL on `127.0.0.1:5432`
-- Grafana LGTM on:
-  - Grafana: `http://localhost:3000`
-  - OTLP HTTP: `http://localhost:4318`
-  - OTLP gRPC: `http://localhost:4317`
-  - Loki: `http://localhost:3100`
+
+Optional full observability is provided by the monorepo-level Compose stack:
+
+```bash
+docker compose -f ../docker/docker-compose.yml up -d opensearch data-prepper opensearch-dashboards
+```
+
+This starts:
+
+- OpenSearch: `http://localhost:9200`
+- OpenSearch Dashboards: `http://localhost:5601`
+- Data Prepper log ingestion: `http://localhost:2021/log/ingest/`
 
 ### Run the Application
 
 ```bash
-mvn -pl recipients-bootstrap -am spring-boot:run \
-  -Dspring-boot.run.profiles=local
+../mvnw spring-boot:run -Dspring-boot.run.profiles=local
 ```
 
 Or run the main class from the IDE with:
@@ -233,25 +243,19 @@ password: password
 Run unit tests:
 
 ```bash
-mvn test
-```
-
-Run tests for this service:
-
-```bash
-mvn test -pl recipients-bootstrap -am
+../mvnw test
 ```
 
 Run integration tests:
 
 ```bash
-mvn verify -pl recipients-bootstrap -am
+../mvnw verify
 ```
 
-Run mutation testing for the domain module:
+Run mutation testing:
 
 ```bash
-mvn pitest:mutationCoverage -pl recipients-domain
+../mvnw pitest:mutationCoverage
 ```
 
 ## Docker
@@ -275,8 +279,8 @@ Build from the monorepo root:
 cd /Users/jcondotta/development/banking-system
 
 docker build \
-  -f recipients/recipients-bootstrap/Dockerfile \
-  -t jcondotta/recipients:1.0.1 \
+  -f recipients/Dockerfile \
+  -t jcondotta/recipients:1.1.0 \
   .
 ```
 
@@ -290,7 +294,7 @@ docker run --rm \
   -e SPRING_DATASOURCE_URL='jdbc:postgresql://host.docker.internal:5432/recipients_db?connectTimeout=3&socketTimeout=30' \
   -e SPRING_DATASOURCE_USERNAME=admin \
   -e SPRING_DATASOURCE_PASSWORD=password \
-  jcondotta/recipients:1.0.1
+  jcondotta/recipients:1.1.0
 ```
 
 Build and push a multi-architecture image:
@@ -298,8 +302,8 @@ Build and push a multi-architecture image:
 ```bash
 docker buildx build \
   --platform linux/amd64,linux/arm64 \
-  -f recipients/recipients-bootstrap/Dockerfile \
-  -t jcondotta/recipients:1.0.1 \
+  -f recipients/Dockerfile \
+  -t jcondotta/recipients:1.1.0 \
   -t jcondotta/recipients:latest \
   --push \
   .
@@ -308,7 +312,7 @@ docker buildx build \
 Inspect published platforms:
 
 ```bash
-docker buildx imagetools inspect jcondotta/recipients:1.0.1
+docker buildx imagetools inspect jcondotta/recipients:1.1.0
 ```
 
 ## Kubernetes
@@ -346,7 +350,7 @@ Current tradeoffs:
 
 ## Testing Strategy
 
-The test suite is split by architectural layer.
+The test suite is organized by architectural package.
 
 Domain tests validate value objects, aggregate behavior, domain exceptions, and invariants without Spring.
 
@@ -356,7 +360,7 @@ Infrastructure tests validate REST mappers, controllers, exception handlers, Pos
 
 Integration tests use Spring Boot, Rest Assured, and Testcontainers. They cover HTTP flows, PostgreSQL behavior, and concurrency limiting.
 
-Mutation testing is configured through PIT. Domain and application modules are expected to maintain high mutation confidence because they carry the core business behavior.
+Mutation testing is configured through PIT. Domain and application packages are expected to maintain high mutation confidence because they carry the core business behavior.
 
 ## Configuration
 
@@ -509,7 +513,7 @@ Database unavailable example:
 
 ## Engineering Notes
 
-This service intentionally uses architecture boundaries without treating them as ceremony. The domain module is kept clean. The application layer uses selected framework annotations where they provide practical value: observability, component wiring, and concurrency limiting.
+This service intentionally uses architecture boundaries without treating them as ceremony. The domain package is kept clean. The application layer uses selected framework annotations where they provide practical value: observability, component wiring, and concurrency limiting.
 
 Observability was prioritized early because failure diagnosis is part of production readiness, not a post-release task. Logs carry high-cardinality diagnostic fields; metrics keep cardinality low and focus on latency, throughput, and operational pressure.
 

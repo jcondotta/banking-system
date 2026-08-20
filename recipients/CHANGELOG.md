@@ -2,6 +2,20 @@
 
 All notable changes to the recipients service are documented in this file.
 
+## 1.1.0 - 2026-08-20
+
+### Changed
+
+- Consolidated the recipients bounded context from four Maven submodules into one standard Maven module.
+- Moved production code, tests, resources, Liquibase changelogs, logging config, and Dockerfile under the flat `src` project layout.
+- Updated the service version from `1.0.1` to `1.1.0`.
+
+### Verified
+
+- `../mvnw test` passes in the consolidated module.
+- `../mvnw verify` passes, including integration tests.
+- `../mvnw spring-boot:run -Dspring-boot.run.profiles=local` starts successfully and `/actuator/health` returns `UP`.
+
 ## 1.0.1 - 2026-05-10
 
 ### Added
