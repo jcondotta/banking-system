@@ -2,6 +2,8 @@
 
 Use this playbook for non-trivial changes in the `recipients` bounded context. Keep changes aligned with the existing package architecture and prefer the closest local pattern before adding new abstractions.
 
+For test style, scope, and integration-test conventions, use `docs/ai/testing.md`.
+
 ## Domain Changes
 
 Read:
