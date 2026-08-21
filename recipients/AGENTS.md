@@ -10,7 +10,8 @@ This is the `recipients` bounded context: a Java 25, Spring Boot 4, single-modul
 - `infrastructure/`: Spring and adapter code. It owns REST controllers, request/response DTOs, mappers, `ProblemDetail` exception handlers, correlation filtering, JPA entities/repositories, PostgreSQL adapters, persistence mappers, and runtime configuration.
 - `src/main/resources/`: Spring `application*.yml`, Liquibase changelogs, SQL migrations, and `logback-spring.xml`.
 - `src/test/java/`: unit and integration tests. Integration tests live under `.../integration` and use `@IntegrationTest`.
-- `docker/`: local PostgreSQL Compose. `k8s/`: app and PostgreSQL manifests.
+- `docker/`: local PostgreSQL Compose.
+- `k8s/`: application and PostgreSQL manifests.
 
 Keep dependencies pointing inward by package: infrastructure may depend on application and domain, application may depend on domain, and domain must not depend on Spring, JPA, HTTP, logging frameworks, or infrastructure code.
 
@@ -18,14 +19,15 @@ Keep dependencies pointing inward by package: infrastructure may depend on appli
 
 Additional task-specific instructions live under `docs/ai/`.
 
-Before performing a task listed below, read the corresponding guidance file. These instructions are part of the repository guidance and must be applied to the task.
+Before performing a task listed below, read and apply the corresponding guidance. More than one guidance file may apply to the same task.
 
-| When working on... | Required guidance |
+| When working on... | Read |
 | --- | --- |
+| Implementing code changes | `docs/ai/implementation-guidelines.md` |
 | Adding, modifying, reviewing, or refactoring tests | `docs/ai/testing-guidelines.md` |
-| Changes to domain, application, REST/API, persistence, configuration, Docker, or Kubernetes | `docs/ai/change-playbook.md` |
+| Changes spanning multiple architectural layers | `docs/ai/change-playbook.md` |
 
-Load only the guidance required for the current task.
+Load only the guidance relevant to the current task.
 
 ## Build, Test, and Development Commands
 
@@ -41,31 +43,27 @@ Run commands from this directory. The Maven wrapper lives one level up.
 
 Use Java conventions with 4-space indentation and packages under `com.jcondotta.banking.recipients`. Prefer records for immutable commands, queries, IDs, and DTOs.
 
-Follow local naming patterns: `*Command`, `*CommandHandler`, `*Query`, `*QueryHandler`, `*Repository`, `*Mapper`, `*Controller`, `*ControllerImpl`, `*ExceptionHandler`, `*Properties`, `*Test`, and `*IT`. REST paths come from `app.api.recipients.*`; API versioning uses `X-API-Version`.
+Follow local naming patterns: `*Command`, `*CommandHandler`, `*Query`, `*QueryHandler`, `*Repository`, `*Mapper`, `*Controller`, `*ControllerImpl`, `*ExceptionHandler`, `*Properties`, `*Test`, and `*IT`.
 
-Use `LogContext`, `RecipientEventType`, and `RecipientLogKey`; mask IBANs and keep IDs out of metric tags. Preserve framework-free domain code even though all layers now compile in one Maven module.
+REST paths come from `app.api.recipients.*`; API versioning uses `X-API-Version`.
+
+Use `LogContext`, `RecipientEventType`, and `RecipientLogKey`; mask IBANs and keep IDs out of metric tags.
+
+Preserve framework-free domain code even though all layers compile in one Maven module.
 
 ## Commit & Pull Request Guidelines
 
-Recent commits use imperative, sentence-style messages such as `Add name filtering to list recipients API`. PRs should include summary, affected areas, test evidence (`../mvnw verify`, targeted tests, or PIT where relevant), linked issues, and API/config notes when endpoints, profiles, Docker, Kubernetes, or observability behavior change.
+Recent commits use imperative, sentence-style messages such as `Add name filtering to list recipients API`.
+
+PRs should include summary, affected areas, test evidence (`../mvnw verify`, targeted tests, or PIT where relevant), linked issues, and API/config notes when endpoints, profiles, Docker, Kubernetes, or observability behavior change.
 
 ## Security & Configuration Tips
 
-Do not commit real secrets. Compose credentials are development-only (`admin`/`password`). Production config comes from environment variables and Kubernetes manifests. Liquibase changelogs live in `src/main/resources/db/changelog`; include SQL rollbacks.
+Do not commit real secrets.
 
-## Decision Points
+Compose credentials are development-only (`admin`/`password`). Production config comes from environment variables and Kubernetes manifests.
 
-When implementation exposes a meaningful architectural or behavioral decision that is not clearly determined by the user's request, repository guidance, or an established local pattern, do not silently choose between materially different alternatives.
-
-Investigate the relevant code first. If the decision remains genuinely ambiguous, surface it to the user with the viable options and a recommended approach before implementing that decision.
-
-Treat changes to existing architectural boundaries as meaningful decisions. In particular, stop and ask before:
-- moving an existing abstraction to a different package or layer
-- broadening an abstraction that currently belongs to one use case so it can be shared by another
-- introducing a new shared abstraction instead of reusing an existing use-case-specific one
-- changing ownership or dependency direction between packages or layers
-
-Do not ask for confirmation about routine, mechanical, or clearly established implementation choices.
+Liquibase changelogs live in `src/main/resources/db/changelog`; include SQL rollbacks.
 
 ## Agent-Specific Instructions
 
