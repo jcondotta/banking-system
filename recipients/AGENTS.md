@@ -53,11 +53,17 @@ Recent commits use imperative, sentence-style messages such as `Add name filteri
 
 Do not commit real secrets. Compose credentials are development-only (`admin`/`password`). Production config comes from environment variables and Kubernetes manifests. Liquibase changelogs live in `src/main/resources/db/changelog`; include SQL rollbacks.
 
-## Decision-Making And Clarification
+## Decision Points
 
 When implementation exposes a meaningful architectural or behavioral decision that is not clearly determined by the user's request, repository guidance, or an established local pattern, do not silently choose between materially different alternatives.
 
 Investigate the relevant code first. If the decision remains genuinely ambiguous, surface it to the user with the viable options and a recommended approach before implementing that decision.
+
+Treat changes to existing architectural boundaries as meaningful decisions. In particular, stop and ask before:
+- moving an existing abstraction to a different package or layer
+- broadening an abstraction that currently belongs to one use case so it can be shared by another
+- introducing a new shared abstraction instead of reusing an existing use-case-specific one
+- changing ownership or dependency direction between packages or layers
 
 Do not ask for confirmation about routine, mechanical, or clearly established implementation choices.
 
