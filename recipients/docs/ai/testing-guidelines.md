@@ -38,11 +38,13 @@ Do not add `@DisplayName` unless the surrounding test class already uses it.
 
 Use AssertJ as the default assertion library.
 
-Use AssertJ `SoftAssertions` when a single behavior has multiple related outputs that should be evaluated together, such as:
+Prefer AssertJ `SoftAssertions` for new or modified tests when a single behavior has multiple related outputs that should be evaluated together, such as:
 - persisted aggregate state
 - response status, headers, and body
 - `ProblemDetail` fields
 - structured log level, event type, and outcome
+
+Existing tests may use JUnit `assertAll` with AssertJ assertions. Preserve that style when working in tests that already use it unless the test is being meaningfully reworked; do not refactor tests solely to replace `assertAll` with `SoftAssertions`.
 
 Use direct assertions when there is only one relevant outcome or when grouping assertions would reduce readability.
 
@@ -72,9 +74,22 @@ Use the existing `@IntegrationTest` annotation for Spring Boot integration tests
 
 Use Rest Assured for HTTP requests and keep request setup close to the endpoint under test.
 
+For HTTP integration tests, follow the existing request-specification pattern, including API versioning and request/response logging on validation failures.
+
 Verify both HTTP behavior and the important persistence side effect when the endpoint changes state.
 
 Clean or isolate state through existing repository/test support patterns. Do not introduce shared mutable state between tests.
+
+## Structured Logging Tests
+
+For application handlers that emit structured logs, follow the existing handler-test pattern.
+
+- Capture log events with `ListAppender` through `StructuredLogEventSupport`.
+- Attach the appender during setup and detach it during teardown.
+- Verify structured log semantics rather than formatted log messages.
+- Verify the expected log level, event type, outcome, and relevant structured keys.
+- Cover success, expected/domain failure, and unexpected failure logging when those paths exist.
+- Follow the nearest handler test for the exact setup and assertions.
 
 ## Coverage And Test Selection
 
