@@ -14,6 +14,19 @@ This is the `recipients` bounded context: a Java 25, Spring Boot 4, single-modul
 
 Keep dependencies pointing inward by package: infrastructure may depend on application and domain, application may depend on domain, and domain must not depend on Spring, JPA, HTTP, logging frameworks, or infrastructure code.
 
+## Task-Specific Guidance
+
+Additional task-specific instructions live under `docs/ai/`.
+
+Before performing a task listed below, read the corresponding guidance file. These instructions are part of the repository guidance and must be applied to the task.
+
+| When working on... | Required guidance |
+| --- | --- |
+| Adding, modifying, reviewing, or refactoring tests | `docs/ai/testing-guidelines.md` |
+| Changes to domain, application, REST/API, persistence, configuration, Docker, or Kubernetes | `docs/ai/change-playbook.md` |
+
+Load only the guidance required for the current task.
+
 ## Build, Test, and Development Commands
 
 Run commands from this directory. The Maven wrapper lives one level up.
@@ -32,17 +45,6 @@ Follow local naming patterns: `*Command`, `*CommandHandler`, `*Query`, `*QueryHa
 
 Use `LogContext`, `RecipientEventType`, and `RecipientLogKey`; mask IBANs and keep IDs out of metric tags. Preserve framework-free domain code even though all layers now compile in one Maven module.
 
-## Testing Guidelines
-
-Tests use JUnit 5, AssertJ, Mockito, Spring Boot Test, Rest Assured, Testcontainers PostgreSQL, JaCoCo, and PIT.
-
-- Domain: value objects, identities, aggregate create/restore, ownership checks, exception messages, and failure reasons.
-- Application: command/query orchestration, repository interactions, structured logging outcomes, concurrency-limit behavior, and error propagation.
-- Infrastructure: REST mappers/controllers, validation DTOs, `ProblemDetail` handlers, JPA entity mapping, PostgreSQL repositories, and IBAN masking.
-- Integration: HTTP flows, Liquibase schema, PostgreSQL persistence, concurrency limiting, correlation IDs, and container lifecycle.
-
-Name unit tests `*Test` and integration tests `*IT`. Update integration coverage for schema, persistence, API, logging, or configuration changes.
-
 ## Commit & Pull Request Guidelines
 
 Recent commits use imperative, sentence-style messages such as `Add name filtering to list recipients API`. PRs should include summary, affected areas, test evidence (`../mvnw verify`, targeted tests, or PIT where relevant), linked issues, and API/config notes when endpoints, profiles, Docker, Kubernetes, or observability behavior change.
@@ -53,4 +55,14 @@ Do not commit real secrets. Compose credentials are development-only (`admin`/`p
 
 ## Agent-Specific Instructions
 
-When updating guidance, inspect the consolidated Maven module plus resources, Docker, Kubernetes, and tests. Do not infer architecture from package names alone; check controllers, handlers, repositories, configuration, resources, and tests. Preserve unrelated user changes.
+Use this file as the initial repository map. Do not rediscover repository structure, conventions, or architecture that are already documented here unless this guidance appears incomplete, stale, or inconsistent with the task.
+
+For questions about existing behavior, use the documented structure to identify the narrowest relevant entry points. Inspect only the production code, tests, configuration, or resources needed to verify the answer, and expand the investigation only when necessary.
+
+Treat production code and tests as the source of truth for current behavior. This file provides orientation and guidance; it does not replace verification when the task depends on implementation details.
+
+Avoid broad repository scans when this guide already provides enough information to locate the relevant code.
+
+When making architectural changes or updating repository guidance, inspect the affected controllers, handlers, repositories, configuration, resources, and tests rather than inferring architecture from package names alone.
+
+Preserve unrelated user changes.

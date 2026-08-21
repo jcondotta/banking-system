@@ -22,7 +22,7 @@ public record RecipientName(String value) {
   }
 
   private static String normalize(String value) {
-    return value.trim().replaceAll("\\s+", " ");
+    return value.strip().replaceAll("\\s+", " ");
   }
 
   private static void validateLength(String value) {

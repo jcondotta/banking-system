@@ -1,8 +1,12 @@
 # Recipients Change Playbook
 
-Use this playbook for non-trivial changes in the `recipients` bounded context. Keep changes aligned with the existing package architecture and prefer the closest local pattern before adding new abstractions.
+Use this playbook for changes to domain, application, REST/API, persistence, configuration, Docker, or Kubernetes in the `recipients` bounded context.
 
-For test style, scope, and integration-test conventions, use `docs/ai/testing.md`.
+Keep changes aligned with the existing package architecture and prefer the closest local pattern before adding new abstractions.
+
+For test style, scope, assertions, test data, and integration-test conventions, use `docs/ai/testing-guidelines.md`.
+
+Prefer the narrowest test command that covers the changed behavior. Expand to broader test suites when the change crosses components or when focused tests are insufficient.
 
 ## Domain Changes
 
@@ -15,7 +19,7 @@ Read:
 
 Rules:
 - keep domain code framework-free
-- preserve recipient ownership checks
+- preserve recipient ownership checks unless the requested behavior intentionally changes them
 - enforce invariants in value objects or aggregate methods when possible
 - keep repository interfaces as ports, not persistence implementations
 - update exception messages and failure reasons deliberately
@@ -36,7 +40,7 @@ Read:
 Rules:
 - keep orchestration in application and business invariants in domain
 - normalize failures consistently
-- preserve structured logging event names and keys unless the behavior intentionally changes
+- preserve structured logging event names and keys unless the requested behavior intentionally changes them
 - keep identifiers out of metric tags
 - do not expose infrastructure exceptions through application APIs
 
@@ -77,8 +81,9 @@ Read:
 
 Rules:
 - keep persistence details in infrastructure
-- preserve optimistic-lock and duplicate-IBAN behavior
+- preserve optimistic-lock and duplicate-IBAN behavior unless the requested behavior intentionally changes those rules
 - include SQL rollbacks for Liquibase changes
+- never modify an already-applied Liquibase changeset; create a new incremental changeset instead
 - keep query projections aligned with `RecipientSummary`
 - mask IBANs before returning read-model data
 
@@ -98,7 +103,7 @@ Read:
 Rules:
 - do not commit real secrets
 - keep local credentials development-only
-- preserve local service port `8081` unless intentionally changing it
+- preserve local service port `8081` unless the requested behavior intentionally changes it
 - keep environment-specific values in profiles, Docker Compose, Kubernetes, or Terraform
 - update tests or docs when profiles, ports, database names, or observability behavior change
 
@@ -112,5 +117,6 @@ Check:
 - dependency direction still points inward by package
 - domain remains free of Spring, JPA, HTTP, and logging framework dependencies
 - tests match the behavior changed
+- focused tests for the changed behavior pass
 - unrelated user changes are preserved
 - API, configuration, observability, or schema changes are mentioned in the final summary

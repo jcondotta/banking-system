@@ -44,8 +44,29 @@ class RecipientNameTest {
   }
 
   @Test
+  void shouldNormalizeRecipientName_whenNameHasSurroundingAndRepeatedWhitespace() {
+    assertThat(RecipientName.of(" Jefferson  Condotta ").value()).isEqualTo(RECIPIENT_NAME_JEFFERSON);
+  }
+
+  @Test
+  void shouldCreateRecipientName_whenNormalizedNameHasMaxLength() {
+    var maxLengthName = " " + "A".repeat(RecipientName.MAX_LENGTH) + " ";
+
+    assertThat(RecipientName.of(maxLengthName).value()).isEqualTo("A".repeat(RecipientName.MAX_LENGTH));
+  }
+
+  @Test
   void shouldThrowException_whenNameIsTooLong() {
     var longName = "A".repeat(51);
+
+    assertThatThrownBy(() -> RecipientName.of(longName))
+        .isInstanceOf(DomainValidationException.class)
+        .hasMessage(RecipientName.NAME_MUST_NOT_EXCEED_LENGTH.formatted(RecipientName.MAX_LENGTH));
+  }
+
+  @Test
+  void shouldThrowException_whenNormalizedNameIsTooLong() {
+    var longName = " A".repeat(RecipientName.MAX_LENGTH + 1);
 
     assertThatThrownBy(() -> RecipientName.of(longName))
         .isInstanceOf(DomainValidationException.class)

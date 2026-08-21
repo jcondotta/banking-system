@@ -3,3 +3,5 @@ databaseChangeLog:
       file: db/changelog/changes/0001-create-recipients-table.sql
   - include:
       file: db/changelog/changes/0002-create-recipients-indexes.sql
+  - include:
+      file: db/changelog/changes/0003-limit-recipient-name-length.sql

@@ -1,6 +1,8 @@
 # Recipients Testing Guidelines
 
-Use these guidelines when adding or changing tests in the `recipients` bounded context. Prefer the style already used by the nearest test class over generic company-wide testing rules.
+Use these guidelines when adding, modifying, reviewing, or refactoring tests in the `recipients` bounded context.
+
+Before introducing a new test pattern, inspect the nearest existing test for the same layer or component type. Prefer established local patterns over generic testing rules.
 
 ## Test Types
 
@@ -36,11 +38,13 @@ Do not add `@DisplayName` unless the surrounding test class already uses it.
 
 Use AssertJ as the default assertion library.
 
-Use `assertAll` when a single behavior has multiple related outputs, such as:
+Use AssertJ `SoftAssertions` when a single behavior has multiple related outputs that should be evaluated together, such as:
 - persisted aggregate state
 - response status, headers, and body
 - `ProblemDetail` fields
 - structured log level, event type, and outcome
+
+Use direct assertions when there is only one relevant outcome or when grouping assertions would reduce readability.
 
 Do not split one coherent behavior into many tests only to satisfy an arbitrary assertion count.
 
