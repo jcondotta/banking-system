@@ -82,8 +82,8 @@ Read:
 Rules:
 - keep persistence details in infrastructure
 - preserve optimistic-lock and duplicate-IBAN behavior unless the requested behavior intentionally changes those rules
-- include SQL rollbacks for Liquibase changes
 - never modify an already-applied Liquibase changeset; create a new incremental changeset instead
+- include SQL rollbacks for Liquibase changes
 - keep query projections aligned with `RecipientSummary`
 - mask IBANs before returning read-model data
 
