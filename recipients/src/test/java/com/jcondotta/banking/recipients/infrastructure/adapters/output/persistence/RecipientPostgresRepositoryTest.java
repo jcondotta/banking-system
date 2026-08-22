@@ -15,6 +15,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -70,6 +71,36 @@ class RecipientPostgresRepositoryTest {
   }
 
   @Test
+  void shouldReturnMappedRecipient_whenRecipientExistsForBankAccount() {
+    var recipient = RecipientFixtures.JEFFERSON.toRecipient(BANK_ACCOUNT_ID);
+    var entity = new RecipientEntity();
+
+    when(repository.findByBankAccountIdAndId(BANK_ACCOUNT_ID.value(), recipient.getId().value()))
+      .thenReturn(Optional.of(entity));
+    when(mapper.toDomain(entity)).thenReturn(recipient);
+
+    var result = adapter.findByBankAccountIdAndId(BANK_ACCOUNT_ID, recipient.getId());
+
+    assertThat(result).contains(recipient);
+    verify(repository).findByBankAccountIdAndId(BANK_ACCOUNT_ID.value(), recipient.getId().value());
+    verify(mapper).toDomain(entity);
+    verifyNoMoreInteractions(repository, mapper);
+  }
+
+  @Test
+  void shouldReturnEmpty_whenRecipientDoesNotExistForBankAccount() {
+    var recipientId = RecipientId.newId();
+
+    when(repository.findByBankAccountIdAndId(BANK_ACCOUNT_ID.value(), recipientId.value()))
+      .thenReturn(Optional.empty());
+
+    assertThat(adapter.findByBankAccountIdAndId(BANK_ACCOUNT_ID, recipientId)).isEmpty();
+
+    verify(repository).findByBankAccountIdAndId(BANK_ACCOUNT_ID.value(), recipientId.value());
+    verifyNoInteractions(mapper);
+  }
+
+  @Test
   void shouldSaveRecipient_whenRecipientIsCreated() {
     var recipient = RecipientFixtures.JEFFERSON.toRecipient(BANK_ACCOUNT_ID);
     var entity = new RecipientEntity();
@@ -94,6 +125,23 @@ class RecipientPostgresRepositoryTest {
 
     assertThatThrownBy(() -> adapter.save(recipient))
       .isInstanceOf(DuplicateRecipientIbanException.class);
+
+    verify(mapper).toEntity(recipient);
+    verify(repository).saveAndFlush(entity);
+    verifyNoMoreInteractions(repository, mapper);
+  }
+
+  @Test
+  void shouldThrowOptimisticLockException_whenSaveDetectsConcurrentModification() {
+    var recipient = RecipientFixtures.JEFFERSON.toRecipient(BANK_ACCOUNT_ID);
+    var entity = new RecipientEntity();
+
+    when(mapper.toEntity(recipient)).thenReturn(entity);
+    when(repository.saveAndFlush(entity))
+      .thenThrow(new ObjectOptimisticLockingFailureException(RecipientEntity.class, recipient.getId().value()));
+
+    assertThatThrownBy(() -> adapter.save(recipient))
+      .isInstanceOf(RecipientOptimisticLockException.class);
 
     verify(mapper).toEntity(recipient);
     verify(repository).saveAndFlush(entity);

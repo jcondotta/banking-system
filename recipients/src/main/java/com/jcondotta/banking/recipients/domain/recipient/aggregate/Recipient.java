@@ -15,8 +15,8 @@ import static com.jcondotta.domain.support.Preconditions.required;
 public final class Recipient extends AggregateRoot<RecipientId> {
 
   private final BankAccountId bankAccountId;
-  private final RecipientName recipientName;
-  private final Iban iban;
+  private RecipientName recipientName;
+  private Iban iban;
   private final Instant createdAt;
 
   private Long version;
@@ -79,6 +79,11 @@ public final class Recipient extends AggregateRoot<RecipientId> {
     if (!bankAccountId.equals(other)) {
       throw new RecipientOwnershipMismatchException(this.getId(), other);
     }
+  }
+
+  public void update(RecipientName recipientName, Iban iban) {
+    this.recipientName = required(recipientName, RecipientError.RECIPIENT_NAME_NOT_PROVIDED);
+    this.iban = required(iban, RecipientError.IBAN_NOT_PROVIDED);
   }
 
   public boolean isVersioned() {

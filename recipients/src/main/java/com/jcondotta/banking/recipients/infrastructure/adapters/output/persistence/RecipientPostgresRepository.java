@@ -3,6 +3,7 @@ package com.jcondotta.banking.recipients.infrastructure.adapters.output.persiste
 import com.jcondotta.banking.recipients.application.common.exception.RecipientOptimisticLockException;
 import com.jcondotta.banking.recipients.domain.recipient.aggregate.Recipient;
 import com.jcondotta.banking.recipients.domain.recipient.exceptions.DuplicateRecipientIbanException;
+import com.jcondotta.banking.recipients.domain.recipient.identity.BankAccountId;
 import com.jcondotta.banking.recipients.domain.recipient.identity.RecipientId;
 import com.jcondotta.banking.recipients.domain.recipient.repository.RecipientRepository;
 import com.jcondotta.banking.recipients.infrastructure.adapters.output.persistence.mapper.RecipientEntityMapper;
@@ -10,6 +11,7 @@ import com.jcondotta.banking.recipients.infrastructure.adapters.output.persisten
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,6 +31,13 @@ public class RecipientPostgresRepository implements RecipientRepository {
     @Transactional(readOnly = true)
     public Optional<Recipient> findById(RecipientId recipientId) {
         return repository.findById(recipientId.value())
+            .map(mapper::toDomain);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Optional<Recipient> findByBankAccountIdAndId(BankAccountId bankAccountId, RecipientId recipientId) {
+        return repository.findByBankAccountIdAndId(bankAccountId.value(), recipientId.value())
             .map(mapper::toDomain);
     }
 
@@ -53,6 +62,9 @@ public class RecipientPostgresRepository implements RecipientRepository {
                 throw new DuplicateRecipientIbanException(recipient.getIban(), recipient.getBankAccountId());
             }
             throw e;
+        }
+        catch (ObjectOptimisticLockingFailureException e) {
+            throw new RecipientOptimisticLockException(recipient.getId());
         }
     }
 
