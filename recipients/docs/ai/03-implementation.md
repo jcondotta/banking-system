@@ -6,6 +6,16 @@ Use this stage to implement behavior and design that are already sufficiently de
 
 Implement the requested change autonomously while preserving the agreed behavior, repository architecture, and established local conventions.
 
+## Entry Condition
+
+Do not begin implementation merely because the user used words such as `implement`, `add`, `create`, `change`, or `fix`.
+
+For a new feature or non-trivial behavioral change, first determine whether the relevant requirements and design decisions have already been resolved.
+
+If meaningful behavioral, contract, or architectural decisions remain unresolved, return to the corresponding earlier stage before editing code.
+
+Once implementation begins, it is autonomous.
+
 ## Before Editing
 
 Review the relevant requirements and design decisions when they are available.

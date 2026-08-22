@@ -25,7 +25,7 @@ The numbered documents represent stages of the development process. They define 
 | --- | --- | --- |
 | 1. Requirements | Understand the requested behavior, scope, constraints, and open questions | `docs/ai/01-requirements.md` |
 | 2. Design | Resolve behavioral, contract, and architectural decisions before implementation | `docs/ai/02-design.md` |
-| 3. Implementation | Implement the agreed behavior and design autonomously | `docs/ai/03-implementation.md` |
+| 3. Implementation | Implement autonomously after relevant requirements and design decisions are resolved | `docs/ai/03-implementation.md` |
 | 4. Testing | Add or update tests according to repository testing conventions | `docs/ai/04-testing.md` |
 | 5. Validation | Independently review the completed change before considering it finished | `docs/ai/05-validation.md` |
 
@@ -33,9 +33,19 @@ The numbered documents represent stages of the development process. They define 
 
 The stages describe responsibilities, not mandatory ceremony for every task.
 
-Start from the earliest stage that is relevant and not already resolved by the user's request or prior decisions. Do not repeat analysis or decisions that are already established.
+Start from the earliest unresolved stage relevant to the task.
 
-A small or mechanical change may require little or no explicit requirements or design work. A feature or non-trivial behavioral change may require the full workflow.
+A request to implement, build, add, create, change, or fix something does not by itself mean that requirements or design have already been resolved.
+
+Before entering implementation for a new feature or non-trivial behavioral change, determine whether the relevant requirements and design are sufficiently defined.
+
+If meaningful behavioral, contract, or architectural decisions remain unresolved, perform the relevant requirements and design stages before implementation.
+
+Skip an earlier stage only when its concerns are already resolved by the user's request, prior decisions in the current task, repository guidance, or an established local pattern.
+
+Do not repeat analysis or decisions that are already established.
+
+A small, mechanical, or clearly established change may require little or no explicit requirements or design work.
 
 When a later stage exposes a concern that belongs to an earlier stage, handle it according to the rules of the current stage rather than silently treating the earlier decision as user-approved.
 
@@ -45,13 +55,17 @@ Load only the guidance relevant to the current task.
 
 Keep user interaction concentrated in the design stage.
 
-Requirements analysis may identify open questions, ambiguities, edge cases, and decisions that need to be resolved, but should continue investigating when useful work can still be done.
+Requirements analysis may identify open questions, ambiguities, edge cases, and decisions that need to be resolved. Continue investigating while useful analysis can still be performed, and carry meaningful unresolved questions into design.
 
-Design is the interactive stage. When multiple meaningful behavioral, contract, or architectural alternatives are viable, present them to the user, recommend an option, and obtain a decision before considering the design resolved.
+Design is the interactive stage. When multiple meaningful behavioral, contract, or architectural alternatives are viable, present them to the user, explain the relevant trade-offs, recommend an option, and obtain a decision before considering the design resolved.
 
-Implementation, testing, and validation are autonomous stages. Do not stop those stages merely to ask a question.
+Do not begin implementation merely because the user explicitly asked to implement something. For a new feature or non-trivial behavioral change, unresolved design decisions must first pass through the design stage.
 
-If implementation requires a meaningful decision that was not resolved during design, make the most conservative choice consistent with existing behavior, contracts, architecture, and repository patterns. Record the decision so it can be surfaced during validation.
+Once implementation begins, implementation, testing, and validation are autonomous stages. Do not stop those stages merely to ask a question.
+
+If implementation discovers a meaningful decision that was not identified or resolved during design, make the most conservative choice consistent with existing behavior, contracts, architecture, and repository patterns. Continue the implementation and record the decision, alternatives, and rationale so they can be surfaced during validation.
+
+Do not treat a decision made autonomously during implementation as though it had been agreed with the user.
 
 Validation must complete its review before reporting questions, findings, suggestions, or decisions that may require user attention.
 
