@@ -41,11 +41,13 @@ Before entering implementation for a new feature or non-trivial behavioral chang
 
 If meaningful behavioral, contract, or architectural decisions remain unresolved, perform the relevant requirements and design stages before implementation.
 
-Skip an earlier stage only when its concerns are already resolved by the user's request, prior decisions in the current task, repository guidance, or an established local pattern.
+Skip an earlier stage only when its concerns are already resolved by the user's request, prior explicit decisions in the current task, or a hard technical/contractual constraint that leaves no viable alternative.
+
+Repository guidance, established local patterns, similar existing endpoints, technical preference, conservatism, simplicity, safety, or idiomatic style do not resolve feature-level decisions by themselves. Use that evidence to recommend an option during Design, not to replace the user's decision.
 
 Do not repeat analysis or decisions that are already established.
 
-A small, mechanical, or clearly established change may require little or no explicit requirements or design work.
+A small or mechanical change may require little or no explicit requirements or design work. A change is not "clearly established" merely because a nearby feature does something similar when the new change exposes behavior, public contract, responsibility, abstraction, architecture, security/data exposure, or observability choices.
 
 When a later stage exposes a concern that belongs to an earlier stage, handle it according to the rules of the current stage rather than silently treating the earlier decision as user-approved.
 
@@ -61,9 +63,13 @@ Design is the interactive stage. When multiple meaningful behavioral, contract, 
 
 Do not begin implementation merely because the user explicitly asked to implement something. For a new feature or non-trivial behavioral change, unresolved design decisions must first pass through the design stage.
 
-Once implementation begins, implementation, testing, and validation are autonomous stages. Do not stop those stages merely to ask a question.
+Before editing code for a new feature or non-trivial behavioral change, the Design gate in `docs/ai/02-design.md` must have no OPEN decisions.
 
-If implementation discovers a meaningful decision that was not identified or resolved during design, make the most conservative choice consistent with existing behavior, contracts, architecture, and repository patterns. Continue the implementation and record the decision, alternatives, and rationale so they can be surfaced during validation.
+Once implementation begins, implementation, testing, and validation are autonomous stages for the resolved design. Do not stop those stages merely to ask about already-resolved decisions or purely mechanical details.
+
+If implementation discovers a meaningful behavioral, public-contract, responsibility, abstraction, architecture, security/data-exposure, or observability decision that was not identified or resolved during Design, stop implementation and return to Design before making further code changes for that decision. Do not use implementation-time discovery as a way to bypass the Design gate.
+
+Only purely mechanical implementation details remain autonomous after Design, such as local variable names, import ordering, helper method extraction with no architectural effect, and formatting.
 
 Do not treat a decision made autonomously during implementation as though it had been agreed with the user.
 

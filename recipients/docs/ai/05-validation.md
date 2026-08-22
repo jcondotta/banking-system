@@ -18,6 +18,7 @@ Review:
 - the original request
 - requirements established for the change
 - design decisions agreed with the user
+- the Design decision list and gate outcome when the change is a new feature or non-trivial behavioral change
 - relevant repository guidance
 - the final working-tree diff
 - affected production code
@@ -31,6 +32,7 @@ Inspect additional files only when needed to verify a finding.
 Verify that:
 - the requested behavior is fully implemented
 - agreed requirements and design decisions are respected
+- no behavior, public contract, responsibility, abstraction, architecture, security/data exposure, persistence, consistency, observability, or test-scope decision was implemented without being resolved in Design
 - no important behavior was omitted
 - no unrelated behavior was changed
 - architectural boundaries and responsibilities remain coherent
@@ -50,12 +52,14 @@ Identify meaningful behavioral, contract, or architectural decisions made during
 
 Do not stop validation to ask about them.
 
+Treat any such decision as a process finding. Passing tests or consistency with existing patterns does not make it accepted.
+
 For each such decision:
 - explain what was decided
 - explain why the decision became necessary
 - identify materially different alternatives when relevant
 - state the rationale used by the implementation
-- recommend whether to keep or revise the decision
+- recommend returning to Design for user resolution before considering the change ready, unless the decision is purely mechanical
 
 A decision made autonomously during implementation must not be presented as though it had been agreed with the user.
 
@@ -66,6 +70,7 @@ Distinguish between:
 - deviations from agreed requirements or design
 - architectural or contract concerns
 - decisions introduced during implementation
+- missing or incomplete Design gate evidence
 - optional improvements
 
 Do not manufacture findings merely to make the review appear comprehensive.
@@ -80,6 +85,7 @@ The final result should:
 - state whether the change is ready
 - report blocking or important findings first
 - list decisions introduced during implementation that deserve user attention
+- state whether the Design gate was satisfied for non-trivial changes
 - include relevant recommendations
 - separate optional suggestions from issues that should be addressed
 

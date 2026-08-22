@@ -12,6 +12,9 @@ This is an interactive stage.
 For new features and non-trivial behavioral changes, do not implement the
 solution until the Design process below has been completed.
 
+Design is complete only when every feature-level decision is either RESOLVED
+or proven not applicable. OPEN decisions block implementation.
+
 ## Design Process
 
 ### 1. Inspect
@@ -47,9 +50,47 @@ Walk through at least these areas when applicable:
 
 For each area, determine whether more than one viable choice exists.
 
-If you can identify two viable alternatives, record the decision as OPEN.
+Create an explicit decision list. For each decision, record:
+
+- decision: the concrete question to resolve
+- status: OPEN or RESOLVED
+- alternatives: the materially different viable options
+- evidence: existing behavior, repository guidance, constraints, risks, and
+  trade-offs
+- recommendation: the option you recommend and why
+- resolution source: user decision, explicit user request, hard constraint, or
+  not applicable
+
+If you can identify two or more viable alternatives that affect behavior,
+public contract, responsibility, abstraction, architecture, security/data
+exposure, persistence semantics, consistency, or observability, record the
+decision as OPEN.
 
 Do not choose an alternative while building the decision tree.
+
+Do not mark a decision RESOLVED merely because:
+
+- one alternative follows an existing repository pattern
+- one alternative matches another endpoint or feature
+- one alternative is more conservative
+- one alternative appears safer
+- one alternative appears simpler
+- one alternative appears more idiomatic
+- one alternative is easier to test
+- one alternative minimizes code changes
+
+Those factors are evidence for the recommendation, not a substitute for the
+user's decision.
+
+A decision may be RESOLVED without asking only when:
+
+- the user's request explicitly selected the behavior or design;
+- an earlier decision in the same task logically determines it;
+- a documented public contract or hard technical constraint leaves no viable
+  alternative; or
+- the item is purely mechanical and has no effect on behavior, public
+  contract, responsibilities, abstractions, architecture, security/data
+  exposure, persistence, consistency, observability, or test scope.
 
 ### 3. Interview the User
 
@@ -71,6 +112,9 @@ simplicity, or a clearly preferred option may support your recommendation.
 
 They do NOT remove the requirement to ask when more than one viable
 alternative exists.
+
+Prefer asking a Design question that later proves unnecessary over silently
+making a relevant decision that may require rework.
 
 Never convert:
 
@@ -103,7 +147,9 @@ ask about it before implementation.
 
 Implementation MUST NOT begin while any identified Design decision is OPEN.
 
-Before leaving Design, explicitly verify:
+Before leaving Design, explicitly verify the decision list. The gate passes
+only when every applicable item below is RESOLVED with an acceptable
+resolution source, or marked not applicable:
 
 - [ ] behavior and error semantics resolved
 - [ ] API contract resolved
@@ -122,6 +168,11 @@ the user.
 
 Do not enter Implementation until this gate passes.
 
+When reporting the Design outcome, include the resolved decision list or a
+concise summary of each resolved decision and its source. Do not imply that
+recommendations based on repository patterns were user-approved unless the
+user explicitly accepted them.
+
 ## Questioning Rules
 
 During Design:
@@ -132,6 +183,8 @@ During Design:
 - Do not use an existing pattern as permission to resolve an OPEN decision.
 - Do not make a decision merely because one alternative is conservative,
   simpler, cleaner, safer, or more conventional.
+- Do not treat behavior from another endpoint as resolving a new endpoint's
+  contract when alternatives remain viable.
 - Do not begin editing while waiting for a Design answer.
 - Push back when the user's choice conflicts with repository architecture,
   established behavior, or another resolved decision.

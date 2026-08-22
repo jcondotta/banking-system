@@ -12,7 +12,9 @@ Do not begin implementation merely because the user used words such as `implemen
 
 For a new feature or non-trivial behavioral change, first determine whether the relevant requirements and design decisions have already been resolved.
 
-If meaningful behavioral, contract, or architectural decisions remain unresolved, return to the corresponding earlier stage before editing code.
+If meaningful behavioral, public-contract, responsibility, abstraction, architectural, security/data-exposure, persistence, consistency, observability, or test-scope decisions remain unresolved, return to the corresponding earlier stage before editing code.
+
+Implementation may begin only after the Design gate has no OPEN decisions for the change.
 
 Once implementation begins, it is autonomous.
 
@@ -45,14 +47,18 @@ Do not introduce new abstractions, generalized infrastructure, or architectural 
 
 ## Decisions Discovered During Implementation
 
-Implementation is autonomous. Do not stop implementation merely to ask a design question.
+Implementation is autonomous for the design that has already been resolved.
 
-If implementation exposes a meaningful behavioral, contract, or architectural decision that was not resolved during requirements or design:
-- choose the option that best preserves existing behavior, contracts, architectural boundaries, and established repository patterns
-- prefer the least disruptive and least expansive viable option when evidence does not clearly favor another choice
-- avoid unnecessary architectural broadening or scope expansion
-- continue the implementation
-- record the decision, relevant alternatives, and rationale for validation
+If implementation exposes a decision that was not resolved during Requirements or Design and two or more viable alternatives affect behavior, public contract, responsibility, abstraction, architecture, security/data exposure, persistence semantics, consistency, observability, or test scope:
+- stop implementation before making further code changes for that decision;
+- leave already-made changes untouched unless they prevent the project from being inspected or the user explicitly asks to revert them;
+- document the newly discovered decision, alternatives, trade-offs, and recommendation;
+- return to Design and ask the user to resolve it;
+- resume implementation only after the Design gate has no OPEN decisions again.
+
+Do not convert an implementation-time discovery into an autonomous choice because one option is conservative, simpler, safer, more idiomatic, consistent with existing behavior, or easier to implement.
+
+If the newly discovered item is purely mechanical and does not affect behavior, public contract, responsibilities, abstractions, architecture, security/data exposure, persistence, consistency, observability, or test scope, resolve it autonomously using local conventions.
 
 Do not silently treat a decision made autonomously during implementation as having been agreed with the user.
 

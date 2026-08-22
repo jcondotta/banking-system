@@ -4,6 +4,8 @@ Use these guidelines when adding, modifying, reviewing, or refactoring tests in 
 
 Testing is an autonomous stage. Follow the agreed behavior and design rather than introducing new behavioral decisions through tests.
 
+Testing must not be used to close an OPEN Design decision. If writing or updating a test requires choosing between viable behavior, public contract, ownership, data exposure, responsibility, abstraction, persistence, consistency, or observability alternatives that were not resolved in Design, stop testing work and return to Design before encoding the choice in tests.
+
 Before introducing a new test pattern, inspect the nearest existing test for the same layer or component type. Prefer established local patterns over generic testing rules.
 
 ## Test Types
@@ -53,6 +55,8 @@ Use direct assertions when there is only one relevant outcome or when grouping a
 Do not split one coherent behavior into many tests only to satisfy an arbitrary assertion count.
 
 Prefer assertions that verify observable behavior. Avoid tests that only mirror implementation details or framework wiring.
+
+For public API tests, assert the behavior and contract that were resolved in Design. Do not infer status codes, response shape, ownership semantics, or error payloads solely from a similar endpoint unless that decision was explicitly resolved.
 
 ## Mocks And Test Data
 
@@ -110,3 +114,5 @@ Prefer test-first for new behavior and bug fixes when the expected behavior is c
 Do not block small refactors or mechanical renames on writing a failing test first when existing focused tests already cover the behavior.
 
 Do not use tests to silently decide behavior that requirements or design left intentionally unresolved.
+
+If tests reveal that the implementation made a relevant decision that is absent from the resolved Design, treat it as a process finding and return to Design before expanding test coverage around that behavior.
