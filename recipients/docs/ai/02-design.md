@@ -1,113 +1,164 @@
 # Recipients Design Guidelines
 
-Use this stage to decide how the requested behavior should fit into the existing system before implementation begins.
+Use this stage to agree on how the requested change should behave and fit into
+the existing system before implementation begins.
 
 ## Goal
 
-Turn the understood requirements into an agreed solution.
+Reach a shared design with the user before writing code.
 
-Design is the primary interactive stage of the development workflow.
+This is an interactive stage.
 
-The goal is not to minimize questions. The goal is to expose meaningful choices before implementation so that the user can participate in the design instead of discovering those choices after the code has been written.
+For new features and non-trivial behavioral changes, do not implement the
+solution until the Design process below has been completed.
 
-Inspect the relevant implementation and established repository patterns before proposing architectural or behavioral choices.
+## Design Process
 
-## Decision Discovery
+### 1. Inspect
 
-Before proposing a solution, inspect enough of the relevant code to identify the meaningful decisions exposed by the requested change.
+Read the relevant existing implementation, tests, contracts, and repository
+guidance.
 
-Do not stop at the first ambiguity when additional investigation can reasonably reveal related decisions or dependencies.
+Understand what is already fixed by the user's request and what remains open.
 
-Consider decisions involving:
-- externally observable behavior or error semantics
-- endpoint paths and API shape
-- request and response contracts or public models
-- domain responsibilities, invariants, and business rules
-- ownership semantics
-- application use-case boundaries
-- persistence and data-access strategy
-- command-side versus query-side access
-- architectural ownership or dependency direction
-- package or layer boundaries
-- the responsibility or scope of existing abstractions
-- whether abstractions should be reused, shared, broadened, moved, created, or remain use-case-specific
-- persistence contracts or schema behavior
-- security or data-exposure behavior
-- concurrency or consistency guarantees
-- observability behavior
-- integration with existing infrastructure
+Do not edit code during this stage.
 
-Do not limit Design questions only to architectural decisions.
+### 2. Build the Decision Tree
 
-## Design Decisions
+Before proposing an implementation, identify the decisions exposed by the
+change.
 
-A choice belongs to Design when multiple reasonable alternatives are viable and choosing between them could affect behavior, contracts, responsibilities, architecture, data access, observability, or future implementation direction.
+Walk through at least these areas when applicable:
 
-Do not silently choose between such alternatives.
+- behavior and error semantics
+- API path and HTTP contract
+- request and response models
+- domain behavior and invariants
+- application/use-case responsibilities
+- repository and data-access strategy
+- persistence behavior
+- abstraction reuse or creation
+- package and architectural boundaries
+- security and data exposure
+- concurrency and consistency
+- observability
+- edge cases
+- testing implications
 
-Existing repository patterns should inform the alternatives and recommendation, but the existence of a technically compatible or preferred local pattern does not by itself resolve a Design decision when another reasonable alternative remains viable.
+For each area, determine whether more than one viable choice exists.
 
-Do not treat the most conservative, conventional, secure, simple, or locally consistent option as automatically resolved when meaningful alternatives exist.
+If you can identify two viable alternatives, record the decision as OPEN.
 
-When uncertain whether a non-mechanical choice belongs to Design or Implementation, prefer surfacing it during Design.
+Do not choose an alternative while building the decision tree.
 
-## Interaction
+### 3. Interview the User
 
-When a Design decision exists:
-- explain what needs to be decided
-- present the viable alternatives
-- explain the relevant trade-offs
-- recommend an option based on the existing code, requirements, and repository conventions
-- ask the user to decide or confirm the recommendation
+If the decision tree contains any OPEN decisions, you MUST ask the user
+questions before implementation.
 
-Do not resolve an identified Design decision autonomously.
+Do not resolve an OPEN decision yourself.
 
-Identifying a decision and then selecting the recommended option yourself does not count as resolving the decision.
+For each OPEN decision:
 
-Group related decisions when that makes them easier to evaluate, but keep each decision independently understandable.
+1. explain what needs to be decided;
+2. present the viable alternatives;
+3. explain the important trade-offs;
+4. recommend one option;
+5. ask the user to choose or confirm.
 
-When several meaningful decisions are discovered, present all decisions that can reasonably be identified before implementation rather than asking only about the first one.
+Existing code, repository patterns, conventions, security considerations,
+simplicity, or a clearly preferred option may support your recommendation.
 
-Do not enter Implementation while identified Design decisions remain unresolved.
+They do NOT remove the requirement to ask when more than one viable
+alternative exists.
 
-## What Not To Ask
+Never convert:
 
-Do not ask about purely mechanical implementation details whose alternatives do not meaningfully affect behavior, contracts, responsibilities, architecture, data access, observability, or maintainability.
+"Option A appears preferable to Option B"
 
-Examples include:
-- local variable names
-- import ordering
-- formatting
-- obvious framework annotations required by an already agreed design
-- exact placement of trivial helper methods
-- mechanical extensions of a pattern when no reasonable design alternative exists
+into:
 
-Do not create questions merely because another implementation is theoretically possible. Alternatives should be reasonable in the context of the requested change and repository.
+"I will use Option A."
 
-When uncertain whether a choice is a meaningful Design decision or a mechanical implementation detail, prefer asking during Design.
+Instead, ask:
 
-## Decision Dependencies
+"I recommend Option A because [...]. Do you want A or B?"
 
-Resolve higher-impact decisions before decisions that depend on them.
+### 4. Resolve Dependencies
 
-When one choice constrains another, make that dependency explicit.
+Work through the decision tree until every OPEN decision is resolved.
 
-If several decisions are independent, they may be presented together so the user can resolve them in one interaction.
+When one decision affects another, resolve the prerequisite first and then
+re-evaluate the dependent decision.
 
-Do not finalize a design whose important decisions still depend on unresolved assumptions.
+Do not assume the user's answer to one decision resolves another unless that
+dependency logically determines it.
+
+After each user response, update the set of RESOLVED and OPEN decisions.
+
+If additional investigation reveals another decision, add it to the tree and
+ask about it before implementation.
+
+### 5. Design Gate
+
+Implementation MUST NOT begin while any identified Design decision is OPEN.
+
+Before leaving Design, explicitly verify:
+
+- [ ] behavior and error semantics resolved
+- [ ] API contract resolved
+- [ ] request/response contract resolved
+- [ ] domain/application responsibilities resolved
+- [ ] repository/data-access strategy resolved
+- [ ] abstraction and architectural boundaries resolved
+- [ ] security/data-exposure behavior resolved
+- [ ] concurrency/consistency behavior resolved when applicable
+- [ ] observability behavior resolved when applicable
+- [ ] important edge cases resolved
+- [ ] testing implications understood
+
+If an applicable item still contains more than one viable alternative, ask
+the user.
+
+Do not enter Implementation until this gate passes.
+
+## Questioning Rules
+
+During Design:
+
+- Ask rather than assume.
+- Prefer one unnecessary Design question over silently making a decision that
+  could require rework.
+- Do not use an existing pattern as permission to resolve an OPEN decision.
+- Do not make a decision merely because one alternative is conservative,
+  simpler, cleaner, safer, or more conventional.
+- Do not begin editing while waiting for a Design answer.
+- Push back when the user's choice conflicts with repository architecture,
+  established behavior, or another resolved decision.
+- Explain the conflict and let the user decide how to proceed.
+
+Do not ask about purely mechanical coding details such as formatting, import
+ordering, local variable names, or other choices that do not affect the
+design.
 
 ## Design Outcome
 
-Once the relevant decisions are resolved, summarize the agreed solution.
+When all decisions are resolved, summarize the agreed design.
 
-The resulting design should make clear:
-- agreed behavior and error semantics
-- API and public contract decisions
-- affected architectural areas
-- ownership and responsibility decisions
-- data-access and persistence decisions
-- relevant observability or concurrency implications
+The summary should capture:
+
+- behavior and error semantics
+- API and public contracts
+- domain and application responsibilities
+- repository and data-access strategy
+- architectural boundaries
+- persistence implications
+- security/data-exposure decisions
+- concurrency or observability decisions when relevant
 - important edge cases
 - expected testing scope
 
-Implementation should be able to proceed autonomously from the agreed design in normal circumstances.
+Only after this summary is established may the workflow proceed to
+Implementation.
+
+Implementation should then proceed autonomously from the agreed design.
