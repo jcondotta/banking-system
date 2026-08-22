@@ -6,7 +6,7 @@ This is the `recipients` bounded context: a Java 25, Spring Boot 4, single-modul
 
 - `src/main/java/com/jcondotta/banking/recipients/`: application entrypoint and all production code.
 - `domain/`: framework-free recipient model. It owns the `Recipient` aggregate, `BankAccountId`, `RecipientId`, `RecipientName`, `Iban`, domain exceptions, failure reasons, validation constants, and repository ports.
-- `application/`: use-case orchestration. It owns create/remove commands, list queries, handlers, query models, logging event names/keys, failure normalization, `@Observed` instrumentation, and concurrency limits.
+- `application/`: use-case orchestration. It owns commands, queries, handlers, query models, logging event names/keys, failure normalization, `@Observed` instrumentation, and concurrency limits.
 - `infrastructure/`: Spring and adapter code. It owns REST controllers, request/response DTOs, mappers, `ProblemDetail` exception handlers, correlation filtering, JPA entities/repositories, PostgreSQL adapters, persistence mappers, and runtime configuration.
 - `src/main/resources/`: Spring `application*.yml`, Liquibase changelogs, SQL migrations, and `logback-spring.xml`.
 - `src/test/java/`: unit and integration tests. Integration tests live under `.../integration` and use `@IntegrationTest`.
@@ -15,19 +15,45 @@ This is the `recipients` bounded context: a Java 25, Spring Boot 4, single-modul
 
 Keep dependencies pointing inward by package: infrastructure may depend on application and domain, application may depend on domain, and domain must not depend on Spring, JPA, HTTP, logging frameworks, or infrastructure code.
 
-## Task-Specific Guidance
+## Development Workflow
 
-Additional task-specific instructions live under `docs/ai/`.
+Development guidance lives under `docs/ai/`.
 
-Before performing a task listed below, read and apply the corresponding guidance. More than one guidance file may apply to the same task.
+The numbered documents represent stages of the development process. They define how to reason about, design, implement, test, and validate changes.
 
-| When working on... | Read |
-| --- | --- |
-| Implementing code changes | `docs/ai/implementation-guidelines.md` |
-| Adding, modifying, reviewing, or refactoring tests | `docs/ai/testing-guidelines.md` |
-| Changes spanning multiple architectural layers | `docs/ai/change-playbook.md` |
+| Stage | Purpose | Guidance |
+| --- | --- | --- |
+| 1. Requirements | Understand the requested behavior, scope, constraints, and open questions | `docs/ai/01-requirements.md` |
+| 2. Design | Resolve behavioral, contract, and architectural decisions before implementation | `docs/ai/02-design.md` |
+| 3. Implementation | Implement the agreed behavior and design autonomously | `docs/ai/03-implementation.md` |
+| 4. Testing | Add or update tests according to repository testing conventions | `docs/ai/04-testing.md` |
+| 5. Validation | Independently review the completed change before considering it finished | `docs/ai/05-validation.md` |
+
+`docs/ai/change-playbook.md` provides cross-cutting guidance based on the architectural areas affected by a change.
+
+The stages describe responsibilities, not mandatory ceremony for every task.
+
+Start from the earliest stage that is relevant and not already resolved by the user's request or prior decisions. Do not repeat analysis or decisions that are already established.
+
+A small or mechanical change may require little or no explicit requirements or design work. A feature or non-trivial behavioral change may require the full workflow.
+
+When a later stage exposes a concern that belongs to an earlier stage, handle it according to the rules of the current stage rather than silently treating the earlier decision as user-approved.
 
 Load only the guidance relevant to the current task.
+
+## Interaction And Autonomy
+
+Keep user interaction concentrated in the design stage.
+
+Requirements analysis may identify open questions, ambiguities, edge cases, and decisions that need to be resolved, but should continue investigating when useful work can still be done.
+
+Design is the interactive stage. When multiple meaningful behavioral, contract, or architectural alternatives are viable, present them to the user, recommend an option, and obtain a decision before considering the design resolved.
+
+Implementation, testing, and validation are autonomous stages. Do not stop those stages merely to ask a question.
+
+If implementation requires a meaningful decision that was not resolved during design, make the most conservative choice consistent with existing behavior, contracts, architecture, and repository patterns. Record the decision so it can be surfaced during validation.
+
+Validation must complete its review before reporting questions, findings, suggestions, or decisions that may require user attention.
 
 ## Build, Test, and Development Commands
 

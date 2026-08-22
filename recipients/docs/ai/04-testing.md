@@ -2,6 +2,8 @@
 
 Use these guidelines when adding, modifying, reviewing, or refactoring tests in the `recipients` bounded context.
 
+Testing is an autonomous stage. Follow the agreed behavior and design rather than introducing new behavioral decisions through tests.
+
 Before introducing a new test pattern, inspect the nearest existing test for the same layer or component type. Prefer established local patterns over generic testing rules.
 
 ## Test Types
@@ -106,3 +108,5 @@ Use `docs/ai/change-playbook.md` to choose the focused Maven command for the cha
 Prefer test-first for new behavior and bug fixes when the expected behavior is clear.
 
 Do not block small refactors or mechanical renames on writing a failing test first when existing focused tests already cover the behavior.
+
+Do not use tests to silently decide behavior that requirements or design left intentionally unresolved.

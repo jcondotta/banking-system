@@ -1,12 +1,12 @@
 # Recipients Change Playbook
 
-Use this playbook for changes to domain, application, REST/API, persistence, configuration, Docker, or Kubernetes in the `recipients` bounded context.
+Use this playbook for non-trivial changes in the `recipients` bounded context.
 
-Keep changes aligned with the existing package architecture and prefer the closest local pattern before adding new abstractions.
+This document complements the numbered development workflow by identifying the repository areas, constraints, and focused verification relevant to each architectural area.
 
-For test style, scope, assertions, test data, and integration-test conventions, use `docs/ai/testing-guidelines.md`.
+Use only the sections relevant to the current change.
 
-Prefer the narrowest test command that covers the changed behavior. Expand to broader test suites when the change crosses components or when focused tests are insufficient.
+For test style and integration-test conventions, use `docs/ai/04-testing.md`.
 
 ## Domain Changes
 
@@ -40,9 +40,10 @@ Read:
 Rules:
 - keep orchestration in application and business invariants in domain
 - normalize failures consistently
-- preserve structured logging event names and keys unless the requested behavior intentionally changes them
+- preserve structured logging event names and keys unless the behavior intentionally changes
 - keep identifiers out of metric tags
 - do not expose infrastructure exceptions through application APIs
+- preserve the responsibility and scope of use-case-specific ports unless the agreed design intentionally changes them
 
 Run:
 - `../mvnw test -Dtest=*CommandHandlerTest,*QueryHandlerTest`
@@ -63,6 +64,7 @@ Rules:
 - preserve `X-API-Version` behavior unless the API contract intentionally changes
 - map validation, domain, conflict, not-found, database, and rate-limit failures through the existing exception handler style
 - do not leak raw IBAN values in responses, logs, or error details
+- treat status codes, error semantics, and public response models as intentional API contract decisions
 - update integration coverage when endpoint behavior, status codes, headers, or error payloads change
 
 Run:
@@ -82,8 +84,8 @@ Read:
 Rules:
 - keep persistence details in infrastructure
 - preserve optimistic-lock and duplicate-IBAN behavior unless the requested behavior intentionally changes those rules
-- never modify an already-applied Liquibase changeset; create a new incremental changeset instead
 - include SQL rollbacks for Liquibase changes
+- never modify an already-applied Liquibase changeset; create a new incremental changeset instead
 - keep query projections aligned with `RecipientSummary`
 - mask IBANs before returning read-model data
 
@@ -103,7 +105,7 @@ Read:
 Rules:
 - do not commit real secrets
 - keep local credentials development-only
-- preserve local service port `8081` unless the requested behavior intentionally changes it
+- preserve local service port `8081` unless intentionally changing it
 - keep environment-specific values in profiles, Docker Compose, Kubernetes, or Terraform
 - update tests or docs when profiles, ports, database names, or observability behavior change
 
@@ -117,6 +119,5 @@ Check:
 - dependency direction still points inward by package
 - domain remains free of Spring, JPA, HTTP, and logging framework dependencies
 - tests match the behavior changed
-- focused tests for the changed behavior pass
 - unrelated user changes are preserved
 - API, configuration, observability, or schema changes are mentioned in the final summary
