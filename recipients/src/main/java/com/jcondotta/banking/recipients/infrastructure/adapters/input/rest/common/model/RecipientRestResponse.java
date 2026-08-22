@@ -1,4 +1,4 @@
-package com.jcondotta.banking.recipients.infrastructure.adapters.input.rest.list_recipients;
+package com.jcondotta.banking.recipients.infrastructure.adapters.input.rest.common.model;
 
 import com.jcondotta.banking.recipients.application.recipient.query.model.RecipientSummary;
 
@@ -12,7 +12,7 @@ public record RecipientRestResponse(
   Instant createdAt
 ) {
 
-  static RecipientRestResponse from(RecipientSummary summary) {
+  public static RecipientRestResponse from(RecipientSummary summary) {
     return new RecipientRestResponse(
       summary.recipientId(),
       summary.recipientName(),

@@ -1,6 +1,7 @@
 package com.jcondotta.banking.recipients.infrastructure.adapters.output.persistence;
 
 import com.jcondotta.application.query.PageRequest;
+import com.jcondotta.banking.recipients.domain.recipient.identity.RecipientId;
 import com.jcondotta.banking.recipients.application.recipient.query.list.ListRecipientsFilter;
 import com.jcondotta.banking.recipients.application.recipient.query.model.RecipientSummary;
 import com.jcondotta.banking.recipients.domain.recipient.identity.BankAccountId;
@@ -18,6 +19,7 @@ import org.springframework.data.domain.Sort;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -133,6 +135,39 @@ class RecipientQueryPostgresRepositoryTest {
     verify(repository, never()).findByBankAccountId(any(), any());
     verify(summaryMapper).fromEntity(entity);
     verifyNoMoreInteractions(repository, summaryMapper);
+  }
+
+  @Test
+  void shouldReturnMappedRecipientSummary_whenRecipientBelongsToBankAccount() {
+    var recipientId = RecipientId.newId();
+    var entity = new RecipientEntity();
+    var summary = recipientSummary("Jefferson Condotta");
+
+    when(repository.findByBankAccountIdAndId(BANK_ACCOUNT_ID.value(), recipientId.value()))
+      .thenReturn(Optional.of(entity));
+    when(summaryMapper.fromEntity(entity)).thenReturn(summary);
+
+    var result = adapter.findByBankAccountIdAndRecipientId(BANK_ACCOUNT_ID, recipientId);
+
+    assertThat(result).contains(summary);
+    verify(repository).findByBankAccountIdAndId(BANK_ACCOUNT_ID.value(), recipientId.value());
+    verify(summaryMapper).fromEntity(entity);
+    verifyNoMoreInteractions(repository, summaryMapper);
+  }
+
+  @Test
+  void shouldReturnEmptyOptional_whenRecipientDoesNotBelongToBankAccount() {
+    var recipientId = RecipientId.newId();
+
+    when(repository.findByBankAccountIdAndId(BANK_ACCOUNT_ID.value(), recipientId.value()))
+      .thenReturn(Optional.empty());
+
+    var result = adapter.findByBankAccountIdAndRecipientId(BANK_ACCOUNT_ID, recipientId);
+
+    assertThat(result).isEmpty();
+    verify(repository).findByBankAccountIdAndId(BANK_ACCOUNT_ID.value(), recipientId.value());
+    verifyNoInteractions(summaryMapper);
+    verifyNoMoreInteractions(repository);
   }
 
   private static RecipientSummary recipientSummary(String name) {

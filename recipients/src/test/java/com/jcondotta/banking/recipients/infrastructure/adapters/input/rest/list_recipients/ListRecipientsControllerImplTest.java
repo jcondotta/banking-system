@@ -10,6 +10,7 @@ import com.jcondotta.banking.recipients.application.recipient.query.model.Recipi
 import com.jcondotta.banking.recipients.domain.recipient.identity.BankAccountId;
 import com.jcondotta.banking.recipients.domain.testsupport.RecipientTestData;
 import com.jcondotta.banking.recipients.domain.testsupport.TimeFactory;
+import com.jcondotta.banking.recipients.infrastructure.adapters.input.rest.common.model.RecipientRestResponse;
 import com.jcondotta.banking.recipients.infrastructure.adapters.input.rest.list_recipients.mapper.ListRecipientsRestMapper;
 import com.jcondotta.banking.recipients.infrastructure.adapters.input.rest.list_recipients.model.ListRecipientsRequest;
 import org.junit.jupiter.api.BeforeEach;

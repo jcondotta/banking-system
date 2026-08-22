@@ -2,15 +2,18 @@ package com.jcondotta.banking.recipients.infrastructure.adapters.output.persiste
 
 import com.jcondotta.application.query.PageRequest;
 import com.jcondotta.application.query.PageResult;
+import com.jcondotta.banking.recipients.application.recipient.query.RecipientQueryRepository;
 import com.jcondotta.banking.recipients.application.recipient.query.list.ListRecipientsFilter;
-import com.jcondotta.banking.recipients.application.recipient.query.list.RecipientQueryRepository;
 import com.jcondotta.banking.recipients.application.recipient.query.model.RecipientSummary;
 import com.jcondotta.banking.recipients.domain.recipient.identity.BankAccountId;
+import com.jcondotta.banking.recipients.domain.recipient.identity.RecipientId;
 import com.jcondotta.banking.recipients.infrastructure.adapters.output.persistence.mapper.RecipientSummaryMapper;
 import com.jcondotta.banking.recipients.infrastructure.adapters.output.persistence.repository.RecipientEntityRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
+
+import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
@@ -45,5 +48,11 @@ public class RecipientQueryPostgresRepository implements RecipientQueryRepositor
             page.getTotalElements(),
             page.getTotalPages()
         );
+    }
+
+    @Override
+    public Optional<RecipientSummary> findByBankAccountIdAndRecipientId(BankAccountId bankAccountId, RecipientId recipientId) {
+        return repository.findByBankAccountIdAndId(bankAccountId.value(), recipientId.value())
+            .map(summaryMapper::fromEntity);
     }
 }

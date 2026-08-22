@@ -1,6 +1,7 @@
 package com.jcondotta.banking.recipients.infrastructure.adapters.input.rest.list_recipients;
 
 import com.jcondotta.banking.recipients.application.recipient.query.list.ListRecipientsQueryResult;
+import com.jcondotta.banking.recipients.infrastructure.adapters.input.rest.common.model.RecipientRestResponse;
 
 import java.util.List;
 
@@ -18,7 +19,7 @@ public record ListRecipientsResponse(
     recipients = List.copyOf(recipients);
   }
 
-  static ListRecipientsResponse from(ListRecipientsQueryResult queryResult) {
+  public static ListRecipientsResponse from(ListRecipientsQueryResult queryResult) {
     var page = queryResult.page();
 
     return new ListRecipientsResponse(

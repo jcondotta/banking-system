@@ -3,6 +3,7 @@ package com.jcondotta.banking.recipients.infrastructure.adapters.input.rest.list
 import com.jcondotta.application.query.PageResult;
 import com.jcondotta.banking.recipients.application.recipient.query.list.ListRecipientsQueryResult;
 import com.jcondotta.banking.recipients.application.recipient.query.model.RecipientSummary;
+import com.jcondotta.banking.recipients.infrastructure.adapters.input.rest.common.model.RecipientRestResponse;
 import org.junit.jupiter.api.Test;
 
 import java.time.Instant;

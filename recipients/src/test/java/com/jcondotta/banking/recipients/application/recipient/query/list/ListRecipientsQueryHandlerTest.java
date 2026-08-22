@@ -10,6 +10,7 @@ import com.jcondotta.banking.recipients.application.common.log.RecipientLogKey;
 import com.jcondotta.application.logging.LogOutcome;
 import com.jcondotta.banking.recipients.application.common.log.RecipientEventType;
 import com.jcondotta.application.logging.StructuredLogEventSupport;
+import com.jcondotta.banking.recipients.application.recipient.query.RecipientQueryRepository;
 import com.jcondotta.banking.recipients.application.recipient.query.model.RecipientSummary;
 import com.jcondotta.banking.recipients.domain.recipient.exceptions.RecipientNotFoundException;
 import com.jcondotta.banking.recipients.domain.recipient.identity.BankAccountId;

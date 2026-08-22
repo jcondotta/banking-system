@@ -8,11 +8,14 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.Optional;
 import java.util.UUID;
 
 public interface RecipientEntityRepository extends JpaRepository<RecipientEntity, UUID> {
 
     Page<RecipientEntity> findByBankAccountId(UUID bankAccountId, Pageable pageable);
+
+    Optional<RecipientEntity> findByBankAccountIdAndId(UUID bankAccountId, UUID id);
 
     @Query("""
         SELECT r
