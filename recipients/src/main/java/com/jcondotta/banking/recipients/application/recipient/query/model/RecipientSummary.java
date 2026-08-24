@@ -6,6 +6,6 @@ import java.util.UUID;
 public record RecipientSummary(
   UUID recipientId,
   String recipientName,
-  String iban,
+  String maskedIban,
   Instant createdAt
 ) {}

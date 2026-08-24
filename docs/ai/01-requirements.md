@@ -1,4 +1,4 @@
-# Recipients Requirements Guidelines
+# Requirements Guidelines
 
 Use this stage to understand what should be built before deciding how it should be implemented.
 

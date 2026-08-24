@@ -1,4 +1,4 @@
-# Recipients Implementation Guidelines
+# Implementation Guidelines
 
 Use this stage to implement behavior and design that are already sufficiently defined.
 
@@ -24,7 +24,7 @@ Review the relevant requirements and design decisions when they are available.
 
 Inspect only the production code, tests, configuration, and resources necessary to understand the affected implementation.
 
-Use `docs/ai/change-playbook.md` when the change affects multiple architectural areas.
+Use the local project or bounded-context playbook when the change affects multiple architectural areas.
 
 Do not reopen decisions that were already explicitly resolved by the user unless the implementation reveals a concrete contradiction or impossibility.
 

@@ -1,4 +1,4 @@
-# Recipients Validation Guidelines
+# Validation Guidelines
 
 Use this stage after implementation and testing to independently review the completed change before considering it finished.
 

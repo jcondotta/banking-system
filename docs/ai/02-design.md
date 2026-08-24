@@ -1,4 +1,4 @@
-# Recipients Design Guidelines
+# Design Guidelines
 
 Use this stage to agree on how the requested change should behave and fit into
 the existing system before implementation begins.

@@ -1,6 +1,6 @@
-# Recipients Testing Guidelines
+# Testing Guidelines
 
-Use these guidelines when adding, modifying, reviewing, or refactoring tests in the `recipients` bounded context.
+Use these guidelines when adding, modifying, reviewing, or refactoring tests.
 
 Testing is an autonomous stage. Follow the agreed behavior and design rather than introducing new behavioral decisions through tests.
 
@@ -34,7 +34,7 @@ Follow the existing naming style:
 
 Use Arrange-Act-Assert as the default structure, but keep the layout natural when a test needs setup helpers or multiple related observations.
 
-Use `@ParameterizedTest` for input families such as blank values, invalid identifiers, invalid IBANs, pagination bounds, and validation limits.
+Use `@ParameterizedTest` for input families such as blank values, invalid identifiers, domain-specific value validation, pagination bounds, and validation limits.
 
 Do not add `@DisplayName` unless the surrounding test class already uses it.
 
@@ -62,23 +62,22 @@ For public API tests, assert the behavior and contract that were resolved in Des
 
 Use Mockito for application and controller unit tests when collaborators are ports, handlers, mappers, or servlet requests.
 
-Prefer existing fixtures and test support:
-- `RecipientFixtures`
-- `RecipientTestData`
-- `TimeFactory`
-- `BlankValuesSource`
-- `ValidatorTestFactory`
+Prefer existing local fixtures and test support, especially for:
+- domain fixtures and test data builders
+- fixed time factories
+- blank-value sources
+- validator factories
 
 Keep tests deterministic. Use fixed clocks and explicit fixtures instead of depending on wall-clock time or random data when the exact value matters.
 
 ## Integration Tests
 
-Use the existing `@IntegrationTest` annotation for Spring Boot integration tests. It already configures:
+Use the existing integration-test annotation or base setup when the project provides one. It should configure:
 - random web port
 - `test` profile
 - Testcontainers initialization
 
-Use Rest Assured for HTTP requests and keep request setup close to the endpoint under test.
+Use the project's established HTTP test client and keep request setup close to the endpoint under test.
 
 For HTTP integration tests, follow the existing request-specification pattern, including API versioning and request/response logging on validation failures.
 
@@ -90,7 +89,7 @@ Clean or isolate state through existing repository/test support patterns. Do not
 
 For application handlers that emit structured logs, follow the existing handler-test pattern.
 
-- Capture log events with `ListAppender` through `StructuredLogEventSupport`.
+- Capture log events with the project's existing log-capture support.
 - Attach the appender during setup and detach it during teardown.
 - Verify structured log semantics rather than formatted log messages.
 - Verify the expected log level, event type, outcome, and relevant structured keys.
@@ -105,7 +104,7 @@ For core business rules, prefer focused domain tests with mutation-resistant ass
 
 For API, schema, persistence, logging, observability, or concurrency changes, update the matching integration coverage.
 
-Use `docs/ai/change-playbook.md` to choose the focused Maven command for the change type.
+Use the local project or bounded-context playbook to choose the focused verification command for the change type.
 
 ## Test-First Guidance
 

@@ -17,19 +17,23 @@ Keep dependencies pointing inward by package: infrastructure may depend on appli
 
 ## Development Workflow
 
-Development guidance lives under `docs/ai/`.
+Shared development workflow guidance lives under `../docs/ai/`.
+
+Recipients-specific guidance lives under `docs/ai/`.
 
 The numbered documents represent stages of the development process. They define how to reason about, design, implement, test, and validate changes.
 
 | Stage | Purpose | Guidance |
 | --- | --- | --- |
-| 1. Requirements | Understand the requested behavior, scope, constraints, and open questions | `docs/ai/01-requirements.md` |
-| 2. Design | Resolve behavioral, contract, and architectural decisions before implementation | `docs/ai/02-design.md` |
-| 3. Implementation | Implement autonomously after relevant requirements and design decisions are resolved | `docs/ai/03-implementation.md` |
-| 4. Testing | Add or update tests according to repository testing conventions | `docs/ai/04-testing.md` |
-| 5. Validation | Independently review the completed change before considering it finished | `docs/ai/05-validation.md` |
+| 1. Requirements | Understand the requested behavior, scope, constraints, and open questions | `../docs/ai/01-requirements.md` |
+| 2. Design | Resolve behavioral, contract, and architectural decisions before implementation | `../docs/ai/02-design.md` |
+| 3. Implementation | Implement autonomously after relevant requirements and design decisions are resolved | `../docs/ai/03-implementation.md` |
+| 4. Testing | Add or update tests according to repository testing conventions | `../docs/ai/04-testing.md` |
+| 5. Validation | Independently review the completed change before considering it finished | `../docs/ai/05-validation.md` |
 
-`docs/ai/change-playbook.md` provides cross-cutting guidance based on the architectural areas affected by a change.
+`docs/ai/change-playbook.md` provides recipients-specific guidance based on the architectural areas affected by a change.
+
+When shared workflow guidance and local recipients guidance both apply, prefer the more specific local recipients guidance for paths, commands, fixtures, contracts, and bounded-context behavior.
 
 The stages describe responsibilities, not mandatory ceremony for every task.
 
@@ -63,7 +67,7 @@ Design is the interactive stage. When multiple meaningful behavioral, contract, 
 
 Do not begin implementation merely because the user explicitly asked to implement something. For a new feature or non-trivial behavioral change, unresolved design decisions must first pass through the design stage.
 
-Before editing code for a new feature or non-trivial behavioral change, the Design gate in `docs/ai/02-design.md` must have no OPEN decisions.
+Before editing code for a new feature or non-trivial behavioral change, the Design gate in `../docs/ai/02-design.md` must have no OPEN decisions.
 
 Once implementation begins, implementation, testing, and validation are autonomous stages for the resolved design. Do not stop those stages merely to ask about already-resolved decisions or purely mechanical details.
 

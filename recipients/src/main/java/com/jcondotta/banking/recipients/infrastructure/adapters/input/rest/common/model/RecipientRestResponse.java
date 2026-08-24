@@ -16,7 +16,7 @@ public record RecipientRestResponse(
     return new RecipientRestResponse(
       summary.recipientId(),
       summary.recipientName(),
-      summary.iban(),
+      summary.maskedIban(),
       summary.createdAt()
     );
   }

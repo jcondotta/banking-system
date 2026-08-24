@@ -18,6 +18,22 @@ This is a Java 25, Spring Boot 4, Maven multi-module banking system. The root `p
 - `cd recipients && docker compose -f docker/docker-compose.yml up -d`: start recipients local dependencies.
 - `./mvnw -pl accounts/accounts-domain pitest:mutationCoverage`: run PIT mutation testing for a focused module.
 
+## Development Workflow
+
+Shared development workflow guidance lives under `docs/ai/`.
+
+The numbered documents represent stages of the development process. They define how to reason about, design, implement, test, and validate changes.
+
+| Stage | Purpose | Guidance |
+| --- | --- | --- |
+| 1. Requirements | Understand the requested behavior, scope, constraints, and open questions | `docs/ai/01-requirements.md` |
+| 2. Design | Resolve behavioral, contract, and architectural decisions before implementation | `docs/ai/02-design.md` |
+| 3. Implementation | Implement autonomously after relevant requirements and design decisions are resolved | `docs/ai/03-implementation.md` |
+| 4. Testing | Add or update tests according to repository testing conventions | `docs/ai/04-testing.md` |
+| 5. Validation | Independently review the completed change before considering it finished | `docs/ai/05-validation.md` |
+
+Bounded contexts may provide local guidance under their own `docs/ai/` directory. When shared workflow guidance and local bounded-context guidance both apply, prefer the more specific local guidance for paths, commands, fixtures, contracts, and bounded-context behavior.
+
 ## Coding Style & Naming Conventions
 
 Use Java conventions with 4-space indentation, descriptive class names, and packages under `com.jcondotta.banking`. Preserve the architecture boundary: domain code must stay framework-free; Spring, persistence, messaging, and HTTP adapters belong in infrastructure or bootstrap modules. Follow existing naming patterns such as `*CommandHandler`, `*Repository`, `*Config`, `*Test`, and `*IT`.

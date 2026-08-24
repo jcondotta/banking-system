@@ -6,7 +6,7 @@ This document complements the numbered development workflow by identifying the r
 
 Use only the sections relevant to the current change.
 
-For test style and integration-test conventions, use `docs/ai/04-testing.md`.
+For test style and integration-test conventions, use `../docs/ai/04-testing.md`.
 
 The rules in this playbook guide recommendations and implementation after Design is resolved. They do not close OPEN Design decisions by themselves. When a rule points to an existing pattern and another viable behavior, public contract, responsibility, abstraction, architecture, security/data-exposure, persistence, consistency, or observability option exists, present the options during Design and use the rule as evidence for the recommendation.
 
