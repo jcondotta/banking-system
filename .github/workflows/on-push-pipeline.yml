@@ -23,7 +23,7 @@ jobs:
         run: chmod +x mvnw
 
       - name: Run unit tests
-        run: ./mvnw -B clean test -pl recipients/recipients-bootstrap --also-make
+        run: ./mvnw -B clean test -pl recipients --also-make
 
   integration-tests:
     name: Integration Tests
@@ -67,4 +67,4 @@ jobs:
           docker save testcontainers/ryuk:0.12.0 -o /tmp/docker-cache/ryuk.tar
 
       - name: Run integration tests
-        run: ./mvnw -B clean verify -DskipUnitTests -pl recipients/recipients-bootstrap --also-make
+        run: ./mvnw -B clean verify -DskipUnitTests -pl recipients --also-make
