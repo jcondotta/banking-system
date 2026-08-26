@@ -1,6 +1,6 @@
 package com.jcondotta.banking.accounts.domain.bankaccount.value_objects.address;
 
-import com.jcondotta.domain.exception.InvalidDomainDataException;
+import com.jcondotta.domain.exception.DomainValidationException;
 
 import static com.jcondotta.domain.support.Preconditions.requiredNotBlank;
 
@@ -16,7 +16,7 @@ public record PostalCode(String value) {
     requiredNotBlank(value, MUST_NOT_BE_EMPTY);
 
     if (value.length() > MAX_LENGTH) {
-      throw new InvalidDomainDataException(
+      throw new DomainValidationException(
         MUST_NOT_EXCEED_LENGTH.formatted(MAX_LENGTH)
       );
     }

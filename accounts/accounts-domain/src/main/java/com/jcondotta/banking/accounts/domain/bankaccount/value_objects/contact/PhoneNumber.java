@@ -1,6 +1,6 @@
 package com.jcondotta.banking.accounts.domain.bankaccount.value_objects.contact;
 
-import com.jcondotta.domain.exception.InvalidDomainDataException;
+import com.jcondotta.domain.exception.DomainValidationException;
 import com.jcondotta.domain.support.Preconditions;
 
 public record PhoneNumber(String value) {
@@ -16,7 +16,7 @@ public record PhoneNumber(String value) {
     value = value.trim();
 
     if (!value.matches(E164_REGEX)) {
-      throw new InvalidDomainDataException(INVALID_FORMAT);
+      throw new DomainValidationException(INVALID_FORMAT);
     }
   }
 

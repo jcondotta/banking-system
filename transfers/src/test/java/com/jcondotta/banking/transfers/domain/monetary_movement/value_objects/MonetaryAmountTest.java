@@ -2,7 +2,7 @@ package com.jcondotta.banking.transfers.domain.monetary_movement.value_objects;
 
 import com.jcondotta.banking.transfers.domain.monetary_movement.exceptions.NegativeMonetaryAmountException;
 import com.jcondotta.banking.transfers.domain.shared.value_objects.Currency;
-import com.jcondotta.domain.exception.InvalidDomainDataException;
+import com.jcondotta.domain.exception.DomainValidationException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -54,14 +54,14 @@ class MonetaryAmountTest {
     @EnumSource(Currency.class)
     void shouldThrowException_whenAmountIsNull(Currency currency) {
         assertThatThrownBy(() -> MonetaryAmount.of(null, currency))
-            .isInstanceOf(InvalidDomainDataException.class)
+            .isInstanceOf(DomainValidationException.class)
             .hasMessage(MonetaryAmount.AMOUNT_NOT_PROVIDED);
     }
 
     @Test
     void shouldThrowException_whenCurrencyIsNull() {
         assertThatThrownBy(() -> MonetaryAmount.of(AMOUNT_200, null))
-            .isInstanceOf(InvalidDomainDataException.class)
+            .isInstanceOf(DomainValidationException.class)
             .hasMessage(MonetaryAmount.CURRENCY_NOT_PROVIDED);
     }
 }

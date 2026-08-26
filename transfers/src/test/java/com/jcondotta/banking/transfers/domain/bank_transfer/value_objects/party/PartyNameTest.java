@@ -1,7 +1,7 @@
 package com.jcondotta.banking.transfers.domain.bank_transfer.value_objects.party;
 
 import com.jcondotta.banking.transfers.domain.testsupport.BlankValuesArgumentProvider;
-import com.jcondotta.domain.exception.InvalidDomainDataException;
+import com.jcondotta.domain.exception.DomainValidationException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ArgumentsSource;
@@ -25,7 +25,7 @@ class PartyNameTest {
     @Test
     void shouldThrowException_whenValueIsNull() {
         assertThatThrownBy(() -> PartyName.of(null))
-            .isInstanceOf(InvalidDomainDataException.class)
+            .isInstanceOf(DomainValidationException.class)
             .hasMessage(PartyName.NAME_NOT_PROVIDED);
     }
 
@@ -33,7 +33,7 @@ class PartyNameTest {
     @ArgumentsSource(BlankValuesArgumentProvider.class)
     void shouldThrowException_whenNameIsBlank(String blankValue) {
         assertThatThrownBy(() -> PartyName.of(blankValue))
-            .isInstanceOf(InvalidDomainDataException.class)
+            .isInstanceOf(DomainValidationException.class)
             .hasMessage(PartyName.NAME_NOT_BLANK);
     }
 
@@ -49,7 +49,7 @@ class PartyNameTest {
         var longName = "A".repeat(256);
 
         assertThatThrownBy(() -> PartyName.of(longName))
-            .isInstanceOf(InvalidDomainDataException.class)
+            .isInstanceOf(DomainValidationException.class)
             .hasMessage(PartyName.NAME_TOO_LONG);
     }
 

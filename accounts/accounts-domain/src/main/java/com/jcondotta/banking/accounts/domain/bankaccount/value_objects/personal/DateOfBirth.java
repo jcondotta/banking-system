@@ -1,6 +1,6 @@
 package com.jcondotta.banking.accounts.domain.bankaccount.value_objects.personal;
 
-import com.jcondotta.domain.exception.InvalidDomainDataException;
+import com.jcondotta.domain.exception.DomainValidationException;
 import com.jcondotta.domain.support.Preconditions;
 
 import java.time.Clock;
@@ -15,7 +15,7 @@ public record DateOfBirth(LocalDate value) {
     Preconditions.required(value, DATE_OF_BIRTH_NOT_PROVIDED);
 
     if (value.isAfter(LocalDate.now(Clock.systemDefaultZone()))) {
-      throw new InvalidDomainDataException(DATE_OF_BIRTH_NOT_IN_PAST);
+      throw new DomainValidationException(DATE_OF_BIRTH_NOT_IN_PAST);
     }
   }
 

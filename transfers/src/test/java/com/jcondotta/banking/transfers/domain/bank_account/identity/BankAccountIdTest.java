@@ -1,6 +1,6 @@
 package com.jcondotta.banking.transfers.domain.bank_account.identity;
 
-import com.jcondotta.domain.exception.InvalidDomainDataException;
+import com.jcondotta.domain.exception.DomainValidationException;
 import org.junit.jupiter.api.Test;
 
 import java.util.UUID;
@@ -26,7 +26,7 @@ class BankAccountIdTest {
     @Test
     void shouldThrowException_whenValueIsNull() {
         assertThatThrownBy(() -> BankAccountId.of(null))
-            .isInstanceOf(InvalidDomainDataException.class)
+            .isInstanceOf(DomainValidationException.class)
             .hasMessage(BankAccountId.ID_NOT_PROVIDED);
     }
 

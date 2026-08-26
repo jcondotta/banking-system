@@ -1,6 +1,6 @@
 package com.jcondotta.domain.support;
 
-import com.jcondotta.domain.exception.InvalidDomainDataException;
+import com.jcondotta.domain.exception.DomainValidationException;
 
 public final class Preconditions {
 
@@ -10,21 +10,21 @@ public final class Preconditions {
 
   public static <T> T required(T value, String message) {
     if (value == null) {
-      throw new InvalidDomainDataException(message);
+      throw new DomainValidationException(message);
     }
     return value;
   }
 
   public static String requiredNotBlank(String value, String message) {
     if (value == null || value.isBlank()) {
-      throw new InvalidDomainDataException(message);
+      throw new DomainValidationException(message);
     }
     return value;
   }
 
   public static void checkArgument(boolean condition, String message) {
     if (!condition) {
-      throw new InvalidDomainDataException(message);
+      throw new DomainValidationException(message);
     }
   }
 }

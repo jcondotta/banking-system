@@ -3,7 +3,7 @@ package com.jcondotta.banking.accounts.domain.bankaccount.policies;
 import com.jcondotta.banking.accounts.domain.bankaccount.enums.DocumentCountry;
 import com.jcondotta.banking.accounts.domain.bankaccount.enums.DocumentType;
 import com.jcondotta.banking.accounts.domain.bankaccount.value_objects.personal.DocumentNumber;
-import com.jcondotta.domain.exception.InvalidDomainDataException;
+import com.jcondotta.domain.exception.DomainValidationException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -48,28 +48,28 @@ class DocumentNumberValidationPolicyTest {
   @Test
   void shouldThrowException_whenRegistryIsNull() {
     assertThatThrownBy(() -> new DocumentNumberValidationPolicy(null))
-      .isInstanceOf(InvalidDomainDataException.class)
+      .isInstanceOf(DomainValidationException.class)
       .hasMessage(DocumentNumberValidationPolicy.REGISTRY_NOT_PROVIDED);
   }
 
   @Test
   void shouldThrowException_whenCountryIsNull() {
     assertThatThrownBy(() -> policy.validate(null, TYPE, NUMBER))
-      .isInstanceOf(InvalidDomainDataException.class)
+      .isInstanceOf(DomainValidationException.class)
       .hasMessage(DocumentNumberValidationPolicy.COUNTRY_NOT_PROVIDED);
   }
 
   @Test
   void shouldThrowException_whenTypeIsNull() {
     assertThatThrownBy(() -> policy.validate(COUNTRY, null, NUMBER))
-      .isInstanceOf(InvalidDomainDataException.class)
+      .isInstanceOf(DomainValidationException.class)
       .hasMessage(DocumentNumberValidationPolicy.TYPE_NOT_PROVIDED);
   }
 
   @Test
   void shouldThrowException_whenNumberIsNull() {
     assertThatThrownBy(() -> policy.validate(COUNTRY, TYPE, null))
-      .isInstanceOf(InvalidDomainDataException.class)
+      .isInstanceOf(DomainValidationException.class)
       .hasMessage(DocumentNumberValidationPolicy.NUMBER_NOT_PROVIDED);
   }
 }

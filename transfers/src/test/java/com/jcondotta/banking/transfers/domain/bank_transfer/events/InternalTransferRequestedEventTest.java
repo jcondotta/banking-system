@@ -5,7 +5,7 @@ import com.jcondotta.banking.transfers.domain.bank_transfer.identity.BankTransfe
 import com.jcondotta.banking.transfers.domain.bank_transfer.validation.BankTransferErrors;
 import com.jcondotta.banking.transfers.domain.monetary_movement.value_objects.MonetaryAmount;
 import com.jcondotta.banking.transfers.domain.shared.value_objects.Currency;
-import com.jcondotta.domain.exception.InvalidDomainDataException;
+import com.jcondotta.domain.exception.DomainValidationException;
 import com.jcondotta.domain.identity.EventId;
 import com.jcondotta.domain.validation.DomainEventErrors;
 import org.junit.jupiter.api.Test;
@@ -58,7 +58,7 @@ class InternalTransferRequestedEventTest {
                 null, BANK_TRANSFER_ID, SENDER_ACCOUNT_ID, RECIPIENT_ACCOUNT_ID, AMOUNT_200_USD, REFERENCE, OCCURRED_AT
             )
         )
-            .isInstanceOf(InvalidDomainDataException.class)
+            .isInstanceOf(DomainValidationException.class)
             .hasMessage(DomainEventErrors.EVENT_ID_MUST_BE_PROVIDED);
     }
 
@@ -69,7 +69,7 @@ class InternalTransferRequestedEventTest {
                 EVENT_ID, null, SENDER_ACCOUNT_ID, RECIPIENT_ACCOUNT_ID, AMOUNT_200_USD, REFERENCE, OCCURRED_AT
             )
         )
-            .isInstanceOf(InvalidDomainDataException.class)
+            .isInstanceOf(DomainValidationException.class)
             .hasMessage(DomainEventErrors.AGGREGATE_ID_MUST_BE_PROVIDED);
     }
 
@@ -80,7 +80,7 @@ class InternalTransferRequestedEventTest {
                 EVENT_ID, BANK_TRANSFER_ID, null, RECIPIENT_ACCOUNT_ID, AMOUNT_200_USD, REFERENCE, OCCURRED_AT
             )
         )
-            .isInstanceOf(InvalidDomainDataException.class)
+            .isInstanceOf(DomainValidationException.class)
             .hasMessage(BankTransferErrors.SENDER_ACCOUNT_ID_MUST_BE_PROVIDED);
     }
 
@@ -91,7 +91,7 @@ class InternalTransferRequestedEventTest {
                 EVENT_ID, BANK_TRANSFER_ID, SENDER_ACCOUNT_ID, null, AMOUNT_200_USD, REFERENCE, OCCURRED_AT
             )
         )
-            .isInstanceOf(InvalidDomainDataException.class)
+            .isInstanceOf(DomainValidationException.class)
             .hasMessage(BankTransferErrors.RECIPIENT_ACCOUNT_ID_MUST_BE_PROVIDED);
     }
 
@@ -102,7 +102,7 @@ class InternalTransferRequestedEventTest {
                 EVENT_ID, BANK_TRANSFER_ID, SENDER_ACCOUNT_ID, RECIPIENT_ACCOUNT_ID, null, REFERENCE, OCCURRED_AT
             )
         )
-            .isInstanceOf(InvalidDomainDataException.class)
+            .isInstanceOf(DomainValidationException.class)
             .hasMessage(BankTransferErrors.MONETARY_AMOUNT_MUST_BE_PROVIDED);
     }
 
@@ -113,7 +113,7 @@ class InternalTransferRequestedEventTest {
                 EVENT_ID, BANK_TRANSFER_ID, SENDER_ACCOUNT_ID, RECIPIENT_ACCOUNT_ID, AMOUNT_200_USD, REFERENCE, null
             )
         )
-            .isInstanceOf(InvalidDomainDataException.class)
+            .isInstanceOf(DomainValidationException.class)
             .hasMessage(DomainEventErrors.EVENT_OCCURRED_AT_MUST_BE_PROVIDED);
     }
 }

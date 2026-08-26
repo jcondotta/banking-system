@@ -11,7 +11,7 @@ import com.jcondotta.banking.transfers.domain.bank_transfer.validation.BankTrans
 import com.jcondotta.banking.transfers.domain.monetary_movement.enums.MovementType;
 import com.jcondotta.banking.transfers.domain.monetary_movement.value_objects.MonetaryAmount;
 import com.jcondotta.banking.transfers.domain.shared.value_objects.Currency;
-import com.jcondotta.domain.exception.InvalidDomainDataException;
+import com.jcondotta.domain.exception.DomainValidationException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
@@ -87,7 +87,7 @@ class BankTransferTest {
         assertThatThrownBy(() ->
             BankTransfer.requestInternalTransfer(null, SENDER_ACCOUNT_ID, RECIPIENT_ACCOUNT_ID, AMOUNT_200_USD, REFERENCE, REQUESTED_AT)
         )
-            .isInstanceOf(InvalidDomainDataException.class)
+            .isInstanceOf(DomainValidationException.class)
             .hasMessage(BankTransferErrors.ID_MUST_BE_PROVIDED);
     }
 
@@ -96,7 +96,7 @@ class BankTransferTest {
         assertThatThrownBy(() ->
             BankTransfer.requestInternalTransfer(BANK_TRANSFER_ID, null, RECIPIENT_ACCOUNT_ID, AMOUNT_200_USD, REFERENCE, REQUESTED_AT)
         )
-            .isInstanceOf(InvalidDomainDataException.class)
+            .isInstanceOf(DomainValidationException.class)
             .hasMessage(BankTransferErrors.SENDER_ACCOUNT_ID_MUST_BE_PROVIDED);
     }
 
@@ -105,7 +105,7 @@ class BankTransferTest {
         assertThatThrownBy(() ->
             BankTransfer.requestInternalTransfer(BANK_TRANSFER_ID, SENDER_ACCOUNT_ID, null, AMOUNT_200_USD, REFERENCE, REQUESTED_AT)
         )
-            .isInstanceOf(InvalidDomainDataException.class)
+            .isInstanceOf(DomainValidationException.class)
             .hasMessage(BankTransferErrors.RECIPIENT_ACCOUNT_ID_MUST_BE_PROVIDED);
     }
 
@@ -114,7 +114,7 @@ class BankTransferTest {
         assertThatThrownBy(() ->
             BankTransfer.requestInternalTransfer(BANK_TRANSFER_ID, SENDER_ACCOUNT_ID, RECIPIENT_ACCOUNT_ID, null, REFERENCE, REQUESTED_AT)
         )
-            .isInstanceOf(InvalidDomainDataException.class)
+            .isInstanceOf(DomainValidationException.class)
             .hasMessage(BankTransferErrors.MONETARY_AMOUNT_MUST_BE_PROVIDED);
     }
 
@@ -123,7 +123,7 @@ class BankTransferTest {
         assertThatThrownBy(() ->
             BankTransfer.requestInternalTransfer(BANK_TRANSFER_ID, SENDER_ACCOUNT_ID, RECIPIENT_ACCOUNT_ID, AMOUNT_200_USD, REFERENCE, null)
         )
-            .isInstanceOf(InvalidDomainDataException.class)
+            .isInstanceOf(DomainValidationException.class)
             .hasMessage(BankTransferErrors.REQUESTED_AT_MUST_BE_PROVIDED);
     }
 
@@ -182,7 +182,7 @@ class BankTransferTest {
         var transfer = requestInternalTransfer();
 
         assertThatThrownBy(() -> transfer.complete(null))
-            .isInstanceOf(InvalidDomainDataException.class)
+            .isInstanceOf(DomainValidationException.class)
             .hasMessage(BankTransferErrors.COMPLETED_AT_MUST_BE_PROVIDED);
     }
 

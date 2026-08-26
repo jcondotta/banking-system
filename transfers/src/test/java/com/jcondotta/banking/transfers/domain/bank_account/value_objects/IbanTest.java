@@ -1,7 +1,7 @@
 package com.jcondotta.banking.transfers.domain.bank_account.value_objects;
 
 import com.jcondotta.banking.transfers.domain.testsupport.BlankValuesArgumentProvider;
-import com.jcondotta.domain.exception.InvalidDomainDataException;
+import com.jcondotta.domain.exception.DomainValidationException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ArgumentsSource;
@@ -31,7 +31,7 @@ class IbanTest {
     @Test
     void shouldThrowException_whenIbanValueIsNull() {
         assertThatThrownBy(() -> Iban.of(null))
-            .isInstanceOf(InvalidDomainDataException.class)
+            .isInstanceOf(DomainValidationException.class)
             .hasMessage(Iban.IBAN_NOT_PROVIDED);
     }
 
@@ -39,21 +39,21 @@ class IbanTest {
     @ArgumentsSource(BlankValuesArgumentProvider.class)
     void shouldThrowException_whenIbanValueIsBlank(String blankValue) {
         assertThatThrownBy(() -> Iban.of(blankValue))
-            .isInstanceOf(InvalidDomainDataException.class)
+            .isInstanceOf(DomainValidationException.class)
             .hasMessage(Iban.IBAN_NOT_PROVIDED);
     }
 
     @Test
     void shouldThrowException_whenIbanFormatIsInvalid() {
         assertThatThrownBy(() -> Iban.of("INVALID"))
-            .isInstanceOf(InvalidDomainDataException.class)
+            .isInstanceOf(DomainValidationException.class)
             .hasMessage(Iban.IBAN_INVALID_FORMAT);
     }
 
     @Test
     void shouldThrowException_whenIbanChecksumIsInvalid() {
         assertThatThrownBy(() -> Iban.of("ES9121000418450200051333"))
-            .isInstanceOf(InvalidDomainDataException.class)
+            .isInstanceOf(DomainValidationException.class)
             .hasMessage(Iban.IBAN_INVALID_FORMAT);
     }
 

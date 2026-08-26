@@ -2,7 +2,7 @@ package com.jcondotta.banking.accounts.domain.bankaccount.policies;
 
 import com.jcondotta.banking.accounts.domain.bankaccount.enums.DocumentCountry;
 import com.jcondotta.banking.accounts.domain.bankaccount.enums.DocumentType;
-import com.jcondotta.domain.exception.InvalidDomainDataException;
+import com.jcondotta.domain.exception.DomainValidationException;
 
 import java.util.HashMap;
 import java.util.List;
@@ -49,7 +49,7 @@ public final class DefaultDocumentNumberValidatorRegistry implements DocumentNum
     var validator = validators.get(new Key(country, type));
 
     if (validator == null) {
-      throw new InvalidDomainDataException(
+      throw new DomainValidationException(
         VALIDATOR_NOT_FOUND.formatted(country, type)
       );
     }

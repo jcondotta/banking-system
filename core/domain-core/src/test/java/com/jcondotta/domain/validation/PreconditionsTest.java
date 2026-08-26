@@ -1,7 +1,6 @@
 package com.jcondotta.domain.validation;
 
 import com.jcondotta.domain.exception.DomainValidationException;
-import com.jcondotta.domain.exception.InvalidDomainDataException;
 import com.jcondotta.domain.support.Preconditions;
 import org.junit.jupiter.api.Test;
 
@@ -26,7 +25,6 @@ class PreconditionsTest {
   @Test
   void shouldThrowDomainValidationException_whenRequiredValueIsNull() {
     assertThatThrownBy(() -> Preconditions.required(null, ERROR_MESSAGE))
-      .isInstanceOf(InvalidDomainDataException.class)
       .isInstanceOf(DomainValidationException.class)
       .hasMessage(ERROR_MESSAGE);
   }
@@ -42,7 +40,6 @@ class PreconditionsTest {
   @SuppressWarnings("ConstantConditions")
   void shouldThrowDomainValidationException_whenRequiredNotBlankValueIsNull() {
     assertThatThrownBy(() -> Preconditions.requiredNotBlank(null, ERROR_MESSAGE))
-      .isInstanceOf(InvalidDomainDataException.class)
       .isInstanceOf(DomainValidationException.class)
       .hasMessage(ERROR_MESSAGE);
   }
@@ -50,7 +47,6 @@ class PreconditionsTest {
   @Test
   void shouldThrowDomainValidationException_whenRequiredNotBlankValueIsBlank() {
     assertThatThrownBy(() -> Preconditions.requiredNotBlank("   ", ERROR_MESSAGE))
-      .isInstanceOf(InvalidDomainDataException.class)
       .isInstanceOf(DomainValidationException.class)
       .hasMessage(ERROR_MESSAGE);
   }
@@ -64,7 +60,6 @@ class PreconditionsTest {
   @Test
   void shouldThrowDomainValidationException_whenCheckArgumentConditionIsFalse() {
     assertThatThrownBy(() -> Preconditions.checkArgument(false, ERROR_MESSAGE))
-      .isInstanceOf(InvalidDomainDataException.class)
       .isInstanceOf(DomainValidationException.class)
       .hasMessage(ERROR_MESSAGE);
   }

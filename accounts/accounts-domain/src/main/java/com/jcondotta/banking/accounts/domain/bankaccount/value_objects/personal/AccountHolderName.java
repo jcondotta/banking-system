@@ -1,6 +1,6 @@
 package com.jcondotta.banking.accounts.domain.bankaccount.value_objects.personal;
 
-import com.jcondotta.domain.exception.InvalidDomainDataException;
+import com.jcondotta.domain.exception.DomainValidationException;
 
 import static com.jcondotta.domain.support.Preconditions.requiredNotBlank;
 
@@ -31,7 +31,7 @@ public record AccountHolderName(String firstName, String lastName) {
 
   private static void validateLength(String value, String message) {
     if (value.length() > MAX_LENGTH) {
-      throw new InvalidDomainDataException(message.formatted(MAX_LENGTH));
+      throw new DomainValidationException(message.formatted(MAX_LENGTH));
     }
   }
 

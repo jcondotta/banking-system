@@ -94,7 +94,7 @@ Rules:
 - Use record component `value` for single-value wrappers.
 - Validate in the compact constructor and provide `of(...)`.
 - Keep value-specific validation messages and domain limits on the value object.
-- Throw `InvalidDomainDataException` directly or through `Preconditions`.
+- Throw `DomainValidationException` directly or through `Preconditions`.
 - Normalize before final validation when canonical form affects validity.
 - Rely on record structural equality.
 - Put value-specific domain behavior on the value object, such as masking.
@@ -177,7 +177,6 @@ Shared hierarchy:
 ```text
 DomainException
 |-- DomainValidationException
-|   `-- InvalidDomainDataException
 |-- DomainRuleViolationException
 |-- DomainConflictException
 `-- DomainNotFoundException
@@ -185,10 +184,9 @@ DomainException
 
 Category choices:
 
-- `DomainValidationException` is the abstract family for domain validation
-  failures. Outer layers may catch it to handle all domain validation uniformly.
-- `InvalidDomainDataException` is the concrete validation exception currently
-  used when supplied data cannot represent a valid domain value or state.
+- `DomainValidationException` is used when supplied data cannot represent a
+  valid domain value or state. Outer layers may catch it to handle all domain
+  validation uniformly.
   Examples: missing required value, blank value, invalid format, invalid length,
   invalid range, invalid checksum, or invalid date/value construction.
 - `DomainRuleViolationException` is for operations where individual values are
@@ -323,7 +321,7 @@ establishes another cross-context rule.
   types.
 - Application query repository: read side, projections, pagination, filters, and
   query models.
-- Exception category: use `InvalidDomainDataException` for invalid value/state
+- Exception category: use `DomainValidationException` for invalid value/state
   construction, `DomainRuleViolationException` for valid data that violates a
   stateful business rule, `DomainConflictException` for already-existing
   conflicting state, and `DomainNotFoundException` for missing required domain

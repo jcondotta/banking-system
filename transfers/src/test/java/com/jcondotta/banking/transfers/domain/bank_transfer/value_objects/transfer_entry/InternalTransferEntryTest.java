@@ -9,7 +9,7 @@ import com.jcondotta.banking.transfers.domain.monetary_movement.value_objects.Mo
 import com.jcondotta.banking.transfers.domain.monetary_movement.value_objects.MonetaryMovement;
 import com.jcondotta.banking.transfers.domain.shared.value_objects.Currency;
 import com.jcondotta.banking.transfers.domain.testsupport.MovementTypeAndCurrencyArgumentsProvider;
-import com.jcondotta.domain.exception.InvalidDomainDataException;
+import com.jcondotta.domain.exception.DomainValidationException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ArgumentsSource;
@@ -98,7 +98,7 @@ class InternalTransferEntryTest {
         var recipient = InternalAccountRecipient.of(RECIPIENT_ACCOUNT_ID);
 
         assertThatThrownBy(() -> new InternalTransferEntry(null, recipient, monetaryMovement))
-            .isInstanceOf(InvalidDomainDataException.class)
+            .isInstanceOf(DomainValidationException.class)
             .hasMessage(InternalAccountSender.SENDER_ACCOUNT_ID_NOT_PROVIDED);
     }
 
@@ -109,7 +109,7 @@ class InternalTransferEntryTest {
         var sender = InternalAccountSender.of(SENDER_ACCOUNT_ID);
 
         assertThatThrownBy(() -> new InternalTransferEntry(sender, null, monetaryMovement))
-            .isInstanceOf(InvalidDomainDataException.class)
+            .isInstanceOf(DomainValidationException.class)
             .hasMessage(InternalAccountRecipient.RECIPIENT_ACCOUNT_ID_NOT_PROVIDED);
     }
 
@@ -119,7 +119,7 @@ class InternalTransferEntryTest {
         var recipient = InternalAccountRecipient.of(RECIPIENT_ACCOUNT_ID);
 
         assertThatThrownBy(() -> new InternalTransferEntry(sender, recipient, null))
-            .isInstanceOf(InvalidDomainDataException.class)
+            .isInstanceOf(DomainValidationException.class)
             .hasMessage(TransferEntry.MONETARY_MOVEMENT_NOT_PROVIDED);
     }
 
@@ -129,7 +129,7 @@ class InternalTransferEntryTest {
         var monetaryAmount = MonetaryAmount.of(AMOUNT_200, currency);
 
         assertThatThrownBy(() -> InternalTransferEntry.of(null, RECIPIENT_ACCOUNT_ID, movementType, monetaryAmount))
-            .isInstanceOf(InvalidDomainDataException.class)
+            .isInstanceOf(DomainValidationException.class)
             .hasMessage(InternalAccountSender.SENDER_ACCOUNT_ID_NOT_PROVIDED);
     }
 
@@ -139,7 +139,7 @@ class InternalTransferEntryTest {
         var monetaryAmount = MonetaryAmount.of(AMOUNT_200, currency);
 
         assertThatThrownBy(() -> InternalTransferEntry.of(SENDER_ACCOUNT_ID, null, movementType, monetaryAmount))
-            .isInstanceOf(InvalidDomainDataException.class)
+            .isInstanceOf(DomainValidationException.class)
             .hasMessage(InternalAccountRecipient.RECIPIENT_ACCOUNT_ID_NOT_PROVIDED);
     }
 
@@ -149,7 +149,7 @@ class InternalTransferEntryTest {
         var monetaryAmount = MonetaryAmount.of(AMOUNT_200, currency);
 
         assertThatThrownBy(() -> InternalTransferEntry.of(SENDER_ACCOUNT_ID, RECIPIENT_ACCOUNT_ID, null, monetaryAmount))
-            .isInstanceOf(InvalidDomainDataException.class)
+            .isInstanceOf(DomainValidationException.class)
             .hasMessage(MonetaryMovement.MOVEMENT_TYPE_NOT_PROVIDED);
     }
 
@@ -157,7 +157,7 @@ class InternalTransferEntryTest {
     @EnumSource(MovementType.class)
     void shouldThrowException_whenUsingOfFactoryWithNullMonetaryAmount(MovementType movementType) {
         assertThatThrownBy(() -> InternalTransferEntry.of(SENDER_ACCOUNT_ID, RECIPIENT_ACCOUNT_ID, movementType, null))
-            .isInstanceOf(InvalidDomainDataException.class)
+            .isInstanceOf(DomainValidationException.class)
             .hasMessage(MonetaryMovement.MONETARY_AMOUNT_NOT_PROVIDED);
     }
 }

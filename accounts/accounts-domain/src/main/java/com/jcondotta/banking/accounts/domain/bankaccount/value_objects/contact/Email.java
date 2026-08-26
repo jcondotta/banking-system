@@ -1,6 +1,6 @@
 package com.jcondotta.banking.accounts.domain.bankaccount.value_objects.contact;
 
-import com.jcondotta.domain.exception.InvalidDomainDataException;
+import com.jcondotta.domain.exception.DomainValidationException;
 import com.jcondotta.domain.support.Preconditions;
 
 import java.util.Locale;
@@ -27,13 +27,13 @@ public record Email(String value) {
     value = value.trim().toLowerCase(Locale.ROOT);
 
     if (value.length() > MAX_LENGTH) {
-      throw new InvalidDomainDataException(
+      throw new DomainValidationException(
         MUST_NOT_EXCEED_LENGTH.formatted(MAX_LENGTH)
       );
     }
 
     if (!EMAIL_REGEX.matcher(value).matches()) {
-      throw new InvalidDomainDataException(INVALID_FORMAT);
+      throw new DomainValidationException(INVALID_FORMAT);
     }
   }
 

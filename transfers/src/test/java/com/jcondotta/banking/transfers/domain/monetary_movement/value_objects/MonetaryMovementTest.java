@@ -3,7 +3,7 @@ package com.jcondotta.banking.transfers.domain.monetary_movement.value_objects;
 import com.jcondotta.banking.transfers.domain.monetary_movement.enums.MovementType;
 import com.jcondotta.banking.transfers.domain.shared.value_objects.Currency;
 import com.jcondotta.banking.transfers.domain.testsupport.MovementTypeAndCurrencyArgumentsProvider;
-import com.jcondotta.domain.exception.InvalidDomainDataException;
+import com.jcondotta.domain.exception.DomainValidationException;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ArgumentsSource;
 import org.junit.jupiter.params.provider.EnumSource;
@@ -75,7 +75,7 @@ class MonetaryMovementTest {
         var monetaryAmount = MonetaryAmount.of(AMOUNT_200, currency);
 
         assertThatThrownBy(() -> MonetaryMovement.of(null, monetaryAmount))
-            .isInstanceOf(InvalidDomainDataException.class)
+            .isInstanceOf(DomainValidationException.class)
             .hasMessage(MonetaryMovement.MOVEMENT_TYPE_NOT_PROVIDED);
     }
 
@@ -83,7 +83,7 @@ class MonetaryMovementTest {
     @EnumSource(MovementType.class)
     void shouldThrowException_whenMonetaryAmountIsNull(MovementType movementType) {
         assertThatThrownBy(() -> MonetaryMovement.of(movementType, null))
-            .isInstanceOf(InvalidDomainDataException.class)
+            .isInstanceOf(DomainValidationException.class)
             .hasMessage(MonetaryMovement.MONETARY_AMOUNT_NOT_PROVIDED);
     }
 }

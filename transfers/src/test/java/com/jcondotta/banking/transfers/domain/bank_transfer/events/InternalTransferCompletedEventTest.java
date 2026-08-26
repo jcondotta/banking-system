@@ -1,7 +1,7 @@
 package com.jcondotta.banking.transfers.domain.bank_transfer.events;
 
 import com.jcondotta.banking.transfers.domain.bank_transfer.identity.BankTransferId;
-import com.jcondotta.domain.exception.InvalidDomainDataException;
+import com.jcondotta.domain.exception.DomainValidationException;
 import com.jcondotta.domain.identity.EventId;
 import com.jcondotta.domain.validation.DomainEventErrors;
 import org.junit.jupiter.api.Test;
@@ -29,21 +29,21 @@ class InternalTransferCompletedEventTest {
     @Test
     void shouldThrowException_whenEventIdIsNull() {
         assertThatThrownBy(() -> new InternalTransferCompletedEvent(null, BANK_TRANSFER_ID, OCCURRED_AT))
-            .isInstanceOf(InvalidDomainDataException.class)
+            .isInstanceOf(DomainValidationException.class)
             .hasMessage(DomainEventErrors.EVENT_ID_MUST_BE_PROVIDED);
     }
 
     @Test
     void shouldThrowException_whenAggregateIdIsNull() {
         assertThatThrownBy(() -> new InternalTransferCompletedEvent(EVENT_ID, null, OCCURRED_AT))
-            .isInstanceOf(InvalidDomainDataException.class)
+            .isInstanceOf(DomainValidationException.class)
             .hasMessage(DomainEventErrors.AGGREGATE_ID_MUST_BE_PROVIDED);
     }
 
     @Test
     void shouldThrowException_whenOccurredAtIsNull() {
         assertThatThrownBy(() -> new InternalTransferCompletedEvent(EVENT_ID, BANK_TRANSFER_ID, null))
-            .isInstanceOf(InvalidDomainDataException.class)
+            .isInstanceOf(DomainValidationException.class)
             .hasMessage(DomainEventErrors.EVENT_OCCURRED_AT_MUST_BE_PROVIDED);
     }
 }

@@ -3,7 +3,6 @@ package com.jcondotta.banking.accounts.domain.bankaccount.policies;
 import com.jcondotta.banking.accounts.domain.bankaccount.enums.DocumentCountry;
 import com.jcondotta.banking.accounts.domain.bankaccount.enums.DocumentType;
 import com.jcondotta.domain.exception.DomainValidationException;
-import com.jcondotta.domain.exception.InvalidDomainDataException;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -46,7 +45,7 @@ class DefaultDocumentNumberValidatorRegistryTest {
   @Test
   void shouldThrowException_whenValidatorsListIsNull() {
     assertThatThrownBy(() -> new DefaultDocumentNumberValidatorRegistry(null))
-      .isInstanceOf(InvalidDomainDataException.class)
+      .isInstanceOf(DomainValidationException.class)
       .hasMessage(DefaultDocumentNumberValidatorRegistry.VALIDATORS_NOT_PROVIDED);
   }
 
@@ -55,7 +54,7 @@ class DefaultDocumentNumberValidatorRegistryTest {
     var validators = new ArrayList<>(Arrays.asList(spanishDniNumberValidator, null));
 
     assertThatThrownBy(() -> new DefaultDocumentNumberValidatorRegistry(validators))
-      .isInstanceOf(InvalidDomainDataException.class)
+      .isInstanceOf(DomainValidationException.class)
       .hasMessage(DefaultDocumentNumberValidatorRegistry.VALIDATOR_NOT_PROVIDED);
   }
 
@@ -64,7 +63,7 @@ class DefaultDocumentNumberValidatorRegistryTest {
     var registry = new DefaultDocumentNumberValidatorRegistry(List.of());
 
     assertThatThrownBy(() -> registry.resolve(null, DocumentType.NATIONAL_ID))
-      .isInstanceOf(InvalidDomainDataException.class)
+      .isInstanceOf(DomainValidationException.class)
       .hasMessage(DefaultDocumentNumberValidatorRegistry.COUNTRY_NOT_PROVIDED);
   }
 
@@ -73,7 +72,7 @@ class DefaultDocumentNumberValidatorRegistryTest {
     var registry = new DefaultDocumentNumberValidatorRegistry(List.of());
 
     assertThatThrownBy(() -> registry.resolve(DocumentCountry.SPAIN, null))
-      .isInstanceOf(InvalidDomainDataException.class)
+      .isInstanceOf(DomainValidationException.class)
       .hasMessage(DefaultDocumentNumberValidatorRegistry.TYPE_NOT_PROVIDED);
   }
 }
