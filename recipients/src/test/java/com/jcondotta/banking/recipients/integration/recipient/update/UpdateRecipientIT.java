@@ -201,14 +201,14 @@ class UpdateRecipientIT {
   }
 
   @Test
-  void shouldReturn400BadRequest_whenIbanIsInvalid() {
+  void shouldReturn422UnprocessableEntity_whenIbanIsInvalid() {
     var recipient = recipient(bankAccountId, RecipientFixtures.JEFFERSON, CREATED_AT);
     recipientRepository.save(recipient);
     var request = new UpdateRecipientRestRequest(RecipientFixtures.PATRIZIO.toName().value(), "INVALID123");
 
     var response = putRecipient(bankAccountId.value(), recipient.getId().value(), request);
 
-    assertThat(response.statusCode()).isEqualTo(HttpStatus.BAD_REQUEST.value());
+    assertThat(response.statusCode()).isEqualTo(HttpStatus.UNPROCESSABLE_CONTENT.value());
   }
 
   private Response putRecipient(UUID bankAccountId, UUID recipientId, Object request) {

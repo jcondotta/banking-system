@@ -36,7 +36,6 @@ class AggregateRootTest {
 
   @Test
   void shouldClearEvents_whenPullEventsIsCalled() {
-
     FakeAggregateId id = FakeAggregateId.newId();
     FakeAggregate aggregate = new FakeAggregate(id);
 
@@ -51,7 +50,6 @@ class AggregateRootTest {
 
   @Test
   void shouldReturnEventsInRegistrationOrder_whenMultipleEventsAreRaised() {
-
     FakeAggregateId id = FakeAggregateId.newId();
     FakeAggregate aggregate = new FakeAggregate(id);
 
@@ -67,7 +65,6 @@ class AggregateRootTest {
 
   @Test
   void shouldReturnEmpty_whenNoEventsWereRegistered() {
-
     FakeAggregateId id = FakeAggregateId.newId();
     FakeAggregate aggregate = new FakeAggregate(id);
 

@@ -19,11 +19,11 @@ public class DomainValidationExceptionHandler {
 
   static final String TITLE_VALIDATION_FAILED = "Request validation failed";
 
-  static final HttpStatus HTTP_STATUS_BAD_REQUEST = HttpStatus.BAD_REQUEST;
+  static final HttpStatus HTTP_STATUS_UNPROCESSABLE_CONTENT = HttpStatus.UNPROCESSABLE_CONTENT;
 
   @ExceptionHandler(DomainValidationException.class)
   public ResponseEntity<ProblemDetail> handle(DomainValidationException ex, HttpServletRequest request) {
-    var problemDetail = ProblemDetail.forStatus(HTTP_STATUS_BAD_REQUEST);
+    var problemDetail = ProblemDetail.forStatus(HTTP_STATUS_UNPROCESSABLE_CONTENT);
     problemDetail.setType(ProblemTypes.VALIDATION_ERRORS);
     problemDetail.setTitle(TITLE_VALIDATION_FAILED);
     problemDetail.setDetail(ex.getMessage());

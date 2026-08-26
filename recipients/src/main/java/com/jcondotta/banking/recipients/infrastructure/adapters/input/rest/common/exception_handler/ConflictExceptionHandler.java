@@ -18,13 +18,13 @@ import java.net.URI;
 public class ConflictExceptionHandler {
 
   static final HttpStatus HTTP_STATUS_CONFLICT = HttpStatus.CONFLICT;
-  public static final String TITLE_RESOURCE_ALREADY_EXISTS = "Resource already exists";
+  public static final String TITLE_CONFLICT = "Conflict";
 
   @ExceptionHandler(DomainConflictException.class)
   public ResponseEntity<ProblemDetail> handleConflict(DomainConflictException ex, HttpServletRequest request) {
     var problemDetail = ProblemDetail.forStatus(HTTP_STATUS_CONFLICT);
     problemDetail.setType(ProblemTypes.CONFLICT);
-    problemDetail.setTitle(TITLE_RESOURCE_ALREADY_EXISTS);
+    problemDetail.setTitle(TITLE_CONFLICT);
     problemDetail.setDetail(ex.getMessage());
     problemDetail.setInstance(URI.create(request.getRequestURI()));
 

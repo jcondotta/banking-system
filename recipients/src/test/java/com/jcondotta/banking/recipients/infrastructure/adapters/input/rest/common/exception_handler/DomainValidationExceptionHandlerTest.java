@@ -21,7 +21,7 @@ class DomainValidationExceptionHandlerTest {
   private final DomainValidationExceptionHandler handler = new DomainValidationExceptionHandler();
 
   @Test
-  void shouldReturnBadRequestProblemDetail_whenDomainValidationExceptionIsThrown() {
+  void shouldReturnUnprocessableContentProblemDetail_whenDomainValidationExceptionIsThrown() {
     var exception = new TestDomainValidationException(EXCEPTION_MESSAGE);
     var request = mock(HttpServletRequest.class);
 
@@ -31,9 +31,9 @@ class DomainValidationExceptionHandlerTest {
     var problemDetail = response.getBody();
 
     assertAll(
-      () -> assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST),
+      () -> assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNPROCESSABLE_CONTENT),
       () -> assertThat(problemDetail).isNotNull(),
-      () -> assertThat(problemDetail.getStatus()).isEqualTo(DomainValidationExceptionHandler.HTTP_STATUS_BAD_REQUEST.value()),
+      () -> assertThat(problemDetail.getStatus()).isEqualTo(DomainValidationExceptionHandler.HTTP_STATUS_UNPROCESSABLE_CONTENT.value()),
       () -> assertThat(problemDetail.getType()).isEqualTo(ProblemTypes.VALIDATION_ERRORS),
       () -> assertThat(problemDetail.getTitle()).isEqualTo(DomainValidationExceptionHandler.TITLE_VALIDATION_FAILED),
       () -> assertThat(problemDetail.getDetail()).isEqualTo(EXCEPTION_MESSAGE),

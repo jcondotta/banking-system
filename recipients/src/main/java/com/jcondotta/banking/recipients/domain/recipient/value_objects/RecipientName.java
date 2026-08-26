@@ -1,9 +1,6 @@
 package com.jcondotta.banking.recipients.domain.recipient.value_objects;
 
-import com.jcondotta.domain.exception.InvalidDomainDataException;
-
-import static com.jcondotta.domain.support.Preconditions.required;
-import static com.jcondotta.domain.support.Preconditions.requiredNotBlank;
+import static com.jcondotta.domain.support.Preconditions.*;
 
 public record RecipientName(String value) {
 
@@ -18,19 +15,11 @@ public record RecipientName(String value) {
     value = normalize(value);
 
     requiredNotBlank(value, NAME_NOT_BLANK);
-    validateLength(value);
+    checkArgument(value.length() <= MAX_LENGTH, NAME_MUST_NOT_EXCEED_LENGTH.formatted(MAX_LENGTH));
   }
 
   private static String normalize(String value) {
     return value.strip().replaceAll("\\s+", " ");
-  }
-
-  private static void validateLength(String value) {
-    if (value.length() > MAX_LENGTH) {
-      throw new InvalidDomainDataException(
-        NAME_MUST_NOT_EXCEED_LENGTH.formatted(MAX_LENGTH)
-      );
-    }
   }
 
   public static RecipientName of(String value) {

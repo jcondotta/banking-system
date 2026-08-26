@@ -152,25 +152,25 @@ class CreateRecipientIT {
   }
 
   @Test
-  void shouldReturn400BadRequest_whenIbanIsInvalid() {
+  void shouldReturn422UnprocessableEntity_whenIbanIsInvalid() {
     var restRequest = new CreateRecipientRestRequest(RECIPIENT_NAME, "INVALID123");
 
     var response = postRecipient(bankAccountId, restRequest);
 
-    assertThat(response.statusCode()).isEqualTo(HttpStatus.BAD_REQUEST.value());
+    assertThat(response.statusCode()).isEqualTo(HttpStatus.UNPROCESSABLE_CONTENT.value());
 
     var problemDetail = response.as(ProblemDetail.class);
     assertThat(problemDetail.getDetail()).isEqualTo(Iban.IBAN_INVALID_FORMAT);
   }
 
   @Test
-  void shouldReturn400BadRequest_whenRecipientNameIsTooLong() {
+  void shouldReturn422UnprocessableEntity_whenRecipientNameIsTooLong() {
     var tooLongName = "a".repeat(51);
     var restRequest = new CreateRecipientRestRequest(tooLongName, RECIPIENT_IBAN);
 
     var response = postRecipient(bankAccountId, restRequest);
 
-    assertThat(response.statusCode()).isEqualTo(HttpStatus.BAD_REQUEST.value());
+    assertThat(response.statusCode()).isEqualTo(HttpStatus.UNPROCESSABLE_CONTENT.value());
 
     var problemDetail = response.as(ProblemDetail.class);
     assertThat(problemDetail.getDetail())

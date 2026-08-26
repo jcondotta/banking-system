@@ -35,7 +35,7 @@ class ConflictExceptionHandlerTest {
       () -> assertThat(problemDetail).isNotNull(),
       () -> assertThat(problemDetail.getStatus()).isEqualTo(ConflictExceptionHandler.HTTP_STATUS_CONFLICT.value()),
       () -> assertThat(problemDetail.getType()).isEqualTo(ProblemTypes.CONFLICT),
-      () -> assertThat(problemDetail.getTitle()).isEqualTo(ConflictExceptionHandler.TITLE_RESOURCE_ALREADY_EXISTS),
+      () -> assertThat(problemDetail.getTitle()).isEqualTo(ConflictExceptionHandler.TITLE_CONFLICT),
       () -> assertThat(problemDetail.getDetail()).isEqualTo(EXCEPTION_MESSAGE),
       () -> assertThat(problemDetail.getInstance()).isEqualTo(URI.create(REQUEST_URI))
     );
