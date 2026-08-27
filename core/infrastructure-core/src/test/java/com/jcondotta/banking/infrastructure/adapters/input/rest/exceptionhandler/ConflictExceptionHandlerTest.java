@@ -1,6 +1,6 @@
 package com.jcondotta.banking.infrastructure.adapters.input.rest.exceptionhandler;
 
-import com.jcondotta.banking.infrastructure.adapters.output.rest.exceptionhandler.ProblemTypes;
+import com.jcondotta.banking.infrastructure.adapters.input.rest.problem.ApiProblem;
 import com.jcondotta.domain.exception.DomainConflictException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.Test;
@@ -34,7 +34,7 @@ class ConflictExceptionHandlerTest {
       () -> assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CONFLICT),
       () -> assertThat(problemDetail).isNotNull(),
       () -> assertThat(problemDetail.getStatus()).isEqualTo(ConflictExceptionHandler.HTTP_STATUS_CONFLICT.value()),
-      () -> assertThat(problemDetail.getType()).isEqualTo(ProblemTypes.CONFLICT),
+      () -> assertThat(problemDetail.getType()).isEqualTo(ApiProblem.CONFLICT),
       () -> assertThat(problemDetail.getTitle()).isEqualTo(HttpStatus.CONFLICT.getReasonPhrase()),
       () -> assertThat(problemDetail.getDetail()).isEqualTo(EXCEPTION_MESSAGE),
       () -> assertThat(problemDetail.getInstance()).isEqualTo(URI.create(REQUEST_URI))

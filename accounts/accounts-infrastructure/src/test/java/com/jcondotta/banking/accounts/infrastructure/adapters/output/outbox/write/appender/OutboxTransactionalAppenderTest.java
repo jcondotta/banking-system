@@ -2,7 +2,7 @@ package com.jcondotta.banking.accounts.infrastructure.adapters.output.outbox.wri
 
 import com.jcondotta.banking.accounts.infrastructure.adapters.output.outbox.entity.OutboxEntity;
 import com.jcondotta.banking.accounts.infrastructure.adapters.output.outbox.write.collector.OutboxEventCollector;
-import com.jcondotta.banking.infrastructure.adapters.config.aws.dynamodb.DynamoDbTransactionContext;
+import com.jcondotta.banking.accounts.infrastructure.adapters.output.persistence.dynamodb.DynamoDbTransactionContext;
 import com.jcondotta.domain.core.AggregateRoot;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

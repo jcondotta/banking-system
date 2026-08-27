@@ -1,7 +1,7 @@
 package com.jcondotta.banking.recipients.infrastructure.adapters.input.rest.common.filter;
 
-import com.jcondotta.banking.infrastructure.adapters.output.rest.HttpHeadersConstants;
-import com.jcondotta.banking.infrastructure.adapters.output.rest.ScopedCorrelationIdProvider;
+import com.jcondotta.banking.infrastructure.adapters.input.rest.http.HttpHeadersConstants;
+import com.jcondotta.banking.infrastructure.adapters.input.rest.correlation.ScopedCorrelationIdProvider;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

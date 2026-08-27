@@ -1,6 +1,6 @@
 package com.jcondotta.banking.infrastructure.adapters.input.rest.exceptionhandler;
 
-import com.jcondotta.banking.infrastructure.adapters.output.rest.exceptionhandler.ProblemTypes;
+import com.jcondotta.banking.infrastructure.adapters.input.rest.problem.ApiProblem;
 import com.jcondotta.domain.exception.DomainRuleViolationException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.Test;
@@ -34,7 +34,7 @@ class RuleViolationExceptionHandlerTest {
       () -> assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNPROCESSABLE_CONTENT),
       () -> assertThat(problemDetail).isNotNull(),
       () -> assertThat(problemDetail.getStatus()).isEqualTo(RuleViolationExceptionHandler.HTTP_STATUS_UNPROCESSABLE_CONTENT.value()),
-      () -> assertThat(problemDetail.getType()).isEqualTo(ProblemTypes.RULE_VIOLATION),
+      () -> assertThat(problemDetail.getType()).isEqualTo(ApiProblem.RULE_VIOLATION),
       () -> assertThat(problemDetail.getTitle()).isEqualTo(RuleViolationExceptionHandler.TITLE_OPERATION_NOT_ALLOWED),
       () -> assertThat(problemDetail.getDetail()).isEqualTo(EXCEPTION_MESSAGE),
       () -> assertThat(problemDetail.getInstance()).isEqualTo(URI.create(REQUEST_URI))

@@ -1,6 +1,6 @@
 package com.jcondotta.banking.recipients.integration.recipient.create;
 
-import com.jcondotta.banking.infrastructure.adapters.output.rest.HttpHeadersConstants;
+import com.jcondotta.banking.infrastructure.adapters.input.rest.http.HttpHeadersConstants;
 import com.jcondotta.banking.recipients.domain.testsupport.RecipientFixtures;
 import com.jcondotta.banking.recipients.infrastructure.adapters.input.rest.create_recipient.model.CreateRecipientRestRequest;
 import com.jcondotta.banking.recipients.infrastructure.adapters.input.rest.properties.RecipientsURIProperties;

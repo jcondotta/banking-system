@@ -1,6 +1,6 @@
 package com.jcondotta.banking.infrastructure.adapters.input.rest.exceptionhandler;
 
-import com.jcondotta.banking.infrastructure.adapters.output.rest.exceptionhandler.ProblemTypes;
+import com.jcondotta.banking.infrastructure.adapters.input.rest.problem.ApiProblem;
 import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpInputMessage;
@@ -34,7 +34,7 @@ class HttpMessageNotReadableExceptionHandlerTest {
       () -> assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST),
       () -> assertThat(problemDetail).isNotNull(),
       () -> assertThat(problemDetail.getStatus()).isEqualTo(HttpMessageNotReadableExceptionHandler.HTTP_STATUS_BAD_REQUEST.value()),
-      () -> assertThat(problemDetail.getType()).isEqualTo(ProblemTypes.VALIDATION_ERRORS),
+      () -> assertThat(problemDetail.getType()).isEqualTo(ApiProblem.VALIDATION_ERRORS),
       () -> assertThat(problemDetail.getTitle()).isEqualTo(HttpMessageNotReadableExceptionHandler.TITLE_VALIDATION_FAILED),
       () -> assertThat(problemDetail.getDetail()).isEqualTo(HttpMessageNotReadableExceptionHandler.DETAIL_UNREADABLE_MESSAGE),
       () -> assertThat(problemDetail.getInstance()).isEqualTo(URI.create(REQUEST_URI))

@@ -1,6 +1,6 @@
 package com.jcondotta.banking.recipients.integration.recipient.create;
 
-import com.jcondotta.banking.infrastructure.adapters.output.rest.HttpHeadersConstants;
+import com.jcondotta.banking.infrastructure.adapters.input.rest.http.HttpHeadersConstants;
 import com.jcondotta.banking.recipients.domain.recipient.exceptions.DuplicateRecipientIbanException;
 import com.jcondotta.banking.recipients.domain.recipient.identity.RecipientId;
 import com.jcondotta.banking.recipients.domain.recipient.repository.RecipientRepository;

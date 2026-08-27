@@ -1,6 +1,6 @@
 package com.jcondotta.banking.infrastructure.adapters.input.rest.exceptionhandler;
 
-import com.jcondotta.banking.infrastructure.adapters.output.rest.exceptionhandler.ProblemTypes;
+import com.jcondotta.banking.infrastructure.adapters.input.rest.problem.ApiProblem;
 import com.jcondotta.domain.exception.DomainNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.core.Ordered;
@@ -22,7 +22,7 @@ public class ResourceNotFoundExceptionHandler {
   @ExceptionHandler(DomainNotFoundException.class)
   public ResponseEntity<ProblemDetail> handleNotFound(DomainNotFoundException ex, HttpServletRequest request) {
     var problemDetail = ProblemDetail.forStatus(HTTP_STATUS_NOT_FOUND);
-    problemDetail.setType(ProblemTypes.RESOURCE_NOT_FOUND);
+    problemDetail.setType(ApiProblem.RESOURCE_NOT_FOUND);
     problemDetail.setTitle(HTTP_STATUS_NOT_FOUND.getReasonPhrase());
     problemDetail.setDetail(ex.getMessage());
     problemDetail.setInstance(URI.create(request.getRequestURI()));

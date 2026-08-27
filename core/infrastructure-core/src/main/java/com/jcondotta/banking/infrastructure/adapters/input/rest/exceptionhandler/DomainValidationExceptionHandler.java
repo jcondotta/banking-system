@@ -1,6 +1,6 @@
 package com.jcondotta.banking.infrastructure.adapters.input.rest.exceptionhandler;
 
-import com.jcondotta.banking.infrastructure.adapters.output.rest.exceptionhandler.ProblemTypes;
+import com.jcondotta.banking.infrastructure.adapters.input.rest.problem.ApiProblem;
 import com.jcondotta.domain.exception.DomainValidationException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.core.Ordered;
@@ -24,7 +24,7 @@ public class DomainValidationExceptionHandler {
   @ExceptionHandler(DomainValidationException.class)
   public ResponseEntity<ProblemDetail> handle(DomainValidationException ex, HttpServletRequest request) {
     var problemDetail = ProblemDetail.forStatus(HTTP_STATUS_UNPROCESSABLE_CONTENT);
-    problemDetail.setType(ProblemTypes.VALIDATION_ERRORS);
+    problemDetail.setType(ApiProblem.VALIDATION_ERRORS);
     problemDetail.setTitle(TITLE_VALIDATION_FAILED);
     problemDetail.setDetail(ex.getMessage());
     problemDetail.setInstance(URI.create(request.getRequestURI()));

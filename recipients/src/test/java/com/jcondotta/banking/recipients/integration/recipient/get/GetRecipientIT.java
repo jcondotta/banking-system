@@ -1,7 +1,7 @@
 package com.jcondotta.banking.recipients.integration.recipient.get;
 
 import com.jcondotta.application.command.CommandHandler;
-import com.jcondotta.banking.infrastructure.adapters.output.rest.HttpHeadersConstants;
+import com.jcondotta.banking.infrastructure.adapters.input.rest.http.HttpHeadersConstants;
 import com.jcondotta.banking.recipients.application.recipient.command.remove.RemoveRecipientCommand;
 import com.jcondotta.banking.recipients.domain.recipient.aggregate.Recipient;
 import com.jcondotta.banking.recipients.domain.recipient.exceptions.RecipientNotFoundException;

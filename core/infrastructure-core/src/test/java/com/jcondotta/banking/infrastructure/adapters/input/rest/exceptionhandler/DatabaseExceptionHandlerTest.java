@@ -1,6 +1,6 @@
 package com.jcondotta.banking.infrastructure.adapters.input.rest.exceptionhandler;
 
-import com.jcondotta.banking.infrastructure.adapters.output.rest.exceptionhandler.ProblemTypes;
+import com.jcondotta.banking.infrastructure.adapters.input.rest.problem.ApiProblem;
 import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.Test;
 import org.springframework.dao.QueryTimeoutException;
@@ -36,7 +36,7 @@ class DatabaseExceptionHandlerTest {
     assertAll(
       () -> assertThat(response.getStatusCode()).isEqualTo(HttpStatus.SERVICE_UNAVAILABLE),
       () -> assertThat(problemDetail).isNotNull(),
-      () -> assertThat(problemDetail.getType()).isEqualTo(ProblemTypes.DATABASE_UNAVAILABLE),
+      () -> assertThat(problemDetail.getType()).isEqualTo(ApiProblem.DATABASE_UNAVAILABLE),
       () -> assertThat(problemDetail.getStatus()).isEqualTo(DatabaseExceptionHandler.HTTP_STATUS_SERVICE_UNAVAILABLE.value()),
       () -> assertThat(problemDetail.getTitle()).isEqualTo(HttpStatus.SERVICE_UNAVAILABLE.getReasonPhrase()),
       () -> assertThat(problemDetail.getDetail()).isEqualTo(DatabaseExceptionHandler.DETAIL_DATABASE_UNAVAILABLE),
@@ -57,7 +57,7 @@ class DatabaseExceptionHandlerTest {
     assertAll(
       () -> assertThat(response.getStatusCode()).isEqualTo(HttpStatus.SERVICE_UNAVAILABLE),
       () -> assertThat(problemDetail).isNotNull(),
-      () -> assertThat(problemDetail.getType()).isEqualTo(ProblemTypes.DATABASE_TIMEOUT),
+      () -> assertThat(problemDetail.getType()).isEqualTo(ApiProblem.DATABASE_TIMEOUT),
       () -> assertThat(problemDetail.getStatus()).isEqualTo(DatabaseExceptionHandler.HTTP_STATUS_SERVICE_UNAVAILABLE.value()),
       () -> assertThat(problemDetail.getTitle()).isEqualTo(HttpStatus.SERVICE_UNAVAILABLE.getReasonPhrase()),
       () -> assertThat(problemDetail.getDetail()).isEqualTo(DatabaseExceptionHandler.DETAIL_DATABASE_TIMEOUT),

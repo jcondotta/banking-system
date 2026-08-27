@@ -1,6 +1,6 @@
 package com.jcondotta.banking.infrastructure.adapters.input.rest.exceptionhandler;
 
-import com.jcondotta.banking.infrastructure.adapters.output.rest.exceptionhandler.ProblemTypes;
+import com.jcondotta.banking.infrastructure.adapters.input.rest.problem.ApiProblem;
 import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
@@ -36,7 +36,7 @@ class GlobalExceptionHandlerTest {
       () -> assertThat(response.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR),
       () -> assertThat(problemDetail).isNotNull(),
       () -> assertThat(problemDetail.getStatus()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR.value()),
-      () -> assertThat(problemDetail.getType()).isEqualTo(ProblemTypes.INTERNAL_ERROR),
+      () -> assertThat(problemDetail.getType()).isEqualTo(ApiProblem.INTERNAL_ERROR),
       () -> assertThat(problemDetail.getTitle()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase()),
       () -> assertThat(problemDetail.getDetail()).isNull(),
       () -> assertThat(problemDetail.getInstance()).isEqualTo(URI.create(REQUEST_URI))
@@ -46,7 +46,7 @@ class GlobalExceptionHandlerTest {
   @Test
   void shouldPreserveProblemDetailAndStatus_whenErrorResponseExceptionIsThrown() {
     var problemDetail = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
-    problemDetail.setType(ProblemTypes.VALIDATION_ERRORS);
+    problemDetail.setType(ApiProblem.VALIDATION_ERRORS);
     problemDetail.setTitle("Request validation failed");
     problemDetail.setDetail("Invalid request");
     var exception = new ErrorResponseException(HttpStatus.BAD_REQUEST, problemDetail, null);
@@ -61,7 +61,7 @@ class GlobalExceptionHandlerTest {
       () -> assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST),
       () -> assertThat(responseProblemDetail).isNotNull(),
       () -> assertThat(responseProblemDetail.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST.value()),
-      () -> assertThat(responseProblemDetail.getType()).isEqualTo(ProblemTypes.VALIDATION_ERRORS),
+      () -> assertThat(responseProblemDetail.getType()).isEqualTo(ApiProblem.VALIDATION_ERRORS),
       () -> assertThat(responseProblemDetail.getTitle()).isEqualTo("Request validation failed"),
       () -> assertThat(responseProblemDetail.getDetail()).isEqualTo("Invalid request"),
       () -> assertThat(responseProblemDetail.getInstance()).isEqualTo(URI.create(REQUEST_URI))

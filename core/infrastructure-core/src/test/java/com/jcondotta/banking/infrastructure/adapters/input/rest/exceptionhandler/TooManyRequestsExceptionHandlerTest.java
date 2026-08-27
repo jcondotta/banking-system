@@ -1,6 +1,6 @@
 package com.jcondotta.banking.infrastructure.adapters.input.rest.exceptionhandler;
 
-import com.jcondotta.banking.infrastructure.adapters.output.rest.exceptionhandler.ProblemTypes;
+import com.jcondotta.banking.infrastructure.adapters.input.rest.problem.ApiProblem;
 import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
@@ -33,7 +33,7 @@ class TooManyRequestsExceptionHandlerTest {
       () -> assertThat(response.getStatusCode()).isEqualTo(HttpStatus.TOO_MANY_REQUESTS),
       () -> assertThat(problemDetail).isNotNull(),
       () -> assertThat(problemDetail.getStatus()).isEqualTo(TooManyRequestsExceptionHandler.HTTP_STATUS_TOO_MANY_REQUESTS.value()),
-      () -> assertThat(problemDetail.getType()).isEqualTo(ProblemTypes.TOO_MANY_REQUESTS),
+      () -> assertThat(problemDetail.getType()).isEqualTo(ApiProblem.TOO_MANY_REQUESTS),
       () -> assertThat(problemDetail.getTitle()).isEqualTo(HttpStatus.TOO_MANY_REQUESTS.getReasonPhrase()),
       () -> assertThat(problemDetail.getDetail()).isEqualTo(TooManyRequestsExceptionHandler.DETAIL_CONCURRENCY_LIMIT_REACHED),
       () -> assertThat(problemDetail.getInstance()).isEqualTo(URI.create(REQUEST_URI))

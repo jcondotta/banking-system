@@ -1,6 +1,6 @@
 package com.jcondotta.banking.recipients.integration.recipient.remove;
 
-import com.jcondotta.banking.infrastructure.adapters.output.rest.HttpHeadersConstants;
+import com.jcondotta.banking.infrastructure.adapters.input.rest.http.HttpHeadersConstants;
 import com.jcondotta.banking.recipients.domain.recipient.aggregate.Recipient;
 import com.jcondotta.banking.recipients.domain.recipient.identity.BankAccountId;
 import com.jcondotta.banking.recipients.domain.recipient.identity.RecipientId;

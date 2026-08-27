@@ -1,6 +1,6 @@
 package com.jcondotta.banking.infrastructure.adapters.input.rest.exceptionhandler;
 
-import com.jcondotta.banking.infrastructure.adapters.output.rest.exceptionhandler.ProblemTypes;
+import com.jcondotta.banking.infrastructure.adapters.input.rest.problem.ApiProblem;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
@@ -25,7 +25,7 @@ public class HttpMessageNotReadableExceptionHandler {
   @ExceptionHandler(HttpMessageNotReadableException.class)
   public ResponseEntity<ProblemDetail> handle(HttpMessageNotReadableException ex, HttpServletRequest request) {
     var problemDetail = ProblemDetail.forStatus(HTTP_STATUS_BAD_REQUEST);
-    problemDetail.setType(ProblemTypes.VALIDATION_ERRORS);
+    problemDetail.setType(ApiProblem.VALIDATION_ERRORS);
     problemDetail.setTitle(TITLE_VALIDATION_FAILED);
     problemDetail.setDetail(DETAIL_UNREADABLE_MESSAGE);
     problemDetail.setInstance(URI.create(request.getRequestURI()));

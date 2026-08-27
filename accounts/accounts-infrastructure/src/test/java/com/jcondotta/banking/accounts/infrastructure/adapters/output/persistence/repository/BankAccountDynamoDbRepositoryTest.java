@@ -10,7 +10,7 @@ import com.jcondotta.banking.accounts.infrastructure.adapters.output.persistence
 import com.jcondotta.banking.accounts.infrastructure.adapters.output.persistence.enums.EntityType;
 import com.jcondotta.banking.accounts.infrastructure.adapters.output.persistence.mapper.BankAccountEntityMapper;
 import com.jcondotta.banking.accounts.infrastructure.support.DynamoPageIterable;
-import com.jcondotta.banking.infrastructure.adapters.config.aws.dynamodb.DynamoDbTransactionContext;
+import com.jcondotta.banking.accounts.infrastructure.adapters.output.persistence.dynamodb.DynamoDbTransactionContext;
 import com.jcondotta.domain.core.AggregateRoot;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;

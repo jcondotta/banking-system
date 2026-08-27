@@ -1,6 +1,6 @@
 package com.jcondotta.banking.infrastructure.adapters.input.rest.exceptionhandler;
 
-import com.jcondotta.banking.infrastructure.adapters.output.rest.exceptionhandler.ProblemTypes;
+import com.jcondotta.banking.infrastructure.adapters.input.rest.problem.ApiProblem;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
@@ -24,12 +24,9 @@ public class DatabaseExceptionHandler {
   public static final String DETAIL_DATABASE_TIMEOUT = "Database operation timed out";
 
   @ExceptionHandler(CannotCreateTransactionException.class)
-  public ResponseEntity<ProblemDetail> handleDatabaseUnavailable(
-    CannotCreateTransactionException ex,
-    HttpServletRequest request
-  ) {
+  public ResponseEntity<ProblemDetail> handleDatabaseUnavailable(CannotCreateTransactionException ex, HttpServletRequest request) {
     var problemDetail = ProblemDetail.forStatus(HTTP_STATUS_SERVICE_UNAVAILABLE);
-    problemDetail.setType(ProblemTypes.DATABASE_UNAVAILABLE);
+    problemDetail.setType(ApiProblem.DATABASE_UNAVAILABLE);
     problemDetail.setTitle(HTTP_STATUS_SERVICE_UNAVAILABLE.getReasonPhrase());
     problemDetail.setDetail(DETAIL_DATABASE_UNAVAILABLE);
     problemDetail.setInstance(URI.create(request.getRequestURI()));
@@ -40,7 +37,7 @@ public class DatabaseExceptionHandler {
   @ExceptionHandler(QueryTimeoutException.class)
   public ResponseEntity<ProblemDetail> handleDatabaseTimeout(QueryTimeoutException ex, HttpServletRequest request) {
     var problemDetail = ProblemDetail.forStatus(HTTP_STATUS_SERVICE_UNAVAILABLE);
-    problemDetail.setType(ProblemTypes.DATABASE_TIMEOUT);
+    problemDetail.setType(ApiProblem.DATABASE_TIMEOUT);
     problemDetail.setTitle(HTTP_STATUS_SERVICE_UNAVAILABLE.getReasonPhrase());
     problemDetail.setDetail(DETAIL_DATABASE_TIMEOUT);
     problemDetail.setInstance(URI.create(request.getRequestURI()));

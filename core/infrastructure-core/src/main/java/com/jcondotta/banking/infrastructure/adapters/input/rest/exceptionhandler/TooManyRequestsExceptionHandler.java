@@ -1,6 +1,6 @@
 package com.jcondotta.banking.infrastructure.adapters.input.rest.exceptionhandler;
 
-import com.jcondotta.banking.infrastructure.adapters.output.rest.exceptionhandler.ProblemTypes;
+import com.jcondotta.banking.infrastructure.adapters.input.rest.problem.ApiProblem;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
@@ -25,7 +25,7 @@ public class TooManyRequestsExceptionHandler {
   @ExceptionHandler(InvocationRejectedException.class)
   public ResponseEntity<ProblemDetail> handle(InvocationRejectedException ex, HttpServletRequest request) {
     var problemDetail = ProblemDetail.forStatus(HTTP_STATUS_TOO_MANY_REQUESTS);
-    problemDetail.setType(ProblemTypes.TOO_MANY_REQUESTS);
+    problemDetail.setType(ApiProblem.TOO_MANY_REQUESTS);
     problemDetail.setTitle(HTTP_STATUS_TOO_MANY_REQUESTS.getReasonPhrase());
     problemDetail.setDetail(DETAIL_CONCURRENCY_LIMIT_REACHED);
     problemDetail.setInstance(URI.create(request.getRequestURI()));

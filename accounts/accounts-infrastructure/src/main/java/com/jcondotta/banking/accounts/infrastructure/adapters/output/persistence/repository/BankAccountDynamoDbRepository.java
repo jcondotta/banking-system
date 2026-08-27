@@ -1,7 +1,7 @@
 package com.jcondotta.banking.accounts.infrastructure.adapters.output.persistence.repository;
 
 import com.jcondotta.banking.accounts.domain.bankaccount.value_objects.Iban;
-import com.jcondotta.banking.infrastructure.adapters.config.aws.dynamodb.DynamoDbTransactionContext;
+import com.jcondotta.banking.accounts.infrastructure.adapters.output.persistence.dynamodb.DynamoDbTransactionContext;
 import com.jcondotta.banking.accounts.application.outbound.TransactionalAppender;
 import com.jcondotta.banking.accounts.domain.bankaccount.aggregate.BankAccount;
 import com.jcondotta.banking.accounts.domain.bankaccount.identity.BankAccountId;

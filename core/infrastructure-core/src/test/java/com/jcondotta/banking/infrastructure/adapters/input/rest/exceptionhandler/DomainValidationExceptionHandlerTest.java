@@ -1,6 +1,6 @@
 package com.jcondotta.banking.infrastructure.adapters.input.rest.exceptionhandler;
 
-import com.jcondotta.banking.infrastructure.adapters.output.rest.exceptionhandler.ProblemTypes;
+import com.jcondotta.banking.infrastructure.adapters.input.rest.problem.ApiProblem;
 import com.jcondotta.domain.exception.DomainValidationException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.Test;
@@ -34,7 +34,7 @@ class DomainValidationExceptionHandlerTest {
       () -> assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNPROCESSABLE_CONTENT),
       () -> assertThat(problemDetail).isNotNull(),
       () -> assertThat(problemDetail.getStatus()).isEqualTo(DomainValidationExceptionHandler.HTTP_STATUS_UNPROCESSABLE_CONTENT.value()),
-      () -> assertThat(problemDetail.getType()).isEqualTo(ProblemTypes.VALIDATION_ERRORS),
+      () -> assertThat(problemDetail.getType()).isEqualTo(ApiProblem.VALIDATION_ERRORS),
       () -> assertThat(problemDetail.getTitle()).isEqualTo(DomainValidationExceptionHandler.TITLE_VALIDATION_FAILED),
       () -> assertThat(problemDetail.getDetail()).isEqualTo(EXCEPTION_MESSAGE),
       () -> assertThat(problemDetail.getInstance()).isEqualTo(URI.create(REQUEST_URI))

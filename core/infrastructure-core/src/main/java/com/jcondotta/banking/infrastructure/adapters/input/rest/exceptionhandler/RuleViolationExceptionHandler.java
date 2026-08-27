@@ -1,6 +1,6 @@
 package com.jcondotta.banking.infrastructure.adapters.input.rest.exceptionhandler;
 
-import com.jcondotta.banking.infrastructure.adapters.output.rest.exceptionhandler.ProblemTypes;
+import com.jcondotta.banking.infrastructure.adapters.input.rest.problem.ApiProblem;
 import com.jcondotta.domain.exception.DomainRuleViolationException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.core.Ordered;
@@ -23,7 +23,7 @@ public class RuleViolationExceptionHandler {
   @ExceptionHandler(DomainRuleViolationException.class)
   public ResponseEntity<ProblemDetail> handleRuleViolation(DomainRuleViolationException ex, HttpServletRequest request) {
     var problemDetail = ProblemDetail.forStatus(HTTP_STATUS_UNPROCESSABLE_CONTENT);
-    problemDetail.setType(ProblemTypes.RULE_VIOLATION);
+    problemDetail.setType(ApiProblem.RULE_VIOLATION);
     problemDetail.setTitle(TITLE_OPERATION_NOT_ALLOWED);
     problemDetail.setDetail(ex.getMessage());
     problemDetail.setInstance(URI.create(request.getRequestURI()));

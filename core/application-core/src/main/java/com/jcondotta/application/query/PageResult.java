@@ -17,10 +17,14 @@ public record PageResult<T>(
   public PageResult {
     requireNonNull(content, CONTENT_REQUIRED);
     if (page < 0) throw new IllegalArgumentException("page must not be negative");
+
     if (size <= 0) throw new IllegalArgumentException("size must be positive");
+
     if (totalPages < 0) throw new IllegalArgumentException("totalPages must not be negative");
+
     if (totalElements == 0 && totalPages > 0)
       throw new IllegalArgumentException("totalPages must be 0 when totalElements is 0");
+
     content = List.copyOf(content);
   }
 

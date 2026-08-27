@@ -1,6 +1,6 @@
 package com.jcondotta.banking.infrastructure.adapters.input.rest.exceptionhandler;
 
-import com.jcondotta.banking.infrastructure.adapters.output.rest.exceptionhandler.ProblemTypes;
+import com.jcondotta.banking.infrastructure.adapters.input.rest.problem.ApiProblem;
 import com.jcondotta.domain.exception.DomainConflictException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.core.Ordered;
@@ -22,7 +22,7 @@ public class ConflictExceptionHandler {
   @ExceptionHandler(DomainConflictException.class)
   public ResponseEntity<ProblemDetail> handleConflict(DomainConflictException ex, HttpServletRequest request) {
     var problemDetail = ProblemDetail.forStatus(HTTP_STATUS_CONFLICT);
-    problemDetail.setType(ProblemTypes.CONFLICT);
+    problemDetail.setType(ApiProblem.CONFLICT);
     problemDetail.setTitle(HttpStatus.CONFLICT.getReasonPhrase());
     problemDetail.setDetail(ex.getMessage());
     problemDetail.setInstance(URI.create(request.getRequestURI()));

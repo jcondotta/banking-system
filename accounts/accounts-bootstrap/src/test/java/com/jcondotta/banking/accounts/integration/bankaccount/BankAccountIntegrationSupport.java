@@ -10,7 +10,7 @@ import com.jcondotta.banking.accounts.infrastructure.adapters.input.rest.lookup.
 import com.jcondotta.banking.accounts.infrastructure.adapters.input.rest.open.model.OpenBankAccountRequest;
 import com.jcondotta.banking.accounts.infrastructure.adapters.output.outbox.entity.OutboxEntity;
 import com.jcondotta.banking.accounts.infrastructure.properties.BankAccountsURIProperties;
-import com.jcondotta.banking.infrastructure.adapters.output.rest.HttpHeadersConstants;
+import com.jcondotta.banking.infrastructure.adapters.input.rest.http.HttpHeadersConstants;
 import io.restassured.RestAssured;
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.http.ContentType;

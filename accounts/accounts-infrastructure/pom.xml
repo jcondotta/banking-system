@@ -59,6 +59,11 @@
             <artifactId>commons-lang3</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>software.amazon.awssdk</groupId>
+            <artifactId>dynamodb-enhanced</artifactId>
+        </dependency>
+
         <!-- Annotation processors -->
         <dependency>
             <groupId>org.mapstruct</groupId>
