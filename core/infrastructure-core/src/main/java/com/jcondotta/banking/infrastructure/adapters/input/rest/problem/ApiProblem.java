@@ -1,0 +1,25 @@
+package com.jcondotta.banking.infrastructure.adapters.input.rest.problem;
+
+import java.net.URI;
+
+public final class ApiProblem {
+
+  public static final URI RESOURCE_NOT_FOUND = uri("/resource-not-found");
+  public static final URI VALIDATION_ERRORS = uri("/validation-errors");
+  public static final URI RULE_VIOLATION = uri("/rule-violation");
+  public static final URI CONFLICT = uri("/conflict");
+  public static final URI TOO_MANY_REQUESTS = uri("/too-many-requests");
+  public static final URI INTERNAL_ERROR = uri("/internal-error");
+  public static final URI DATABASE_UNAVAILABLE = uri("/database-unavailable");
+  public static final URI DATABASE_TIMEOUT = uri("/database-timeout");
+
+  @SuppressWarnings("all")
+  private static final String BASE_PATH = "https://api.jcondotta.com/problems";
+
+  private ApiProblem() {
+  }
+
+  private static URI uri(String path) {
+    return URI.create(BASE_PATH.concat(path));
+  }
+}
