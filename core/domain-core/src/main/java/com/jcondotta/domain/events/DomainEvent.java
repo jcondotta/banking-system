@@ -6,13 +6,25 @@ import com.jcondotta.domain.identity.EventId;
 
 import java.time.Instant;
 
-public interface DomainEvent<A extends AggregateId<?>> {
+public interface DomainEvent<A extends AggregateId<?>, D> {
 
-  EventId eventId();
-  A aggregateId();
-  Instant occurredAt();
+  DomainEventMetadata<A> metadata();
+  D data();
+  String eventType();
 
-  default int version() {
+  default EventId eventId() {
+    return metadata().eventId();
+  }
+
+  default A aggregateId() {
+    return metadata().aggregateId();
+  }
+
+  default Instant occurredAt() {
+    return metadata().occurredAt();
+  }
+
+  default int eventVersion() {
     return 1;
   }
 }

@@ -1,53 +1,64 @@
 package com.jcondotta.domain.events;
 
-import com.jcondotta.domain.identity.AggregateId;
 import com.jcondotta.domain.identity.EventId;
+import com.jcondotta.domain.testsupport.FakeAggregateId;
+import com.jcondotta.domain.testsupport.FakeDomainEvent;
 import org.junit.jupiter.api.Test;
 
 import java.time.Instant;
-import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 class DomainEventTest {
 
   private static final EventId EVENT_ID = EventId.newId();
-  private static final TestAggregateId AGGREGATE_ID = new TestAggregateId(UUID.randomUUID());
+  private static final FakeAggregateId AGGREGATE_ID = FakeAggregateId.newId();
   private static final Instant OCCURRED_AT = Instant.now();
 
-  @Test
-  void shouldReturnDefaultVersion_whenNotOverridden() {
-    DomainEvent<TestAggregateId> event = new TestDomainEvent(EVENT_ID, AGGREGATE_ID, OCCURRED_AT);
+  private static final DomainEventMetadata<FakeAggregateId> METADATA = DomainEventMetadata.of(
+    EVENT_ID,
+    AGGREGATE_ID,
+    OCCURRED_AT
+  );
 
-    assertThat(event.version()).isEqualTo(1);
+  @Test
+  void shouldReturnDefaultEventVersion_whenNotOverridden() {
+    DomainEvent<FakeAggregateId, FakeAggregateId> event = new FakeDomainEvent(METADATA, AGGREGATE_ID);
+
+    assertThat(event.eventVersion()).isEqualTo(1);
   }
 
   @Test
-  void shouldAllowOverridingVersion_whenImplemented() {
-    DomainEvent<TestAggregateId> event = new TestDomainEventWithCustomVersion(EVENT_ID, AGGREGATE_ID, OCCURRED_AT);
+  void shouldReturnEventVersion_whenVersionIsCustomized() {
+    DomainEvent<FakeAggregateId, FakeAggregateId> event = new TestDomainEventWithCustomVersion(
+      METADATA,
+      AGGREGATE_ID
+    );
 
-    assertThat(event.version()).isEqualTo(2);
+    assertThat(event.eventVersion()).isEqualTo(2);
   }
 
   @Test
   void shouldReturnEventDataCorrectly() {
-    DomainEvent<TestAggregateId> event = new TestDomainEvent(EVENT_ID, AGGREGATE_ID, OCCURRED_AT);
+    DomainEvent<FakeAggregateId, FakeAggregateId> event = new FakeDomainEvent(METADATA, AGGREGATE_ID);
 
     assertThat(event.eventId()).isEqualTo(EVENT_ID);
     assertThat(event.aggregateId()).isEqualTo(AGGREGATE_ID);
+    assertThat(event.data()).isEqualTo(AGGREGATE_ID);
+    assertThat(event.eventType()).isEqualTo(FakeDomainEvent.EVENT_TYPE);
     assertThat(event.occurredAt()).isEqualTo(OCCURRED_AT);
   }
 
-  private record TestAggregateId(UUID value) implements AggregateId<UUID> {}
-
-  private record TestDomainEvent(EventId eventId, TestAggregateId aggregateId, Instant occurredAt)
-    implements DomainEvent<TestAggregateId> {}
-
-  private record TestDomainEventWithCustomVersion(EventId eventId, TestAggregateId aggregateId, Instant occurredAt)
-    implements DomainEvent<TestAggregateId> {
+  private record TestDomainEventWithCustomVersion(DomainEventMetadata<FakeAggregateId> metadata, FakeAggregateId data)
+    implements DomainEvent<FakeAggregateId, FakeAggregateId> {
 
     @Override
-    public int version() {
+    public String eventType() {
+      return FakeDomainEvent.EVENT_TYPE;
+    }
+
+    @Override
+    public int eventVersion() {
       return 2;
     }
   }

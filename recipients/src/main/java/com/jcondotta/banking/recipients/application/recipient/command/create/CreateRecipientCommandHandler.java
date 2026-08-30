@@ -9,6 +9,7 @@ import com.jcondotta.banking.recipients.domain.common.FailureReason;
 import com.jcondotta.banking.recipients.domain.recipient.aggregate.Recipient;
 import com.jcondotta.banking.recipients.domain.recipient.identity.RecipientId;
 import com.jcondotta.banking.recipients.domain.recipient.repository.RecipientRepository;
+import com.jcondotta.banking.recipients.application.recipient.ports.output.RecipientEventPublisher;
 import com.jcondotta.domain.exception.DomainException;
 import io.micrometer.observation.annotation.Observed;
 import org.slf4j.Logger;
@@ -25,10 +26,16 @@ public class CreateRecipientCommandHandler implements CommandHandlerWithResult<C
   private static final Logger LOGGER = LoggerFactory.getLogger(CreateRecipientCommandHandler.class);
 
   private final RecipientRepository recipientRepository;
+  private final RecipientEventPublisher recipientEventPublisher;
   private final Clock clock;
 
-  public CreateRecipientCommandHandler(RecipientRepository recipientRepository, Clock clock) {
+  public CreateRecipientCommandHandler(
+    RecipientRepository recipientRepository,
+    RecipientEventPublisher recipientEventPublisher,
+    Clock clock
+  ) {
     this.recipientRepository = recipientRepository;
+    this.recipientEventPublisher = recipientEventPublisher;
     this.clock = clock;
   }
 
@@ -56,6 +63,7 @@ public class CreateRecipientCommandHandler implements CommandHandlerWithResult<C
       );
 
       recipientRepository.save(recipient);
+      recipientEventPublisher.publish(recipient.pullEvents());
 
       logContext.info("Recipient created")
         .success()

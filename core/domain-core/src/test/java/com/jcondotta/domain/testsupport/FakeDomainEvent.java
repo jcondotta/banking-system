@@ -1,17 +1,21 @@
 package com.jcondotta.domain.testsupport;
 
 import com.jcondotta.domain.events.DomainEvent;
-import com.jcondotta.domain.identity.EventId;
+import com.jcondotta.domain.events.DomainEventMetadata;
 
 import java.time.Instant;
 
-public record FakeDomainEvent(
-  EventId eventId,
-  FakeAggregateId aggregateId,
-  Instant occurredAt
-) implements DomainEvent<FakeAggregateId> {
+public record FakeDomainEvent(DomainEventMetadata<FakeAggregateId> metadata, FakeAggregateId data)
+  implements DomainEvent<FakeAggregateId, FakeAggregateId> {
+
+  public static final String EVENT_TYPE = "fake-domain-event";
 
   public static FakeDomainEvent create(FakeAggregateId id) {
-    return new FakeDomainEvent(EventId.newId(), id, Instant.now());
+    return new FakeDomainEvent(DomainEventMetadata.of(id, Instant.now()), id);
+  }
+
+  @Override
+  public String eventType() {
+    return EVENT_TYPE;
   }
 }

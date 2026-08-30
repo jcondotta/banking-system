@@ -4,8 +4,6 @@ import com.jcondotta.domain.testsupport.FakeEntity;
 import com.jcondotta.domain.testsupport.FakeId;
 import org.junit.jupiter.api.Test;
 
-import java.util.UUID;
-
 import static org.assertj.core.api.Assertions.assertThat;
 
 class EntityTest {
@@ -20,7 +18,7 @@ class EntityTest {
 
   @Test
   void shouldBeEqual_whenEntitiesHaveSameId() {
-    FakeId id = new FakeId(UUID.randomUUID());
+    FakeId id = FakeId.newId();
 
     FakeEntity entity1 = new FakeEntity(id);
     FakeEntity entity2 = new FakeEntity(id);
@@ -57,7 +55,7 @@ class EntityTest {
 
   @Test
   void shouldHaveConsistentHashCode_whenCalledMultipleTimes() {
-    FakeEntity entity = new FakeEntity(new FakeId(UUID.randomUUID()));
+    FakeEntity entity = new FakeEntity(FakeId.newId());
 
     int hash1 = entity.hashCode();
     int hash2 = entity.hashCode();
@@ -68,7 +66,7 @@ class EntityTest {
   @Test
   @SuppressWarnings("all")
   void shouldReturnTrue_whenComparingSameEntityInstance() {
-    FakeEntity entity = new FakeEntity(new FakeId(UUID.randomUUID()));
+    FakeEntity entity = new FakeEntity(FakeId.newId());
     FakeEntity sameReference = entity;
 
     assertThat(entity.equals(sameReference)).isTrue();
@@ -76,8 +74,8 @@ class EntityTest {
 
   @Test
   void shouldReturnDifferentHashCode_whenEntitiesHaveDifferentIds() {
-    FakeEntity entity1 = new FakeEntity(new FakeId(UUID.randomUUID()));
-    FakeEntity entity2 = new FakeEntity(new FakeId(UUID.randomUUID()));
+    FakeEntity entity1 = new FakeEntity(FakeId.newId());
+    FakeEntity entity2 = new FakeEntity(FakeId.newId());
 
     assertThat(entity1.hashCode()).isNotEqualTo(entity2.hashCode());
   }

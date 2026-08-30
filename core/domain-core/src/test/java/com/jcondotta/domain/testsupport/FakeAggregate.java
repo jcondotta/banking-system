@@ -9,7 +9,7 @@ public class FakeAggregate extends AggregateRoot<FakeAggregateId> {
     super(id);
   }
 
-  public void raiseEvent(DomainEvent<FakeAggregateId> event) {
+  public void raiseEvent(DomainEvent<FakeAggregateId, ?> event) {
     registerEvent(event);
   }
 }
