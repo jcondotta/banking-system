@@ -1,6 +1,6 @@
 package com.jcondotta.banking.recipients.domain.recipient.aggregate;
 
-import com.jcondotta.banking.recipients.domain.recipient.exceptions.RecipientOwnershipMismatchException;
+import com.jcondotta.banking.recipients.domain.recipient.events.RecipientCreatedEvent;
 import com.jcondotta.banking.recipients.domain.recipient.identity.BankAccountId;
 import com.jcondotta.banking.recipients.domain.recipient.identity.RecipientId;
 import com.jcondotta.banking.recipients.domain.recipient.validation.RecipientError;
@@ -40,6 +40,21 @@ class RecipientCreateTest {
         assertThat(r.getIban()).isEqualTo(IBAN_JEFFERSON);
         assertThat(r.getCreatedAt()).isEqualTo(CREATED_AT);
         assertThat(r.getVersion()).isNull();
+        assertThat(r.pullEvents())
+          .singleElement()
+          .satisfies(event -> {
+            assertThat(event).isInstanceOf(RecipientCreatedEvent.class);
+            var createdEvent = (RecipientCreatedEvent) event;
+            assertThat(createdEvent.eventId()).isNotNull();
+            assertThat(createdEvent.aggregateId()).isEqualTo(RECIPIENT_ID);
+            assertThat(createdEvent.eventType()).isEqualTo(RecipientCreatedEvent.EVENT_TYPE);
+            assertThat(createdEvent.eventVersion()).isEqualTo(RecipientCreatedEvent.EVENT_VERSION);
+            assertThat(createdEvent.data().bankAccountId()).isEqualTo(BANK_ACCOUNT_ID.value());
+            assertThat(createdEvent.data().name()).isEqualTo(RECIPIENT_NAME_JEFFERSON.value());
+            assertThat(createdEvent.data().iban()).isEqualTo(IBAN_JEFFERSON.value());
+            assertThat(createdEvent.occurredAt()).isEqualTo(CREATED_AT);
+          });
+        assertThat(r.hasEvents()).isFalse();
       });
   }
 
@@ -84,33 +99,6 @@ class RecipientCreateTest {
     var recipient2 = Recipient.create(RecipientId.newId(), BANK_ACCOUNT_ID, RECIPIENT_NAME_JEFFERSON, IBAN_JEFFERSON, CREATED_AT);
 
     assertThat(recipient1.getId()).isNotEqualTo(recipient2.getId());
-  }
-
-  @Test
-  void shouldPassSilently_whenRecipientBelongsToGivenBankAccount() {
-    var recipient = Recipient.create(RECIPIENT_ID, BANK_ACCOUNT_ID, RECIPIENT_NAME_JEFFERSON, IBAN_JEFFERSON, CREATED_AT);
-
-    assertThatCode(() -> recipient.assertBelongsTo(BANK_ACCOUNT_ID))
-      .doesNotThrowAnyException();
-  }
-
-  @Test
-  void shouldThrowOwnershipMismatch_whenRecipientBelongsToADifferentBankAccount() {
-    var recipient = Recipient.create(RECIPIENT_ID, BANK_ACCOUNT_ID, RECIPIENT_NAME_JEFFERSON, IBAN_JEFFERSON, CREATED_AT);
-    var otherBankAccountId = BankAccountId.of(UUID.randomUUID());
-
-    assertThatThrownBy(() -> recipient.assertBelongsTo(otherBankAccountId))
-      .isInstanceOf(RecipientOwnershipMismatchException.class)
-      .hasMessage(RecipientOwnershipMismatchException.MESSAGE);
-  }
-
-  @Test
-  void shouldThrowException_whenAssertingAgainstNullBankAccountId() {
-    var recipient = Recipient.create(RECIPIENT_ID, BANK_ACCOUNT_ID, RECIPIENT_NAME_JEFFERSON, IBAN_JEFFERSON, CREATED_AT);
-
-    assertThatThrownBy(() -> recipient.assertBelongsTo(null))
-      .isInstanceOf(DomainValidationException.class)
-      .hasMessage(RecipientError.BANK_ACCOUNT_ID_NOT_PROVIDED);
   }
 
   @Test

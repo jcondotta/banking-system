@@ -14,7 +14,6 @@ import com.jcondotta.banking.recipients.domain.testsupport.RecipientFixtures;
 import com.jcondotta.banking.recipients.domain.testsupport.TimeFactory;
 import com.jcondotta.banking.recipients.infrastructure.adapters.input.rest.common.model.RecipientRestResponse;
 import com.jcondotta.banking.recipients.infrastructure.adapters.input.rest.properties.RecipientsURIProperties;
-import com.jcondotta.banking.recipients.infrastructure.adapters.output.persistence.mapper.IbanMasker;
 import com.jcondotta.banking.recipients.integration.testsupport.annotation.IntegrationTest;
 import io.restassured.RestAssured;
 import io.restassured.builder.RequestSpecBuilder;
@@ -81,7 +80,7 @@ class GetRecipientIT {
     assertAll(
       () -> assertThat(body.recipientId()).isEqualTo(recipient.getId().value()),
       () -> assertThat(body.recipientName()).isEqualTo(recipient.getRecipientName().value()),
-      () -> assertThat(body.maskedIban()).isEqualTo(IbanMasker.mask(recipient.getIban().value())),
+      () -> assertThat(body.iban()).isEqualTo(recipient.getIban().value()),
       () -> assertThat(body.createdAt()).isEqualTo(CREATED_AT)
     );
   }

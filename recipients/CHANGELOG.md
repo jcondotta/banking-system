@@ -2,6 +2,28 @@
 
 All notable changes to the recipients service are documented in this file.
 
+## 2.0.0 - 2026-09-03
+
+### Added
+
+- Added GetRecipient use case with query, handler, and REST mapping.
+- Added UpdateRecipient use case with command, handler, and REST mapping.
+
+### Changed
+
+- Refactored DomainEvent structure to include metadata and typed event data.
+- Standardized exception handling using ApiProblem constants across handlers and controllers.
+- Replaced InvalidDomainDataException with DomainValidationException for domain validation failures.
+- Updated exception handler HTTP status codes and titles for consistency.
+- Normalized recipient name handling and enforced maximum length constraints.
+- Updated service version from 1.1.0 to 2.0.0.
+
+### Verified
+
+- `../mvnw test` passes in the consolidated module.
+- `../mvnw verify` passes, including integration tests.
+- `../mvnw spring-boot:run -Dspring-boot.run.profiles=local` starts successfully and `/actuator/health` returns `UP`.
+
 ## 1.1.0 - 2026-08-20
 
 ### Changed

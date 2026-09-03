@@ -9,6 +9,7 @@ import com.jcondotta.banking.recipients.domain.testsupport.RecipientFixtures;
 import com.jcondotta.banking.recipients.infrastructure.adapters.output.persistence.entity.RecipientEntity;
 import com.jcondotta.banking.recipients.infrastructure.adapters.output.persistence.mapper.RecipientEntityMapper;
 import com.jcondotta.banking.recipients.infrastructure.adapters.output.persistence.repository.RecipientEntityRepository;
+import org.hibernate.exception.ConstraintViolationException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -17,6 +18,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 
+import java.sql.SQLException;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -27,6 +29,7 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class RecipientPostgresRepositoryTest {
 
+  private static final String DUPLICATE_IBAN_CONSTRAINT = "uq_recipient_bank_account_iban";
   private static final BankAccountId BANK_ACCOUNT_ID = BankAccountId.of(UUID.randomUUID());
 
   @Mock
@@ -121,10 +124,44 @@ class RecipientPostgresRepositoryTest {
 
     when(mapper.toEntity(recipient)).thenReturn(entity);
     when(repository.saveAndFlush(entity))
-      .thenThrow(dataIntegrityViolation("uq_recipient_bank_account_iban"));
+      .thenThrow(dataIntegrityViolation(DUPLICATE_IBAN_CONSTRAINT));
 
     assertThatThrownBy(() -> adapter.save(recipient))
       .isInstanceOf(DuplicateRecipientIbanException.class);
+
+    verify(mapper).toEntity(recipient);
+    verify(repository).saveAndFlush(entity);
+    verifyNoMoreInteractions(repository, mapper);
+  }
+
+  @Test
+  void shouldRethrowDataIntegrityViolationException_whenAnotherConstraintIsViolated() {
+    var recipient = RecipientFixtures.JEFFERSON.toRecipient(BANK_ACCOUNT_ID);
+    var entity = new RecipientEntity();
+    var exception = dataIntegrityViolation("another_constraint");
+
+    when(mapper.toEntity(recipient)).thenReturn(entity);
+    when(repository.saveAndFlush(entity)).thenThrow(exception);
+
+    assertThatThrownBy(() -> adapter.save(recipient))
+      .isSameAs(exception);
+
+    verify(mapper).toEntity(recipient);
+    verify(repository).saveAndFlush(entity);
+    verifyNoMoreInteractions(repository, mapper);
+  }
+
+  @Test
+  void shouldRethrowDataIntegrityViolationException_whenConstraintDetailsAreUnavailable() {
+    var recipient = RecipientFixtures.JEFFERSON.toRecipient(BANK_ACCOUNT_ID);
+    var entity = new RecipientEntity();
+    var exception = new DataIntegrityViolationException("constraint violation");
+
+    when(mapper.toEntity(recipient)).thenReturn(entity);
+    when(repository.saveAndFlush(entity)).thenThrow(exception);
+
+    assertThatThrownBy(() -> adapter.save(recipient))
+      .isSameAs(exception);
 
     verify(mapper).toEntity(recipient);
     verify(repository).saveAndFlush(entity);
@@ -208,7 +245,14 @@ class RecipientPostgresRepositoryTest {
     );
   }
 
-  private static DataIntegrityViolationException dataIntegrityViolation(String message) {
-    return new DataIntegrityViolationException("constraint violation", new RuntimeException(message));
+  private static DataIntegrityViolationException dataIntegrityViolation(String constraintName) {
+    var sqlException = new SQLException("constraint violation", "23505");
+    var constraintViolation = new ConstraintViolationException(
+      "constraint violation",
+      sqlException,
+      constraintName
+    );
+
+    return new DataIntegrityViolationException("constraint violation", constraintViolation);
   }
 }

@@ -20,11 +20,7 @@ public final class LogContext {
   }
 
   public static LogContext timed(Logger logger, String eventType) {
-    return new LogContext(
-      logger,
-      Map.of(LogKey.EVENT_TYPE, eventType),
-      System.nanoTime()
-    );
+    return new LogContext(logger, Map.of(LogKey.EVENT_TYPE, eventType), System.nanoTime());
   }
 
   public LogContext with(String key, Object value) {

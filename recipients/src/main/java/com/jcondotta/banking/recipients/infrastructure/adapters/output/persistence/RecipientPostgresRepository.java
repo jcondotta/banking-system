@@ -10,6 +10,7 @@ import com.jcondotta.banking.recipients.infrastructure.adapters.output.persisten
 import com.jcondotta.banking.recipients.infrastructure.adapters.output.persistence.repository.RecipientEntityRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Repository;
@@ -82,8 +83,13 @@ public class RecipientPostgresRepository implements RecipientRepository {
         throw new RecipientOptimisticLockException(recipientId);
     }
 
-    private static boolean isDuplicateIban(DataIntegrityViolationException e) {
-        var msg = e.getMostSpecificCause().getMessage();
-        return msg != null && msg.contains(CONSTRAINT_DUPLICATE_IBAN);
+    private static boolean isDuplicateIban(DataIntegrityViolationException exception) {
+        for (var cause = exception.getCause(); cause != null; cause = cause.getCause()) {
+            if (cause instanceof ConstraintViolationException constraintViolation) {
+                return CONSTRAINT_DUPLICATE_IBAN.equals(constraintViolation.getConstraintName());
+            }
+        }
+
+        return false;
     }
 }

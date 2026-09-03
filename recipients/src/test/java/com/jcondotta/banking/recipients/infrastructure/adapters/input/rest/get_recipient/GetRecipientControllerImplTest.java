@@ -60,7 +60,7 @@ class GetRecipientControllerImplTest {
     assertThat(response.getBody()).isNotNull();
     assertThat(response.getBody().recipientId()).isEqualTo(RECIPIENT_ID.value());
     assertThat(response.getBody().recipientName()).isEqualTo(RecipientTestData.JEFFERSON.getName());
-    assertThat(response.getBody().maskedIban()).isEqualTo(RecipientTestData.JEFFERSON.getIban());
+    assertThat(response.getBody().iban()).isEqualTo(RecipientTestData.JEFFERSON.getIban());
     assertThat(response.getBody().createdAt()).isEqualTo(TimeFactory.FIXED_INSTANT);
 
     verify(mapper).toQuery(BANK_ACCOUNT_ID.value(), RECIPIENT_ID.value());

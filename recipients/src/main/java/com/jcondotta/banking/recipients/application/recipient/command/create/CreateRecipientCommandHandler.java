@@ -5,7 +5,7 @@ import com.jcondotta.application.logging.LogContext;
 import com.jcondotta.application.logging.LogKey;
 import com.jcondotta.banking.recipients.application.common.log.RecipientLogKey;
 import com.jcondotta.banking.recipients.application.common.log.RecipientEventType;
-import com.jcondotta.banking.recipients.domain.common.FailureReason;
+import com.jcondotta.banking.recipients.application.common.log.RecipientFailureReason;
 import com.jcondotta.banking.recipients.domain.recipient.aggregate.Recipient;
 import com.jcondotta.banking.recipients.domain.recipient.identity.RecipientId;
 import com.jcondotta.banking.recipients.domain.recipient.repository.RecipientRepository;
@@ -73,7 +73,7 @@ public class CreateRecipientCommandHandler implements CommandHandlerWithResult<C
       return recipient.getId();
     }
     catch (DomainException ex) {
-      var failureReason = FailureReason.from(ex);
+      var failureReason = RecipientFailureReason.from(ex);
 
       logContext.warn("Recipient creation failed")
         .failure()
@@ -86,7 +86,7 @@ public class CreateRecipientCommandHandler implements CommandHandlerWithResult<C
     catch (Exception ex) {
       logContext.error("Unexpected error during recipient creation", ex)
         .failure()
-        .with(LogKey.REASON, FailureReason.INTERNAL_ERROR.normalize())
+        .with(LogKey.REASON, RecipientFailureReason.INTERNAL_ERROR.normalize())
         .with(RecipientLogKey.MASKED_IBAN, command.iban().masked())
         .log();
 

@@ -9,14 +9,17 @@ import com.jcondotta.application.logging.LogOutcome;
 import com.jcondotta.banking.recipients.application.common.log.RecipientEventType;
 import com.jcondotta.application.logging.StructuredLogEventSupport;
 import com.jcondotta.banking.recipients.domain.recipient.aggregate.Recipient;
+import com.jcondotta.banking.recipients.domain.recipient.events.RecipientCreatedEvent;
 import com.jcondotta.banking.recipients.domain.recipient.exceptions.DuplicateRecipientIbanException;
 import com.jcondotta.banking.recipients.domain.recipient.identity.BankAccountId;
 import com.jcondotta.banking.recipients.domain.recipient.repository.RecipientRepository;
 import com.jcondotta.banking.recipients.domain.recipient.value_objects.Iban;
 import com.jcondotta.banking.recipients.domain.recipient.value_objects.RecipientName;
+import com.jcondotta.banking.recipients.application.recipient.ports.output.RecipientEventPublisher;
 import com.jcondotta.banking.recipients.domain.testsupport.RecipientFixtures;
 import com.jcondotta.banking.recipients.domain.testsupport.TimeFactory;
 import com.jcondotta.domain.exception.DomainException;
+import com.jcondotta.domain.events.DomainEvent;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -28,6 +31,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.time.Clock;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
+import java.util.List;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -48,6 +52,12 @@ class CreateRecipientCommandHandlerTest {
   @Mock
   private RecipientRepository recipientRepository;
 
+  @Mock
+  private RecipientEventPublisher recipientEventPublisher;
+
+  @Captor
+  private ArgumentCaptor<List<DomainEvent<?, ?>>> eventsCaptor;
+
   @Captor
   private ArgumentCaptor<Recipient> recipientCaptor;
 
@@ -57,7 +67,7 @@ class CreateRecipientCommandHandlerTest {
 
   @BeforeEach
   void setUp() {
-    commandHandler = new CreateRecipientCommandHandler(recipientRepository, CLOCK);
+    commandHandler = new CreateRecipientCommandHandler(recipientRepository, recipientEventPublisher, CLOCK);
     logAppender = StructuredLogEventSupport.attachAppender(CreateRecipientCommandHandler.class);
   }
 
@@ -85,6 +95,18 @@ class CreateRecipientCommandHandlerTest {
     assertThat(savedRecipient.getIban()).isEqualTo(IBAN);
     assertThat(savedRecipient.getCreatedAt()).isEqualTo(CLOCK.instant());
     assertThat(savedRecipient.getVersion()).isNull();
+    verify(recipientEventPublisher).publish(eventsCaptor.capture());
+    assertThat(eventsCaptor.getValue())
+      .singleElement()
+      .isInstanceOfSatisfying(RecipientCreatedEvent.class, event -> {
+        assertThat(event.occurredAt()).isEqualTo(CLOCK.instant());
+        assertThat(event.aggregateId()).isEqualTo(recipientId);
+        assertThat(event.eventVersion()).isEqualTo(RecipientCreatedEvent.EVENT_VERSION);
+        assertThat(event.data().name()).isEqualTo(RECIPIENT_NAME.value());
+        assertThat(event.data().iban()).isEqualTo(IBAN.value());
+        assertThat(event.data().bankAccountId()).isEqualTo(BANK_ACCOUNT_ID.value());
+      });
+    assertThat(savedRecipient.hasEvents()).isFalse();
 
     assertThat(StructuredLogEventSupport.lastEvent(logAppender, ILoggingEvent::getLevel))
       .isEqualTo(Level.INFO);

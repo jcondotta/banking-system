@@ -2,6 +2,7 @@ package com.jcondotta.banking.recipients.domain.recipient.aggregate;
 
 import com.jcondotta.banking.recipients.domain.recipient.identity.BankAccountId;
 import com.jcondotta.banking.recipients.domain.recipient.identity.RecipientId;
+import com.jcondotta.banking.recipients.domain.recipient.events.RecipientDeletedEvent;
 import com.jcondotta.banking.recipients.domain.recipient.validation.RecipientError;
 import com.jcondotta.banking.recipients.domain.recipient.value_objects.Iban;
 import com.jcondotta.banking.recipients.domain.recipient.value_objects.RecipientName;
@@ -85,6 +86,33 @@ class RecipientRestoreTest {
 
     assertThat(recipient.hasEvents()).isFalse();
     assertThat(recipient.pullEvents()).isEmpty();
+  }
+
+  @Test
+  void shouldRegisterDeletedEvent_whenDeletingRecipient() {
+    var recipient = Recipient.restore(
+      RECIPIENT_ID,
+      BANK_ACCOUNT_ID,
+      RECIPIENT_NAME,
+      IBAN,
+      CREATED_AT,
+      VERSION
+    );
+    var deletedAt = CREATED_AT.plusSeconds(60);
+
+    recipient.delete(deletedAt);
+
+    assertThat(recipient.pullEvents())
+      .singleElement()
+      .satisfies(event -> {
+        assertThat(event).isInstanceOf(RecipientDeletedEvent.class);
+        var deletedEvent = (RecipientDeletedEvent) event;
+        assertThat(deletedEvent.aggregateId()).isEqualTo(RECIPIENT_ID);
+        assertThat(deletedEvent.eventType()).isEqualTo(RecipientDeletedEvent.EVENT_TYPE);
+        assertThat(deletedEvent.eventVersion()).isEqualTo(RecipientDeletedEvent.EVENT_VERSION);
+        assertThat(deletedEvent.data().bankAccountId()).isEqualTo(BANK_ACCOUNT_ID.value());
+        assertThat(deletedEvent.occurredAt()).isEqualTo(deletedAt);
+      });
   }
 
   @Test

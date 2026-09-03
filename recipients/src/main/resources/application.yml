@@ -23,6 +23,12 @@ spring:
     enabled: true
     change-log: classpath:db/changelog/db.changelog-master.yml
 
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.ByteArraySerializer
+
   jpa:
     hibernate:
       ddl-auto: validate
@@ -37,6 +43,9 @@ spring:
         header: X-API-Version
 
 app:
+  kafka:
+    publisher:
+      publish-timeout: ${KAFKA_PUBLISH_TIMEOUT:5s}
   concurrency:
     recipients:
       create:

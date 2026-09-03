@@ -6,7 +6,7 @@ import com.jcondotta.application.logging.LogKey;
 import com.jcondotta.banking.recipients.application.common.log.RecipientLogKey;
 import com.jcondotta.banking.recipients.application.common.log.RecipientEventType;
 import com.jcondotta.banking.recipients.application.recipient.query.RecipientQueryRepository;
-import com.jcondotta.banking.recipients.domain.common.FailureReason;
+import com.jcondotta.banking.recipients.application.common.log.RecipientFailureReason;
 import com.jcondotta.domain.exception.DomainException;
 import io.micrometer.observation.annotation.Observed;
 import org.slf4j.Logger;
@@ -54,7 +54,7 @@ public class ListRecipientsQueryHandler
       return result;
     }
     catch (DomainException ex) {
-      var reason = FailureReason.from(ex);
+      var reason = RecipientFailureReason.from(ex);
 
       logContext.warn("Recipient listing failed: " + reason.name())
         .failure()
@@ -66,7 +66,7 @@ public class ListRecipientsQueryHandler
     catch (Exception ex) {
       logContext.error("Unexpected error during recipient listing", ex)
         .failure()
-        .with(LogKey.REASON, FailureReason.INTERNAL_ERROR.normalize())
+        .with(LogKey.REASON, RecipientFailureReason.INTERNAL_ERROR.normalize())
         .log();
 
       throw ex;

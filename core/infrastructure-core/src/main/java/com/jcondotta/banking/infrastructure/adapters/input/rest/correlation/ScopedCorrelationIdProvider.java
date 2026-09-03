@@ -12,6 +12,6 @@ public class ScopedCorrelationIdProvider implements CorrelationIdProvider {
 
   @Override
   public UUID get() {
-    return CORRELATION_ID.get();
+    return CORRELATION_ID.isBound() ? CORRELATION_ID.get() : UUID.randomUUID();
   }
 }

@@ -11,7 +11,7 @@ public class RecipientSummaryMapper {
     return new RecipientSummary(
       entity.getId(),
       entity.getName(),
-      IbanMasker.mask(entity.getIban()),
+      entity.getIban(),
       entity.getCreatedAt()
     );
   }

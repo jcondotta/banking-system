@@ -32,7 +32,7 @@ class ListRecipientsResponseTest {
       .satisfies(recipient -> assertAll(
         () -> assertThat(recipient.recipientId()).isEqualTo(RECIPIENT_ID),
         () -> assertThat(recipient.recipientName()).isEqualTo("Jefferson Condotta"),
-        () -> assertThat(recipient.maskedIban()).isEqualTo("ES3801283316232166447417"),
+        () -> assertThat(recipient.iban()).isEqualTo("ES3801283316232166447417"),
         () -> assertThat(recipient.createdAt()).isEqualTo(CREATED_AT)
       ));
     assertThat(response.page()).isEqualTo(1);

@@ -20,5 +20,7 @@ create_topic() {
 create_topic "bank-account-opened"
 create_topic "bank-account-status-changed"
 create_topic "joint-account-holder-added"
+create_topic "recipients-created"
+create_topic "recipients-deleted"
 
 echo "✅ Kafka topics created successfully"

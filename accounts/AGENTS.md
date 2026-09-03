@@ -2,30 +2,36 @@
 
 ## Project Structure & Module Organization
 
-This is a Java 25, Spring Boot 4, Maven multi-module banking system. The root `pom.xml` builds `core`, `accounts`, and `recipients`; `transfers` has a separate Maven tree and is not included in the root modules.
+This is the `accounts` bounded context: a Java 25, Spring Boot 4, single-module Maven service using DDD, CQRS, hexagonal architecture, DynamoDB, Kafka, and a transactional outbox.
 
-- `core/`: shared `domain-core`, `application-core`, and `infrastructure-core` modules.
-- `accounts/`, `recipients/`, `transfers/`: bounded contexts split into `*-domain`, `*-application`, `*-infrastructure`, and `*-bootstrap` modules.
-- `accounts/accounts-contracts` and `accounts/accounts-outbox`: accounts-specific contracts and outbox support.
-- `src/main/java` and `src/test/java`: production and test code within each module.
-- `src/main/resources`: Spring config, Liquibase changelogs, and logging configuration.
-- `docker/`, `k8s/`, `terraform/`: local dependencies, Kubernetes manifests, and cloud infrastructure.
+- `src/main/java/com/jcondotta/banking/accounts/domain/`: framework-free bank-account model, invariants, identities, value objects, events, exceptions, and repository ports.
+- `src/main/java/com/jcondotta/banking/accounts/application/`: commands, queries, handlers, query models, logging definitions, and output ports.
+- `src/main/java/com/jcondotta/banking/accounts/contracts/`: integration-event contracts published by accounts.
+- `src/main/java/com/jcondotta/banking/accounts/infrastructure/adapters/input/`: REST endpoints, correlation filtering, and the outbox worker entrypoint.
+- `src/main/java/com/jcondotta/banking/accounts/infrastructure/adapters/output/`: DynamoDB persistence/outbox adapters and Kafka publishers.
+- `src/main/java/com/jcondotta/banking/accounts/infrastructure/outbox/`: outbox dispatch, processing, concurrency, logging, properties, and internal configuration.
+- `src/main/resources/`: the shared Spring and logging configuration for the API and outbox worker.
+- `src/test/java/`: unit and integration tests; integration tests live under `.../integration` and use `@IntegrationTest`.
+
+The API and outbox processor share one `AccountsApplication`, Boot JAR, lifecycle, health endpoint, and metrics endpoint. Keep `app.outbox.worker.enabled` as the operational kill switch.
 
 ## Build, Test, and Development Commands
 
-- `./mvnw clean verify`: builds root modules, runs unit and integration tests, and generates JaCoCo reports.
-- `./mvnw test`: runs unit tests through Surefire.
-- `./mvnw -pl accounts/accounts-bootstrap -am spring-boot:run -Dspring-boot.run.profiles=local`: runs the accounts service locally with required upstream modules.
-- `cd accounts && docker compose -f docker/docker-compose.yml up -d`: starts local accounts dependencies.
-- `./mvnw -pl accounts/accounts-domain pitest:mutationCoverage`: runs PIT mutation testing for the accounts domain module.
+Run commands from this directory. The Maven wrapper lives one level up.
+
+- `../mvnw clean verify`: build the service, run Surefire/Failsafe, and generate JaCoCo reports.
+- `../mvnw test`: run unit tests.
+- `../mvnw spring-boot:run -Dspring-boot.run.profiles=local`: run the API and outbox worker locally on port `8080`.
+- `docker compose -f docker/docker-compose.yml up -d`: start the local DynamoDB dependency.
+- `../mvnw pitest:mutationCoverage`: run mutation testing for the consolidated service.
 
 ## Coding Style & Naming Conventions
 
-Use standard Java conventions with 4-space indentation, descriptive class names, and packages under `com.jcondotta.banking`. Preserve architectural boundaries: domain code must remain framework-free, while Spring, HTTP, messaging, and persistence adapters belong in infrastructure or bootstrap modules. Follow existing naming patterns such as `*CommandHandler`, `*Repository`, `*Config`, `*Test`, and `*IT`.
+Use standard Java conventions with 4-space indentation and packages under `com.jcondotta.banking.accounts`. Preserve inward dependencies: infrastructure may depend on application/domain/contracts, application may depend on domain, and domain must remain framework-free. Keep DynamoDB code under `infrastructure.adapters.output.persistence.dynamodb`, Kafka under `infrastructure.adapters.output.messaging`, and delivery mechanisms under `infrastructure.adapters.input`.
 
 ## Testing Guidelines
 
-Tests use JUnit 5, Mockito, Rest Assured, ArchUnit, Instancio, Testcontainers, JaCoCo, and PIT. Keep tests beside the module they verify under `src/test/java`. Name unit tests `*Test` and integration tests `*IT` so Surefire and Failsafe pick them up correctly. Add focused domain tests for business rules and integration tests for REST, persistence, messaging, and containerized dependencies.
+Tests use JUnit 5, Mockito, Rest Assured, ArchUnit, Testcontainers, JaCoCo, and PIT. Keep unit tests under matching packages in `src/test/java`; name unit tests `*Test` and integration tests `*IT`. The `test` profile disables the outbox worker by default so HTTP tests do not poll concurrently; test worker behavior explicitly when needed.
 
 ## Commit & Pull Request Guidelines
 

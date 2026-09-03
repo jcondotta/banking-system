@@ -36,7 +36,7 @@ class RecipientSummaryMapperTest {
     assertAll(
       () -> assertThat(summary.recipientId()).isEqualTo(entity.getId()),
       () -> assertThat(summary.recipientName()).isEqualTo(RECIPIENT_NAME),
-      () -> assertThat(summary.maskedIban()).isEqualTo(IbanMasker.mask(RECIPIENT_IBAN)),
+      () -> assertThat(summary.iban()).isEqualTo(RECIPIENT_IBAN),
       () -> assertThat(summary.createdAt()).isEqualTo(CREATED_AT)
     );
   }

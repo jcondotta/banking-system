@@ -16,15 +16,15 @@ Read:
 - `src/main/java/com/jcondotta/banking/recipients/domain/recipient/aggregate`
 - related value objects under `domain/recipient/value_objects`
 - related identities under `domain/recipient/identity`
-- related domain exceptions and failure reasons
+- related domain exceptions
 - matching tests under `src/test/java/com/jcondotta/banking/recipients/domain`
 
 Rules:
 - keep domain code framework-free
-- preserve recipient ownership checks unless the requested behavior intentionally changes them; when a new feature exposes where or how ownership should be checked, resolve that responsibility in Design
+- scope recipient lookups by bank account when ownership affects resource visibility; a missing recipient and a recipient owned by another bank account both use not-found semantics
 - enforce invariants in value objects or aggregate methods when possible
 - keep repository interfaces as ports, not persistence implementations
-- update exception messages and failure reasons deliberately
+- update exception messages deliberately
 
 Run:
 - `../mvnw test -Dtest=*Recipient*Test`
@@ -41,7 +41,7 @@ Read:
 
 Rules:
 - keep orchestration in application and business invariants in domain
-- normalize failures consistently
+- classify and normalize operational failure reasons in application rather than domain
 - preserve structured logging event names and keys unless the behavior intentionally changes
 - keep identifiers out of metric tags
 - do not expose infrastructure exceptions through application APIs
@@ -65,7 +65,8 @@ Rules:
 - keep paths sourced from `app.api.recipients.*`
 - preserve `X-API-Version` behavior unless the API contract intentionally changes
 - map validation, domain, conflict, not-found, database, and rate-limit failures through the existing exception handler style
-- do not leak raw IBAN values in responses, logs, or error details
+- return the full IBAN from authorized recipient read endpoints because it is required for consultation and transfers
+- mask IBAN values in logs and error details
 - treat status codes, error semantics, paths, headers, and public response models as intentional API contract decisions that must be resolved in Design when alternatives are viable
 - update integration coverage when endpoint behavior, status codes, headers, or error payloads change
 
@@ -89,7 +90,7 @@ Rules:
 - include SQL rollbacks for Liquibase changes
 - never modify an already-applied Liquibase changeset; create a new incremental changeset instead
 - keep query projections aligned with `RecipientSummary` after the response/read-model contract is resolved in Design
-- mask IBANs before returning read-model data unless an explicitly resolved Design decision requires a different representation
+- keep the full IBAN in `RecipientSummary`; masking is reserved for logs and error details
 
 Run:
 - `../mvnw test -Dtest=*PostgresRepositoryTest,*EntityMapperTest,*SummaryMapperTest`

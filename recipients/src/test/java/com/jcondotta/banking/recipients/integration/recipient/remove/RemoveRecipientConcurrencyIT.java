@@ -82,7 +82,10 @@ class RemoveRecipientConcurrencyIT {
         releaseSlotsLatch.await();
       }
       return invocationOnMock.callRealMethod();
-    }).when(recipientRepository).findById(any(RecipientId.class));
+    }).when(recipientRepository).findByBankAccountIdAndId(
+      any(BankAccountId.class),
+      any(RecipientId.class)
+    );
 
     try (var scope = StructuredTaskScope.open()) {
       var concurrentDeleteTasks = recipientsToDelete.stream()

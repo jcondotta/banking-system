@@ -3,9 +3,10 @@ package com.jcondotta.banking.recipients.application.recipient.command.remove;
 import com.jcondotta.application.command.CommandHandler;
 import com.jcondotta.application.logging.LogContext;
 import com.jcondotta.application.logging.LogKey;
-import com.jcondotta.banking.recipients.application.common.log.RecipientLogKey;
 import com.jcondotta.banking.recipients.application.common.log.RecipientEventType;
-import com.jcondotta.banking.recipients.domain.common.FailureReason;
+import com.jcondotta.banking.recipients.application.common.log.RecipientFailureReason;
+import com.jcondotta.banking.recipients.application.common.log.RecipientLogKey;
+import com.jcondotta.banking.recipients.application.recipient.ports.output.RecipientEventPublisher;
 import com.jcondotta.banking.recipients.domain.recipient.exceptions.RecipientNotFoundException;
 import com.jcondotta.banking.recipients.domain.recipient.repository.RecipientRepository;
 import com.jcondotta.domain.exception.DomainException;
@@ -15,15 +16,26 @@ import org.slf4j.LoggerFactory;
 import org.springframework.resilience.annotation.ConcurrencyLimit;
 import org.springframework.stereotype.Component;
 
+import java.time.Clock;
+import java.time.Instant;
+
 @Component
 public class RemoveRecipientCommandHandler implements CommandHandler<RemoveRecipientCommand> {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(RemoveRecipientCommandHandler.class);
 
   private final RecipientRepository recipientRepository;
+  private final RecipientEventPublisher recipientEventPublisher;
+  private final Clock clock;
 
-  public RemoveRecipientCommandHandler(RecipientRepository recipientRepository) {
+  public RemoveRecipientCommandHandler(
+    RecipientRepository recipientRepository,
+    RecipientEventPublisher recipientEventPublisher,
+    Clock clock
+  ) {
     this.recipientRepository = recipientRepository;
+    this.recipientEventPublisher = recipientEventPublisher;
+    this.clock = clock;
   }
 
   @Override
@@ -42,19 +54,19 @@ public class RemoveRecipientCommandHandler implements CommandHandler<RemoveRecip
       .with(RecipientLogKey.RECIPIENT_ID, command.recipientId().asString());
 
     try {
-      var recipient = recipientRepository.findById(command.recipientId())
+      var recipient = recipientRepository.findByBankAccountIdAndId(command.bankAccountId(), command.recipientId())
         .orElseThrow(() -> new RecipientNotFoundException(command.recipientId(), command.bankAccountId()));
 
-      recipient.assertBelongsTo(command.bankAccountId());
-
+      recipient.delete(Instant.now(clock));
       recipientRepository.delete(recipient);
+      recipientEventPublisher.publish(recipient.pullEvents());
 
       logContext.info("Recipient removed")
         .success()
         .log();
     }
     catch (DomainException ex) {
-      var reason = FailureReason.from(ex);
+      var reason = RecipientFailureReason.from(ex);
 
       logContext.warn("Recipient removal failed")
         .failure()
@@ -66,7 +78,7 @@ public class RemoveRecipientCommandHandler implements CommandHandler<RemoveRecip
     catch (Exception ex) {
       logContext.error("Unexpected error during recipient removal", ex)
         .failure()
-        .with(LogKey.REASON, FailureReason.INTERNAL_ERROR.normalize())
+        .with(LogKey.REASON, RecipientFailureReason.INTERNAL_ERROR.normalize())
         .log();
 
       throw ex;

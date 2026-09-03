@@ -5,7 +5,6 @@ import com.jcondotta.banking.recipients.application.common.exception.RecipientOp
 import com.jcondotta.banking.recipients.application.recipient.command.remove.RemoveRecipientCommand;
 import com.jcondotta.banking.recipients.application.recipient.command.remove.RemoveRecipientCommandHandler;
 import com.jcondotta.banking.recipients.domain.recipient.exceptions.RecipientNotFoundException;
-import com.jcondotta.banking.recipients.domain.recipient.exceptions.RecipientOwnershipMismatchException;
 import com.jcondotta.banking.recipients.domain.recipient.identity.BankAccountId;
 import com.jcondotta.banking.recipients.domain.recipient.repository.RecipientRepository;
 import com.jcondotta.banking.recipients.domain.testsupport.RecipientFixtures;
@@ -96,16 +95,16 @@ class RemoveRecipientIT {
   }
 
   @Test
-  void shouldReturn422UnprocessableEntity_whenRecipientBelongsToAnotherBankAccount() {
+  void shouldReturn404NotFound_whenRecipientBelongsToAnotherBankAccount() {
     var recipient = RecipientFixtures.VIRGINIO.toRecipient(bankAccountId);
     var otherBankAccountId = UUID.randomUUID();
     recipientRepository.save(recipient);
 
     var response = deleteRecipient(otherBankAccountId, recipient.getId().value());
-    assertThat(response.statusCode()).isEqualTo(HttpStatus.UNPROCESSABLE_CONTENT.value());
+    assertThat(response.statusCode()).isEqualTo(HttpStatus.NOT_FOUND.value());
 
     var problemDetail = response.as(ProblemDetail.class);
-    assertThat(problemDetail.getDetail()).isEqualTo(RecipientOwnershipMismatchException.MESSAGE);
+    assertThat(problemDetail.getDetail()).isEqualTo(RecipientNotFoundException.MESSAGE);
   }
 
   @Test

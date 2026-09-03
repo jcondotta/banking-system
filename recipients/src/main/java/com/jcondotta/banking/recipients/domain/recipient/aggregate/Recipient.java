@@ -1,12 +1,16 @@
 package com.jcondotta.banking.recipients.domain.recipient.aggregate;
 
-import com.jcondotta.banking.recipients.domain.recipient.exceptions.RecipientOwnershipMismatchException;
+import com.jcondotta.banking.recipients.domain.recipient.events.RecipientCreatedData;
+import com.jcondotta.banking.recipients.domain.recipient.events.RecipientCreatedEvent;
+import com.jcondotta.banking.recipients.domain.recipient.events.RecipientDeletedData;
+import com.jcondotta.banking.recipients.domain.recipient.events.RecipientDeletedEvent;
 import com.jcondotta.banking.recipients.domain.recipient.identity.BankAccountId;
 import com.jcondotta.banking.recipients.domain.recipient.identity.RecipientId;
 import com.jcondotta.banking.recipients.domain.recipient.validation.RecipientError;
 import com.jcondotta.banking.recipients.domain.recipient.value_objects.Iban;
 import com.jcondotta.banking.recipients.domain.recipient.value_objects.RecipientName;
 import com.jcondotta.domain.core.AggregateRoot;
+import com.jcondotta.domain.events.DomainEventMetadata;
 
 import java.time.Instant;
 
@@ -45,7 +49,7 @@ public final class Recipient extends AggregateRoot<RecipientId> {
     Iban iban,
     Instant createdAt
   ) {
-    return new Recipient(
+    var recipient = new Recipient(
       recipientId,
       bankAccountId,
       recipientName,
@@ -53,6 +57,19 @@ public final class Recipient extends AggregateRoot<RecipientId> {
       createdAt,
       null
     );
+
+    recipient.registerEvent(
+      new RecipientCreatedEvent(
+        DomainEventMetadata.of(recipient.getId(), createdAt),
+        new RecipientCreatedData(
+          recipient.getBankAccountId().value(),
+          recipient.getRecipientName().value(),
+          recipient.getIban().value()
+        )
+      )
+    );
+
+    return recipient;
   }
 
   public static Recipient restore(
@@ -73,17 +90,18 @@ public final class Recipient extends AggregateRoot<RecipientId> {
     );
   }
 
-  public void assertBelongsTo(BankAccountId other) {
-    required(other, RecipientError.BANK_ACCOUNT_ID_NOT_PROVIDED);
-
-    if (!bankAccountId.equals(other)) {
-      throw new RecipientOwnershipMismatchException(this.getId(), other);
-    }
-  }
-
   public void update(RecipientName recipientName, Iban iban) {
     this.recipientName = required(recipientName, RecipientError.RECIPIENT_NAME_NOT_PROVIDED);
     this.iban = required(iban, RecipientError.IBAN_NOT_PROVIDED);
+  }
+
+  public void delete(Instant deletedAt) {
+    registerEvent(
+      new RecipientDeletedEvent(
+        DomainEventMetadata.of(getId(), deletedAt),
+        new RecipientDeletedData(getBankAccountId().value())
+      )
+    );
   }
 
   public boolean isVersioned() {

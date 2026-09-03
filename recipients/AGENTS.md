@@ -5,8 +5,8 @@
 This is the `recipients` bounded context: a Java 25, Spring Boot 4, single-module Maven service using DDD, CQRS, and hexagonal architecture by package rather than by Maven submodule.
 
 - `src/main/java/com/jcondotta/banking/recipients/`: application entrypoint and all production code.
-- `domain/`: framework-free recipient model. It owns the `Recipient` aggregate, `BankAccountId`, `RecipientId`, `RecipientName`, `Iban`, domain exceptions, failure reasons, validation constants, and repository ports.
-- `application/`: use-case orchestration. It owns commands, queries, handlers, query models, logging event names/keys, failure normalization, `@Observed` instrumentation, and concurrency limits.
+- `domain/`: tem framework-free recipient model. It owns the `Recipient` aggregate, `BankAccountId`, `RecipientId`, `RecipientName`, `Iban`, domain exceptions, domain events, validation constants, and repository ports.
+- `application/`: use-case orchestration. It owns commands, queries, handlers, query models, logging event names/keys, failure classification and normalization, `@Observed` instrumentation, and concurrency limits.
 - `infrastructure/`: Spring and adapter code. It owns REST controllers, request/response DTOs, mappers, `ProblemDetail` exception handlers, correlation filtering, JPA entities/repositories, PostgreSQL adapters, persistence mappers, and runtime configuration.
 - `src/main/resources/`: Spring `application*.yml`, Liquibase changelogs, SQL migrations, and `logback-spring.xml`.
 - `src/test/java/`: unit and integration tests. Integration tests live under `.../integration` and use `@IntegrationTest`.
@@ -43,7 +43,7 @@ Follow local naming patterns: `*Command`, `*CommandHandler`, `*Query`, `*QueryHa
 
 REST paths come from `app.api.recipients.*`; API versioning uses `X-API-Version`.
 
-Use `LogContext`, `RecipientEventType`, and `RecipientLogKey`; mask IBANs and keep IDs out of metric tags.
+Use `LogContext`, `RecipientEventType`, and `RecipientLogKey`; expose the full IBAN through authorized recipient read endpoints, mask it in logs and error details, and keep IDs out of metric tags.
 
 Preserve framework-free domain code even though all layers compile in one Maven module.
 

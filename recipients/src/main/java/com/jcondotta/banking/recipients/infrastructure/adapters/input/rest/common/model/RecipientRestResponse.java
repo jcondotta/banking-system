@@ -5,18 +5,13 @@ import com.jcondotta.banking.recipients.application.recipient.query.model.Recipi
 import java.time.Instant;
 import java.util.UUID;
 
-public record RecipientRestResponse(
-  UUID recipientId,
-  String recipientName,
-  String maskedIban,
-  Instant createdAt
-) {
+public record RecipientRestResponse(UUID recipientId, String recipientName, String iban, Instant createdAt) {
 
   public static RecipientRestResponse from(RecipientSummary summary) {
     return new RecipientRestResponse(
       summary.recipientId(),
       summary.recipientName(),
-      summary.maskedIban(),
+      summary.iban(),
       summary.createdAt()
     );
   }

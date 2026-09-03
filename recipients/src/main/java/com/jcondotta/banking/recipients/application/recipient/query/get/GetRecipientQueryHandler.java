@@ -6,7 +6,7 @@ import com.jcondotta.application.query.QueryHandler;
 import com.jcondotta.banking.recipients.application.common.log.RecipientEventType;
 import com.jcondotta.banking.recipients.application.common.log.RecipientLogKey;
 import com.jcondotta.banking.recipients.application.recipient.query.RecipientQueryRepository;
-import com.jcondotta.banking.recipients.domain.common.FailureReason;
+import com.jcondotta.banking.recipients.application.common.log.RecipientFailureReason;
 import com.jcondotta.banking.recipients.domain.recipient.exceptions.RecipientNotFoundException;
 import com.jcondotta.domain.exception.DomainException;
 import io.micrometer.observation.annotation.Observed;
@@ -50,7 +50,7 @@ public class GetRecipientQueryHandler implements QueryHandler<GetRecipientQuery,
       return new GetRecipientQueryResult(recipient);
     }
     catch (DomainException ex) {
-      var reason = FailureReason.from(ex);
+      var reason = RecipientFailureReason.from(ex);
 
       logContext.warn("Recipient retrieval failed")
         .failure()
@@ -62,7 +62,7 @@ public class GetRecipientQueryHandler implements QueryHandler<GetRecipientQuery,
     catch (Exception ex) {
       logContext.error("Unexpected error during recipient retrieval", ex)
         .failure()
-        .with(LogKey.REASON, FailureReason.INTERNAL_ERROR.normalize())
+        .with(LogKey.REASON, RecipientFailureReason.INTERNAL_ERROR.normalize())
         .log();
 
       throw ex;

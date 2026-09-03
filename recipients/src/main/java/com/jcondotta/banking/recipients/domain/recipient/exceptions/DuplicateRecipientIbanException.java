@@ -1,6 +1,5 @@
 package com.jcondotta.banking.recipients.domain.recipient.exceptions;
 
-import com.jcondotta.banking.recipients.domain.common.FailureReason;
 import com.jcondotta.banking.recipients.domain.recipient.identity.BankAccountId;
 import com.jcondotta.banking.recipients.domain.recipient.value_objects.Iban;
 
@@ -15,11 +14,6 @@ public final class DuplicateRecipientIbanException extends RecipientDomainConfli
     super(MESSAGE);
     this.maskedIban = iban.masked();
     this.bankAccountId = bankAccountId.value().toString();
-  }
-
-  @Override
-  public FailureReason reason() {
-    return FailureReason.DUPLICATE_IBAN;
   }
 
   public String getMaskedIban() {

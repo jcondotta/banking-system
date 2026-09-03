@@ -5,7 +5,7 @@ import com.jcondotta.application.logging.LogContext;
 import com.jcondotta.application.logging.LogKey;
 import com.jcondotta.banking.recipients.application.common.log.RecipientEventType;
 import com.jcondotta.banking.recipients.application.common.log.RecipientLogKey;
-import com.jcondotta.banking.recipients.domain.common.FailureReason;
+import com.jcondotta.banking.recipients.application.common.log.RecipientFailureReason;
 import com.jcondotta.banking.recipients.domain.recipient.exceptions.RecipientNotFoundException;
 import com.jcondotta.banking.recipients.domain.recipient.repository.RecipientRepository;
 import com.jcondotta.domain.exception.DomainException;
@@ -53,7 +53,7 @@ public class UpdateRecipientCommandHandler implements CommandHandler<UpdateRecip
         .log();
     }
     catch (DomainException ex) {
-      var reason = FailureReason.from(ex);
+      var reason = RecipientFailureReason.from(ex);
 
       logContext.warn("Recipient update failed")
         .failure()
@@ -66,7 +66,7 @@ public class UpdateRecipientCommandHandler implements CommandHandler<UpdateRecip
     catch (Exception ex) {
       logContext.error("Unexpected error during recipient update", ex)
         .failure()
-        .with(LogKey.REASON, FailureReason.INTERNAL_ERROR.normalize())
+        .with(LogKey.REASON, RecipientFailureReason.INTERNAL_ERROR.normalize())
         .with(RecipientLogKey.MASKED_IBAN, command.iban().masked())
         .log();
 

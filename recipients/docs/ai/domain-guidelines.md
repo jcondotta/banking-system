@@ -15,7 +15,8 @@ security must be resolved in Design.
 - Domain objects own invariants and business behavior.
 - Application code orchestrates use cases and owns ID generation when the use
   case creates the identity, time sourcing, repository coordination, logging,
-  observations, concurrency limits, and transaction coordination.
+  observations, concurrency limits, operational failure classification, and
+  transaction coordination.
 - Infrastructure owns Spring, HTTP, persistence, database, messaging,
   serialization, and runtime configuration.
 - Once input crosses into a use case, prefer domain IDs and value objects over
@@ -64,8 +65,9 @@ The shared `domain-core` module provides these contracts:
 - `EntityId<T>` and `AggregateId<T>`: typed ID contracts; `EntityId.asString()`
   delegates to `value().toString()`.
 - `EventId`: UUID-backed domain event ID with `of(UUID)` and `newId()`.
-- `DomainEvent<A extends AggregateId<?>>`: requires `eventId()`,
-  `aggregateId()`, `occurredAt()`, and defaults `version()` to `1`.
+- `DomainEvent<A extends AggregateId<?>, D>`: provides metadata and data,
+  exposes `eventId()`, `aggregateId()`, and `occurredAt()`, and defaults
+  `eventVersion()` to `1`.
 - `Preconditions`: `required`, `requiredNotBlank`, and `checkArgument`, all
   raising `DomainValidationException` on failure.
 - Domain exception hierarchy: `DomainException`, `DomainValidationException`,
@@ -91,12 +93,12 @@ Use concept-focused packages under `domain/<concept>/`:
   belong naturally to an aggregate or value object.
 
 Current `recipients` domain elements are aggregate root, identifiers, value
-objects, domain exceptions, validation constants, failure reasons, and aggregate
+objects, domain exceptions, domain events, validation constants, and aggregate
 repository ports.
 
-Child entities, domain collections, domain events, domain policies, and domain
-services are supported patterns in the wider repository, but their first use in
-`recipients` needs Design confirmation.
+Child entities, domain collections, domain policies, and domain services are
+supported patterns in the wider repository, but their first use in `recipients`
+needs Design confirmation.
 
 ## 4. Aggregate Roots
 
@@ -168,13 +170,6 @@ public final class Recipient extends AggregateRoot<RecipientId> {
     return new Recipient(recipientId, bankAccountId, recipientName, iban, createdAt, version);
   }
 
-  public void assertBelongsTo(BankAccountId bankAccountId) {
-    required(bankAccountId, RecipientError.BANK_ACCOUNT_ID_NOT_PROVIDED);
-    if (!this.bankAccountId.equals(bankAccountId)) {
-      throw new RecipientOwnershipMismatchException(getId(), bankAccountId);
-    }
-  }
-
   public void update(RecipientName recipientName, Iban iban) {
     this.recipientName = required(recipientName, RecipientError.RECIPIENT_NAME_NOT_PROVIDED);
     this.iban = required(iban, RecipientError.IBAN_NOT_PROVIDED);
@@ -219,7 +214,8 @@ Rules:
 - Throw `DomainValidationException` directly or through `Preconditions`.
 - Normalize before final validation when canonical form affects validity.
 - Rely on record structural equality.
-- Put value-specific domain behavior on the value object, such as masking.
+- Put value-specific domain behavior on the value object, such as masking for
+  logs and error details. Authorized recipient read models expose the full IBAN.
 
 Observed normalization:
 
@@ -296,7 +292,7 @@ public record BankAccountId(UUID value) implements EntityId<UUID> {
 }
 ```
 
-## 8. Exceptions And Failure Reasons
+## 8. Exceptions And Operational Failure Classification
 
 Use domain exceptions for invalid domain data, rule violations, conflicts, and
 missing domain resources. Do not choose exception types from HTTP status codes.
@@ -317,14 +313,19 @@ Rules:
 - Put concept-specific exceptions under `domain/<concept>/exceptions`.
 - Make concrete domain exceptions `final`.
 - Use human-readable message constants on exception classes.
-- Implement `FailureReasonProvider` when callers need a stable
-  machine-readable reason.
-- Use `FailureReason.normalize()` for lowercase log/error values.
 - Expose contextual values through getters when useful.
 - Mask sensitive values before storing them on exceptions.
 - Keep HTTP status, ProblemDetail, SQL constraint names, database exception
   types, and transport details outside domain exceptions.
 - Do not parse exception messages to determine failure categories.
+
+Operational failure classification belongs in application:
+
+- Use `RecipientFailureReason` for stable log reasons and normalization.
+- Map concrete domain/application exception types explicitly in application.
+- Keep `INTERNAL_ERROR`, log normalization, and other operational categories out
+  of domain types.
+- Do not make domain exceptions implement application-facing reason providers.
 
 ## 9. Repository Ports And CQRS
 
@@ -339,6 +340,8 @@ Rules:
 - Return `Optional<Aggregate>` for lookups that may miss.
 - `save(Aggregate)` returns `void`.
 - Add only command-side operations required by use cases.
+- Scope ownership-sensitive lookups by `BankAccountId` and `RecipientId`; both a
+  missing recipient and one owned by another account use not-found semantics.
 - Keep Spring Data, JPA, SQL, pagination, filters, and projections out of
   domain ports.
 
@@ -364,18 +367,18 @@ on the domain aggregate repository.
 
 ## 10. Domain Events
 
-Shared `domain-core` supports domain events. Production `recipients` events are
-not established yet.
+Shared `domain-core` supports domain events. `RecipientCreatedEvent` and
+`RecipientDeletedEvent` are established production events in `recipients`.
 
 Rules:
 
 - Place events under `domain/<concept>/events`.
-- Implement `DomainEvent<A extends AggregateId<?>>`.
+- Implement `DomainEvent<A extends AggregateId<?>, D>`.
 - Use records unless a concrete need requires a class.
 - Validate `eventId`, `aggregateId`, and `occurredAt` with
   `DomainEventErrors`.
 - Include business payload needed by downstream domain/application behavior.
-- Use `version()` only for event schema versioning.
+- Use `eventVersion()` only for event schema versioning.
 - Aggregate roots register events internally with `registerEvent(...)`.
 - `pullEvents()` returns registered events in registration order and clears the
   aggregate event buffer.
@@ -385,9 +388,9 @@ Rules:
 - Application or infrastructure maps domain events to technical/integration
   events.
 
-First production event in `recipients` needs Design confirmation for payload
-shape, event ID/time sourcing, registration trigger, publication responsibility,
-and testing scope.
+New event types or changes to existing event payloads need Design confirmation
+for payload shape, event ID/time sourcing, registration trigger, publication
+responsibility, compatibility, and testing scope.
 
 ## 11. Domain Policies And Services
 
@@ -433,10 +436,10 @@ Creation:
 
 Add or update focused domain tests when changing:
 
-- aggregate construction, restore behavior, ownership, lifecycle, or mutation;
+- aggregate construction, restore behavior, lifecycle, or mutation;
 - value-object validation, normalization, formatting, or masking;
 - identifier creation and null validation;
-- exception message, contextual values, or failure reason;
+- exception message or contextual values;
 - repository port shape;
 - domain event payload, validation, registration, or pull semantics;
 - child entity, domain collection, policy, or service behavior.
@@ -459,7 +462,8 @@ repository root.
 - Aggregate rule: use when it protects valid domain state or expresses business
   behavior.
 - Application rule: use for orchestration concerns such as repository calls, ID
-  generation, time, logging, observations, and transaction coordination.
+  generation, time, logging, operational failure classification, observations,
+  and transaction coordination.
 - Domain repository: command side, aggregate persistence, aggregate return
   types.
 - Application query repository: read side, projections, pagination, filters, and
