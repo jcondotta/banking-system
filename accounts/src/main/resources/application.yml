@@ -1,0 +1,141 @@
+server:
+  port: ${SERVER_PORT:8080}
+
+spring:
+  application:
+    name: accounts
+    version: "@project.version@"
+  mvc:
+    apiversion:
+      supported:
+        - "1.0"
+      use:
+        header: X-API-Version
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.ByteArraySerializer
+    consumer:
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.ByteArrayDeserializer
+      properties:
+        spring.json.trusted.packages: "*"
+        spring.json.write-dates-as-timestamps: false
+
+app:
+  kafka:
+    topics:
+      bank-account-opened:
+        topic-name: ${KAFKA_BANK_ACCOUNT_OPENED_TOPIC_NAME}
+      bank-account-status-changed:
+        topic-name: ${KAFKA_BANK_ACCOUNT_STATUS_CHANGED_TOPIC_NAME}
+      joint-account-holder-added:
+        topic-name: ${KAFKA_JOINT_ACCOUNT_HOLDER_ADDED_TOPIC_NAME}
+  outbox:
+    worker:
+      enabled: ${OUTBOX_WORKER_ENABLED:true}
+    shards:
+      count: 4
+      batch-size-per-shard: 40
+      concurrency-per-shard: 4
+    processing:
+      acquire-timeout: 10s
+      publish-timeout: 5s
+      max-retries: 5
+      lease:
+        duration: 30s
+    polling:
+      interval: 10s
+
+cloud:
+  aws:
+    region:
+      static: ${AWS_DEFAULT_REGION:us-east-1}
+    dynamodb:
+      endpoint: ${AWS_DYNAMODB_ENDPOINT:http://127.0.0.1:4566}
+      tables:
+        bank-accounts:
+          table-name: ${AWS_DYNAMODB_BANK_ACCOUNTS_TABLE_NAME}
+
+        outbox:
+          table-name: ${AWS_DYNAMODB_BANK_ACCOUNTS_TABLE_NAME}
+          indexes:
+            gsi1:
+              name: ${AWS_DYNAMODB_OUTBOX_GSI1_NAME:gsi-outbox-status}
+
+api:
+  bank-accounts:
+    root-path: '/api/bank-accounts'
+    bank-account-id-path: '/api/bank-accounts/{bank-account-id}'
+    account-holders-path: '/api/bank-accounts/{bank-account-id}/account-holders'
+
+management:
+  endpoint:
+    health:
+      probes:
+        enabled: true
+
+  endpoints:
+    web:
+      exposure:
+        include: health, metrics, prometheus
+
+  observations:
+    annotations:
+      enabled: true
+
+  otlp:
+    metrics:
+      export:
+        enabled: ${MANAGEMENT_OTLP_METRICS_EXPORT_ENABLED:false}
+        url: ${MANAGEMENT_OTLP_METRICS_EXPORT_URL:http://localhost:4318/v1/metrics}
+        step: 10s
+
+  metrics:
+    tags:
+      application: ${spring.application.name}
+
+    enable:
+      accounts.open.active: false
+      accounts.activate.active: false
+      accounts.block.active: false
+      accounts.unblock.active: false
+      accounts.close.active: false
+      accounts.addJointHolder.active: false
+      accounts.getById.active: false
+      accounts.outbox.dispatch.active: false
+      accounts.outbox.process.active: false
+      accounts.outbox.publish.active: false
+
+    distribution:
+      percentiles-histogram:
+        http.server.requests: true
+        accounts.open: true
+        accounts.activate: true
+        accounts.block: true
+        accounts.unblock: true
+        accounts.close: true
+        accounts.addJointHolder: true
+        accounts.getById: true
+        accounts.outbox.dispatch: true
+        accounts.outbox.process: true
+        accounts.outbox.publish: true
+      percentiles:
+        http.server.requests: 0.5, 0.9, 0.99
+        accounts.open: 0.5, 0.9, 0.99
+        accounts.activate: 0.5, 0.9, 0.99
+        accounts.block: 0.5, 0.9, 0.99
+        accounts.unblock: 0.5, 0.9, 0.99
+        accounts.close: 0.5, 0.9, 0.99
+        accounts.addJointHolder: 0.5, 0.9, 0.99
+        accounts.getById: 0.5, 0.9, 0.99
+        accounts.outbox.dispatch: 0.5, 0.9, 0.99
+        accounts.outbox.process: 0.5, 0.9, 0.99
+        accounts.outbox.publish: 0.5, 0.9, 0.99
+#      expiry:
+#        outbox.publish.duration: 5m
+#        outbox.shard.wait.duration: 5m
+#      buffer-length:
+#        outbox.publish.duration: 3
+#        outbox.shard.wait.duration: 3

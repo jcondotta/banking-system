@@ -1,0 +1,32 @@
+package com.jcondotta.banking.accounts.infrastructure.adapters.output.persistence.dynamodb.repository;
+
+import com.jcondotta.banking.accounts.application.bankaccount.query.get.BankAccountQueryRepository;
+import com.jcondotta.banking.accounts.application.bankaccount.query.get.mapper.BankAccountSummaryMapper;
+import com.jcondotta.banking.accounts.application.bankaccount.query.get.model.BankAccountSummary;
+import com.jcondotta.banking.accounts.domain.bankaccount.identity.BankAccountId;
+import com.jcondotta.banking.accounts.domain.bankaccount.repository.BankAccountRepository;
+import com.jcondotta.banking.accounts.domain.bankaccount.value_objects.Iban;
+import lombok.AllArgsConstructor;
+import org.springframework.stereotype.Repository;
+
+import java.util.Optional;
+
+@Repository
+@AllArgsConstructor
+public class BankAccountQueryDynamoDbRepository implements BankAccountQueryRepository {
+
+  private final BankAccountRepository bankAccountRepository;
+  private final BankAccountSummaryMapper bankAccountSummaryMapper;
+
+  @Override
+  public Optional<BankAccountSummary> findById(BankAccountId bankAccountId) {
+    return bankAccountRepository.findById(bankAccountId)
+      .map(bankAccountSummaryMapper::toSummary);
+  }
+
+  @Override
+  public Optional<BankAccountSummary> findByIban(Iban iban) {
+    return bankAccountRepository.findByIban(iban)
+      .map(bankAccountSummaryMapper::toSummary);
+  }
+}

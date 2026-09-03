@@ -1,0 +1,41 @@
+server:
+  port: 8080
+
+spring:
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS}
+
+    properties:
+      security.protocol: SASL_SSL
+      sasl.mechanism: PLAIN
+      sasl.jaas.config: >
+        org.apache.kafka.common.security.plain.PlainLoginModule required
+        username='${KAFKA_API_KEY}'
+        password='${KAFKA_API_SECRET}';
+
+app:
+  kafka:
+    topics:
+      bank-account-opened:
+        topic-name: ${KAFKA_BANK_ACCOUNT_OPENED_TOPIC_NAME:bank-account-opened}
+      bank-account-status-changed:
+        topic-name: ${KAFKA_BANK_ACCOUNT_STATUS_CHANGED_TOPIC_NAME:bank-account-status-changed}
+      joint-account-holder-added:
+        topic-name: ${KAFKA_JOINT_ACCOUNT_HOLDER_ADDED_TOPIC_NAME:joint-account-holder-added}
+
+cloud:
+  aws:
+    region:
+      static: ${AWS_DEFAULT_REGION}
+    credentials:
+      access-key-id: ${AWS_ACCESS_KEY_ID}
+      secret-key: ${AWS_SECRET_ACCESS_KEY}
+    dynamodb:
+      tables:
+        bank-accounts:
+          table-name: ${AWS_DYNAMODB_BANK_ACCOUNTS_TABLE_NAME}
+        outbox:
+          table-name: ${AWS_DYNAMODB_BANK_ACCOUNTS_TABLE_NAME}
+          indexes:
+            gsi1:
+              name: ${AWS_DYNAMODB_OUTBOX_GSI1_NAME:gsi-outbox-status}
