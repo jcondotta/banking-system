@@ -1,5 +1,6 @@
 package com.jcondotta.banking.accounts.infrastructure.adapters.output.persistence.dynamodb.outbox.shard;
 
+import com.jcondotta.banking.infrastructure.outbox.shard.ShardCalculator;
 import com.jcondotta.domain.identity.AggregateId;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;

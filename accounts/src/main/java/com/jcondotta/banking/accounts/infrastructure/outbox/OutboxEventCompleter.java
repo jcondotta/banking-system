@@ -8,7 +8,7 @@ import com.jcondotta.banking.accounts.infrastructure.outbox.log.OutboxEventType;
 import com.jcondotta.banking.accounts.infrastructure.outbox.log.OutboxLogKey;
 import com.jcondotta.banking.accounts.infrastructure.adapters.output.messaging.outbox.OutboxEventPublisher;
 import com.jcondotta.banking.accounts.infrastructure.adapters.output.persistence.dynamodb.outbox.store.OutboxEventStore;
-import com.jcondotta.banking.accounts.infrastructure.adapters.output.persistence.dynamodb.outbox.store.exceptions.OutboxEventAlreadyProcessedException;
+import com.jcondotta.banking.infrastructure.outbox.exceptions.OutboxEventAlreadyProcessedException;
 import io.micrometer.observation.annotation.Observed;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;

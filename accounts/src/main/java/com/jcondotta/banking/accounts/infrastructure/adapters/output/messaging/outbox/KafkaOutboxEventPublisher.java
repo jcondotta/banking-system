@@ -1,7 +1,8 @@
 package com.jcondotta.banking.accounts.infrastructure.adapters.output.messaging.outbox;
 
 import com.jcondotta.banking.accounts.infrastructure.adapters.output.persistence.dynamodb.outbox.entity.OutboxEntity;
-import com.jcondotta.banking.accounts.infrastructure.outbox.properties.OutboxProcessingProperties;
+import com.jcondotta.banking.infrastructure.outbox.exceptions.OutboxPublishException;
+import com.jcondotta.banking.infrastructure.outbox.properties.OutboxProcessingProperties;
 import lombok.RequiredArgsConstructor;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;

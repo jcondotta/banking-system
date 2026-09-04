@@ -1,7 +1,7 @@
 package com.jcondotta.banking.accounts.infrastructure.adapters.output.persistence.dynamodb.outbox.store;
 
 import com.jcondotta.banking.accounts.infrastructure.adapters.output.persistence.dynamodb.outbox.entity.OutboxEntity;
-import com.jcondotta.banking.accounts.infrastructure.adapters.output.persistence.dynamodb.outbox.store.OutboxQuery;
+import com.jcondotta.banking.infrastructure.outbox.store.OutboxQuery;
 
 import java.util.List;
 import java.util.Optional;

@@ -2,7 +2,7 @@ package com.jcondotta.banking.accounts.infrastructure.adapters.output.messaging.
 
 import com.jcondotta.banking.accounts.infrastructure.adapters.output.persistence.dynamodb.outbox.entity.OutboxEntity;
 import com.jcondotta.banking.accounts.infrastructure.adapters.output.messaging.outbox.KafkaOutboxEventPublisher;
-import com.jcondotta.banking.accounts.infrastructure.outbox.properties.OutboxProcessingProperties;
+import com.jcondotta.banking.infrastructure.outbox.properties.OutboxProcessingProperties;
 import org.apache.kafka.clients.producer.RecordMetadata;
 import org.apache.kafka.common.TopicPartition;
 import org.junit.jupiter.api.BeforeEach;

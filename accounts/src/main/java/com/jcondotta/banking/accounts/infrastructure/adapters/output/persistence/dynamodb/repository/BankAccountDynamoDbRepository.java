@@ -54,11 +54,17 @@ public class BankAccountDynamoDbRepository implements BankAccountRepository {
 
   @Override
   public Optional<BankAccount> findByIban(Iban iban) {
-    BankingEntity bankingEntity = bankingTable.scan().items().stream().
-      findFirst()
-      .get();
+    Optional<BankingEntity> first = bankingTable
+      .scan()
+      .items()
+      .stream().
+      findFirst();
 
-    return findById(BankAccountId.of(bankingEntity.getBankAccountId()));
+    if(first.isPresent()) {
+      return findById(BankAccountId.of(first.get().getBankAccountId()));
+    }
+
+    return Optional.empty();
   }
 
   @Override

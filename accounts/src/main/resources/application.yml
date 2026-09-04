@@ -34,17 +34,16 @@ app:
         topic-name: ${KAFKA_JOINT_ACCOUNT_HOLDER_ADDED_TOPIC_NAME}
   outbox:
     worker:
-      enabled: ${OUTBOX_WORKER_ENABLED:true}
+      enabled: true
     shards:
       count: 4
-      batch-size-per-shard: 40
+      batch-size-per-shard: 20
       concurrency-per-shard: 4
     processing:
       acquire-timeout: 10s
       publish-timeout: 5s
+      claim-timeout: 30s
       max-retries: 5
-      lease:
-        duration: 30s
     polling:
       interval: 10s
 

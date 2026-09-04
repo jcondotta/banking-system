@@ -1,9 +1,9 @@
 package com.jcondotta.banking.accounts.infrastructure.outbox.concurrency;
 
-import com.jcondotta.banking.accounts.infrastructure.outbox.concurrency.SemaphoreConcurrencyPolicy;
-import com.jcondotta.banking.accounts.infrastructure.outbox.concurrency.exceptions.ShardExecutionException;
-import com.jcondotta.banking.accounts.infrastructure.outbox.concurrency.exceptions.ShardNotFoundException;
-import com.jcondotta.banking.accounts.infrastructure.outbox.concurrency.exceptions.ShardTimeoutException;
+import com.jcondotta.banking.infrastructure.outbox.concurrency.SemaphoreConcurrencyPolicy;
+import com.jcondotta.banking.infrastructure.outbox.concurrency.exceptions.ShardExecutionException;
+import com.jcondotta.banking.infrastructure.outbox.concurrency.exceptions.ShardNotFoundException;
+import com.jcondotta.banking.infrastructure.outbox.concurrency.exceptions.ShardTimeoutException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;

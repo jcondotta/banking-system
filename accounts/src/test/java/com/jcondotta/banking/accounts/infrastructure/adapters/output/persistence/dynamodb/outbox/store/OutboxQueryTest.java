@@ -1,10 +1,10 @@
 package com.jcondotta.banking.accounts.infrastructure.adapters.output.persistence.dynamodb.outbox.store;
 
+import com.jcondotta.banking.infrastructure.outbox.store.OutboxQuery;
+import com.jcondotta.domain.exception.DomainValidationException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-
-import com.jcondotta.domain.exception.DomainValidationException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;

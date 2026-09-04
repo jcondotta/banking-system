@@ -53,8 +53,9 @@
             <appender-ref ref="DATA_PREPPER"/>
         </root>
         <logger name="org.springframework" level="WARN"/>
-        <logger name="software.amazon.awssdk" level="WARN"/>
-        <logger name="org.apache.kafka" level="WARN"/>
+        <logger name="org.hibernate" level="WARN"/>
+        <logger name="org.hibernate.orm.jdbc.error" level="ERROR"/>
+        <logger name="com.zaxxer.hikari" level="WARN"/>
         <logger name="com.jcondotta" level="INFO"/>
     </springProfile>
 
@@ -77,8 +78,9 @@
             <appender-ref ref="JSON_CONSOLE"/>
         </root>
         <logger name="org.springframework" level="WARN"/>
-        <logger name="software.amazon.awssdk" level="WARN"/>
-        <logger name="org.apache.kafka" level="WARN"/>
+        <logger name="org.hibernate" level="WARN"/>
+        <logger name="org.hibernate.orm.jdbc.error" level="ERROR"/>
+        <logger name="com.zaxxer.hikari" level="WARN"/>
         <logger name="com.jcondotta" level="INFO"/>
     </springProfile>
 

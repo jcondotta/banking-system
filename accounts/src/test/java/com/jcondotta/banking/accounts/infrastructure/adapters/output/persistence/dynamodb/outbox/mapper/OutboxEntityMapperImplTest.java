@@ -1,7 +1,7 @@
 package com.jcondotta.banking.accounts.infrastructure.adapters.output.persistence.dynamodb.outbox.mapper;
 
 import com.jcondotta.banking.accounts.infrastructure.adapters.output.persistence.dynamodb.outbox.entity.OutboxEntity;
-import com.jcondotta.banking.accounts.infrastructure.adapters.output.persistence.dynamodb.outbox.write.exceptions.OutboxSerializationException;
+import com.jcondotta.banking.infrastructure.outbox.exceptions.OutboxSerializationException;
 import com.jcondotta.banking.accounts.infrastructure.adapters.output.persistence.dynamodb.outbox.write.mapper.OutboxEntityMapperImpl;
 import com.jcondotta.banking.accounts.infrastructure.adapters.output.persistence.dynamodb.outbox.write.shard.OutboxShardResolver;
 import com.jcondotta.banking.infrastructure.adapters.output.messaging.EventEnvelope;

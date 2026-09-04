@@ -1,7 +1,8 @@
 package com.jcondotta.banking.accounts.infrastructure.adapters.input.scheduling.outbox;
 
-import com.jcondotta.banking.accounts.infrastructure.outbox.dispatcher.OutboxDispatcher;
-import com.jcondotta.banking.accounts.infrastructure.outbox.properties.OutboxPollingProperties;
+import com.jcondotta.banking.infrastructure.adapters.input.scheduling.outbox.OutboxWorkerRunner;
+import com.jcondotta.banking.infrastructure.outbox.dispatcher.OutboxDispatcher;
+import com.jcondotta.banking.infrastructure.outbox.properties.OutboxPollingProperties;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.ApplicationArguments;
 

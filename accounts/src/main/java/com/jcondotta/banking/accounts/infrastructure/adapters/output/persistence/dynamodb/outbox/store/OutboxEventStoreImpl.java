@@ -1,10 +1,10 @@
 package com.jcondotta.banking.accounts.infrastructure.adapters.output.persistence.dynamodb.outbox.store;
 
 import com.jcondotta.banking.accounts.infrastructure.adapters.output.persistence.dynamodb.outbox.entity.OutboxEntity;
-import com.jcondotta.banking.accounts.infrastructure.adapters.output.persistence.dynamodb.outbox.store.OutboxQuery;
+import com.jcondotta.banking.infrastructure.outbox.exceptions.OutboxEventAlreadyProcessedException;
+import com.jcondotta.banking.infrastructure.outbox.properties.OutboxProcessingProperties;
+import com.jcondotta.banking.infrastructure.outbox.store.OutboxQuery;
 import com.jcondotta.banking.accounts.infrastructure.adapters.output.persistence.dynamodb.outbox.store.OutboxQueryKey;
-import com.jcondotta.banking.accounts.infrastructure.adapters.output.persistence.dynamodb.outbox.store.exceptions.OutboxEventAlreadyProcessedException;
-import com.jcondotta.banking.accounts.infrastructure.outbox.properties.OutboxProcessingProperties;
 import com.jcondotta.banking.accounts.infrastructure.adapters.output.persistence.dynamodb.outbox.properties.OutboxTableProperties;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -70,7 +70,7 @@ public class OutboxEventStoreImpl implements OutboxEventStore {
   @Override
   public Optional<OutboxEntity> tryClaimEvent(OutboxEntity item) {
     Instant now = Instant.now();
-    Instant newVisibility = now.plus(processingProperties.lease().duration());
+    Instant newVisibility = now.plus(processingProperties.claimTimeout());
 
     Expression condition = Expression.builder()
       .expression("nextAttemptAt <= :now")

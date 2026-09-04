@@ -1,5 +1,6 @@
 package com.jcondotta.banking.accounts.infrastructure.adapters.output.persistence.dynamodb.outbox.write.exceptions;
 
+import com.jcondotta.banking.infrastructure.outbox.exceptions.OutboxSerializationException;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;

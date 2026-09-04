@@ -20,6 +20,7 @@
 		<module>core</module>
 		<module>accounts</module>
 		<module>recipients</module>
+		<module>transfers</module>
 	</modules>
 
 	<properties>

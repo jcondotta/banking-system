@@ -1,7 +1,7 @@
 package com.jcondotta.banking.accounts.infrastructure.adapters.output.persistence.dynamodb.outbox.write.shard;
 
-import com.jcondotta.banking.accounts.infrastructure.adapters.output.persistence.dynamodb.outbox.shard.ShardCalculator;
-import com.jcondotta.banking.accounts.infrastructure.outbox.properties.OutboxShardsProperties;
+import com.jcondotta.banking.infrastructure.outbox.properties.OutboxShardsProperties;
+import com.jcondotta.banking.infrastructure.outbox.shard.ShardCalculator;
 import com.jcondotta.domain.identity.AggregateId;
 import org.junit.jupiter.api.Test;
 
