@@ -4,9 +4,10 @@ import com.jcondotta.banking.infrastructure.outbox.concurrency.DefaultShardExecu
 import com.jcondotta.banking.infrastructure.outbox.concurrency.ShardConcurrencyPolicy;
 import com.jcondotta.banking.infrastructure.outbox.concurrency.exceptions.ShardNotFoundException;
 import com.jcondotta.banking.infrastructure.outbox.concurrency.exceptions.ShardTimeoutException;
-import com.jcondotta.domain.exception.DomainValidationException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -71,17 +72,31 @@ class DefaultShardExecutorTest {
   }
 
   @Test
-  void shouldThrowDomainValidationException_whenPolicyIsNull() {
+  void shouldThrowIllegalArgumentException_whenPolicyIsNull() {
     assertThatThrownBy(() -> new DefaultShardExecutor<>(null, DEFAULT_TIMEOUT))
-      .isInstanceOf(DomainValidationException.class)
+      .isInstanceOf(IllegalArgumentException.class)
       .hasMessage(DefaultShardExecutor.ERROR_POLICY_REQUIRED);
   }
 
   @Test
-  void shouldThrowDomainValidationException_whenDefaultTimeoutIsNull() {
+  void shouldThrowIllegalArgumentException_whenDefaultTimeoutIsNull() {
     assertThatThrownBy(() -> new DefaultShardExecutor<>(policy, null))
-      .isInstanceOf(DomainValidationException.class)
+      .isInstanceOf(IllegalArgumentException.class)
       .hasMessage(DefaultShardExecutor.ERROR_DEFAULT_TIMEOUT_REQUIRED);
+
+    verifyNoInteractions(policy);
+  }
+
+  @ParameterizedTest
+  @ValueSource(longs = {0, -1})
+  void shouldThrowIllegalArgumentException_whenDefaultTimeoutIsNotPositive(long timeoutMillis) {
+    var timeout = Duration.ofMillis(timeoutMillis);
+
+    assertThatThrownBy(() -> new DefaultShardExecutor<>(policy, timeout))
+      .isInstanceOf(IllegalArgumentException.class)
+      .hasMessage(DefaultShardExecutor.ERROR_DEFAULT_TIMEOUT_MUST_BE_POSITIVE);
+
+    verifyNoInteractions(policy);
   }
 
   @Test
@@ -92,6 +107,21 @@ class DefaultShardExecutorTest {
     assertThatThrownBy(() -> executor.execute(SHARD_ZERO, null, counter::incrementAndGet))
       .isInstanceOf(IllegalArgumentException.class)
       .hasMessage(DefaultShardExecutor.ERROR_TIMEOUT_REQUIRED);
+
+    assertThat(counter.get()).isZero();
+    verifyNoInteractions(policy);
+  }
+
+  @ParameterizedTest
+  @ValueSource(longs = {0, -1})
+  void shouldThrowIllegalArgumentException_whenExplicitTimeoutIsNotPositive(long timeoutMillis) {
+    var executor = new DefaultShardExecutor<>(policy, DEFAULT_TIMEOUT);
+    var counter = new AtomicInteger(0);
+    var timeout = Duration.ofMillis(timeoutMillis);
+
+    assertThatThrownBy(() -> executor.execute(SHARD_ZERO, timeout, counter::incrementAndGet))
+      .isInstanceOf(IllegalArgumentException.class)
+      .hasMessage(DefaultShardExecutor.ERROR_TIMEOUT_MUST_BE_POSITIVE);
 
     assertThat(counter.get()).isZero();
     verifyNoInteractions(policy);

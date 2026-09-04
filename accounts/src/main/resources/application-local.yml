@@ -24,6 +24,9 @@ cloud:
       tables:
         bank-accounts:
           table-name: ${AWS_DYNAMODB_BANK_ACCOUNTS_TABLE_NAME:bank-accounts}
+          indexes:
+            gsi1:
+              name: ${AWS_DYNAMODB_BANK_ACCOUNTS_GSI1_NAME:gsi-iban}
 
         outbox:
           table-name: ${AWS_DYNAMODB_BANK_ACCOUNTS_TABLE_NAME:bank-accounts}

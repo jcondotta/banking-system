@@ -4,6 +4,7 @@ import com.jcondotta.banking.accounts.infrastructure.adapters.output.persistence
 import lombok.*;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbBean;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbPartitionKey;
+import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbSecondaryPartitionKey;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbSortKey;
 
 import java.time.Instant;
@@ -55,6 +56,11 @@ public class BankingEntity {
   @DynamoDbSortKey
   public String getSortKey() {
     return sortKey;
+  }
+
+  @DynamoDbSecondaryPartitionKey(indexNames = "gsi-iban")
+  public String getIban() {
+    return iban;
   }
 
   public boolean isBankAccount() {

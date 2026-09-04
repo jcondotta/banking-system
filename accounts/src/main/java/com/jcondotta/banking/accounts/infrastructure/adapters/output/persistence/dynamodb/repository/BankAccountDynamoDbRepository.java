@@ -9,6 +9,7 @@ import com.jcondotta.banking.accounts.domain.bankaccount.repository.BankAccountR
 import com.jcondotta.banking.accounts.infrastructure.adapters.output.persistence.dynamodb.entity.BankAccountEntityKey;
 import com.jcondotta.banking.accounts.infrastructure.adapters.output.persistence.dynamodb.entity.BankingEntity;
 import com.jcondotta.banking.accounts.infrastructure.adapters.output.persistence.dynamodb.mapper.BankAccountEntityMapper;
+import com.jcondotta.banking.accounts.infrastructure.adapters.output.persistence.dynamodb.properties.BankAccountsTableProperties;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
@@ -16,6 +17,7 @@ import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
 import software.amazon.awssdk.enhanced.dynamodb.Key;
 import software.amazon.awssdk.enhanced.dynamodb.model.QueryConditional;
+import software.amazon.awssdk.enhanced.dynamodb.model.QueryEnhancedRequest;
 import software.amazon.awssdk.enhanced.dynamodb.model.TransactWriteItemsEnhancedRequest;
 
 import java.util.List;
@@ -30,6 +32,7 @@ public class BankAccountDynamoDbRepository implements BankAccountRepository {
   private final DynamoDbTable<BankingEntity> bankingTable;
 
   private final BankAccountEntityMapper bankAccountEntityMapper;
+  private final BankAccountsTableProperties tableProperties;
   private final List<TransactionalAppender> appenders;
 
   @Override
@@ -54,17 +57,27 @@ public class BankAccountDynamoDbRepository implements BankAccountRepository {
 
   @Override
   public Optional<BankAccount> findByIban(Iban iban) {
-    Optional<BankingEntity> first = bankingTable
-      .scan()
-      .items()
-      .stream().
-      findFirst();
+    var queryConditional = QueryConditional.keyEqualTo(Key.builder()
+      .partitionValue(iban.value())
+      .build());
 
-    if(first.isPresent()) {
-      return findById(BankAccountId.of(first.get().getBankAccountId()));
+    var queryRequest = QueryEnhancedRequest.builder()
+      .queryConditional(queryConditional)
+      .limit(1)
+      .build();
+
+    var gsiName = tableProperties.indexes().gsi1().name();
+    var bankingEntity = bankingTable.index(gsiName)
+      .query(queryRequest)
+      .stream()
+      .flatMap(page -> page.items().stream())
+      .findFirst();
+
+    if (bankingEntity.isEmpty()) {
+      return Optional.empty();
     }
 
-    return Optional.empty();
+    return findById(BankAccountId.of(bankingEntity.get().getBankAccountId()));
   }
 
   @Override

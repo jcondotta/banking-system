@@ -15,6 +15,17 @@ resource "aws_dynamodb_table" "banking_entities" {
     type = "S"
   }
 
+  attribute {
+    name = "iban"
+    type = "S"
+  }
+
+  global_secondary_index {
+    name            = "gsi-iban"
+    hash_key        = "iban"
+    projection_type = "ALL"
+  }
+
   tags = {
     Name = local.banking_entities_table_name
     Tier = local.tier

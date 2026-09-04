@@ -14,6 +14,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 
+import java.net.URI;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -77,6 +78,23 @@ class BankAccountLookupIT extends BankAccountIntegrationSupport {
     );
   }
 
+  @ParameterizedTest
+  @AccountTypeAndCurrencySource
+  void shouldReturn200OkWithBankAccountDetails_whenBankAccountIsFoundByIban(AccountType accountType, Currency currency) {
+    var id = openBankAccount(accountType, currency);
+    var bankAccount = bankAccountRepository.findById(id).orElseThrow();
+    var ibanValue = bankAccount.getIban().value();
+
+    var response = getBankAccountByIban(ibanValue);
+
+    assertAll(
+      () -> assertThat(response.id()).isEqualTo(id.value()),
+      () -> assertThat(response.iban()).isEqualTo(ibanValue),
+      () -> assertThat(response.accountType().name()).isEqualTo(accountType.name()),
+      () -> assertThat(response.currency().name()).isEqualTo(currency.name())
+    );
+  }
+
   @Test
   void shouldReturn404NotFound_whenBankAccountIsNotFound() {
     var nonExistentId = UUID.fromString("08d8cf86-bc25-4535-8b88-920c07d3e5fe");
@@ -86,5 +104,16 @@ class BankAccountLookupIT extends BankAccountIntegrationSupport {
     assertThat(response.statusCode()).isEqualTo(HttpStatus.NOT_FOUND.value());
     assertThat(response.as(ProblemDetail.class).getInstance())
       .isEqualTo(uriProperties.bankAccountURI(nonExistentId));
+  }
+
+  @Test
+  void shouldReturn404NotFound_whenBankAccountWithIbanIsNotFound() {
+    var nonExistentIban = "GB29NWBK60161331926819";
+
+    var response = getBankAccountByIbanResponse(nonExistentIban);
+
+    assertThat(response.statusCode()).isEqualTo(HttpStatus.NOT_FOUND.value());
+    assertThat(response.as(ProblemDetail.class).getInstance())
+      .isEqualTo(URI.create(uriProperties.rootPath()));
   }
 }

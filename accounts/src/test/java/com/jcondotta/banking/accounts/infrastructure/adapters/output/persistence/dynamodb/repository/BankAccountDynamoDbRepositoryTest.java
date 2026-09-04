@@ -9,6 +9,7 @@ import com.jcondotta.banking.accounts.infrastructure.adapters.output.persistence
 import com.jcondotta.banking.accounts.infrastructure.adapters.output.persistence.dynamodb.entity.BankingEntity;
 import com.jcondotta.banking.accounts.infrastructure.adapters.output.persistence.dynamodb.enums.EntityType;
 import com.jcondotta.banking.accounts.infrastructure.adapters.output.persistence.dynamodb.mapper.BankAccountEntityMapper;
+import com.jcondotta.banking.accounts.infrastructure.adapters.output.persistence.dynamodb.properties.BankAccountsTableProperties;
 import com.jcondotta.banking.accounts.infrastructure.support.DynamoPageIterable;
 import com.jcondotta.banking.accounts.infrastructure.adapters.output.persistence.dynamodb.DynamoDbTransactionContext;
 import com.jcondotta.domain.core.AggregateRoot;
@@ -20,9 +21,11 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
+import software.amazon.awssdk.enhanced.dynamodb.DynamoDbIndex;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
 import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
 import software.amazon.awssdk.enhanced.dynamodb.model.QueryConditional;
+import software.amazon.awssdk.enhanced.dynamodb.model.QueryEnhancedRequest;
 import software.amazon.awssdk.enhanced.dynamodb.model.TransactWriteItemsEnhancedRequest;
 
 import java.util.List;
@@ -36,6 +39,8 @@ class BankAccountDynamoDbRepositoryTest {
   private static final AccountHolderFixtures PRIMARY = AccountHolderFixtures.JEFFERSON;
   private static final AccountHolderFixtures JOINT = AccountHolderFixtures.VIRGINIO;
 
+  private static final String IBAN_GSI_NAME = "gsi-iban";
+
   private final TableSchema<BankingEntity> bankingTableSchema = TableSchema.fromBean(BankingEntity.class);
   private final TableSchema<OutboxEntity> outboxTableSchema = TableSchema.fromBean(OutboxEntity.class);
 
@@ -46,10 +51,13 @@ class BankAccountDynamoDbRepositoryTest {
   private DynamoDbTable<BankingEntity> bankingTable;
 
   @Mock
-  private DynamoDbTable<OutboxEntity> outboxTable;
+  private DynamoDbIndex<BankingEntity> bankingTableIbanIndex;
 
   @Mock
   private BankAccountEntityMapper bankAccountEntityMapper;
+
+  @Mock
+  private BankAccountsTableProperties tableProperties;
 
   @Mock
   private TransactionalAppender transactionalAppender;
@@ -62,6 +70,7 @@ class BankAccountDynamoDbRepositoryTest {
       dynamoDbClient,
       bankingTable,
       bankAccountEntityMapper,
+      tableProperties,
       List.of()
     );
   }
@@ -129,6 +138,55 @@ class BankAccountDynamoDbRepositoryTest {
   }
 
   @Nested
+  class FindByIban {
+
+    @BeforeEach
+    void setUp() {
+      var indexes = new BankAccountsTableProperties.Indexes(new BankAccountsTableProperties.Index(IBAN_GSI_NAME));
+      when(tableProperties.indexes()).thenReturn(indexes);
+      when(bankingTable.index(IBAN_GSI_NAME)).thenReturn(bankingTableIbanIndex);
+    }
+
+    @Test
+    void shouldReturnBankAccount_whenEntityIsFoundByIban() {
+      var account = BankAccountTestFactory.withPrimary(PRIMARY);
+      var bankAccountEntity = BankingEntity.builder()
+        .entityType(EntityType.BANK_ACCOUNT)
+        .bankAccountId(account.getId().value())
+        .build();
+      var fullEntities = List.of(
+        bankAccountEntity,
+        BankingEntity.builder().entityType(EntityType.ACCOUNT_HOLDER).build()
+      );
+
+      when(bankingTableIbanIndex.query(any(QueryEnhancedRequest.class)))
+        .thenReturn(DynamoPageIterable.pageOf(List.of(bankAccountEntity)));
+      when(bankingTable.query(any(QueryConditional.class)))
+        .thenReturn(DynamoPageIterable.pageOf(fullEntities));
+      when(bankAccountEntityMapper.restore(fullEntities)).thenReturn(account);
+
+      var result = repository.findByIban(account.getIban());
+
+      assertThat(result).contains(account);
+      verify(bankingTable, never()).scan();
+    }
+
+    @Test
+    void shouldReturnEmpty_whenNoEntityIsFoundByIban() {
+      var account = BankAccountTestFactory.withPrimary(PRIMARY);
+
+      when(bankingTableIbanIndex.query(any(QueryEnhancedRequest.class)))
+        .thenReturn(DynamoPageIterable.emptyPage());
+
+      var result = repository.findByIban(account.getIban());
+
+      assertThat(result).isEmpty();
+      verify(bankingTable, never()).scan();
+      verifyNoInteractions(bankAccountEntityMapper);
+    }
+  }
+
+  @Nested
   class Save {
 
     @BeforeEach
@@ -160,6 +218,7 @@ class BankAccountDynamoDbRepositoryTest {
         dynamoDbClient,
         bankingTable,
         bankAccountEntityMapper,
+        tableProperties,
         List.of(transactionalAppender)
       );
 
@@ -183,6 +242,7 @@ class BankAccountDynamoDbRepositoryTest {
         dynamoDbClient,
         bankingTable,
         bankAccountEntityMapper,
+        tableProperties,
         List.of(appender)
       );
 
@@ -202,6 +262,9 @@ class BankAccountDynamoDbRepositoryTest {
       assertThat(captor.getValue().transactWriteItems()).hasSize(bankingEntities.size() + 1);
     }
   }
+
+  @Mock
+  private DynamoDbTable<OutboxEntity> outboxTable;
 
   private record TestOutboxAppender(DynamoDbTable<OutboxEntity> outboxTable) implements TransactionalAppender {
 

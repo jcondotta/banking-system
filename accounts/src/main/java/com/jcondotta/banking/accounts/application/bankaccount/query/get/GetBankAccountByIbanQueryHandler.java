@@ -43,6 +43,7 @@ public class GetBankAccountByIbanQueryHandler
         .orElseThrow(() -> new BankAccountNotFoundException(query.iban()));
 
       logContext.info("Bank account retrieved by IBAN")
+        .with(BankAccountLogKey.BANK_ACCOUNT_ID, summary.id())
         .success()
         .log();
 

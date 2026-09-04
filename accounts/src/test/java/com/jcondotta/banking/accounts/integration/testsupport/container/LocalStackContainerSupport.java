@@ -60,12 +60,20 @@ public final class LocalStackContainerSupport {
         .tableName("bank-accounts")
         .attributeDefinitions(
           AttributeDefinition.builder().attributeName("partitionKey").attributeType(ScalarAttributeType.S).build(),
-          AttributeDefinition.builder().attributeName("sortKey").attributeType(ScalarAttributeType.S).build()
+          AttributeDefinition.builder().attributeName("sortKey").attributeType(ScalarAttributeType.S).build(),
+          AttributeDefinition.builder().attributeName("iban").attributeType(ScalarAttributeType.S).build()
         )
         .keySchema(
           KeySchemaElement.builder().attributeName("partitionKey").keyType(KeyType.HASH).build(),
           KeySchemaElement.builder().attributeName("sortKey").keyType(KeyType.RANGE).build()
         )
+        .globalSecondaryIndexes(GlobalSecondaryIndex.builder()
+          .indexName("gsi-iban")
+          .keySchema(KeySchemaElement.builder().attributeName("iban").keyType(KeyType.HASH).build())
+          .projection(Projection.builder().projectionType(ProjectionType.ALL).build())
+          .provisionedThroughput(ProvisionedThroughput.builder()
+            .readCapacityUnits(5L).writeCapacityUnits(5L).build())
+          .build())
         .billingMode(BillingMode.PAY_PER_REQUEST)
         .build());
 

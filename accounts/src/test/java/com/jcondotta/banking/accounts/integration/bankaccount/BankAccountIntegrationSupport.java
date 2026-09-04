@@ -131,6 +131,29 @@ public abstract class BankAccountIntegrationSupport {
       .as(BankAccountDetailsResponse.class);
   }
 
+  protected BankAccountDetailsResponse getBankAccountByIban(String iban) {
+    return given()
+      .spec(requestSpecification(uriProperties.rootPath()))
+      .queryParam("iban", iban)
+      .when()
+      .get()
+      .then()
+      .statusCode(HttpStatus.OK.value())
+      .extract()
+      .as(BankAccountDetailsResponse.class);
+  }
+
+  protected Response getBankAccountByIbanResponse(String iban) {
+    return given()
+      .spec(requestSpecification(uriProperties.rootPath()))
+      .queryParam("iban", iban)
+      .when()
+      .get()
+      .then()
+      .extract()
+      .response();
+  }
+
   protected Response getBankAccount(UUID id) {
     return given()
       .spec(requestSpecification(uriProperties.bankAccountIdPath()))

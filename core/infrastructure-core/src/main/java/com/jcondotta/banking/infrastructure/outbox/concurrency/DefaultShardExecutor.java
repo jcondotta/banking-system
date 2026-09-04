@@ -3,20 +3,28 @@ package com.jcondotta.banking.infrastructure.outbox.concurrency;
 import java.time.Duration;
 import java.util.function.Supplier;
 
-import static com.jcondotta.domain.support.Preconditions.required;
-
 public class DefaultShardExecutor<K> implements ShardExecutor<K> {
 
   public static final String ERROR_POLICY_REQUIRED = "policy must be provided";
   public static final String ERROR_TIMEOUT_REQUIRED = "acquireTimeout must be provided";
+  public static final String ERROR_TIMEOUT_MUST_BE_POSITIVE = "acquireTimeout must be greater than zero";
   public static final String ERROR_DEFAULT_TIMEOUT_REQUIRED = "defaultTimeout must be provided";
+  public static final String ERROR_DEFAULT_TIMEOUT_MUST_BE_POSITIVE = "defaultTimeout must be greater than zero";
 
   private final ShardConcurrencyPolicy<K> policy;
   private final Duration defaultTimeout;
 
   public DefaultShardExecutor(ShardConcurrencyPolicy<K> policy, Duration timeout) {
-    this.policy = required(policy, ERROR_POLICY_REQUIRED);
-    this.defaultTimeout = required(timeout, ERROR_DEFAULT_TIMEOUT_REQUIRED);
+    if (policy == null) {
+      throw new IllegalArgumentException(ERROR_POLICY_REQUIRED);
+    }
+
+    this.policy = policy;
+    this.defaultTimeout = validateTimeout(
+      timeout,
+      ERROR_DEFAULT_TIMEOUT_REQUIRED,
+      ERROR_DEFAULT_TIMEOUT_MUST_BE_POSITIVE
+    );
   }
 
   @Override
@@ -26,10 +34,18 @@ public class DefaultShardExecutor<K> implements ShardExecutor<K> {
 
   @Override
   public <T> T execute(K shard, Duration timeout, Supplier<T> task) {
-    if (timeout == null) {
-      throw new IllegalArgumentException(ERROR_TIMEOUT_REQUIRED);
-    }
+    var validatedTimeout = validateTimeout(timeout, ERROR_TIMEOUT_REQUIRED, ERROR_TIMEOUT_MUST_BE_POSITIVE);
 
-    return policy.execute(shard, timeout, task);
+    return policy.execute(shard, validatedTimeout, task);
+  }
+
+  private static Duration validateTimeout(Duration timeout, String requiredMessage, String positiveMessage) {
+    if (timeout == null) {
+      throw new IllegalArgumentException(requiredMessage);
+    }
+    if (!timeout.isPositive()) {
+      throw new IllegalArgumentException(positiveMessage);
+    }
+    return timeout;
   }
 }
