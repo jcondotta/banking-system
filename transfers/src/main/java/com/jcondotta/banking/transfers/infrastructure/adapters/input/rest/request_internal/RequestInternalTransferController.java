@@ -6,7 +6,7 @@ import com.jcondotta.banking.transfers.domain.bank_account.identity.BankAccountI
 import com.jcondotta.banking.transfers.domain.bank_account.value_objects.Iban;
 import com.jcondotta.banking.transfers.domain.bank_transfer.identity.BankTransferId;
 import com.jcondotta.banking.transfers.domain.bank_transfer.value_objects.party.PartyName;
-import com.jcondotta.banking.transfers.domain.monetary_movement.value_objects.MonetaryAmount;
+import com.jcondotta.banking.money.MonetaryAmount;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PostMapping;

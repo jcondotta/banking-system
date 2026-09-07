@@ -1,7 +1,7 @@
 package com.jcondotta.banking.accounts.integration.bankaccount.activate;
 
+import com.jcondotta.banking.accounts.domain.bankaccount.events.BankAccountActivatedEvent;
 import com.jcondotta.banking.accounts.domain.bankaccount.events.BankAccountOpenedEvent;
-import com.jcondotta.banking.accounts.domain.bankaccount.events.BankAccountStatusChangedEvent;
 import com.jcondotta.banking.accounts.domain.testsupport.AccountTypeAndCurrencySource;
 import com.jcondotta.banking.accounts.domain.bankaccount.enums.AccountStatus;
 import com.jcondotta.banking.accounts.domain.bankaccount.enums.AccountType;
@@ -36,7 +36,7 @@ class ActivateBankAccountIT extends BankAccountIntegrationSupport {
     assertOutboxEvents(
       id,
       BankAccountOpenedEvent.EVENT_TYPE,
-      BankAccountStatusChangedEvent.EVENT_TYPE
+      BankAccountActivatedEvent.EVENT_TYPE
     );
   }
 

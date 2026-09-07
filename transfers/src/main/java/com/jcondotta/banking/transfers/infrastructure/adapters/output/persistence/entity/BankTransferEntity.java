@@ -2,7 +2,7 @@ package com.jcondotta.banking.transfers.infrastructure.adapters.output.persisten
 
 import com.jcondotta.banking.transfers.domain.bank_transfer.enums.TransferStatus;
 import com.jcondotta.banking.transfers.domain.bank_transfer.enums.TransferType;
-import com.jcondotta.banking.transfers.domain.shared.value_objects.Currency;
+import com.jcondotta.banking.money.Currency;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;

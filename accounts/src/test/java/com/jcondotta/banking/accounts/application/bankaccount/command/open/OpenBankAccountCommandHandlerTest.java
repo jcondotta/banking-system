@@ -2,15 +2,12 @@ package com.jcondotta.banking.accounts.application.bankaccount.command.open;
 
 import com.jcondotta.application.command.CommandHandlerWithResult;
 import com.jcondotta.banking.accounts.application.bankaccount.command.open.model.OpenBankAccountCommand;
-import com.jcondotta.banking.accounts.application.bankaccount.ports.output.facade.IbanGeneratorFacade;
 import com.jcondotta.banking.accounts.domain.bankaccount.aggregate.BankAccount;
 import com.jcondotta.banking.accounts.domain.bankaccount.enums.AccountType;
 import com.jcondotta.banking.accounts.domain.bankaccount.enums.Currency;
 import com.jcondotta.banking.accounts.domain.bankaccount.identity.BankAccountId;
 import com.jcondotta.banking.accounts.domain.bankaccount.repository.BankAccountRepository;
 import com.jcondotta.banking.accounts.domain.testsupport.AccountHolderFixtures;
-import com.jcondotta.banking.accounts.domain.testsupport.BankAccountFixture;
-import com.jcondotta.banking.accounts.domain.bankaccount.value_objects.Iban;
 import com.jcondotta.domain.exception.DomainException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -27,13 +24,8 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class OpenBankAccountCommandHandlerTest {
 
-  private static final Iban GENERATED_IBAN = BankAccountFixture.VALID_IBAN;
-
   @Mock
   private BankAccountRepository bankAccountRepository;
-
-  @Mock
-  private IbanGeneratorFacade ibanGeneratorFacade;
 
   @Captor
   private ArgumentCaptor<BankAccount> bankAccountCaptor;
@@ -42,10 +34,7 @@ class OpenBankAccountCommandHandlerTest {
 
   @BeforeEach
   void setUp() {
-    commandHandler = new OpenBankAccountCommandHandler(
-      bankAccountRepository,
-      ibanGeneratorFacade
-    );
+    commandHandler = new OpenBankAccountCommandHandler(bankAccountRepository);
   }
 
   @Test
@@ -69,8 +58,6 @@ class OpenBankAccountCommandHandlerTest {
   }
 
   private void shouldOpenBankAccount_whenCommandIsValid(AccountType accountType, Currency currency) {
-    when(ibanGeneratorFacade.generate()).thenReturn(GENERATED_IBAN);
-
     var personalInfo = AccountHolderFixtures.JEFFERSON.personalInfo();
     var contactInfo = AccountHolderFixtures.JEFFERSON.contactInfo();
     var address = AccountHolderFixtures.JEFFERSON.address();
@@ -85,9 +72,8 @@ class OpenBankAccountCommandHandlerTest {
 
     var bankAccountId = commandHandler.handle(command);
 
-    verify(ibanGeneratorFacade).generate();
     verify(bankAccountRepository).save(bankAccountCaptor.capture());
-    verifyNoMoreInteractions(ibanGeneratorFacade, bankAccountRepository);
+    verifyNoMoreInteractions(bankAccountRepository);
 
     assertThat(bankAccountId).isEqualTo(bankAccountCaptor.getValue().getId());
 
@@ -96,7 +82,7 @@ class OpenBankAccountCommandHandlerTest {
         assertThat(bankAccount.getId()).isNotNull();
         assertThat(bankAccount.getAccountType()).isEqualTo(accountType);
         assertThat(bankAccount.getCurrency()).isEqualTo(currency);
-        assertThat(bankAccount.getIban()).isEqualTo(GENERATED_IBAN);
+        assertThat(bankAccount.getIban()).isEmpty();
         assertThat(bankAccount.getAccountStatus()).isEqualTo(BankAccount.ACCOUNT_STATUS_ON_OPENING);
         assertThat(bankAccount.getCreatedAt()).isNotNull();
         assertThat(bankAccount.getActiveHolders())
@@ -104,7 +90,6 @@ class OpenBankAccountCommandHandlerTest {
           .singleElement()
           .satisfies(accountHolder -> {
             assertThat(accountHolder.getId()).isNotNull();
-
             assertThat(accountHolder.getPersonalInfo()).isEqualTo(personalInfo);
             assertThat(accountHolder.getContactInfo()).isEqualTo(contactInfo);
             assertThat(accountHolder.getAddress()).isEqualTo(address);
@@ -116,8 +101,6 @@ class OpenBankAccountCommandHandlerTest {
 
   @Test
   void shouldThrowDomainException_whenRepositoryThrowsDomainException() {
-    when(ibanGeneratorFacade.generate()).thenReturn(GENERATED_IBAN);
-
     var exception = new TestDomainException();
 
     doThrow(exception)
@@ -129,15 +112,12 @@ class OpenBankAccountCommandHandlerTest {
     assertThatThrownBy(() -> commandHandler.handle(command))
       .isSameAs(exception);
 
-    verify(ibanGeneratorFacade).generate();
     verify(bankAccountRepository).save(any(BankAccount.class));
-    verifyNoMoreInteractions(ibanGeneratorFacade, bankAccountRepository);
+    verifyNoMoreInteractions(bankAccountRepository);
   }
 
   @Test
   void shouldThrowUnexpectedException_whenRepositoryThrowsUnexpectedException() {
-    when(ibanGeneratorFacade.generate()).thenReturn(GENERATED_IBAN);
-
     var exception = new IllegalStateException("database unavailable");
 
     doThrow(exception)
@@ -149,25 +129,8 @@ class OpenBankAccountCommandHandlerTest {
     assertThatThrownBy(() -> commandHandler.handle(command))
       .isSameAs(exception);
 
-    verify(ibanGeneratorFacade).generate();
     verify(bankAccountRepository).save(any(BankAccount.class));
-    verifyNoMoreInteractions(ibanGeneratorFacade, bankAccountRepository);
-  }
-
-  @Test
-  void shouldThrowUnexpectedException_whenIbanGenerationFails() {
-    var exception = new IllegalStateException("iban generator unavailable");
-
-    when(ibanGeneratorFacade.generate())
-      .thenThrow(exception);
-
-    var command = command(AccountType.SAVINGS, Currency.USD);
-
-    assertThatThrownBy(() -> commandHandler.handle(command))
-      .isSameAs(exception);
-
-    verify(ibanGeneratorFacade).generate();
-    verifyNoInteractions(bankAccountRepository);
+    verifyNoMoreInteractions(bankAccountRepository);
   }
 
   private static OpenBankAccountCommand command(AccountType accountType, Currency currency) {

@@ -44,7 +44,7 @@ class OpenBankAccountIT extends BankAccountIntegrationSupport {
     assertAll(
       () -> assertThat(bankAccount.getAccountType()).isEqualTo(accountType),
       () -> assertThat(bankAccount.getCurrency()).isEqualTo(currency),
-      () -> assertThat(bankAccount.getIban()).isNotNull(),
+      () -> assertThat(bankAccount.getIban()).isEmpty(),
       () -> assertThat(bankAccount.getAccountStatus()).isEqualTo(BankAccount.ACCOUNT_STATUS_ON_OPENING),
       () -> assertThat(bankAccount.getCreatedAt()).isNotNull(),
       () -> assertThat(bankAccount.getActiveHolders())

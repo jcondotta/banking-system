@@ -8,7 +8,7 @@ import com.jcondotta.application.query.PageResult;
 import com.jcondotta.application.logging.LogKey;
 import com.jcondotta.banking.recipients.application.common.log.RecipientLogKey;
 import com.jcondotta.application.logging.LogOutcome;
-import com.jcondotta.banking.recipients.application.common.log.RecipientEventType;
+import com.jcondotta.banking.recipients.application.common.log.RecipientOperation;
 import com.jcondotta.application.logging.StructuredLogEventSupport;
 import com.jcondotta.banking.recipients.application.recipient.query.RecipientQueryRepository;
 import com.jcondotta.banking.recipients.application.recipient.query.model.RecipientSummary;
@@ -85,10 +85,10 @@ class ListRecipientsQueryHandlerTest {
     assertThat(StructuredLogEventSupport.lastEvent(logAppender, ILoggingEvent::getLevel))
       .isEqualTo(Level.INFO);
     assertThat(StructuredLogEventSupport.lastEventKeyValues(logAppender))
-      .containsEntry(LogKey.EVENT_TYPE, RecipientEventType.LIST)
+      .containsEntry(LogKey.OPERATION, RecipientOperation.LIST)
       .containsEntry(LogKey.OUTCOME, LogOutcome.SUCCESS)
       .containsEntry(RecipientLogKey.FILTER_NAME_PRESENT, "false");
-    assertThat(StructuredLogEventSupport.eventTypes(logAppender))
+    assertThat(StructuredLogEventSupport.operations(logAppender))
       .allMatch(eventType -> !eventType.contains(".failed"));
   }
 
@@ -111,10 +111,10 @@ class ListRecipientsQueryHandlerTest {
     assertThat(StructuredLogEventSupport.lastEvent(logAppender, ILoggingEvent::getLevel))
       .isEqualTo(Level.INFO);
     assertThat(StructuredLogEventSupport.lastEventKeyValues(logAppender))
-      .containsEntry(LogKey.EVENT_TYPE, RecipientEventType.LIST)
+      .containsEntry(LogKey.OPERATION, RecipientOperation.LIST)
       .containsEntry(LogKey.OUTCOME, LogOutcome.SUCCESS)
       .containsEntry(RecipientLogKey.FILTER_NAME_PRESENT, "false");
-    assertThat(StructuredLogEventSupport.eventTypes(logAppender))
+    assertThat(StructuredLogEventSupport.operations(logAppender))
       .allMatch(eventType -> !eventType.contains(".failed"));
   }
 
@@ -136,9 +136,9 @@ class ListRecipientsQueryHandlerTest {
     assertThat(StructuredLogEventSupport.lastEvent(logAppender, ILoggingEvent::getLevel))
       .isEqualTo(Level.WARN);
     assertThat(StructuredLogEventSupport.lastEventKeyValues(logAppender))
-      .containsEntry(LogKey.EVENT_TYPE, RecipientEventType.LIST)
+      .containsEntry(LogKey.OPERATION, RecipientOperation.LIST)
       .containsEntry(LogKey.OUTCOME, LogOutcome.FAILURE);
-    assertThat(StructuredLogEventSupport.eventTypes(logAppender))
+    assertThat(StructuredLogEventSupport.operations(logAppender))
       .allMatch(eventType -> !eventType.contains(".failed"));
   }
 
@@ -159,9 +159,9 @@ class ListRecipientsQueryHandlerTest {
     assertThat(StructuredLogEventSupport.lastEvent(logAppender, ILoggingEvent::getLevel))
       .isEqualTo(Level.ERROR);
     assertThat(StructuredLogEventSupport.lastEventKeyValues(logAppender))
-      .containsEntry(LogKey.EVENT_TYPE, RecipientEventType.LIST)
+      .containsEntry(LogKey.OPERATION, RecipientOperation.LIST)
       .containsEntry(LogKey.OUTCOME, LogOutcome.FAILURE);
-    assertThat(StructuredLogEventSupport.eventTypes(logAppender))
+    assertThat(StructuredLogEventSupport.operations(logAppender))
       .allMatch(eventType -> !eventType.contains(".failed"));
   }
 

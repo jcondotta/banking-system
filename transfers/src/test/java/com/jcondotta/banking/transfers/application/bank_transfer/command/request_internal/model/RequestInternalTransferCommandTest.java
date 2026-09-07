@@ -3,8 +3,8 @@ package com.jcondotta.banking.transfers.application.bank_transfer.command.reques
 import com.jcondotta.banking.transfers.domain.bank_account.identity.BankAccountId;
 import com.jcondotta.banking.transfers.domain.bank_account.value_objects.Iban;
 import com.jcondotta.banking.transfers.domain.bank_transfer.value_objects.party.PartyName;
-import com.jcondotta.banking.transfers.domain.monetary_movement.value_objects.MonetaryAmount;
-import com.jcondotta.banking.transfers.domain.shared.value_objects.Currency;
+import com.jcondotta.banking.money.Currency;
+import com.jcondotta.banking.money.MonetaryAmount;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;

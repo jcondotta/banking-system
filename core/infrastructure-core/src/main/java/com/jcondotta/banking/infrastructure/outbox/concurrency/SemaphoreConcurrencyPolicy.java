@@ -14,6 +14,9 @@ import java.util.function.Supplier;
 
 public class SemaphoreConcurrencyPolicy<K> implements ShardConcurrencyPolicy<K> {
 
+  public static final String ERROR_TIMEOUT_REQUIRED = "timeout must be provided";
+  public static final String ERROR_TIMEOUT_MUST_BE_POSITIVE = "timeout must be greater than zero";
+
   private final Map<K, Semaphore> shardSemaphores;
 
   public SemaphoreConcurrencyPolicy(Set<K> shards, int concurrencyPerShard) {
@@ -26,6 +29,7 @@ public class SemaphoreConcurrencyPolicy<K> implements ShardConcurrencyPolicy<K> 
   @Override
   public <T> T execute(K shard, Duration timeout, Supplier<T> task) {
     var semaphore = getSemaphore(shard);
+    validateTimeout(timeout);
     boolean acquired;
 
     try {
@@ -66,5 +70,14 @@ public class SemaphoreConcurrencyPolicy<K> implements ShardConcurrencyPolicy<K> 
       throw new ShardNotFoundException(shard);
     }
     return semaphore;
+  }
+
+  private static void validateTimeout(Duration timeout) {
+    if (timeout == null) {
+      throw new IllegalArgumentException(ERROR_TIMEOUT_REQUIRED);
+    }
+    if (!timeout.isPositive()) {
+      throw new IllegalArgumentException(ERROR_TIMEOUT_MUST_BE_POSITIVE);
+    }
   }
 }

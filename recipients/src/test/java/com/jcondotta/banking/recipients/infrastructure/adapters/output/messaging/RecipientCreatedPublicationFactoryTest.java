@@ -3,6 +3,8 @@ package com.jcondotta.banking.recipients.infrastructure.adapters.output.messagin
 import com.jcondotta.banking.recipients.domain.recipient.events.RecipientCreatedData;
 import com.jcondotta.banking.recipients.domain.recipient.events.RecipientCreatedEvent;
 import com.jcondotta.banking.recipients.domain.recipient.identity.RecipientId;
+import com.jcondotta.banking.recipients.infrastructure.adapters.output.messaging.properties.KafkaTopicsProperties;
+import com.jcondotta.banking.recipients.infrastructure.adapters.output.messaging.properties.KafkaTopicsProperties.TopicConfig;
 import com.jcondotta.domain.events.DomainEventMetadata;
 import com.jcondotta.domain.identity.EventId;
 import org.junit.jupiter.api.Test;
@@ -19,7 +21,12 @@ class RecipientCreatedPublicationFactoryTest {
   private static final UUID BANK_ACCOUNT_ID = UUID.fromString("c328e5b7-0bf8-4acb-b09a-1dd0ed475c22");
   private static final Instant OCCURRED_AT = Instant.parse("2026-01-01T00:00:00Z");
 
-  private final RecipientCreatedPublicationFactory factory = new RecipientCreatedPublicationFactory();
+  private static final KafkaTopicsProperties TOPICS_PROPERTIES = new KafkaTopicsProperties(
+      new TopicConfig("custom-recipient-created"),
+      new TopicConfig("custom-recipient-deleted")
+  );
+
+  private final RecipientCreatedPublicationFactory factory = new RecipientCreatedPublicationFactory(TOPICS_PROPERTIES);
 
   @Test
   void shouldMapRecipientCreatedEventToPublication() {
@@ -29,7 +36,7 @@ class RecipientCreatedPublicationFactoryTest {
 
     assertThat(factory.domainEventType()).isEqualTo(RecipientCreatedEvent.class);
     assertThat(publication.event()).isSameAs(event);
-    assertThat(publication.destination()).isEqualTo("recipients-created");
+    assertThat(publication.destination()).isEqualTo("custom-recipient-created");
     assertThat(publication.key()).isEqualTo(BANK_ACCOUNT_ID.toString());
   }
 

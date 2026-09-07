@@ -8,9 +8,9 @@ import com.jcondotta.banking.transfers.domain.bank_transfer.events.InternalTrans
 import com.jcondotta.banking.transfers.domain.bank_transfer.exceptions.InvalidTransferStatusTransitionException;
 import com.jcondotta.banking.transfers.domain.bank_transfer.identity.BankTransferId;
 import com.jcondotta.banking.transfers.domain.bank_transfer.validation.BankTransferErrors;
-import com.jcondotta.banking.transfers.domain.monetary_movement.enums.MovementType;
-import com.jcondotta.banking.transfers.domain.monetary_movement.value_objects.MonetaryAmount;
-import com.jcondotta.banking.transfers.domain.shared.value_objects.Currency;
+import com.jcondotta.banking.money.Currency;
+import com.jcondotta.banking.money.MonetaryAmount;
+import com.jcondotta.banking.money.MovementType;
 import com.jcondotta.domain.exception.DomainValidationException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;

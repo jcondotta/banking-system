@@ -39,6 +39,7 @@ services:
 
   data-prepper:
     image: opensearchproject/data-prepper:2.8.0
+    platform: linux/amd64
     container_name: banking-data-prepper
     ports:
       - "2021:2021"

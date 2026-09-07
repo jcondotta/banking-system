@@ -4,7 +4,7 @@ import com.jcondotta.application.logging.LogContext;
 import com.jcondotta.application.logging.LogKey;
 import com.jcondotta.application.query.QueryHandler;
 import com.jcondotta.banking.accounts.application.bankaccount.query.get.model.BankAccountSummary;
-import com.jcondotta.banking.accounts.application.common.log.BankAccountEventType;
+import com.jcondotta.banking.accounts.application.common.log.BankAccountOperation;
 import com.jcondotta.banking.accounts.application.common.log.BankAccountLogKey;
 import com.jcondotta.banking.accounts.domain.bankaccount.exceptions.BankAccountNotFoundException;
 import com.jcondotta.banking.accounts.application.common.log.BankAccountFailureReason;
@@ -34,7 +34,7 @@ public class GetBankAccountByIbanQueryHandler
     }
   )
   public BankAccountSummary handle(GetBankAccountByIbanQuery query) {
-    var logContext = LogContext.timed(LOGGER, BankAccountEventType.GET_BY_IBAN)
+    var logContext = LogContext.timed(LOGGER, BankAccountOperation.GET_BY_IBAN)
       .with(BankAccountLogKey.MASKED_IBAN, query.iban().masked());
 
     try {

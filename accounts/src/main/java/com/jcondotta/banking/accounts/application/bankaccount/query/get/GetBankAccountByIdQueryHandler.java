@@ -1,7 +1,7 @@
 package com.jcondotta.banking.accounts.application.bankaccount.query.get;
 
 import com.jcondotta.application.query.QueryHandler;
-import com.jcondotta.banking.accounts.application.common.log.BankAccountEventType;
+import com.jcondotta.banking.accounts.application.common.log.BankAccountOperation;
 import com.jcondotta.application.logging.LogContext;
 import com.jcondotta.application.logging.LogKey;
 import com.jcondotta.banking.accounts.application.common.log.BankAccountLogKey;
@@ -34,7 +34,7 @@ public class GetBankAccountByIdQueryHandler
     }
   )
   public BankAccountSummary handle(GetBankAccountByIdQuery query) {
-    var logContext = LogContext.timed(LOGGER, BankAccountEventType.GET_BY_ID)
+    var logContext = LogContext.timed(LOGGER, BankAccountOperation.GET_BY_ID)
       .with(BankAccountLogKey.BANK_ACCOUNT_ID, query.bankAccountId().value().toString());
 
     try {

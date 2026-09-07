@@ -6,7 +6,7 @@ import ch.qos.logback.core.read.ListAppender;
 import com.jcondotta.application.logging.LogKey;
 import com.jcondotta.banking.recipients.application.common.log.RecipientLogKey;
 import com.jcondotta.application.logging.LogOutcome;
-import com.jcondotta.banking.recipients.application.common.log.RecipientEventType;
+import com.jcondotta.banking.recipients.application.common.log.RecipientOperation;
 import com.jcondotta.application.logging.StructuredLogEventSupport;
 import com.jcondotta.banking.recipients.domain.recipient.aggregate.Recipient;
 import com.jcondotta.banking.recipients.domain.recipient.exceptions.RecipientNotFoundException;
@@ -95,9 +95,9 @@ class RemoveRecipientCommandHandlerTest {
     assertThat(StructuredLogEventSupport.lastEvent(logAppender, ILoggingEvent::getLevel))
       .isEqualTo(Level.INFO);
     assertThat(StructuredLogEventSupport.lastEventKeyValues(logAppender))
-      .containsEntry(LogKey.EVENT_TYPE, RecipientEventType.REMOVE)
+      .containsEntry(LogKey.OPERATION, RecipientOperation.REMOVE)
       .containsEntry(LogKey.OUTCOME, LogOutcome.SUCCESS);
-    assertThat(StructuredLogEventSupport.eventTypes(logAppender))
+    assertThat(StructuredLogEventSupport.operations(logAppender))
       .allMatch(eventType -> !eventType.contains(".failed"));
   }
 
@@ -119,9 +119,9 @@ class RemoveRecipientCommandHandlerTest {
     assertThat(StructuredLogEventSupport.lastEvent(logAppender, ILoggingEvent::getLevel))
       .isEqualTo(Level.WARN);
     assertThat(StructuredLogEventSupport.lastEventKeyValues(logAppender))
-      .containsEntry(LogKey.EVENT_TYPE, RecipientEventType.REMOVE)
+      .containsEntry(LogKey.OPERATION, RecipientOperation.REMOVE)
       .containsEntry(LogKey.OUTCOME, LogOutcome.FAILURE);
-    assertThat(StructuredLogEventSupport.eventTypes(logAppender))
+    assertThat(StructuredLogEventSupport.operations(logAppender))
       .allMatch(eventType -> !eventType.contains(".failed"));
   }
 
@@ -142,9 +142,9 @@ class RemoveRecipientCommandHandlerTest {
     assertThat(StructuredLogEventSupport.lastEvent(logAppender, ILoggingEvent::getLevel))
       .isEqualTo(Level.WARN);
     assertThat(StructuredLogEventSupport.lastEventKeyValues(logAppender))
-      .containsEntry(LogKey.EVENT_TYPE, RecipientEventType.REMOVE)
+      .containsEntry(LogKey.OPERATION, RecipientOperation.REMOVE)
       .containsEntry(LogKey.OUTCOME, LogOutcome.FAILURE);
-    assertThat(StructuredLogEventSupport.eventTypes(logAppender))
+    assertThat(StructuredLogEventSupport.operations(logAppender))
       .allMatch(eventType -> !eventType.contains(".failed"));
   }
 
@@ -166,9 +166,9 @@ class RemoveRecipientCommandHandlerTest {
     assertThat(StructuredLogEventSupport.lastEvent(logAppender, ILoggingEvent::getLevel))
       .isEqualTo(Level.ERROR);
     assertThat(StructuredLogEventSupport.lastEventKeyValues(logAppender))
-      .containsEntry(LogKey.EVENT_TYPE, RecipientEventType.REMOVE)
+      .containsEntry(LogKey.OPERATION, RecipientOperation.REMOVE)
       .containsEntry(LogKey.OUTCOME, LogOutcome.FAILURE);
-    assertThat(StructuredLogEventSupport.eventTypes(logAppender))
+    assertThat(StructuredLogEventSupport.operations(logAppender))
       .allMatch(eventType -> !eventType.contains(".failed"));
   }
 

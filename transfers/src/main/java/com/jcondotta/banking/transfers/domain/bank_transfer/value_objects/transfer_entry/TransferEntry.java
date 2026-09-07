@@ -2,9 +2,9 @@ package com.jcondotta.banking.transfers.domain.bank_transfer.value_objects.trans
 
 import com.jcondotta.banking.transfers.domain.bank_transfer.value_objects.party.PartyRecipient;
 import com.jcondotta.banking.transfers.domain.bank_transfer.value_objects.party.PartySender;
-import com.jcondotta.banking.transfers.domain.monetary_movement.enums.MovementType;
-import com.jcondotta.banking.transfers.domain.monetary_movement.value_objects.MonetaryMovement;
-import com.jcondotta.banking.transfers.domain.shared.value_objects.Currency;
+import com.jcondotta.banking.money.Currency;
+import com.jcondotta.banking.money.MonetaryMovement;
+import com.jcondotta.banking.money.MovementType;
 
 import java.math.BigDecimal;
 

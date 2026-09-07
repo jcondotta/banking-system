@@ -1,8 +1,8 @@
 package com.jcondotta.banking.accounts.integration.bankaccount.add_joint_holder;
 
+import com.jcondotta.banking.accounts.domain.bankaccount.events.BankAccountActivatedEvent;
 import com.jcondotta.banking.accounts.domain.bankaccount.events.BankAccountJointHolderAddedEvent;
 import com.jcondotta.banking.accounts.domain.bankaccount.events.BankAccountOpenedEvent;
-import com.jcondotta.banking.accounts.domain.bankaccount.events.BankAccountStatusChangedEvent;
 import com.jcondotta.banking.accounts.domain.testsupport.AccountTypeAndCurrencySource;
 import com.jcondotta.banking.accounts.domain.bankaccount.enums.AccountType;
 import com.jcondotta.banking.accounts.domain.bankaccount.enums.Currency;
@@ -41,7 +41,7 @@ class AddJointHolderIT extends BankAccountIntegrationSupport {
     assertOutboxEvents(
       id,
       BankAccountOpenedEvent.EVENT_TYPE,
-      BankAccountStatusChangedEvent.EVENT_TYPE,
+      BankAccountActivatedEvent.EVENT_TYPE,
       BankAccountJointHolderAddedEvent.EVENT_TYPE
     );
   }

@@ -1,6 +1,14 @@
 server:
   port: 8082
 
+app:
+  kafka:
+    topics:
+      internal-transfer-requested:
+        topic-name: internal-transfer-requested
+      internal-transfer-completed:
+        topic-name: internal-transfer-completed
+
 spring:
   datasource:
     url: jdbc:postgresql://localhost:5433/transfers_db?connectTimeout=3&socketTimeout=5
@@ -9,6 +17,9 @@ spring:
 
   jpa:
     show-sql: false
+
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
 
 management:
   data-prepper:

@@ -11,6 +11,8 @@ app:
         topic-name: bank-account-status-changed
       joint-account-holder-added:
         topic-name: joint-account-holder-added
+      bank-account-activated:
+        topic-name: bank-account-activated
 
 cloud:
   aws:

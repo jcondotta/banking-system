@@ -2,10 +2,11 @@ package com.jcondotta.banking.accounts.infrastructure.adapters.output.persistenc
 
 import com.jcondotta.banking.accounts.infrastructure.adapters.output.persistence.dynamodb.outbox.entity.OutboxEntity;
 import com.jcondotta.banking.infrastructure.outbox.exceptions.OutboxEventAlreadyProcessedException;
-import com.jcondotta.banking.infrastructure.outbox.properties.OutboxProcessingProperties;
+import com.jcondotta.banking.infrastructure.outbox.properties.OutboxProperties;
 import com.jcondotta.banking.infrastructure.outbox.store.OutboxQuery;
 import com.jcondotta.banking.accounts.infrastructure.adapters.output.persistence.dynamodb.outbox.store.OutboxQueryKey;
 import com.jcondotta.banking.accounts.infrastructure.adapters.output.persistence.dynamodb.outbox.properties.OutboxTableProperties;
+import com.jcondotta.banking.infrastructure.outbox.store.OutboxEventStore;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
@@ -25,11 +26,11 @@ import java.util.Optional;
 
 @Repository
 @RequiredArgsConstructor
-public class OutboxEventStoreImpl implements OutboxEventStore {
+public class OutboxEventStoreImpl implements OutboxEventStore<OutboxEntity> {
 
   private final DynamoDbTable<OutboxEntity> outboxTable;
   private final OutboxTableProperties outboxTableProperties;
-  private final OutboxProcessingProperties processingProperties;
+  private final OutboxProperties outboxProperties;
 
   @Override
   public List<OutboxEntity> findPendingEvents(OutboxQuery query) {
@@ -70,7 +71,7 @@ public class OutboxEventStoreImpl implements OutboxEventStore {
   @Override
   public Optional<OutboxEntity> tryClaimEvent(OutboxEntity item) {
     Instant now = Instant.now();
-    Instant newVisibility = now.plus(processingProperties.claimTimeout());
+    Instant newVisibility = now.plus(outboxProperties.worker().processing().claimTimeout());
 
     Expression condition = Expression.builder()
       .expression("nextAttemptAt <= :now")
@@ -80,7 +81,7 @@ public class OutboxEventStoreImpl implements OutboxEventStore {
     OutboxEntity updatedItem = item.toBuilder()
       .nextAttemptAt(newVisibility)
       .gsi1sk(newVisibility.toString())
-      .retryCount(item.getRetryCount() + 1)
+      .attemptCount(item.getAttemptCount() + 1)
       .build();
 
     var request = UpdateItemEnhancedRequest.builder(OutboxEntity.class)

@@ -29,6 +29,17 @@ spring:
     show-sql: false
     open-in-view: false
 
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.ByteArraySerializer
+    consumer:
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.ByteArrayDeserializer
+      auto-offset-reset: earliest
+      enable-auto-commit: false
+
   mvc:
     apiversion:
       supported:
@@ -43,6 +54,13 @@ spring:
         api-version: ${ACCOUNTS_API_VERSION:1.0}
 
 app:
+  kafka:
+    topics:
+      internal-transfer-requested:
+        topic-name: ${KAFKA_INTERNAL_TRANSFER_REQUESTED_TOPIC_NAME}
+      internal-transfer-completed:
+        topic-name: ${KAFKA_INTERNAL_TRANSFER_COMPLETED_TOPIC_NAME}
+
   api:
     transfers:
       internal-transfer-path: /api/transfers/internal
@@ -51,6 +69,31 @@ app:
     transfers:
       request-internal:
         limit: 5
+
+  ledger:
+    kafka:
+      topics:
+        bank-account-activated: bank-account-activated
+        internal-transfer-requested: internal-transfer-requested
+      consumer:
+        group-id: ledger-bank-account-provisioner
+        transfer-group-id: ledger-internal-transfer-processor
+
+  outbox:
+    shards:
+      count: 4
+    worker:
+      enabled: true
+      processing:
+        batch-size-per-shard: 20
+        concurrency-per-shard: 4
+        acquire-timeout: 10s
+        publish-timeout: 5s
+        claim-timeout: 30s
+      retry:
+        max-retries: 5
+      polling:
+        interval: 10s
 
 management:
   endpoint:

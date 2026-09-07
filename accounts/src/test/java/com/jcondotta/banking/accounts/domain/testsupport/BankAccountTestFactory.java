@@ -24,7 +24,8 @@ public final class BankAccountTestFactory {
 
   public static BankAccount build(BankAccountId id, AccountType accountType, Currency currency,
                                   AccountStatus status, Instant createdAt, AccountHolders accountHolders) {
-    return build(id, accountType, currency, DEFAULT_IBAN, status, createdAt, accountHolders);
+    var iban = status.isPending() ? null : DEFAULT_IBAN;
+    return build(id, accountType, currency, iban, status, createdAt, accountHolders);
   }
 
   public static BankAccount build(BankAccountId id, AccountType accountType, Currency currency,

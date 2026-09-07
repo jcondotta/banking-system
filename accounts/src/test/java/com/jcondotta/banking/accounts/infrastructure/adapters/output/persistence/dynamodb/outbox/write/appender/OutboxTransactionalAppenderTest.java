@@ -1,7 +1,7 @@
 package com.jcondotta.banking.accounts.infrastructure.adapters.output.persistence.dynamodb.outbox.write.appender;
 
 import com.jcondotta.banking.accounts.infrastructure.adapters.output.persistence.dynamodb.outbox.entity.OutboxEntity;
-import com.jcondotta.banking.accounts.infrastructure.adapters.output.persistence.dynamodb.outbox.write.collector.OutboxEventCollector;
+import com.jcondotta.banking.infrastructure.outbox.collector.OutboxEventCollector;
 import com.jcondotta.banking.accounts.infrastructure.adapters.output.persistence.dynamodb.DynamoDbTransactionContext;
 import com.jcondotta.domain.core.AggregateRoot;
 import org.junit.jupiter.api.BeforeEach;
@@ -27,7 +27,7 @@ class OutboxTransactionalAppenderTest {
   private DynamoDbTable<OutboxEntity> outboxTable;
 
   @Mock
-  private OutboxEventCollector outboxEventCollector;
+  private OutboxEventCollector<OutboxEntity> outboxEventCollector;
 
   @Mock
   private AggregateRoot<?> aggregate;

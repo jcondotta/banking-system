@@ -67,12 +67,13 @@ class BankAccountUnblockTest {
   @EnumSource(value = AccountStatus.class, names = {"BLOCKED", "ACTIVE"}, mode = EnumSource.Mode.EXCLUDE)
   void shouldThrowInvalidBankAccountStateTransitionException_whenUnblockingFromInvalidState(AccountStatus status) {
     var primaryAccountHolder = BankAccountTestFixture.createPrimaryHolder(PRIMARY_ACCOUNT_HOLDER, ACCOUNT_CREATED_AT);
+    var iban = status.isPending() ? null : VALID_IBAN;
 
     var bankAccount = BankAccount.restore(
       BankAccountId.newId(),
       ACCOUNT_TYPE_SAVINGS,
       CURRENCY_USD,
-      VALID_IBAN,
+      iban,
       status,
       ACCOUNT_CREATED_AT,
       AccountHolders.of(primaryAccountHolder)

@@ -1,27 +1,23 @@
 package com.jcondotta.banking.infrastructure.adapters.input.scheduling.outbox;
 
 import com.jcondotta.banking.infrastructure.outbox.dispatcher.OutboxDispatcher;
-import com.jcondotta.banking.infrastructure.outbox.properties.OutboxPollingProperties;
 import jakarta.annotation.PreDestroy;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.stereotype.Component;
 
+import java.time.Duration;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-@Component
-@ConditionalOnProperty(prefix = "app.outbox.worker", name = "enabled", havingValue = "true", matchIfMissing = false)
 public class OutboxWorkerRunner implements ApplicationRunner {
 
   private final OutboxDispatcher dispatcher;
-  private final OutboxPollingProperties pollingProperties;
+  private final Duration interval;
 
-  public OutboxWorkerRunner(OutboxDispatcher dispatcher, OutboxPollingProperties pollingProperties) {
+  public OutboxWorkerRunner(OutboxDispatcher dispatcher, Duration interval) {
     this.dispatcher = dispatcher;
-    this.pollingProperties = pollingProperties;
+    this.interval = interval;
   }
 
   private final ExecutorService executor = Executors.newSingleThreadExecutor(
@@ -48,8 +44,6 @@ public class OutboxWorkerRunner implements ApplicationRunner {
   }
 
   private void workerLoop() {
-    var interval = pollingProperties.interval();
-
     while (!Thread.currentThread().isInterrupted()) {
       try {
         dispatcher.dispatch();

@@ -4,7 +4,7 @@ import com.jcondotta.application.query.QueryHandler;
 import com.jcondotta.application.logging.LogContext;
 import com.jcondotta.application.logging.LogKey;
 import com.jcondotta.banking.recipients.application.common.log.RecipientLogKey;
-import com.jcondotta.banking.recipients.application.common.log.RecipientEventType;
+import com.jcondotta.banking.recipients.application.common.log.RecipientOperation;
 import com.jcondotta.banking.recipients.application.recipient.query.RecipientQueryRepository;
 import com.jcondotta.banking.recipients.application.common.log.RecipientFailureReason;
 import com.jcondotta.domain.exception.DomainException;
@@ -35,7 +35,7 @@ public class ListRecipientsQueryHandler
       }
   )
   public ListRecipientsQueryResult handle(ListRecipientsQuery query) {
-    var logContext = LogContext.timed(LOGGER, RecipientEventType.LIST)
+    var logContext = LogContext.timed(LOGGER, RecipientOperation.LIST)
       .with(RecipientLogKey.BANK_ACCOUNT_ID, query.bankAccountId().asString());
 
     try {

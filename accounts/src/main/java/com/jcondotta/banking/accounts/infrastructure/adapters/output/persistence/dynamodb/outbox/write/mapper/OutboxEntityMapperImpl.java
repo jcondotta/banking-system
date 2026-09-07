@@ -3,8 +3,9 @@ package com.jcondotta.banking.accounts.infrastructure.adapters.output.persistenc
 import com.jcondotta.banking.accounts.infrastructure.adapters.output.persistence.dynamodb.outbox.entity.OutboxEntity;
 import com.jcondotta.banking.accounts.infrastructure.adapters.output.persistence.dynamodb.outbox.entity.OutboxKey;
 import com.jcondotta.banking.infrastructure.outbox.exceptions.OutboxSerializationException;
-import com.jcondotta.banking.accounts.infrastructure.adapters.output.persistence.dynamodb.outbox.write.shard.OutboxShardResolver;
+import com.jcondotta.banking.infrastructure.outbox.shard.OutboxShardResolver;
 import com.jcondotta.banking.infrastructure.adapters.output.messaging.EventEnvelope;
+import com.jcondotta.banking.infrastructure.outbox.mapper.OutboxEntityMapper;
 import com.jcondotta.domain.events.DomainEvent;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -15,7 +16,7 @@ import java.time.Instant;
 
 @Component
 @RequiredArgsConstructor
-public class OutboxEntityMapperImpl implements OutboxEntityMapper {
+public class OutboxEntityMapperImpl implements OutboxEntityMapper<OutboxEntity> {
 
   private final ObjectMapper objectMapper;
   private final OutboxShardResolver shardResolver;
@@ -39,8 +40,11 @@ public class OutboxEntityMapperImpl implements OutboxEntityMapper {
       .shard(shard)
       .nextAttemptAt(now)
       .aggregateId(aggregateId.asString())
+      .messageKey(envelope.messageKey())
       .eventId(eventId)
+      .correlationId(envelope.correlationId())
       .eventType(event.eventType())
+      .destination(envelope.destination())
       .payload(serialize(envelope))
       .createdAt(now)
       .build();

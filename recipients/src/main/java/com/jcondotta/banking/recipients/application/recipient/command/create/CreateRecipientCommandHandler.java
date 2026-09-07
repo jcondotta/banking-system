@@ -4,7 +4,7 @@ import com.jcondotta.application.command.CommandHandlerWithResult;
 import com.jcondotta.application.logging.LogContext;
 import com.jcondotta.application.logging.LogKey;
 import com.jcondotta.banking.recipients.application.common.log.RecipientLogKey;
-import com.jcondotta.banking.recipients.application.common.log.RecipientEventType;
+import com.jcondotta.banking.recipients.application.common.log.RecipientOperation;
 import com.jcondotta.banking.recipients.application.common.log.RecipientFailureReason;
 import com.jcondotta.banking.recipients.domain.recipient.aggregate.Recipient;
 import com.jcondotta.banking.recipients.domain.recipient.identity.RecipientId;
@@ -50,7 +50,7 @@ public class CreateRecipientCommandHandler implements CommandHandlerWithResult<C
   )
   @ConcurrencyLimit(limitString = "${app.concurrency.recipients.create.limit}", policy = ConcurrencyLimit.ThrottlePolicy.REJECT)
   public RecipientId handle(CreateRecipientCommand command) {
-    var logContext = LogContext.timed(LOGGER, RecipientEventType.CREATE)
+    var logContext = LogContext.timed(LOGGER, RecipientOperation.CREATE)
       .with(RecipientLogKey.BANK_ACCOUNT_ID, command.bankAccountId().asString());
 
     try {

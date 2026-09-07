@@ -43,7 +43,7 @@ Follow local naming patterns: `*Command`, `*CommandHandler`, `*Query`, `*QueryHa
 
 REST paths come from `app.api.recipients.*`; API versioning uses `X-API-Version`.
 
-Use `LogContext`, `RecipientEventType`, and `RecipientLogKey`; expose the full IBAN through authorized recipient read endpoints, mask it in logs and error details, and keep IDs out of metric tags.
+Use `LogContext`, `RecipientOperation`, and `RecipientLogKey`; expose the full IBAN through authorized recipient read endpoints, mask it in logs and error details, and keep IDs out of metric tags.
 
 Preserve framework-free domain code even though all layers compile in one Maven module.
 

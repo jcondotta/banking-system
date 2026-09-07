@@ -36,7 +36,7 @@ Read:
 - command/query records under `src/main/java/com/jcondotta/banking/recipients/application/recipient`
 - matching command or query handler
 - repository ports used by the handler
-- `RecipientEventType` and `RecipientLogKey` when logging changes
+- `RecipientOperation` and `RecipientLogKey` when logging changes
 - matching handler tests under `src/test/java/com/jcondotta/banking/recipients/application`
 
 Rules:

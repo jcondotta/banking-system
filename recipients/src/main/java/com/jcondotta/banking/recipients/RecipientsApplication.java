@@ -6,7 +6,7 @@ import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.resilience.annotation.EnableResilientMethods;
 
 @SpringBootApplication(scanBasePackages = "com.jcondotta.banking")
-@ConfigurationPropertiesScan(basePackages = "com.jcondotta.banking")
+@ConfigurationPropertiesScan(basePackageClasses = RecipientsApplication.class)
 @EnableResilientMethods
 public class RecipientsApplication {
 

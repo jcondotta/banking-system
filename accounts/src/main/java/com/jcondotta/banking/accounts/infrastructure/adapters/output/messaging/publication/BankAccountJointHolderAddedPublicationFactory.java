@@ -3,13 +3,18 @@ package com.jcondotta.banking.accounts.infrastructure.adapters.output.messaging.
 import com.jcondotta.banking.accounts.domain.bankaccount.events.BankAccountJointHolderAddedEvent;
 import com.jcondotta.banking.infrastructure.adapters.output.messaging.DefaultEventPublication;
 import com.jcondotta.banking.infrastructure.adapters.output.messaging.EventPublication;
+import com.jcondotta.banking.accounts.infrastructure.adapters.output.messaging.properties.KafkaTopicsProperties;
 import com.jcondotta.banking.infrastructure.adapters.output.messaging.EventPublicationFactory;
 import org.springframework.stereotype.Component;
 
 @Component
 public class BankAccountJointHolderAddedPublicationFactory implements EventPublicationFactory<BankAccountJointHolderAddedEvent> {
 
-  static final String DESTINATION = "bank-account-joint-holder-added";
+  private final String destination;
+
+  public BankAccountJointHolderAddedPublicationFactory(KafkaTopicsProperties topicsProperties) {
+    this.destination = topicsProperties.jointAccountHolderAdded().topicName();
+  }
 
   @Override
   public Class<BankAccountJointHolderAddedEvent> domainEventType() {
@@ -18,6 +23,6 @@ public class BankAccountJointHolderAddedPublicationFactory implements EventPubli
 
   @Override
   public EventPublication<BankAccountJointHolderAddedEvent> create(BankAccountJointHolderAddedEvent event) {
-    return new DefaultEventPublication<>(event, DESTINATION, event.aggregateId().asString());
+    return new DefaultEventPublication<>(event, destination, event.aggregateId().asString());
   }
 }

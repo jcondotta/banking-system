@@ -5,7 +5,7 @@ import com.jcondotta.application.logging.LogContext;
 import com.jcondotta.application.logging.LogKey;
 import com.jcondotta.banking.transfers.application.bank_account.ports.output.BankAccountLookupPort;
 import com.jcondotta.banking.transfers.application.bank_transfer.command.request_internal.model.RequestInternalTransferCommand;
-import com.jcondotta.banking.transfers.application.common.log.BankTransferEventType;
+import com.jcondotta.banking.transfers.application.common.log.BankTransferOperation;
 import com.jcondotta.banking.transfers.application.common.log.BankTransferLogKey;
 import com.jcondotta.banking.transfers.domain.bank_account.exceptions.RecipientBankAccountNotFoundException;
 import com.jcondotta.banking.transfers.domain.bank_transfer.aggregate.BankTransfer;
@@ -52,7 +52,7 @@ public class RequestInternalTransferCommandHandler implements CommandHandlerWith
   public BankTransferId handle(RequestInternalTransferCommand command) {
     var bankTransferId = BankTransferId.newId();
 
-    var logContext = LogContext.timed(LOGGER, BankTransferEventType.REQUEST_INTERNAL)
+    var logContext = LogContext.timed(LOGGER, BankTransferOperation.REQUEST_INTERNAL)
       .with(BankTransferLogKey.BANK_TRANSFER_ID, bankTransferId.value().toString())
       .with(BankTransferLogKey.SENDER_ACCOUNT_ID, command.senderAccountId().value().toString())
       .with(BankTransferLogKey.RECIPIENT_NAME, command.recipientName().value())

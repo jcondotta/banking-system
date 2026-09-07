@@ -2,15 +2,19 @@ package com.jcondotta.banking.accounts.application.bankaccount.command.activate;
 
 import com.jcondotta.application.command.CommandHandler;
 import com.jcondotta.banking.accounts.application.bankaccount.command.activate.model.ActivateBankAccountCommand;
+import com.jcondotta.banking.accounts.domain.bankaccount.aggregate.BankAccount;
 import com.jcondotta.banking.accounts.domain.bankaccount.enums.AccountStatus;
 import com.jcondotta.banking.accounts.domain.bankaccount.exceptions.BankAccountNotFoundException;
 import com.jcondotta.banking.accounts.domain.bankaccount.identity.BankAccountId;
 import com.jcondotta.banking.accounts.domain.bankaccount.repository.BankAccountRepository;
 import com.jcondotta.banking.accounts.domain.testsupport.AccountHolderFixtures;
 import com.jcondotta.banking.accounts.domain.testsupport.BankAccountFixture;
+import com.jcondotta.banking.accounts.application.bankaccount.services.IbanGenerator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -26,11 +30,14 @@ class ActivateBankAccountCommandHandlerTest {
   @Mock
   private BankAccountRepository bankAccountRepository;
 
+  @Captor
+  private ArgumentCaptor<BankAccount> bankAccountCaptor;
+
   private CommandHandler<ActivateBankAccountCommand> commandHandler;
 
   @BeforeEach
   void setUp() {
-    commandHandler = new ActivateBankAccountCommandHandler(bankAccountRepository);
+    commandHandler = new ActivateBankAccountCommandHandler(bankAccountRepository, new IbanGenerator());
   }
 
   @Test
@@ -45,11 +52,15 @@ class ActivateBankAccountCommandHandlerTest {
 
     commandHandler.handle(command);
 
-    assertThat(bankAccount.getAccountStatus()).isEqualTo(AccountStatus.ACTIVE);
-
     verify(bankAccountRepository).findById(bankAccount.getId());
-    verify(bankAccountRepository).save(bankAccount);
+    verify(bankAccountRepository).save(bankAccountCaptor.capture());
     verifyNoMoreInteractions(bankAccountRepository);
+
+    assertThat(bankAccountCaptor.getValue())
+      .satisfies(activated -> {
+        assertThat(activated.getAccountStatus()).isEqualTo(AccountStatus.ACTIVE);
+        assertThat(activated.getIban()).isPresent();
+      });
   }
 
   @Test

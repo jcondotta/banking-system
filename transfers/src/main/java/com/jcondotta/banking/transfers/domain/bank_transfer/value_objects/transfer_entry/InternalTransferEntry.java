@@ -4,9 +4,9 @@ import com.jcondotta.banking.transfers.domain.bank_account.identity.BankAccountI
 import com.jcondotta.banking.transfers.domain.bank_transfer.exceptions.IdenticalInternalPartiesException;
 import com.jcondotta.banking.transfers.domain.bank_transfer.value_objects.party.InternalAccountRecipient;
 import com.jcondotta.banking.transfers.domain.bank_transfer.value_objects.party.InternalAccountSender;
-import com.jcondotta.banking.transfers.domain.monetary_movement.enums.MovementType;
-import com.jcondotta.banking.transfers.domain.monetary_movement.value_objects.MonetaryAmount;
-import com.jcondotta.banking.transfers.domain.monetary_movement.value_objects.MonetaryMovement;
+import com.jcondotta.banking.money.MonetaryAmount;
+import com.jcondotta.banking.money.MonetaryMovement;
+import com.jcondotta.banking.money.MovementType;
 
 import static com.jcondotta.domain.support.Preconditions.required;
 

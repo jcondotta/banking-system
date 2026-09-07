@@ -2,7 +2,6 @@ package com.jcondotta.banking.accounts.infrastructure.adapters.input.scheduling.
 
 import com.jcondotta.banking.infrastructure.adapters.input.scheduling.outbox.OutboxWorkerRunner;
 import com.jcondotta.banking.infrastructure.outbox.dispatcher.OutboxDispatcher;
-import com.jcondotta.banking.infrastructure.outbox.properties.OutboxPollingProperties;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.ApplicationArguments;
 
@@ -17,7 +16,7 @@ class OutboxWorkerRunnerTest {
   @Test
   void shouldStopWorker_whenApplicationShutsDown() {
     var dispatcher = mock(OutboxDispatcher.class);
-    var runner = new OutboxWorkerRunner(dispatcher, new OutboxPollingProperties(Duration.ofHours(1)));
+    var runner = new OutboxWorkerRunner(dispatcher, Duration.ofHours(1));
 
     runner.run(mock(ApplicationArguments.class));
 

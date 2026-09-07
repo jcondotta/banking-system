@@ -32,8 +32,7 @@ public final class BankAccountTestFixture {
       fixtures.contactInfo(),
       fixtures.address(),
       accountType,
-      currency,
-      VALID_IBAN
+      currency
     );
   }
 
@@ -43,10 +42,9 @@ public final class BankAccountTestFixture {
 
   public static BankAccount openActiveAccount(AccountHolderFixtures fixtures, AccountType accountType, Currency currency) {
     var account = openPendingAccount(fixtures, accountType, currency);
-    account.activate();
-    account.pullEvents();
-
-    return account;
+    var activated = account.activate(VALID_IBAN);
+    activated.pullEvents();
+    return activated;
   }
 
   public static AccountHolder createPrimaryHolder(AccountHolderFixtures fixtures, Instant createdAt) {

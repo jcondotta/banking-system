@@ -44,10 +44,10 @@ public final class StructuredLogEventSupport {
       ));
   }
 
-  public static List<String> eventTypes(ListAppender<ILoggingEvent> appender) {
+  public static List<String> operations(ListAppender<ILoggingEvent> appender) {
     return appender.list.stream()
       .map(StructuredLogEventSupport::keyValues)
-      .map(values -> values.get(LogKey.EVENT_TYPE))
+      .map(values -> values.get(LogKey.OPERATION))
       .filter(java.util.Objects::nonNull)
       .toList();
   }

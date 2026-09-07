@@ -18,6 +18,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 
 import java.util.List;
 
@@ -86,7 +87,7 @@ class BankAccountEntityMapperImplTest {
             assertThat(entity.getBankAccountId()).isEqualTo(bankAccount.getId().value());
             assertThat(entity.getAccountType()).isEqualTo(accountType.name());
             assertThat(entity.getCurrency()).isEqualTo(currency.name());
-            assertThat(entity.getIban()).isEqualTo(bankAccount.getIban().value());
+            assertThat(entity.getIban()).isEqualTo(bankAccount.getIban().map(iban -> iban.value()).orElse(null));
             assertThat(entity.getAccountStatus()).isEqualTo(bankAccount.getAccountStatus().name());
             assertThat(entity.getCreatedAt()).isEqualTo(bankAccount.getCreatedAt());
         }
@@ -106,6 +107,23 @@ class BankAccountEntityMapperImplTest {
 
     @Nested
     class Restore {
+
+        @ParameterizedTest
+        @EnumSource(AccountStatus.class)
+        void shouldRestoreValidIbanConfigurationForEveryAccountStatus(AccountStatus accountStatus) {
+            BankAccount original = BankAccountTestFactory.build(
+              BankAccountId.newId(),
+              AccountType.CHECKING,
+              Currency.EUR,
+              accountStatus,
+              AccountHolderTestFactory.primary(PRIMARY_FIXTURE)
+            );
+
+            BankAccount restored = mapper.restore(mapper.toEntities(original));
+
+            assertThat(restored.getAccountStatus()).isEqualTo(accountStatus);
+            assertThat(restored.getIban()).isEqualTo(original.getIban());
+        }
 
         @ParameterizedTest
         @AccountTypeAndCurrencySource

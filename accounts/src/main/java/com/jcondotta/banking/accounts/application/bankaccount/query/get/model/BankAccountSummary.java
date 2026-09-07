@@ -23,7 +23,6 @@ public record BankAccountSummary(
   static final String ID_REQUIRED = "id must be provided";
   static final String ACCOUNT_TYPE_REQUIRED = "accountType must be provided";
   static final String CURRENCY_REQUIRED = "currency must be provided";
-  static final String IBAN_REQUIRED = "iban must be provided";
   static final String ACCOUNT_STATUS_REQUIRED = "accountStatus must be provided";
   static final String CREATED_AT_REQUIRED = "createdAt must be provided";
   static final String ACCOUNT_HOLDERS_REQUIRED = "holders must be provided";
@@ -33,7 +32,6 @@ public record BankAccountSummary(
     requireNonNull(id, ID_REQUIRED);
     requireNonNull(accountType, ACCOUNT_TYPE_REQUIRED);
     requireNonNull(currency, CURRENCY_REQUIRED);
-    requireNonNull(iban, IBAN_REQUIRED);
     requireNonNull(accountStatus, ACCOUNT_STATUS_REQUIRED);
     requireNonNull(createdAt, CREATED_AT_REQUIRED);
 

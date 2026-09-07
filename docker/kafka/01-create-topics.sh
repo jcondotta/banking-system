@@ -18,9 +18,12 @@ create_topic() {
 }
 
 create_topic "bank-account-opened"
+create_topic "bank-account-activated"
 create_topic "bank-account-status-changed"
 create_topic "joint-account-holder-added"
 create_topic "recipients-created"
 create_topic "recipients-deleted"
+create_topic "internal-transfer-requested"
+create_topic "internal-transfer-completed"
 
 echo "✅ Kafka topics created successfully"

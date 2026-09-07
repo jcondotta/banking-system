@@ -13,8 +13,8 @@ import com.jcondotta.banking.transfers.domain.bank_transfer.exceptions.Identical
 import com.jcondotta.banking.transfers.domain.bank_transfer.identity.BankTransferId;
 import com.jcondotta.banking.transfers.domain.bank_transfer.repository.BankTransferRepository;
 import com.jcondotta.banking.transfers.domain.bank_transfer.value_objects.party.PartyName;
-import com.jcondotta.banking.transfers.domain.monetary_movement.value_objects.MonetaryAmount;
-import com.jcondotta.banking.transfers.domain.shared.value_objects.Currency;
+import com.jcondotta.banking.money.Currency;
+import com.jcondotta.banking.money.MonetaryAmount;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

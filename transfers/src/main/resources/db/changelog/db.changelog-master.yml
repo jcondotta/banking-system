@@ -3,3 +3,15 @@ databaseChangeLog:
       file: db/changelog/changes/0001-create-bank-transfers-table.sql
   - include:
       file: db/changelog/changes/0002-create-bank-transfers-indexes.sql
+  - include:
+      file: db/changelog/changes/0003-create-bank-transfer-outbox-table.sql
+  - include:
+      file: db/changelog/changes/0004-create-ledger-account-table.sql
+  - include:
+      file: db/changelog/changes/0005-create-account-balance-table.sql
+  - include:
+      file: db/changelog/changes/0006-alter-ledger-account-currency-to-varchar.sql
+  - include:
+      file: db/changelog/changes/0007-add-destination-to-bank-transfer-outbox.sql
+  - include:
+      file: db/changelog/changes/0008-add-message-key-to-bank-transfer-outbox.sql

@@ -7,7 +7,7 @@ import org.springframework.web.service.registry.ImportHttpServices;
 
 @SpringBootApplication(scanBasePackages = "com.jcondotta.banking")
 @ImportHttpServices(basePackages = "com.jcondotta.banking.accounts.infrastructure.adapters.input.rest")
-@ConfigurationPropertiesScan(basePackages = "com.jcondotta.banking")
+@ConfigurationPropertiesScan(basePackageClasses = AccountsApplication.class)
 public class AccountsApplication {
 
   public static void main(String[] args) {

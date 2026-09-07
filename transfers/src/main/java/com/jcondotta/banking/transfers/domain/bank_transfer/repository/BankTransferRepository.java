@@ -6,4 +6,5 @@ import com.jcondotta.domain.core.repository.AggregateRepository;
 
 public interface BankTransferRepository extends AggregateRepository<BankTransfer, BankTransferId> {
 
+    void complete(BankTransfer transfer);
 }

@@ -4,8 +4,7 @@ import com.jcondotta.application.command.CommandHandlerWithResult;
 import com.jcondotta.application.logging.LogContext;
 import com.jcondotta.application.logging.LogKey;
 import com.jcondotta.banking.accounts.application.bankaccount.command.open.model.OpenBankAccountCommand;
-import com.jcondotta.banking.accounts.application.bankaccount.ports.output.facade.IbanGeneratorFacade;
-import com.jcondotta.banking.accounts.application.common.log.BankAccountEventType;
+import com.jcondotta.banking.accounts.application.common.log.BankAccountOperation;
 import com.jcondotta.banking.accounts.application.common.log.BankAccountLogKey;
 import com.jcondotta.banking.accounts.domain.bankaccount.aggregate.BankAccount;
 import com.jcondotta.banking.accounts.domain.bankaccount.identity.BankAccountId;
@@ -23,7 +22,6 @@ import org.springframework.stereotype.Component;
 public class OpenBankAccountCommandHandler implements CommandHandlerWithResult<OpenBankAccountCommand, BankAccountId> {
 
   private final BankAccountRepository bankAccountRepository;
-  private final IbanGeneratorFacade ibanGeneratorFacade;
 
   @Override
   @Observed(
@@ -37,20 +35,17 @@ public class OpenBankAccountCommandHandler implements CommandHandlerWithResult<O
   public BankAccountId handle(OpenBankAccountCommand command) {
     var bankAccountId = BankAccountId.newId();
 
-    var logContext = LogContext.timed(log, BankAccountEventType.OPEN)
-      .with(BankAccountLogKey.BANK_ACCOUNT_ID, bankAccountId.value().toString());;
+    var logContext = LogContext.timed(log, BankAccountOperation.OPEN)
+      .with(BankAccountLogKey.BANK_ACCOUNT_ID, bankAccountId.value().toString());
 
     try {
-      var iban = ibanGeneratorFacade.generate();
-
       BankAccount bankAccount = BankAccount.open(
         bankAccountId,
         command.personalInfo(),
         command.contactInfo(),
         command.address(),
         command.accountType(),
-        command.currency(),
-        iban
+        command.currency()
       );
 
       bankAccountRepository.save(bankAccount);

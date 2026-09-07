@@ -22,6 +22,8 @@ app:
         topic-name: ${KAFKA_BANK_ACCOUNT_STATUS_CHANGED_TOPIC_NAME:bank-account-status-changed}
       joint-account-holder-added:
         topic-name: ${KAFKA_JOINT_ACCOUNT_HOLDER_ADDED_TOPIC_NAME:joint-account-holder-added}
+      bank-account-activated:
+        topic-name: ${KAFKA_BANK_ACCOUNT_ACTIVATED_TOPIC_NAME:bank-account-activated}
 
 cloud:
   aws:

@@ -6,9 +6,9 @@ import com.jcondotta.banking.transfers.domain.bank_transfer.enums.TransferStatus
 import com.jcondotta.banking.transfers.domain.bank_transfer.enums.TransferType;
 import com.jcondotta.banking.transfers.domain.bank_transfer.identity.BankTransferId;
 import com.jcondotta.banking.transfers.domain.bank_transfer.value_objects.transfer_entry.InternalTransferEntry;
-import com.jcondotta.banking.transfers.domain.monetary_movement.enums.MovementType;
-import com.jcondotta.banking.transfers.domain.monetary_movement.value_objects.MonetaryAmount;
-import com.jcondotta.banking.transfers.domain.shared.value_objects.Currency;
+import com.jcondotta.banking.money.Currency;
+import com.jcondotta.banking.money.MonetaryAmount;
+import com.jcondotta.banking.money.MovementType;
 import com.jcondotta.banking.transfers.infrastructure.adapters.output.persistence.entity.BankTransferEntity;
 import org.junit.jupiter.api.Test;
 

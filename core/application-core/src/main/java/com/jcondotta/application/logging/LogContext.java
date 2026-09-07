@@ -19,8 +19,8 @@ public final class LogContext {
     this.startNs = startNs;
   }
 
-  public static LogContext timed(Logger logger, String eventType) {
-    return new LogContext(logger, Map.of(LogKey.EVENT_TYPE, eventType), System.nanoTime());
+  public static LogContext timed(Logger logger, String operation) {
+    return new LogContext(logger, Map.of(LogKey.OPERATION, operation), System.nanoTime());
   }
 
   public LogContext with(String key, Object value) {

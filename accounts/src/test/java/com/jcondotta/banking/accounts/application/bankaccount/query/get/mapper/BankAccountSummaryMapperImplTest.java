@@ -14,6 +14,7 @@ import org.junit.jupiter.api.Test;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -45,13 +46,21 @@ class BankAccountSummaryMapperImplTest {
     assertThat(bankAccountSummary.id()).isEqualTo(bankAccount.getId().value());
     assertThat(bankAccountSummary.accountType()).isEqualTo(bankAccount.getAccountType());
     assertThat(bankAccountSummary.currency()).isEqualTo(bankAccount.getCurrency());
-    assertThat(bankAccountSummary.iban()).isEqualTo(bankAccount.getIban().value());
+    assertThat(bankAccountSummary.iban()).isNull();
     assertThat(bankAccountSummary.accountStatus()).isEqualTo(bankAccount.getAccountStatus());
     assertThat(bankAccountSummary.createdAt()).isNotNull();
 
     assertThat(bankAccountSummary.holders())
       .extracting(AccountHolderSummary::type)
       .containsExactly(HolderType.PRIMARY);
+  }
+
+  @Test
+  void shouldMapActiveAccount_whenIbanIsPresent() {
+    var bankAccount = BankAccountFixture.openActiveAccount(AccountHolderFixtures.JEFFERSON);
+    var bankAccountSummary = bankAccountMapper.toSummary(bankAccount);
+
+    assertThat(bankAccountSummary.iban()).isEqualTo(bankAccount.getIban().map(iban -> iban.value()).orElseThrow());
   }
 
   @Test
@@ -77,16 +86,6 @@ class BankAccountSummaryMapperImplTest {
   }
 
   @Test
-  void shouldThrowNullPointerException_whenBankAccountIbanIsNull() {
-    var bankAccount = mock(BankAccount.class);
-    mockRequiredValues(bankAccount);
-
-    assertThatThrownBy(() -> bankAccountMapper.toSummary(bankAccount))
-      .isInstanceOf(NullPointerException.class)
-      .hasMessage("iban must be provided");
-  }
-
-  @Test
   void shouldThrowNullPointerException_whenBankAccountIdIsNull() {
     var bankAccount = mock(BankAccount.class);
 
@@ -99,7 +98,7 @@ class BankAccountSummaryMapperImplTest {
   void shouldThrowNullPointerException_whenBankAccountHoldersAreNull() {
     var bankAccount = mock(BankAccount.class);
     mockRequiredValues(bankAccount);
-    when(bankAccount.getIban()).thenReturn(BankAccountFixture.VALID_IBAN);
+    when(bankAccount.getIban()).thenReturn(Optional.of(BankAccountFixture.VALID_IBAN));
     when(bankAccount.getActiveHolders()).thenReturn(null);
 
     assertThatThrownBy(() -> bankAccountMapper.toSummary(bankAccount))

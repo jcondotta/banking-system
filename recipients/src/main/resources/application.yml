@@ -46,6 +46,11 @@ app:
   kafka:
     publisher:
       publish-timeout: ${KAFKA_PUBLISH_TIMEOUT:5s}
+    topics:
+      recipient-created:
+        topic-name: ${KAFKA_RECIPIENT_CREATED_TOPIC_NAME}
+      recipient-deleted:
+        topic-name: ${KAFKA_RECIPIENT_DELETED_TOPIC_NAME}
   concurrency:
     recipients:
       create:

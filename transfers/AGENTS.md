@@ -34,7 +34,7 @@ Use Java conventions with 4-space indentation and packages under `com.jcondotta.
 
 Follow local naming patterns such as `*Command`, `*CommandHandler`, `*Repository`, `*Adapter`, `*Client`, `*Controller`, `*Request`, `*Response`, `*Entity`, `*Mapper`, `*Event`, `*Test`, and `*IT`.
 
-Keep REST paths under `app.api.transfers.*`, API versioning on `X-API-Version`, use `BankTransferEventType` and `BankTransferLogKey` for structured logs, and keep identifiers out of metric tags. Preserve framework-free domain code even though all layers compile in one Maven module.
+Keep REST paths under `app.api.transfers.*`, API versioning on `X-API-Version`, use `BankTransferOperation` and `BankTransferLogKey` for structured logs, and keep identifiers out of metric tags. Preserve framework-free domain code even though all layers compile in one Maven module.
 
 ## Testing Guidelines
 

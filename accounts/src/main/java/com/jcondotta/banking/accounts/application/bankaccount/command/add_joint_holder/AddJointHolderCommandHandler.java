@@ -4,7 +4,7 @@ import com.jcondotta.application.command.CommandHandler;
 import com.jcondotta.application.logging.LogContext;
 import com.jcondotta.application.logging.LogKey;
 import com.jcondotta.banking.accounts.application.bankaccount.command.add_joint_holder.model.AddJointHolderCommand;
-import com.jcondotta.banking.accounts.application.common.log.BankAccountEventType;
+import com.jcondotta.banking.accounts.application.common.log.BankAccountOperation;
 import com.jcondotta.banking.accounts.application.common.log.BankAccountLogKey;
 import com.jcondotta.banking.accounts.domain.bankaccount.exceptions.BankAccountNotFoundException;
 import com.jcondotta.banking.accounts.domain.bankaccount.repository.BankAccountRepository;
@@ -32,7 +32,7 @@ public class AddJointHolderCommandHandler implements CommandHandler<AddJointHold
     }
   )
   public void handle(AddJointHolderCommand command) {
-    var logContext = LogContext.timed(log, BankAccountEventType.ADD_JOINT_HOLDER)
+    var logContext = LogContext.timed(log, BankAccountOperation.ADD_JOINT_HOLDER)
       .with(BankAccountLogKey.BANK_ACCOUNT_ID, command.bankAccountId().value().toString());
 
     try {

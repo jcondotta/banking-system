@@ -3,7 +3,7 @@ package com.jcondotta.banking.accounts.infrastructure.adapters.output.persistenc
 import com.jcondotta.banking.accounts.infrastructure.adapters.output.persistence.dynamodb.DynamoDbTransactionContext;
 import com.jcondotta.application.TransactionContext;
 import com.jcondotta.banking.accounts.application.bankaccount.ports.output.TransactionalAppender;
-import com.jcondotta.banking.accounts.infrastructure.adapters.output.persistence.dynamodb.outbox.write.collector.OutboxEventCollector;
+import com.jcondotta.banking.infrastructure.outbox.collector.OutboxEventCollector;
 import com.jcondotta.banking.accounts.infrastructure.adapters.output.persistence.dynamodb.outbox.entity.OutboxEntity;
 import com.jcondotta.domain.core.AggregateRoot;
 import lombok.RequiredArgsConstructor;
@@ -15,7 +15,7 @@ import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
 public class OutboxTransactionalAppender implements TransactionalAppender {
 
   private final DynamoDbTable<OutboxEntity> outboxTable;
-  private final OutboxEventCollector outboxEventCollector;
+  private final OutboxEventCollector<OutboxEntity> outboxEventCollector;
 
   @Override
   public void append(AggregateRoot<?> aggregate, TransactionContext transactionContext) {

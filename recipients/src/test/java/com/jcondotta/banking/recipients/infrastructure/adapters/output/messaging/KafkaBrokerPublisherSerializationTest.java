@@ -6,6 +6,8 @@ import com.jcondotta.banking.recipients.domain.recipient.events.RecipientCreated
 import com.jcondotta.banking.recipients.domain.recipient.events.RecipientCreatedEvent;
 import com.jcondotta.banking.recipients.domain.recipient.identity.BankAccountId;
 import com.jcondotta.banking.recipients.domain.recipient.identity.RecipientId;
+import com.jcondotta.banking.recipients.infrastructure.adapters.output.messaging.properties.KafkaTopicsProperties;
+import com.jcondotta.banking.recipients.infrastructure.adapters.output.messaging.properties.KafkaTopicsProperties.TopicConfig;
 import com.jcondotta.domain.events.DomainEventMetadata;
 import com.jcondotta.domain.identity.EventId;
 import org.apache.kafka.clients.producer.ProducerRecord;
@@ -52,7 +54,11 @@ class KafkaBrokerPublisherSerializationTest {
       DomainEventMetadata.of(EVENT_ID, RECIPIENT_ID, OCCURRED_AT),
       new RecipientCreatedData(BANK_ACCOUNT_ID.value(), "Isabella Condotta", "BE68539007547034")
     );
-    var publication = new RecipientCreatedPublicationFactory().create(event);
+    var topicsProperties = new KafkaTopicsProperties(
+      new TopicConfig(TOPIC_NAME),
+      new TopicConfig("recipients-deleted")
+    );
+    var publication = new RecipientCreatedPublicationFactory(topicsProperties).create(event);
 
     publisher.publish(publication, publicationContext());
 

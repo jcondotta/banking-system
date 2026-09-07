@@ -4,11 +4,12 @@ import com.jcondotta.application.command.CommandHandler;
 import com.jcondotta.application.logging.LogContext;
 import com.jcondotta.application.logging.LogKey;
 import com.jcondotta.banking.accounts.application.bankaccount.command.activate.model.ActivateBankAccountCommand;
-import com.jcondotta.banking.accounts.application.common.log.BankAccountEventType;
+import com.jcondotta.banking.accounts.application.common.log.BankAccountOperation;
 import com.jcondotta.banking.accounts.application.common.log.BankAccountLogKey;
 import com.jcondotta.banking.accounts.domain.bankaccount.exceptions.BankAccountNotFoundException;
 import com.jcondotta.banking.accounts.domain.bankaccount.repository.BankAccountRepository;
 import com.jcondotta.banking.accounts.application.common.log.BankAccountFailureReason;
+import com.jcondotta.banking.accounts.application.bankaccount.services.IbanGenerator;
 import com.jcondotta.domain.exception.DomainException;
 import io.micrometer.observation.annotation.Observed;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +22,7 @@ import org.springframework.stereotype.Component;
 public class ActivateBankAccountCommandHandler implements CommandHandler<ActivateBankAccountCommand> {
 
   private final BankAccountRepository bankAccountRepository;
+  private final IbanGenerator ibanGenerator;
 
   @Override
   @Observed(
@@ -32,15 +34,16 @@ public class ActivateBankAccountCommandHandler implements CommandHandler<Activat
     }
   )
   public void handle(ActivateBankAccountCommand command) {
-    var logContext = LogContext.timed(log, BankAccountEventType.ACTIVATE)
+    var logContext = LogContext.timed(log, BankAccountOperation.ACTIVATE)
       .with(BankAccountLogKey.BANK_ACCOUNT_ID, command.bankAccountId().value().toString());
 
     try {
       var bankAccount = bankAccountRepository.findById(command.bankAccountId())
         .orElseThrow(() -> new BankAccountNotFoundException(command.bankAccountId()));
 
-      bankAccount.activate();
-      bankAccountRepository.save(bankAccount);
+      var iban = ibanGenerator.generate();
+      var activatedAccount = bankAccount.activate(iban);
+      bankAccountRepository.save(activatedAccount);
 
       logContext.info("Bank account activated")
         .success()

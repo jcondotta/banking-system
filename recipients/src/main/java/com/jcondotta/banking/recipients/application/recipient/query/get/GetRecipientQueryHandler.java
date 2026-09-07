@@ -3,7 +3,7 @@ package com.jcondotta.banking.recipients.application.recipient.query.get;
 import com.jcondotta.application.logging.LogContext;
 import com.jcondotta.application.logging.LogKey;
 import com.jcondotta.application.query.QueryHandler;
-import com.jcondotta.banking.recipients.application.common.log.RecipientEventType;
+import com.jcondotta.banking.recipients.application.common.log.RecipientOperation;
 import com.jcondotta.banking.recipients.application.common.log.RecipientLogKey;
 import com.jcondotta.banking.recipients.application.recipient.query.RecipientQueryRepository;
 import com.jcondotta.banking.recipients.application.common.log.RecipientFailureReason;
@@ -35,7 +35,7 @@ public class GetRecipientQueryHandler implements QueryHandler<GetRecipientQuery,
     }
   )
   public GetRecipientQueryResult handle(GetRecipientQuery query) {
-    var logContext = LogContext.timed(LOGGER, RecipientEventType.GET)
+    var logContext = LogContext.timed(LOGGER, RecipientOperation.GET)
       .with(RecipientLogKey.BANK_ACCOUNT_ID, query.bankAccountId().asString())
       .with(RecipientLogKey.RECIPIENT_ID, query.recipientId().asString());
 

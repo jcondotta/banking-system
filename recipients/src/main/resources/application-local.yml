@@ -1,6 +1,14 @@
 server:
   port: 8081
 
+app:
+  kafka:
+    topics:
+      recipient-created:
+        topic-name: recipients-created
+      recipient-deleted:
+        topic-name: recipients-deleted
+
 spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/recipients_db?connectTimeout=3&socketTimeout=5

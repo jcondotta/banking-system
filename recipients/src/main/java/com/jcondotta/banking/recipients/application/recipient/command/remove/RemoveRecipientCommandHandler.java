@@ -3,7 +3,7 @@ package com.jcondotta.banking.recipients.application.recipient.command.remove;
 import com.jcondotta.application.command.CommandHandler;
 import com.jcondotta.application.logging.LogContext;
 import com.jcondotta.application.logging.LogKey;
-import com.jcondotta.banking.recipients.application.common.log.RecipientEventType;
+import com.jcondotta.banking.recipients.application.common.log.RecipientOperation;
 import com.jcondotta.banking.recipients.application.common.log.RecipientFailureReason;
 import com.jcondotta.banking.recipients.application.common.log.RecipientLogKey;
 import com.jcondotta.banking.recipients.application.recipient.ports.output.RecipientEventPublisher;
@@ -49,7 +49,7 @@ public class RemoveRecipientCommandHandler implements CommandHandler<RemoveRecip
   )
   @ConcurrencyLimit(limitString = "${app.concurrency.recipients.remove.limit}", policy = ConcurrencyLimit.ThrottlePolicy.REJECT)
   public void handle(RemoveRecipientCommand command) {
-    var logContext = LogContext.timed(LOGGER, RecipientEventType.REMOVE)
+    var logContext = LogContext.timed(LOGGER, RecipientOperation.REMOVE)
       .with(RecipientLogKey.BANK_ACCOUNT_ID, command.bankAccountId().asString())
       .with(RecipientLogKey.RECIPIENT_ID, command.recipientId().asString());
 

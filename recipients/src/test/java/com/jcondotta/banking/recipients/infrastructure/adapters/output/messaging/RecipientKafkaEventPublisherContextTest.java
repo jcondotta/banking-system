@@ -7,6 +7,8 @@ import com.jcondotta.banking.infrastructure.adapters.output.messaging.EventPubli
 import com.jcondotta.banking.recipients.domain.recipient.events.RecipientCreatedData;
 import com.jcondotta.banking.recipients.domain.recipient.events.RecipientCreatedEvent;
 import com.jcondotta.banking.recipients.domain.recipient.identity.RecipientId;
+import com.jcondotta.banking.recipients.infrastructure.adapters.output.messaging.properties.KafkaTopicsProperties;
+import com.jcondotta.banking.recipients.infrastructure.adapters.output.messaging.properties.KafkaTopicsProperties.TopicConfig;
 import com.jcondotta.domain.events.DomainEventMetadata;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -33,7 +35,11 @@ class RecipientKafkaEventPublisherContextTest {
   @Test
   void shouldReusePublicationContext_whenPublishingMultipleEvents() {
     var event = recipientCreatedEvent();
-    var publication = new RecipientCreatedPublicationFactory().create(event);
+    var topicsProperties = new KafkaTopicsProperties(
+      new TopicConfig("recipients-created"),
+      new TopicConfig("recipients-deleted")
+    );
+    var publication = new RecipientCreatedPublicationFactory(topicsProperties).create(event);
     var publicationRegistry = mock(EventPublicationRegistry.class);
     var brokerPublisher = mock(BrokerPublisher.class);
     var correlationIdProvider = mock(CorrelationIdProvider.class);

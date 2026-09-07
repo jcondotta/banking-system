@@ -2,7 +2,7 @@ package com.jcondotta.banking.transfers.domain.bank_transfer.events;
 
 import com.jcondotta.banking.transfers.domain.bank_account.identity.BankAccountId;
 import com.jcondotta.banking.transfers.domain.bank_transfer.identity.BankTransferId;
-import com.jcondotta.banking.transfers.domain.monetary_movement.value_objects.MonetaryAmount;
+import com.jcondotta.banking.money.MonetaryAmount;
 import com.jcondotta.domain.events.DomainEvent;
 import com.jcondotta.domain.events.DomainEventMetadata;
 import com.jcondotta.domain.identity.EventId;

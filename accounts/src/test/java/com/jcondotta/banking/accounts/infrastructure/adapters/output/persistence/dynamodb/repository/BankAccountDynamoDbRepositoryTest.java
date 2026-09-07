@@ -165,7 +165,7 @@ class BankAccountDynamoDbRepositoryTest {
         .thenReturn(DynamoPageIterable.pageOf(fullEntities));
       when(bankAccountEntityMapper.restore(fullEntities)).thenReturn(account);
 
-      var result = repository.findByIban(account.getIban());
+      var result = repository.findByIban(account.getIban().orElseThrow());
 
       assertThat(result).contains(account);
       verify(bankingTable, never()).scan();
@@ -178,7 +178,7 @@ class BankAccountDynamoDbRepositoryTest {
       when(bankingTableIbanIndex.query(any(QueryEnhancedRequest.class)))
         .thenReturn(DynamoPageIterable.emptyPage());
 
-      var result = repository.findByIban(account.getIban());
+      var result = repository.findByIban(account.getIban().orElseThrow());
 
       assertThat(result).isEmpty();
       verify(bankingTable, never()).scan();

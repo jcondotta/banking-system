@@ -8,6 +8,7 @@ public class DefaultShardExecutor<K> implements ShardExecutor<K> {
   public static final String ERROR_POLICY_REQUIRED = "policy must be provided";
   public static final String ERROR_TIMEOUT_REQUIRED = "acquireTimeout must be provided";
   public static final String ERROR_TIMEOUT_MUST_BE_POSITIVE = "acquireTimeout must be greater than zero";
+
   public static final String ERROR_DEFAULT_TIMEOUT_REQUIRED = "defaultTimeout must be provided";
   public static final String ERROR_DEFAULT_TIMEOUT_MUST_BE_POSITIVE = "defaultTimeout must be greater than zero";
 
@@ -20,11 +21,7 @@ public class DefaultShardExecutor<K> implements ShardExecutor<K> {
     }
 
     this.policy = policy;
-    this.defaultTimeout = validateTimeout(
-      timeout,
-      ERROR_DEFAULT_TIMEOUT_REQUIRED,
-      ERROR_DEFAULT_TIMEOUT_MUST_BE_POSITIVE
-    );
+    this.defaultTimeout = validateTimeout(timeout, ERROR_DEFAULT_TIMEOUT_REQUIRED, ERROR_DEFAULT_TIMEOUT_MUST_BE_POSITIVE);
   }
 
   @Override

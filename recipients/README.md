@@ -105,13 +105,14 @@ Important fields:
 
 | Field | Purpose |
 | --- | --- |
-| `event_type` | Stable business event name, for example `recipients.create` |
+| `operation` | Stable application operation name, for example `recipients.create` |
+| `event_type` | Domain/integration event type when an actual event is being processed |
 | `outcome` | `success` or `failure` |
 | `reason` | Normalized failure reason |
 | `bank_account_id` | Bank account boundary identifier |
 | `recipient_id` | Recipient identifier when available |
 | `duration_ms` | Application use-case duration |
-| `correlationId` | Request correlation ID from MDC |
+| `correlation_id` | Request correlation ID from MDC |
 
 Example JSON log:
 
@@ -123,8 +124,8 @@ Example JSON log:
   "message": "Recipient created",
   "service": "recipients",
   "service_version": "1.1.0",
-  "correlationId": "5d83107d-9e7f-46f2-99a7-6cf7c51cf319",
-  "event_type": "recipients.create",
+  "correlation_id": "5d83107d-9e7f-46f2-99a7-6cf7c51cf319",
+  "operation": "recipients.create",
   "outcome": "success",
   "bank_account_id": "11111111-1111-1111-1111-111111111116",
   "recipient_id": "b96ac832-98cb-4590-bd42-0fa3a3ef61f6",
@@ -168,7 +169,7 @@ The application does not push directly to Loki. Logs are written to stdout in a 
 Example LogQL:
 
 ```logql
-{application="recipients"} | json | event_type="recipients.create"
+{application="recipients"} | json | operation="recipients.create"
 ```
 
 ```logql
@@ -176,12 +177,12 @@ Example LogQL:
 ```
 
 ```logql
-{application="recipients"} | json | correlationId="5d83107d-9e7f-46f2-99a7-6cf7c51cf319"
+{application="recipients"} | json | correlation_id="5d83107d-9e7f-46f2-99a7-6cf7c51cf319"
 ```
 
 ### Cardinality Decisions
 
-Metrics use low-cardinality tags such as `application`, `operation`, `aggregate`, `method`, `status`, and templated `uri`. High-cardinality values such as `recipient_id`, `bank_account_id`, and `correlationId` belong in logs and traces, not metric labels.
+Metrics use low-cardinality tags such as `application`, `operation`, `aggregate`, `method`, `status`, and templated `uri`. High-cardinality values such as `recipient_id`, `bank_account_id`, and `correlation_id` belong in logs and traces, not metric labels.
 
 ## Running Locally
 

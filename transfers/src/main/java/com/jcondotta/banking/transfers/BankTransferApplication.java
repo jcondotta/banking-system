@@ -9,7 +9,7 @@ import org.springframework.web.service.registry.ImportHttpServices;
 
 @SpringBootApplication(scanBasePackages = "com.jcondotta.banking")
 @ImportHttpServices(group = "accounts", types = BankAccountLookupClient.class)
-@ConfigurationPropertiesScan(basePackages = "com.jcondotta.banking")
+@ConfigurationPropertiesScan(basePackageClasses = BankTransferApplication.class)
 @EnableResilientMethods
 public class BankTransferApplication {
 

@@ -1,5 +1,6 @@
 package com.jcondotta.banking.accounts.infrastructure.adapters.output.persistence.dynamodb.outbox.entity;
 
+import com.jcondotta.banking.infrastructure.outbox.record.OutboxRecord;
 import lombok.*;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.*;
 
@@ -12,7 +13,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @Builder(toBuilder = true)
 @DynamoDbBean
-public class OutboxEntity {
+public class OutboxEntity implements OutboxRecord {
 
   private String partitionKey;
   private String sortKey;
@@ -24,11 +25,14 @@ public class OutboxEntity {
   private Instant nextAttemptAt;
 
   @Builder.Default
-  private int retryCount = 0;
+  private int attemptCount = 0;
 
   private UUID eventId;
+  private UUID correlationId;
   private String aggregateId;
+  private String messageKey;
   private String eventType;
+  private String destination;
   private String payload;
   private Instant createdAt;
 

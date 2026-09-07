@@ -32,20 +32,23 @@ app:
         topic-name: ${KAFKA_BANK_ACCOUNT_STATUS_CHANGED_TOPIC_NAME}
       joint-account-holder-added:
         topic-name: ${KAFKA_JOINT_ACCOUNT_HOLDER_ADDED_TOPIC_NAME}
+      bank-account-activated:
+        topic-name: ${KAFKA_BANK_ACCOUNT_ACTIVATED_TOPIC_NAME}
   outbox:
-    worker:
-      enabled: true
     shards:
       count: 4
-      batch-size-per-shard: 20
-      concurrency-per-shard: 4
-    processing:
-      acquire-timeout: 10s
-      publish-timeout: 5s
-      claim-timeout: 30s
-      max-retries: 5
-    polling:
-      interval: 10s
+    worker:
+      enabled: true
+      processing:
+        batch-size-per-shard: 20
+        concurrency-per-shard: 4
+        acquire-timeout: 10s
+        publish-timeout: 5s
+        claim-timeout: 30s
+      retry:
+        max-retries: 5
+      polling:
+        interval: 10s
 
 cloud:
   aws:

@@ -3,6 +3,8 @@ package com.jcondotta.banking.recipients.infrastructure.adapters.output.messagin
 import com.jcondotta.banking.recipients.domain.recipient.events.RecipientDeletedData;
 import com.jcondotta.banking.recipients.domain.recipient.events.RecipientDeletedEvent;
 import com.jcondotta.banking.recipients.domain.recipient.identity.RecipientId;
+import com.jcondotta.banking.recipients.infrastructure.adapters.output.messaging.properties.KafkaTopicsProperties;
+import com.jcondotta.banking.recipients.infrastructure.adapters.output.messaging.properties.KafkaTopicsProperties.TopicConfig;
 import com.jcondotta.domain.events.DomainEventMetadata;
 import com.jcondotta.domain.identity.EventId;
 import org.junit.jupiter.api.Test;
@@ -18,6 +20,10 @@ class RecipientDeletedPublicationFactoryTest {
   private static final RecipientId RECIPIENT_ID = RecipientId.of(UUID.fromString("10d723ea-fe73-4d58-9ed0-97c248955496"));
   private static final UUID BANK_ACCOUNT_ID = UUID.fromString("c328e5b7-0bf8-4acb-b09a-1dd0ed475c22");
   private static final Instant OCCURRED_AT = Instant.parse("2026-01-01T00:00:00Z");
+  private static final KafkaTopicsProperties TOPICS_PROPERTIES = new KafkaTopicsProperties(
+      new TopicConfig("custom-recipient-created"),
+      new TopicConfig("custom-recipient-deleted")
+  );
 
   @Test
   void shouldCreatePublicationForDeletedEvent() {
@@ -26,10 +32,10 @@ class RecipientDeletedPublicationFactoryTest {
       new RecipientDeletedData(BANK_ACCOUNT_ID)
     );
 
-    var publication = new RecipientDeletedPublicationFactory().create(event);
+    var publication = new RecipientDeletedPublicationFactory(TOPICS_PROPERTIES).create(event);
 
     assertThat(publication.event()).isSameAs(event);
-    assertThat(publication.destination()).isEqualTo("recipients-deleted");
+    assertThat(publication.destination()).isEqualTo("custom-recipient-deleted");
     assertThat(publication.key()).isEqualTo(BANK_ACCOUNT_ID.toString());
   }
 }

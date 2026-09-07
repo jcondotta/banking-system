@@ -6,6 +6,7 @@ import com.jcondotta.banking.accounts.domain.bankaccount.enums.AccountType;
 import com.jcondotta.banking.accounts.domain.bankaccount.enums.Currency;
 import com.jcondotta.banking.accounts.domain.bankaccount.enums.HolderType;
 import com.jcondotta.banking.accounts.domain.bankaccount.exceptions.InvalidBankAccountHoldersConfigurationException;
+import com.jcondotta.banking.accounts.domain.bankaccount.exceptions.InvalidBankAccountIbanConfigurationException;
 import com.jcondotta.banking.accounts.domain.bankaccount.exceptions.MaxJointHoldersExceededException;
 import com.jcondotta.banking.accounts.domain.testsupport.TimeTestFactory;
 import com.jcondotta.banking.accounts.domain.bankaccount.fixtures.AccountHolderFixtures;
@@ -14,6 +15,7 @@ import com.jcondotta.banking.accounts.domain.bankaccount.identity.BankAccountId;
 import com.jcondotta.banking.accounts.domain.bankaccount.value_objects.Iban;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 
 import java.time.Instant;
 
@@ -30,6 +32,82 @@ class BankAccountRestoreTest {
   private static final Currency CURRENCY_USD = Currency.USD;
 
   private static final Instant ACCOUNT_CREATED_AT = TimeTestFactory.FIXED_INSTANT;
+
+  @Test
+  void shouldRestorePendingBankAccountWithoutIban() {
+    var primaryAccountHolder = BankAccountTestFixture.createPrimaryHolder(PRIMARY_ACCOUNT_HOLDER, ACCOUNT_CREATED_AT);
+
+    var bankAccount = BankAccount.restore(
+      BankAccountId.newId(),
+      ACCOUNT_TYPE_SAVINGS,
+      CURRENCY_USD,
+      null,
+      AccountStatus.PENDING,
+      ACCOUNT_CREATED_AT,
+      AccountHolders.of(primaryAccountHolder)
+    );
+
+    assertThat(bankAccount.getAccountStatus()).isEqualTo(AccountStatus.PENDING);
+    assertThat(bankAccount.getIban()).isEmpty();
+  }
+
+  @ParameterizedTest
+  @EnumSource(value = AccountStatus.class, names = "PENDING", mode = EnumSource.Mode.EXCLUDE)
+  void shouldRestorePostActivationBankAccountWithIban(AccountStatus accountStatus) {
+    var primaryAccountHolder = BankAccountTestFixture.createPrimaryHolder(PRIMARY_ACCOUNT_HOLDER, ACCOUNT_CREATED_AT);
+
+    var bankAccount = BankAccount.restore(
+      BankAccountId.newId(),
+      ACCOUNT_TYPE_SAVINGS,
+      CURRENCY_USD,
+      VALID_IBAN,
+      accountStatus,
+      ACCOUNT_CREATED_AT,
+      AccountHolders.of(primaryAccountHolder)
+    );
+
+    assertThat(bankAccount.getAccountStatus()).isEqualTo(accountStatus);
+    assertThat(bankAccount.getIban()).contains(VALID_IBAN);
+  }
+
+  @Test
+  void shouldThrowInvalidBankAccountIbanConfigurationException_whenRestoringPendingAccountWithIban() {
+    var primaryAccountHolder = BankAccountTestFixture.createPrimaryHolder(PRIMARY_ACCOUNT_HOLDER, ACCOUNT_CREATED_AT);
+
+    assertThatThrownBy(() ->
+      BankAccount.restore(
+        BankAccountId.newId(),
+        ACCOUNT_TYPE_SAVINGS,
+        CURRENCY_USD,
+        VALID_IBAN,
+        AccountStatus.PENDING,
+        ACCOUNT_CREATED_AT,
+        AccountHolders.of(primaryAccountHolder)
+      ))
+      .isInstanceOf(InvalidBankAccountIbanConfigurationException.class)
+      .hasMessage("Bank account with PENDING status must not have an IBAN");
+  }
+
+  @ParameterizedTest
+  @EnumSource(value = AccountStatus.class, names = "PENDING", mode = EnumSource.Mode.EXCLUDE)
+  void shouldThrowInvalidBankAccountIbanConfigurationException_whenRestoringPostActivationAccountWithoutIban(
+    AccountStatus accountStatus
+  ) {
+    var primaryAccountHolder = BankAccountTestFixture.createPrimaryHolder(PRIMARY_ACCOUNT_HOLDER, ACCOUNT_CREATED_AT);
+
+    assertThatThrownBy(() ->
+      BankAccount.restore(
+        BankAccountId.newId(),
+        ACCOUNT_TYPE_SAVINGS,
+        CURRENCY_USD,
+        null,
+        accountStatus,
+        ACCOUNT_CREATED_AT,
+        AccountHolders.of(primaryAccountHolder)
+      ))
+      .isInstanceOf(InvalidBankAccountIbanConfigurationException.class)
+      .hasMessage("Bank account with " + accountStatus + " status must have an IBAN");
+  }
 
   @ParameterizedTest
   @AccountTypeAndCurrencySource
@@ -51,7 +129,7 @@ class BankAccountRestoreTest {
     assertThat(bankAccount.getId()).isEqualTo(bankAccountId);
     assertThat(bankAccount.getAccountType()).isEqualTo(accountType);
     assertThat(bankAccount.getCurrency()).isEqualTo(currency);
-    assertThat(bankAccount.getIban()).isEqualTo(BankAccountTestFixture.VALID_IBAN);
+    assertThat(bankAccount.getIban()).contains(BankAccountTestFixture.VALID_IBAN);
     assertThat(bankAccount.getAccountStatus().isActive()).isTrue();
     assertThat(bankAccount.getCreatedAt()).isEqualTo(ACCOUNT_CREATED_AT);
     assertThat(bankAccount.pullEvents()).isEmpty();
@@ -81,7 +159,7 @@ class BankAccountRestoreTest {
     assertThat(bankAccount.getId()).isEqualTo(bankAccountId);
     assertThat(bankAccount.getAccountType()).isEqualTo(accountType);
     assertThat(bankAccount.getCurrency()).isEqualTo(currency);
-    assertThat(bankAccount.getIban()).isEqualTo(BankAccountTestFixture.VALID_IBAN);
+    assertThat(bankAccount.getIban()).contains(BankAccountTestFixture.VALID_IBAN);
     assertThat(bankAccount.getAccountStatus().isActive()).isTrue();
     assertThat(bankAccount.getCreatedAt()).isEqualTo(ACCOUNT_CREATED_AT);
     assertThat(bankAccount.pullEvents()).isEmpty();

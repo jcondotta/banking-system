@@ -1,8 +1,8 @@
 package com.jcondotta.banking.accounts.integration.bankaccount.lookup;
 
+import com.jcondotta.banking.accounts.domain.bankaccount.events.BankAccountActivatedEvent;
 import com.jcondotta.banking.accounts.domain.bankaccount.events.BankAccountJointHolderAddedEvent;
 import com.jcondotta.banking.accounts.domain.bankaccount.events.BankAccountOpenedEvent;
-import com.jcondotta.banking.accounts.domain.bankaccount.events.BankAccountStatusChangedEvent;
 import com.jcondotta.banking.accounts.domain.testsupport.AccountTypeAndCurrencySource;
 import com.jcondotta.banking.accounts.domain.bankaccount.enums.AccountType;
 import com.jcondotta.banking.accounts.domain.bankaccount.enums.Currency;
@@ -34,7 +34,7 @@ class BankAccountLookupIT extends BankAccountIntegrationSupport {
       () -> assertThat(response.id()).isEqualTo(id.value()),
       () -> assertThat(response.accountType().name()).isEqualTo(accountType.name()),
       () -> assertThat(response.currency().name()).isEqualTo(currency.name()),
-      () -> assertThat(response.iban()).isNotBlank(),
+      () -> assertThat(response.iban()).isNull(),
       () -> assertThat(response.createdAt()).isNotNull(),
       () -> assertThat(response.holders())
         .hasSize(1)
@@ -73,7 +73,7 @@ class BankAccountLookupIT extends BankAccountIntegrationSupport {
     assertOutboxEvents(
       id,
       BankAccountOpenedEvent.EVENT_TYPE,
-      BankAccountStatusChangedEvent.EVENT_TYPE,
+      BankAccountActivatedEvent.EVENT_TYPE,
       BankAccountJointHolderAddedEvent.EVENT_TYPE
     );
   }
@@ -82,8 +82,9 @@ class BankAccountLookupIT extends BankAccountIntegrationSupport {
   @AccountTypeAndCurrencySource
   void shouldReturn200OkWithBankAccountDetails_whenBankAccountIsFoundByIban(AccountType accountType, Currency currency) {
     var id = openBankAccount(accountType, currency);
+    activateBankAccount(id);
     var bankAccount = bankAccountRepository.findById(id).orElseThrow();
-    var ibanValue = bankAccount.getIban().value();
+    var ibanValue = bankAccount.getIban().orElseThrow().value();
 
     var response = getBankAccountByIban(ibanValue);
 
