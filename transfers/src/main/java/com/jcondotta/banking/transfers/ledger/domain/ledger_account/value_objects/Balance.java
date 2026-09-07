@@ -2,7 +2,6 @@ package com.jcondotta.banking.transfers.ledger.domain.ledger_account.value_objec
 
 import com.jcondotta.banking.money.Currency;
 import com.jcondotta.banking.money.MonetaryMovement;
-import com.jcondotta.banking.money.exception.CurrencyMismatchException;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -29,7 +28,7 @@ public record Balance(BigDecimal amount, Currency currency) {
 
     public Balance apply(MonetaryMovement movement) {
         required(movement, MONETARY_MOVEMENT_NOT_PROVIDED);
-        requireSameCurrency(movement.currency());
+        currency.requireSameAs(movement.currency());
 
         BigDecimal newAmount = movement.isDebit()
             ? this.amount.subtract(movement.amount())
@@ -40,18 +39,12 @@ public record Balance(BigDecimal amount, Currency currency) {
 
     public Balance subtract(Balance other) {
         required(other, OTHER_BALANCE_NOT_PROVIDED);
-        requireSameCurrency(other.currency());
+        currency.requireSameAs(other.currency());
 
         return new Balance(this.amount.subtract(other.amount), this.currency);
     }
 
     public boolean isNegative() {
         return amount.compareTo(BigDecimal.ZERO) < 0;
-    }
-
-    private void requireSameCurrency(Currency other) {
-        if (!other.equals(this.currency)) {
-            throw new CurrencyMismatchException(this.currency, other);
-        }
     }
 }

@@ -1,5 +1,7 @@
 package com.jcondotta.banking.money;
 
+import com.jcondotta.banking.money.exception.CurrencyMismatchException;
+
 public enum Currency {
     EUR("Euro", "€", 2),
     USD("US Dollar", "$", 2);
@@ -24,5 +26,11 @@ public enum Currency {
 
     public int scale() {
         return scale;
+    }
+
+    public void requireSameAs(Currency actual) {
+        if (this != actual) {
+            throw new CurrencyMismatchException(this, actual);
+        }
     }
 }

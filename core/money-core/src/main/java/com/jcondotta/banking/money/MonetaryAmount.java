@@ -4,6 +4,7 @@ import com.jcondotta.banking.money.exception.InvalidMonetaryScaleException;
 import com.jcondotta.banking.money.exception.NegativeMonetaryAmountException;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 import static com.jcondotta.domain.support.Preconditions.required;
 
@@ -24,7 +25,7 @@ public record MonetaryAmount(BigDecimal amount, Currency currency) {
             throw new InvalidMonetaryScaleException(currency, amount.scale());
         }
 
-        amount = amount.setScale(currency.scale());
+        amount = amount.setScale(currency.scale(), RoundingMode.UNNECESSARY);
     }
 
     public static MonetaryAmount of(BigDecimal amount, Currency currency) {
