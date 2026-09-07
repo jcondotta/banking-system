@@ -10,8 +10,8 @@ class CurrencyTest {
     void shouldAssertCurrencyDetailsCorrectly_whenCurrencyIsEuro() {
         assertThat(Currency.EUR)
             .satisfies(currency -> {
-                assertThat(currency.symbol()).isEqualTo(Currency.EUR.symbol());
-                assertThat(currency.description()).isEqualTo(Currency.EUR.description());
+                assertThat(currency.symbol()).isEqualTo("€");
+                assertThat(currency.description()).isEqualTo("Euro");
                 assertThat(currency.scale()).isEqualTo(2);
             });
     }
@@ -20,8 +20,8 @@ class CurrencyTest {
     void shouldAssertCurrencyDetailsCorrectly_whenCurrencyIsUsDollar() {
         assertThat(Currency.USD)
             .satisfies(currency -> {
-                assertThat(currency.symbol()).isEqualTo(Currency.USD.symbol());
-                assertThat(currency.description()).isEqualTo(Currency.USD.description());
+                assertThat(currency.symbol()).isEqualTo("$");
+                assertThat(currency.description()).isEqualTo("US Dollar");
                 assertThat(currency.scale()).isEqualTo(2);
             });
     }

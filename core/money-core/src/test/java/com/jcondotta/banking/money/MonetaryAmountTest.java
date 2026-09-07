@@ -1,5 +1,6 @@
 package com.jcondotta.banking.money;
 
+import com.jcondotta.banking.money.exception.InvalidMonetaryScaleException;
 import com.jcondotta.banking.money.exception.NegativeMonetaryAmountException;
 import com.jcondotta.domain.exception.DomainValidationException;
 import org.junit.jupiter.api.Test;
@@ -18,9 +19,19 @@ class MonetaryAmountTest {
     private static final BigDecimal AMOUNT_200 = new BigDecimal("200.00");
 
     @ParameterizedTest
-    @EnumSource(Currency.class)
-    void shouldCreateMonetaryAmount_whenParametersAreValid(Currency currency) {
-        assertThat(MonetaryAmount.of(AMOUNT_200, currency))
+    @CsvSource({
+        "200, EUR",
+        "200.0, EUR",
+        "200.00, EUR",
+        "200, USD",
+        "200.0, USD",
+        "200.00, USD"
+    })
+    void shouldCreateCanonicalMonetaryAmount_whenScaleDoesNotExceedCurrencyLimit(
+        String amount,
+        Currency currency
+    ) {
+        assertThat(MonetaryAmount.of(new BigDecimal(amount), currency))
             .satisfies(monetaryAmount ->
                 assertAll(
                     () -> assertThat(monetaryAmount.amount()).isEqualTo(AMOUNT_200),
@@ -42,11 +53,36 @@ class MonetaryAmountTest {
     }
 
     @ParameterizedTest
-    @CsvSource({"-0.01", "-1.00", "-100.00"})
+    @CsvSource({"-0.001", "-0.01", "-1.00", "-100.00"})
     void shouldThrowException_whenAmountIsNegative(String amount) {
         assertThatThrownBy(() -> MonetaryAmount.of(new BigDecimal(amount), Currency.USD))
             .isInstanceOf(NegativeMonetaryAmountException.class)
             .hasMessage(NegativeMonetaryAmountException.AMOUNT_NOT_NEGATIVE_MESSAGE);
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+        "0.000, EUR",
+        "10.001, EUR",
+        "200.000, EUR",
+        "0.000, USD",
+        "10.001, USD",
+        "200.000, USD"
+    })
+    void shouldThrowException_whenScaleExceedsCurrencyLimit(String amount, Currency currency) {
+        assertThatThrownBy(() -> MonetaryAmount.of(new BigDecimal(amount), currency))
+            .isInstanceOf(InvalidMonetaryScaleException.class)
+            .hasMessage(
+                "Invalid monetary scale for %s: maximum is %d but was 3.",
+                currency,
+                currency.scale()
+            )
+            .satisfies(exception -> {
+                var invalidScale = (InvalidMonetaryScaleException) exception;
+                assertThat(invalidScale.getCurrency()).isEqualTo(currency);
+                assertThat(invalidScale.getAllowedScale()).isEqualTo(currency.scale());
+                assertThat(invalidScale.getActualScale()).isEqualTo(3);
+            });
     }
 
     @ParameterizedTest

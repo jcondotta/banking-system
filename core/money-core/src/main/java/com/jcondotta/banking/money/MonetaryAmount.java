@@ -1,9 +1,9 @@
 package com.jcondotta.banking.money;
 
+import com.jcondotta.banking.money.exception.InvalidMonetaryScaleException;
 import com.jcondotta.banking.money.exception.NegativeMonetaryAmountException;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 
 import static com.jcondotta.domain.support.Preconditions.required;
 
@@ -16,11 +16,15 @@ public record MonetaryAmount(BigDecimal amount, Currency currency) {
         required(amount, AMOUNT_NOT_PROVIDED);
         required(currency, CURRENCY_NOT_PROVIDED);
 
-        amount = amount.setScale(currency.scale(), RoundingMode.HALF_UP);
-
         if (amount.compareTo(BigDecimal.ZERO) < 0) {
             throw new NegativeMonetaryAmountException();
         }
+
+        if (amount.scale() > currency.scale()) {
+            throw new InvalidMonetaryScaleException(currency, amount.scale());
+        }
+
+        amount = amount.setScale(currency.scale());
     }
 
     public static MonetaryAmount of(BigDecimal amount, Currency currency) {
