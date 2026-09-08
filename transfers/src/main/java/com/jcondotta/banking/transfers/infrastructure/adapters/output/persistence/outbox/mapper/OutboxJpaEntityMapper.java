@@ -1,6 +1,7 @@
 package com.jcondotta.banking.transfers.infrastructure.adapters.output.persistence.outbox.mapper;
 
 import com.jcondotta.banking.infrastructure.adapters.output.messaging.EventEnvelope;
+import com.jcondotta.banking.infrastructure.adapters.output.messaging.EventPublication;
 import com.jcondotta.banking.infrastructure.outbox.exceptions.OutboxSerializationException;
 import com.jcondotta.banking.infrastructure.outbox.mapper.OutboxEntityMapper;
 import com.jcondotta.banking.infrastructure.outbox.shard.OutboxShardResolver;
@@ -21,7 +22,7 @@ public class OutboxJpaEntityMapper implements OutboxEntityMapper<OutboxJpaEntity
   private final OutboxShardResolver shardResolver;
 
   @Override
-  public OutboxJpaEntity toOutboxEntity(DomainEvent<?, ?> event, EventEnvelope envelope) {
+  public OutboxJpaEntity toOutboxEntity(DomainEvent<?, ?> event, EventPublication<?> publication, EventEnvelope envelope) {
     var aggregateId = event.aggregateId();
     var now = Instant.now();
     var shard = shardResolver.resolve(aggregateId);
@@ -30,9 +31,9 @@ public class OutboxJpaEntityMapper implements OutboxEntityMapper<OutboxJpaEntity
       .eventId(event.eventId().value())
       .correlationId(envelope.correlationId())
       .aggregateId(aggregateId.asString())
-      .messageKey(envelope.messageKey())
+      .messageKey(publication.key())
       .eventType(event.eventType())
-      .destination(envelope.destination())
+      .destination(publication.destination())
       .payload(serialize(envelope))
       .shard(shard)
       .attemptCount(0)

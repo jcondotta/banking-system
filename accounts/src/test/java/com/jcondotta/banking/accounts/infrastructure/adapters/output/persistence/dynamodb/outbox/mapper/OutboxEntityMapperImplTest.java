@@ -5,6 +5,7 @@ import com.jcondotta.banking.infrastructure.outbox.exceptions.OutboxSerializatio
 import com.jcondotta.banking.accounts.infrastructure.adapters.output.persistence.dynamodb.outbox.write.mapper.OutboxEntityMapperImpl;
 import com.jcondotta.banking.infrastructure.outbox.shard.OutboxShardResolver;
 import com.jcondotta.banking.infrastructure.adapters.output.messaging.EventEnvelope;
+import com.jcondotta.banking.infrastructure.adapters.output.messaging.EventPublication;
 import com.jcondotta.domain.events.DomainEvent;
 import com.jcondotta.domain.identity.AggregateId;
 import com.jcondotta.domain.identity.EventId;
@@ -51,6 +52,9 @@ class OutboxEntityMapperImplTest {
   @Mock
   private EventEnvelope envelope;
 
+  @Mock
+  private EventPublication<?> publication;
+
   @InjectMocks
   private OutboxEntityMapperImpl mapper;
 
@@ -69,10 +73,10 @@ class OutboxEntityMapperImplTest {
   void shouldMapToOutboxEntity_whenValidInput() {
     when(objectMapper.writeValueAsString(envelope)).thenReturn(SERIALIZED_PAYLOAD);
     when(envelope.correlationId()).thenReturn(CORRELATION_ID);
-    when(envelope.messageKey()).thenReturn(MESSAGE_KEY);
-    when(envelope.destination()).thenReturn(DESTINATION);
+    when(publication.key()).thenReturn(MESSAGE_KEY);
+    when(publication.destination()).thenReturn(DESTINATION);
 
-    OutboxEntity outboxEntity = mapper.toOutboxEntity(domainEvent, envelope);
+    OutboxEntity outboxEntity = mapper.toOutboxEntity(domainEvent, publication, envelope);
 
     assertThat(outboxEntity.getAggregateId()).isEqualTo(AGGREGATE_ID);
     assertThat(outboxEntity.getMessageKey()).isEqualTo(MESSAGE_KEY);
@@ -95,7 +99,7 @@ class OutboxEntityMapperImplTest {
     when(objectMapper.writeValueAsString(any(EventEnvelope.class)))
       .thenThrow(new JacksonException("serialization failed") {});
 
-    assertThatThrownBy(() -> mapper.toOutboxEntity(domainEvent, envelope))
+    assertThatThrownBy(() -> mapper.toOutboxEntity(domainEvent, publication, envelope))
       .isInstanceOf(OutboxSerializationException.class)
       .hasMessageContaining(EventEnvelope.class.getSimpleName());
 

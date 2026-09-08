@@ -1,7 +1,7 @@
 package com.jcondotta.banking.transfers.domain.testsupport;
 
 import com.jcondotta.banking.money.Currency;
-import com.jcondotta.banking.money.MovementType;
+import com.jcondotta.banking.transfers.domain.movement.MovementType;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.ArgumentsProvider;

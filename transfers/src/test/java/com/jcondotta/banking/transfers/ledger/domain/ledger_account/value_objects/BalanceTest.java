@@ -1,8 +1,8 @@
 package com.jcondotta.banking.transfers.ledger.domain.ledger_account.value_objects;
 
 import com.jcondotta.banking.money.Currency;
-import com.jcondotta.banking.money.MonetaryAmount;
-import com.jcondotta.banking.money.MonetaryMovement;
+import com.jcondotta.banking.transfers.domain.movement.MovementAmount;
+import com.jcondotta.banking.transfers.domain.movement.Movement;
 import com.jcondotta.banking.money.exception.CurrencyMismatchException;
 import com.jcondotta.domain.exception.DomainValidationException;
 import org.instancio.Instancio;
@@ -108,13 +108,13 @@ class BalanceTest {
     }
 
     @Nested
-    class WhenApplyingMonetaryMovement {
+    class WhenApplyingMovement {
 
         @ParameterizedTest
         @EnumSource(Currency.class)
         void shouldDecreaseBalance_whenMovementIsDebit(Currency currency) {
             var balance = new Balance(AMOUNT_100, currency);
-            var debitMovement = MonetaryMovement.ofDebit(MonetaryAmount.of(AMOUNT_30, currency));
+            var debitMovement = Movement.ofDebit(MovementAmount.of(AMOUNT_30, currency));
 
             var result = balance.apply(debitMovement);
 
@@ -126,7 +126,7 @@ class BalanceTest {
         @EnumSource(Currency.class)
         void shouldIncreaseBalance_whenMovementIsCredit(Currency currency) {
             var balance = new Balance(AMOUNT_100, currency);
-            var creditMovement = MonetaryMovement.ofCredit(MonetaryAmount.of(AMOUNT_50, currency));
+            var creditMovement = Movement.ofCredit(MovementAmount.of(AMOUNT_50, currency));
 
             var result = balance.apply(creditMovement);
 
@@ -138,7 +138,7 @@ class BalanceTest {
         @EnumSource(Currency.class)
         void shouldAllowBalanceToGoBelowZero_whenDebitExceedsBalance(Currency currency) {
             var balance = new Balance(AMOUNT_30, currency);
-            var debitMovement = MonetaryMovement.ofDebit(MonetaryAmount.of(AMOUNT_100, currency));
+            var debitMovement = Movement.ofDebit(MovementAmount.of(AMOUNT_100, currency));
 
             var result = balance.apply(debitMovement);
 
@@ -150,7 +150,7 @@ class BalanceTest {
         @EnumSource(Currency.class)
         void shouldRecoverToPositiveBalance_whenCreditIsAppliedToNegativeBalance(Currency currency) {
             var negativeBalance = new Balance(new BigDecimal("-50.00"), currency);
-            var creditMovement = MonetaryMovement.ofCredit(MonetaryAmount.of(AMOUNT_100, currency));
+            var creditMovement = Movement.ofCredit(MovementAmount.of(AMOUNT_100, currency));
 
             var result = negativeBalance.apply(creditMovement);
 
@@ -162,7 +162,7 @@ class BalanceTest {
         @EnumSource(Currency.class)
         void shouldRecoverToZero_whenCreditExactlyCoversNegativeBalance(Currency currency) {
             var negativeBalance = new Balance(new BigDecimal("-100.00"), currency);
-            var creditMovement = MonetaryMovement.ofCredit(MonetaryAmount.of(AMOUNT_100, currency));
+            var creditMovement = Movement.ofCredit(MovementAmount.of(AMOUNT_100, currency));
 
             var result = negativeBalance.apply(creditMovement);
 
@@ -176,7 +176,7 @@ class BalanceTest {
             var otherCurrency = otherCurrencyThan(currency);
 
             var balance = new Balance(AMOUNT_100, currency);
-            var movement = MonetaryMovement.ofDebit(MonetaryAmount.of(AMOUNT_50, otherCurrency));
+            var movement = Movement.ofDebit(MovementAmount.of(AMOUNT_50, otherCurrency));
 
             assertThatThrownBy(() -> balance.apply(movement))
                 .isInstanceOf(CurrencyMismatchException.class)

@@ -10,7 +10,7 @@ import tools.jackson.databind.ObjectMapper;
 import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 
-@Component
+// @Component
 @RequiredArgsConstructor
 public class BankAccountActivatedEventConsumer {
 

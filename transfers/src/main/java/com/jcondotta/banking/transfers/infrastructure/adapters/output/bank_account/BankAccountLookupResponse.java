@@ -2,5 +2,5 @@ package com.jcondotta.banking.transfers.infrastructure.adapters.output.bank_acco
 
 import java.util.UUID;
 
-public record BankAccountLookupResponse(UUID id) {
+public record BankAccountLookupResponse(UUID id, String accountStatus) {
 }

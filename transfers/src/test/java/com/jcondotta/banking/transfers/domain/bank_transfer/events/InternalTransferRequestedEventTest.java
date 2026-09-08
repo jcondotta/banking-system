@@ -4,7 +4,7 @@ import com.jcondotta.banking.transfers.domain.bank_account.identity.BankAccountI
 import com.jcondotta.banking.transfers.domain.bank_transfer.identity.BankTransferId;
 import com.jcondotta.banking.transfers.domain.bank_transfer.validation.BankTransferErrors;
 import com.jcondotta.banking.money.Currency;
-import com.jcondotta.banking.money.MonetaryAmount;
+import com.jcondotta.banking.transfers.domain.movement.MovementAmount;
 import com.jcondotta.domain.exception.DomainValidationException;
 import com.jcondotta.domain.identity.EventId;
 import com.jcondotta.domain.validation.DomainEventErrors;
@@ -23,7 +23,9 @@ class InternalTransferRequestedEventTest {
     private static final BankTransferId BANK_TRANSFER_ID = BankTransferId.newId();
     private static final BankAccountId SENDER_ACCOUNT_ID = BankAccountId.of(UUID.randomUUID());
     private static final BankAccountId RECIPIENT_ACCOUNT_ID = BankAccountId.of(UUID.randomUUID());
-    private static final MonetaryAmount AMOUNT_200_USD = MonetaryAmount.of(new BigDecimal("200.00"), Currency.USD);
+    private static final BigDecimal AMOUNT = new BigDecimal("200.00");
+    private static final Currency CURRENCY = Currency.USD;
+    private static final MovementAmount AMOUNT_200_USD = MovementAmount.of(AMOUNT, CURRENCY);
     private static final String REFERENCE = "payment for invoice #123";
     private static final Instant OCCURRED_AT = Instant.now();
 
@@ -37,7 +39,8 @@ class InternalTransferRequestedEventTest {
         assertThat(event.aggregateId()).isEqualTo(BANK_TRANSFER_ID);
         assertThat(event.senderAccountId()).isEqualTo(SENDER_ACCOUNT_ID);
         assertThat(event.recipientAccountId()).isEqualTo(RECIPIENT_ACCOUNT_ID);
-        assertThat(event.monetaryAmount()).isEqualTo(AMOUNT_200_USD);
+        assertThat(event.amount()).isEqualByComparingTo(AMOUNT);
+        assertThat(event.currency()).isEqualTo(CURRENCY);
         assertThat(event.reference()).isEqualTo(REFERENCE);
         assertThat(event.occurredAt()).isEqualTo(OCCURRED_AT);
     }
@@ -96,14 +99,14 @@ class InternalTransferRequestedEventTest {
     }
 
     @Test
-    void shouldThrowException_whenMonetaryAmountIsNull() {
+    void shouldThrowException_whenMovementAmountIsNull() {
         assertThatThrownBy(() ->
             new InternalTransferRequestedEvent(
                 EVENT_ID, BANK_TRANSFER_ID, SENDER_ACCOUNT_ID, RECIPIENT_ACCOUNT_ID, null, REFERENCE, OCCURRED_AT
             )
         )
             .isInstanceOf(DomainValidationException.class)
-            .hasMessage(BankTransferErrors.MONETARY_AMOUNT_MUST_BE_PROVIDED);
+            .hasMessage(BankTransferErrors.MOVEMENT_AMOUNT_MUST_BE_PROVIDED);
     }
 
     @Test

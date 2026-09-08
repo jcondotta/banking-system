@@ -7,8 +7,8 @@ import java.util.Locale;
 
 public record Iban(String value) {
 
-  public static final String IBAN_NOT_PROVIDED = "IBAN must be provided.";
-  public static final String IBAN_INVALID_FORMAT = "IBAN format is invalid.";
+  public static final String IBAN_NOT_PROVIDED = "IBAN must be provided";
+  public static final String IBAN_INVALID_FORMAT = "IBAN format is invalid";
 
   public Iban {
     Preconditions.required(value, IBAN_NOT_PROVIDED);

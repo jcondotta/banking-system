@@ -5,7 +5,7 @@ import com.jcondotta.banking.transfers.domain.bank_transfer.aggregate.BankTransf
 import com.jcondotta.banking.transfers.domain.bank_transfer.identity.BankTransferId;
 import com.jcondotta.banking.transfers.domain.bank_transfer.value_objects.transfer_entry.InternalTransferEntry;
 import com.jcondotta.banking.transfers.domain.bank_transfer.value_objects.transfer_entry.TransferEntry;
-import com.jcondotta.banking.money.MonetaryAmount;
+import com.jcondotta.banking.transfers.domain.movement.MovementAmount;
 import com.jcondotta.banking.transfers.infrastructure.adapters.output.persistence.entity.BankTransferEntity;
 import org.springframework.stereotype.Component;
 
@@ -16,14 +16,14 @@ public class BankTransferEntityMapper {
 
   public BankTransferEntity toEntity(BankTransfer bankTransfer) {
     var entry = internalTransferEntry(bankTransfer);
-    var monetaryAmount = entry.monetaryMovement().monetaryAmount();
+    var movementAmount = entry.movement().movementAmount();
 
     return BankTransferEntity.builder()
       .id(bankTransfer.getId().value())
       .senderAccountId(entry.partySender().bankAccountId().value())
       .recipientAccountId(entry.partyRecipient().bankAccountId().value())
-      .amount(monetaryAmount.amount())
-      .currency(monetaryAmount.currency())
+      .amount(movementAmount.amount())
+      .currency(movementAmount.currency())
       .transferType(bankTransfer.getTransferType())
       .transferStatus(bankTransfer.getTransferStatus())
       .reference(bankTransfer.getReference())
@@ -34,13 +34,13 @@ public class BankTransferEntityMapper {
   public BankTransfer toDomain(BankTransferEntity entity) {
     var senderAccountId = BankAccountId.of(entity.getSenderAccountId());
     var recipientAccountId = BankAccountId.of(entity.getRecipientAccountId());
-    var monetaryAmount = MonetaryAmount.of(entity.getAmount(), entity.getCurrency());
+    var movementAmount = MovementAmount.of(entity.getAmount(), entity.getCurrency());
 
     return BankTransfer.restore(
       BankTransferId.of(entity.getId()),
       List.of(
-        InternalTransferEntry.ofDebit(senderAccountId, recipientAccountId, monetaryAmount),
-        InternalTransferEntry.ofCredit(senderAccountId, recipientAccountId, monetaryAmount)
+        InternalTransferEntry.ofDebit(senderAccountId, recipientAccountId, movementAmount),
+        InternalTransferEntry.ofCredit(senderAccountId, recipientAccountId, movementAmount)
       ),
       entity.getTransferType(),
       entity.getReference(),

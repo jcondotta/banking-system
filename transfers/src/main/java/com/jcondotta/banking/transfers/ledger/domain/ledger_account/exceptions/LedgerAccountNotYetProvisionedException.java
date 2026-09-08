@@ -1,12 +1,10 @@
 package com.jcondotta.banking.transfers.ledger.domain.ledger_account.exceptions;
 
-import com.jcondotta.banking.transfers.domain.common.FailureReason;
-import com.jcondotta.banking.transfers.domain.common.FailureReasonProvider;
 import com.jcondotta.domain.exception.DomainNotFoundException;
 
 import java.util.UUID;
 
-public final class LedgerAccountNotYetProvisionedException extends DomainNotFoundException implements FailureReasonProvider {
+public final class LedgerAccountNotYetProvisionedException extends DomainNotFoundException {
 
     public static final String MESSAGE = "Ledger account not yet provisioned";
 
@@ -15,11 +13,6 @@ public final class LedgerAccountNotYetProvisionedException extends DomainNotFoun
     public LedgerAccountNotYetProvisionedException(UUID accountReference) {
         super(MESSAGE);
         this.accountReference = accountReference;
-    }
-
-    @Override
-    public FailureReason reason() {
-        return FailureReason.NOT_FOUND;
     }
 
     public UUID getAccountReference() {

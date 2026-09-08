@@ -7,7 +7,7 @@ import java.util.UUID;
 
 public record InternalAccountRecipient(BankAccountId bankAccountId) implements PartyRecipient {
 
-    public static final String RECIPIENT_ACCOUNT_ID_NOT_PROVIDED = "recipient account id must be provided.";
+    public static final String RECIPIENT_ACCOUNT_ID_NOT_PROVIDED = "recipient account id must be provided";
 
     public InternalAccountRecipient {
         Preconditions.required(bankAccountId, RECIPIENT_ACCOUNT_ID_NOT_PROVIDED);
@@ -19,9 +19,5 @@ public record InternalAccountRecipient(BankAccountId bankAccountId) implements P
 
     public static InternalAccountRecipient of(UUID bankAccountId) {
         return of(BankAccountId.of(bankAccountId));
-    }
-
-    public static InternalAccountRecipient of(String bankAccountId) {
-        return of(UUID.fromString(bankAccountId));
     }
 }

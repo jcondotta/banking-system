@@ -4,13 +4,14 @@ import com.jcondotta.banking.transfers.domain.bank_account.identity.BankAccountI
 import com.jcondotta.banking.transfers.domain.bank_transfer.enums.TransferStatus;
 import com.jcondotta.banking.transfers.domain.bank_transfer.enums.TransferType;
 import com.jcondotta.banking.transfers.domain.bank_transfer.events.InternalTransferCompletedEvent;
+import com.jcondotta.banking.transfers.domain.bank_transfer.events.InternalTransferFailedEvent;
 import com.jcondotta.banking.transfers.domain.bank_transfer.events.InternalTransferRequestedEvent;
 import com.jcondotta.banking.transfers.domain.bank_transfer.exceptions.InvalidTransferStatusTransitionException;
 import com.jcondotta.banking.transfers.domain.bank_transfer.identity.BankTransferId;
 import com.jcondotta.banking.transfers.domain.bank_transfer.validation.BankTransferErrors;
 import com.jcondotta.banking.transfers.domain.bank_transfer.value_objects.transfer_entry.InternalTransferEntry;
 import com.jcondotta.banking.transfers.domain.bank_transfer.value_objects.transfer_entry.TransferEntry;
-import com.jcondotta.banking.money.MonetaryAmount;
+import com.jcondotta.banking.transfers.domain.movement.MovementAmount;
 import com.jcondotta.domain.core.AggregateRoot;
 import com.jcondotta.domain.identity.EventId;
 
@@ -21,7 +22,7 @@ import static com.jcondotta.domain.support.Preconditions.required;
 
 public final class BankTransfer extends AggregateRoot<BankTransferId> {
 
-  public static final TransferStatus STATUS_ON_REQUEST = TransferStatus.PENDING;
+  private static final TransferStatus INITIAL_STATUS = TransferStatus.PENDING;
 
   private final List<TransferEntry> transferEntries;
   private final TransferType transferType;
@@ -50,13 +51,13 @@ public final class BankTransfer extends AggregateRoot<BankTransferId> {
       BankTransferId bankTransferId,
       BankAccountId senderAccountId,
       BankAccountId recipientAccountId,
-      MonetaryAmount amount,
+      MovementAmount amount,
       String reference,
       Instant requestedAt
   ) {
     required(senderAccountId, BankTransferErrors.SENDER_ACCOUNT_ID_MUST_BE_PROVIDED);
     required(recipientAccountId, BankTransferErrors.RECIPIENT_ACCOUNT_ID_MUST_BE_PROVIDED);
-    required(amount, BankTransferErrors.MONETARY_AMOUNT_MUST_BE_PROVIDED);
+    required(amount, BankTransferErrors.MOVEMENT_AMOUNT_MUST_BE_PROVIDED);
     required(requestedAt, BankTransferErrors.REQUESTED_AT_MUST_BE_PROVIDED);
 
     var entryDebit = InternalTransferEntry.ofDebit(senderAccountId, recipientAccountId, amount);
@@ -67,7 +68,7 @@ public final class BankTransfer extends AggregateRoot<BankTransferId> {
         List.of(entryDebit, entryCredit),
         TransferType.INTERNAL,
         reference,
-        STATUS_ON_REQUEST,
+        INITIAL_STATUS,
         requestedAt
     );
 
@@ -110,7 +111,9 @@ public final class BankTransfer extends AggregateRoot<BankTransferId> {
     registerEvent(new InternalTransferCompletedEvent(EventId.newId(), getId(), completedAt));
   }
 
-  public void fail() {
+  public void fail(Instant failedAt) {
+    required(failedAt, BankTransferErrors.FAILED_AT_MUST_BE_PROVIDED);
+
     if (transferStatus == TransferStatus.FAILED) {
       return;
     }
@@ -120,6 +123,7 @@ public final class BankTransfer extends AggregateRoot<BankTransferId> {
     }
 
     transferStatus = TransferStatus.FAILED;
+    registerEvent(new InternalTransferFailedEvent(EventId.newId(), getId(), failedAt));
   }
 
   public List<TransferEntry> getTransferEntries() {

@@ -28,13 +28,6 @@ class InternalAccountRecipientTest {
     }
 
     @Test
-    void shouldCreateRecipientCorrectly_whenUsingRawString() {
-        var recipient = InternalAccountRecipient.of(BANK_ACCOUNT_ID.value().toString());
-
-        assertThat(recipient.bankAccountId()).isEqualTo(BANK_ACCOUNT_ID);
-    }
-
-    @Test
     void shouldThrowException_whenBankAccountIdIsNull() {
         assertThatThrownBy(() -> InternalAccountRecipient.of((BankAccountId) null))
             .isInstanceOf(DomainValidationException.class)

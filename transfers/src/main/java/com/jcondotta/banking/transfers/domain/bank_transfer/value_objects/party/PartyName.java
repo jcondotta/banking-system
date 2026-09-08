@@ -5,9 +5,9 @@ import static com.jcondotta.domain.support.Preconditions.required;
 
 public record PartyName(String value) {
 
-    public static final String NAME_NOT_PROVIDED = "name must be provided.";
-    public static final String NAME_NOT_BLANK = "name must not be blank.";
-    public static final String NAME_TOO_LONG = "name must not exceed 255 characters.";
+    public static final String NAME_NOT_PROVIDED = "name must be provided";
+    public static final String NAME_NOT_BLANK = "name must not be blank";
+    public static final String NAME_TOO_LONG = "name must not exceed 255 characters";
 
     public PartyName {
         required(value, NAME_NOT_PROVIDED);

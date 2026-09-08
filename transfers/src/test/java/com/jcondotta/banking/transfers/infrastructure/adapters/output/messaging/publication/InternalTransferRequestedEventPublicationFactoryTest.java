@@ -1,7 +1,7 @@
 package com.jcondotta.banking.transfers.infrastructure.adapters.output.messaging.publication;
 
 import com.jcondotta.banking.money.Currency;
-import com.jcondotta.banking.money.MonetaryAmount;
+import com.jcondotta.banking.transfers.domain.movement.MovementAmount;
 import com.jcondotta.banking.transfers.domain.bank_account.identity.BankAccountId;
 import com.jcondotta.banking.transfers.domain.bank_transfer.events.InternalTransferRequestedEvent;
 import com.jcondotta.banking.transfers.domain.bank_transfer.identity.BankTransferId;
@@ -34,7 +34,7 @@ class InternalTransferRequestedEventPublicationFactoryTest {
             BANK_TRANSFER_ID,
             BankAccountId.of(UUID.fromString("0b89f13d-4990-4be1-9868-ae3acbbcb9d8")),
             BankAccountId.of(UUID.fromString("70874b4d-3b81-4dfa-a92d-519c82022b1b")),
-            MonetaryAmount.of(new BigDecimal("200.00"), Currency.EUR),
+            MovementAmount.of(new BigDecimal("200.00"), Currency.EUR),
             "Invoice 123",
             Instant.parse("2026-09-06T10:00:00Z")
         );

@@ -7,7 +7,7 @@ import java.util.UUID;
 
 public record InternalAccountSender(BankAccountId bankAccountId) implements PartySender {
 
-    public static final String SENDER_ACCOUNT_ID_NOT_PROVIDED = "sender account id must be provided.";
+    public static final String SENDER_ACCOUNT_ID_NOT_PROVIDED = "sender account id must be provided";
 
     public InternalAccountSender {
         Preconditions.required(bankAccountId, SENDER_ACCOUNT_ID_NOT_PROVIDED);

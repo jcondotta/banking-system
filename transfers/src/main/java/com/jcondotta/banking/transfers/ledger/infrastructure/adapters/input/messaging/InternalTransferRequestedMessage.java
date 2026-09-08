@@ -18,7 +18,7 @@ public record InternalTransferRequestedMessage(
     public record InternalTransferRequestedMessageData(
             UUID senderAccountId,
             UUID recipientAccountId,
-            MonetaryAmountData monetaryAmount,
+            MonetaryAmountData amount,
             String reference
     ) {
 

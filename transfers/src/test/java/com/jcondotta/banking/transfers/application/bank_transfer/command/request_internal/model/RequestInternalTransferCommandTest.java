@@ -4,7 +4,7 @@ import com.jcondotta.banking.transfers.domain.bank_account.identity.BankAccountI
 import com.jcondotta.banking.transfers.domain.bank_account.value_objects.Iban;
 import com.jcondotta.banking.transfers.domain.bank_transfer.value_objects.party.PartyName;
 import com.jcondotta.banking.money.Currency;
-import com.jcondotta.banking.money.MonetaryAmount;
+import com.jcondotta.banking.transfers.domain.movement.MovementAmount;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
@@ -18,7 +18,7 @@ class RequestInternalTransferCommandTest {
   private static final BankAccountId SENDER_ACCOUNT_ID = BankAccountId.of(UUID.randomUUID());
   private static final PartyName RECIPIENT_NAME = PartyName.of("Jane Recipient");
   private static final Iban RECIPIENT_IBAN = Iban.of("ES9121000418450200051332");
-  private static final MonetaryAmount MONETARY_AMOUNT = MonetaryAmount.of(new BigDecimal("100.00"), Currency.EUR);
+  private static final MovementAmount MONETARY_AMOUNT = MovementAmount.of(new BigDecimal("100.00"), Currency.EUR);
   private static final String REFERENCE = "invoice #123";
 
   @Test
@@ -34,7 +34,7 @@ class RequestInternalTransferCommandTest {
     assertThat(command.senderAccountId()).isEqualTo(SENDER_ACCOUNT_ID);
     assertThat(command.recipientName()).isEqualTo(RECIPIENT_NAME);
     assertThat(command.recipientIban()).isEqualTo(RECIPIENT_IBAN);
-    assertThat(command.monetaryAmount()).isEqualTo(MONETARY_AMOUNT);
+    assertThat(command.movementAmount()).isEqualTo(MONETARY_AMOUNT);
     assertThat(command.reference()).isEqualTo(REFERENCE);
   }
 
@@ -73,7 +73,7 @@ class RequestInternalTransferCommandTest {
   }
 
   @Test
-  void shouldThrowException_whenMonetaryAmountIsNull() {
+  void shouldThrowException_whenMovementAmountIsNull() {
     assertThatThrownBy(() -> new RequestInternalTransferCommand(SENDER_ACCOUNT_ID, RECIPIENT_NAME, RECIPIENT_IBAN, null, REFERENCE))
       .isInstanceOf(NullPointerException.class)
       .hasMessage(RequestInternalTransferCommand.MONETARY_AMOUNT_REQUIRED);

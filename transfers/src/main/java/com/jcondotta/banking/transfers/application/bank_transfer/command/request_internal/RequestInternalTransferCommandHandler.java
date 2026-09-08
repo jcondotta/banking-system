@@ -5,13 +5,14 @@ import com.jcondotta.application.logging.LogContext;
 import com.jcondotta.application.logging.LogKey;
 import com.jcondotta.banking.transfers.application.bank_account.ports.output.BankAccountLookupPort;
 import com.jcondotta.banking.transfers.application.bank_transfer.command.request_internal.model.RequestInternalTransferCommand;
+import com.jcondotta.banking.transfers.application.common.log.BankTransferFailureReason;
 import com.jcondotta.banking.transfers.application.common.log.BankTransferOperation;
 import com.jcondotta.banking.transfers.application.common.log.BankTransferLogKey;
+import com.jcondotta.banking.transfers.domain.bank_account.exceptions.RecipientBankAccountNotActiveException;
 import com.jcondotta.banking.transfers.domain.bank_account.exceptions.RecipientBankAccountNotFoundException;
 import com.jcondotta.banking.transfers.domain.bank_transfer.aggregate.BankTransfer;
 import com.jcondotta.banking.transfers.domain.bank_transfer.identity.BankTransferId;
 import com.jcondotta.banking.transfers.domain.bank_transfer.repository.BankTransferRepository;
-import com.jcondotta.banking.transfers.domain.common.FailureReason;
 import com.jcondotta.domain.exception.DomainException;
 import io.micrometer.observation.annotation.Observed;
 import org.slf4j.Logger;
@@ -53,22 +54,26 @@ public class RequestInternalTransferCommandHandler implements CommandHandlerWith
     var bankTransferId = BankTransferId.newId();
 
     var logContext = LogContext.timed(LOGGER, BankTransferOperation.REQUEST_INTERNAL)
-      .with(BankTransferLogKey.BANK_TRANSFER_ID, bankTransferId.value().toString())
-      .with(BankTransferLogKey.SENDER_ACCOUNT_ID, command.senderAccountId().value().toString())
-      .with(BankTransferLogKey.RECIPIENT_NAME, command.recipientName().value())
-      .with(BankTransferLogKey.MASKED_IBAN, command.recipientIban().masked());
+      .with(BankTransferLogKey.BANK_TRANSFER_ID, bankTransferId.asString())
+      .with(BankTransferLogKey.SENDER_ACCOUNT_ID, command.senderAccountId().asString())
+      .with(BankTransferLogKey.RECIPIENT_NAME, command.recipientName().value());
 
     try {
-      var recipientAccountId = bankAccountLookupPort.findByIban(command.recipientIban())
+      var recipientSummary = bankAccountLookupPort.findByIban(command.recipientIban())
         .orElseThrow(() -> new RecipientBankAccountNotFoundException(command.recipientIban()));
 
-      logContext = logContext.with(BankTransferLogKey.RECIPIENT_ACCOUNT_ID, recipientAccountId.value().toString());
+      if (!recipientSummary.status().isActive()) {
+        throw new RecipientBankAccountNotActiveException(recipientSummary.status());
+      }
+
+      var recipientAccountId = recipientSummary.bankAccountId();
+      logContext = logContext.with(BankTransferLogKey.RECIPIENT_ACCOUNT_ID, recipientAccountId.asString());
 
       var bankTransfer = BankTransfer.requestInternalTransfer(
         bankTransferId,
         command.senderAccountId(),
         recipientAccountId,
-        command.monetaryAmount(),
+        command.movementAmount(),
         command.reference(),
         Instant.now(clock)
       );
@@ -82,7 +87,7 @@ public class RequestInternalTransferCommandHandler implements CommandHandlerWith
       return bankTransfer.getId();
     }
     catch (DomainException ex) {
-      var failureReason = FailureReason.from(ex);
+      var failureReason = BankTransferFailureReason.from(ex);
 
       logContext.warn("Internal transfer request failed")
         .failure()
@@ -94,7 +99,7 @@ public class RequestInternalTransferCommandHandler implements CommandHandlerWith
     catch (Exception ex) {
       logContext.error("Unexpected error during internal transfer request", ex)
         .failure()
-        .with(LogKey.REASON, FailureReason.INTERNAL_ERROR.normalize())
+        .with(LogKey.REASON, BankTransferFailureReason.INTERNAL_ERROR.normalize())
         .log();
 
       throw ex;

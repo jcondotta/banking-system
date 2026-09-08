@@ -4,13 +4,14 @@ import com.jcondotta.banking.transfers.domain.bank_account.identity.BankAccountI
 import com.jcondotta.banking.transfers.domain.bank_transfer.enums.TransferStatus;
 import com.jcondotta.banking.transfers.domain.bank_transfer.enums.TransferType;
 import com.jcondotta.banking.transfers.domain.bank_transfer.events.InternalTransferCompletedEvent;
+import com.jcondotta.banking.transfers.domain.bank_transfer.events.InternalTransferFailedEvent;
 import com.jcondotta.banking.transfers.domain.bank_transfer.events.InternalTransferRequestedEvent;
 import com.jcondotta.banking.transfers.domain.bank_transfer.exceptions.InvalidTransferStatusTransitionException;
 import com.jcondotta.banking.transfers.domain.bank_transfer.identity.BankTransferId;
 import com.jcondotta.banking.transfers.domain.bank_transfer.validation.BankTransferErrors;
 import com.jcondotta.banking.money.Currency;
-import com.jcondotta.banking.money.MonetaryAmount;
-import com.jcondotta.banking.money.MovementType;
+import com.jcondotta.banking.transfers.domain.movement.MovementAmount;
+import com.jcondotta.banking.transfers.domain.movement.MovementType;
 import com.jcondotta.domain.exception.DomainValidationException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -28,10 +29,11 @@ class BankTransferTest {
     private static final BankTransferId BANK_TRANSFER_ID = BankTransferId.newId();
     private static final BankAccountId SENDER_ACCOUNT_ID = BankAccountId.of(UUID.randomUUID());
     private static final BankAccountId RECIPIENT_ACCOUNT_ID = BankAccountId.of(UUID.randomUUID());
-    private static final MonetaryAmount AMOUNT_200_USD = MonetaryAmount.of(new BigDecimal("200.00"), Currency.USD);
+    private static final MovementAmount AMOUNT_200_USD = MovementAmount.of(new BigDecimal("200.00"), Currency.USD);
     private static final String REFERENCE = "payment for invoice #123";
     private static final Instant REQUESTED_AT = Instant.parse("2026-05-16T10:15:30Z");
     private static final Instant COMPLETED_AT = Instant.parse("2026-05-16T10:16:30Z");
+    private static final Instant FAILED_AT = Instant.parse("2026-05-16T10:17:30Z");
 
     @Test
     void shouldRequestInternalTransfer_whenParamsAreValid() {
@@ -77,7 +79,8 @@ class BankTransferTest {
         assertThat(event.aggregateId()).isEqualTo(BANK_TRANSFER_ID);
         assertThat(event.senderAccountId()).isEqualTo(SENDER_ACCOUNT_ID);
         assertThat(event.recipientAccountId()).isEqualTo(RECIPIENT_ACCOUNT_ID);
-        assertThat(event.monetaryAmount()).isEqualTo(AMOUNT_200_USD);
+        assertThat(event.amount()).isEqualByComparingTo(AMOUNT_200_USD.amount());
+        assertThat(event.currency()).isEqualTo(AMOUNT_200_USD.currency());
         assertThat(event.reference()).isEqualTo(REFERENCE);
         assertThat(event.occurredAt()).isEqualTo(REQUESTED_AT);
     }
@@ -110,12 +113,12 @@ class BankTransferTest {
     }
 
     @Test
-    void shouldThrowException_whenMonetaryAmountIsNull() {
+    void shouldThrowException_whenMovementAmountIsNull() {
         assertThatThrownBy(() ->
             BankTransfer.requestInternalTransfer(BANK_TRANSFER_ID, SENDER_ACCOUNT_ID, RECIPIENT_ACCOUNT_ID, null, REFERENCE, REQUESTED_AT)
         )
             .isInstanceOf(DomainValidationException.class)
-            .hasMessage(BankTransferErrors.MONETARY_AMOUNT_MUST_BE_PROVIDED);
+            .hasMessage(BankTransferErrors.MOVEMENT_AMOUNT_MUST_BE_PROVIDED);
     }
 
     @Test
@@ -169,7 +172,7 @@ class BankTransferTest {
     @Test
     void shouldThrowException_whenCompleteCalledOnFailedTransfer() {
         var transfer = requestInternalTransfer();
-        transfer.fail();
+        transfer.fail(FAILED_AT);
 
         assertThatThrownBy(() -> transfer.complete(COMPLETED_AT))
             .isInstanceOf(InvalidTransferStatusTransitionException.class)
@@ -190,29 +193,44 @@ class BankTransferTest {
     void shouldFailTransfer_whenStatusIsPending() {
         var transfer = requestInternalTransfer();
 
-        transfer.fail();
+        transfer.fail(FAILED_AT);
 
         assertThat(transfer.getTransferStatus()).isEqualTo(TransferStatus.FAILED);
     }
 
     @Test
-    void shouldNotRegisterEvent_whenTransferFailed() {
+    void shouldRegisterInternalTransferFailedEvent_whenTransferFailed() {
         var transfer = requestInternalTransfer();
         transfer.pullEvents();
 
-        transfer.fail();
+        transfer.fail(FAILED_AT);
 
-        assertThat(transfer.pullEvents()).isEmpty();
+        var events = transfer.pullEvents();
+        assertThat(events).hasSize(1);
+        assertThat(events.getFirst()).isInstanceOf(InternalTransferFailedEvent.class);
+
+        var event = (InternalTransferFailedEvent) events.getFirst();
+        assertThat(event.aggregateId()).isEqualTo(BANK_TRANSFER_ID);
+        assertThat(event.occurredAt()).isEqualTo(FAILED_AT);
     }
 
     @Test
     void shouldBeIdempotent_whenFailCalledOnAlreadyFailedTransfer() {
         var transfer = requestInternalTransfer();
-        transfer.fail();
+        transfer.fail(FAILED_AT);
 
-        transfer.fail();
+        transfer.fail(FAILED_AT);
 
         assertThat(transfer.getTransferStatus()).isEqualTo(TransferStatus.FAILED);
+    }
+
+    @Test
+    void shouldThrowException_whenFailedAtIsNull() {
+        var transfer = requestInternalTransfer();
+
+        assertThatThrownBy(() -> transfer.fail(null))
+            .isInstanceOf(DomainValidationException.class)
+            .hasMessage(BankTransferErrors.FAILED_AT_MUST_BE_PROVIDED);
     }
 
     @Test
@@ -220,7 +238,7 @@ class BankTransferTest {
         var transfer = requestInternalTransfer();
         transfer.complete(COMPLETED_AT);
 
-        assertThatThrownBy(transfer::fail)
+        assertThatThrownBy(() -> transfer.fail(FAILED_AT))
             .isInstanceOf(InvalidTransferStatusTransitionException.class)
             .hasMessageContaining(TransferStatus.COMPLETED.name())
             .hasMessageContaining(TransferStatus.FAILED.name());
@@ -229,7 +247,7 @@ class BankTransferTest {
     @ParameterizedTest
     @EnumSource(Currency.class)
     void shouldRequestInternalTransfer_forAllCurrencies(Currency currency) {
-        var amount = MonetaryAmount.of(new BigDecimal("100.00"), currency);
+        var amount = MovementAmount.of(new BigDecimal("100.00"), currency);
         var transfer = BankTransfer.requestInternalTransfer(
             BANK_TRANSFER_ID, SENDER_ACCOUNT_ID, RECIPIENT_ACCOUNT_ID, amount, null, REQUESTED_AT
         );

@@ -7,8 +7,8 @@ import com.jcondotta.banking.transfers.domain.bank_transfer.enums.TransferType;
 import com.jcondotta.banking.transfers.domain.bank_transfer.identity.BankTransferId;
 import com.jcondotta.banking.transfers.domain.bank_transfer.value_objects.transfer_entry.InternalTransferEntry;
 import com.jcondotta.banking.money.Currency;
-import com.jcondotta.banking.money.MonetaryAmount;
-import com.jcondotta.banking.money.MovementType;
+import com.jcondotta.banking.transfers.domain.movement.MovementAmount;
+import com.jcondotta.banking.transfers.domain.movement.MovementType;
 import com.jcondotta.banking.transfers.infrastructure.adapters.output.persistence.entity.BankTransferEntity;
 import org.junit.jupiter.api.Test;
 
@@ -28,13 +28,13 @@ class BankTransferEntityMapperTest {
     var senderAccountId = BankAccountId.of(UUID.randomUUID());
     var recipientAccountId = BankAccountId.of(UUID.randomUUID());
     var requestedAt = Instant.parse("2026-05-16T12:00:00Z");
-    var monetaryAmount = MonetaryAmount.of(new BigDecimal("25.50"), Currency.EUR);
+    var movementAmount = MovementAmount.of(new BigDecimal("25.50"), Currency.EUR);
 
     var bankTransfer = BankTransfer.requestInternalTransfer(
       bankTransferId,
       senderAccountId,
       recipientAccountId,
-      monetaryAmount,
+      movementAmount,
       "teste postman",
       requestedAt
     );
@@ -86,14 +86,14 @@ class BankTransferEntityMapperTest {
 
     assertThat(debitEntry.partySender().bankAccountId().value()).isEqualTo(senderAccountId);
     assertThat(debitEntry.partyRecipient().bankAccountId().value()).isEqualTo(recipientAccountId);
-    assertThat(debitEntry.monetaryMovement().movementType()).isEqualTo(MovementType.DEBIT);
-    assertThat(debitEntry.monetaryMovement().amount()).isEqualByComparingTo("25.50");
-    assertThat(debitEntry.monetaryMovement().currency()).isEqualTo(Currency.EUR);
+    assertThat(debitEntry.movement().movementType()).isEqualTo(MovementType.DEBIT);
+    assertThat(debitEntry.movement().amount()).isEqualByComparingTo("25.50");
+    assertThat(debitEntry.movement().currency()).isEqualTo(Currency.EUR);
 
     assertThat(creditEntry.partySender().bankAccountId().value()).isEqualTo(senderAccountId);
     assertThat(creditEntry.partyRecipient().bankAccountId().value()).isEqualTo(recipientAccountId);
-    assertThat(creditEntry.monetaryMovement().movementType()).isEqualTo(MovementType.CREDIT);
-    assertThat(creditEntry.monetaryMovement().amount()).isEqualByComparingTo("25.50");
-    assertThat(creditEntry.monetaryMovement().currency()).isEqualTo(Currency.EUR);
+    assertThat(creditEntry.movement().movementType()).isEqualTo(MovementType.CREDIT);
+    assertThat(creditEntry.movement().amount()).isEqualByComparingTo("25.50");
+    assertThat(creditEntry.movement().currency()).isEqualTo(Currency.EUR);
   }
 }

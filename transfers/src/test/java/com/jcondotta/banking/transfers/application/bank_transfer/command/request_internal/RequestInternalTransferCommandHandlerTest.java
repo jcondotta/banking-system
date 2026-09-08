@@ -3,8 +3,11 @@ package com.jcondotta.banking.transfers.application.bank_transfer.command.reques
 import com.jcondotta.application.command.CommandHandlerWithResult;
 import com.jcondotta.banking.transfers.application.bank_account.ports.output.BankAccountLookupPort;
 import com.jcondotta.banking.transfers.application.bank_transfer.command.request_internal.model.RequestInternalTransferCommand;
-import com.jcondotta.banking.transfers.domain.bank_account.identity.BankAccountId;
+import com.jcondotta.banking.transfers.domain.bank_account.BankAccountSummary;
+import com.jcondotta.banking.transfers.domain.bank_account.enums.BankAccountStatus;
+import com.jcondotta.banking.transfers.domain.bank_account.exceptions.RecipientBankAccountNotActiveException;
 import com.jcondotta.banking.transfers.domain.bank_account.exceptions.RecipientBankAccountNotFoundException;
+import com.jcondotta.banking.transfers.domain.bank_account.identity.BankAccountId;
 import com.jcondotta.banking.transfers.domain.bank_account.value_objects.Iban;
 import com.jcondotta.banking.transfers.domain.bank_transfer.aggregate.BankTransfer;
 import com.jcondotta.banking.transfers.domain.bank_transfer.enums.TransferStatus;
@@ -14,10 +17,12 @@ import com.jcondotta.banking.transfers.domain.bank_transfer.identity.BankTransfe
 import com.jcondotta.banking.transfers.domain.bank_transfer.repository.BankTransferRepository;
 import com.jcondotta.banking.transfers.domain.bank_transfer.value_objects.party.PartyName;
 import com.jcondotta.banking.money.Currency;
-import com.jcondotta.banking.money.MonetaryAmount;
+import com.jcondotta.banking.transfers.domain.movement.MovementAmount;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
@@ -44,9 +49,10 @@ class RequestInternalTransferCommandHandlerTest {
 
   private static final BankAccountId SENDER_ACCOUNT_ID = BankAccountId.of(UUID.randomUUID());
   private static final BankAccountId RECIPIENT_ACCOUNT_ID = BankAccountId.of(UUID.randomUUID());
+  private static final BankAccountSummary ACTIVE_RECIPIENT_SUMMARY = new BankAccountSummary(RECIPIENT_ACCOUNT_ID, BankAccountStatus.ACTIVE);
   private static final PartyName RECIPIENT_NAME = PartyName.of("Jane Recipient");
   private static final Iban RECIPIENT_IBAN = Iban.of("ES9121000418450200051332");
-  private static final MonetaryAmount MONETARY_AMOUNT = MonetaryAmount.of(new BigDecimal("100.00"), Currency.EUR);
+  private static final MovementAmount MONETARY_AMOUNT = MovementAmount.of(new BigDecimal("100.00"), Currency.EUR);
   private static final String REFERENCE = "invoice #123";
   private static final Instant REQUESTED_AT = Instant.parse("2026-05-16T10:15:30Z");
   private static final Clock FIXED_CLOCK = Clock.fixed(REQUESTED_AT, ZoneOffset.UTC);
@@ -69,7 +75,7 @@ class RequestInternalTransferCommandHandlerTest {
 
   @Test
   void shouldRequestInternalTransfer_whenCommandIsValid() {
-    when(bankAccountLookupPort.findByIban(RECIPIENT_IBAN)).thenReturn(Optional.of(RECIPIENT_ACCOUNT_ID));
+    when(bankAccountLookupPort.findByIban(RECIPIENT_IBAN)).thenReturn(Optional.of(ACTIVE_RECIPIENT_SUMMARY));
 
     var command = command();
 
@@ -94,7 +100,7 @@ class RequestInternalTransferCommandHandlerTest {
 
   @Test
   void shouldThrowDomainException_whenCommandBreaksDomainRule() {
-    when(bankAccountLookupPort.findByIban(RECIPIENT_IBAN)).thenReturn(Optional.of(SENDER_ACCOUNT_ID));
+    when(bankAccountLookupPort.findByIban(RECIPIENT_IBAN)).thenReturn(Optional.of(new BankAccountSummary(SENDER_ACCOUNT_ID, BankAccountStatus.ACTIVE)));
 
     var command = new RequestInternalTransferCommand(
       SENDER_ACCOUNT_ID,
@@ -128,7 +134,7 @@ class RequestInternalTransferCommandHandlerTest {
 
   @Test
   void shouldThrowUnexpectedException_whenRepositoryThrowsUnexpectedException() {
-    when(bankAccountLookupPort.findByIban(RECIPIENT_IBAN)).thenReturn(Optional.of(RECIPIENT_ACCOUNT_ID));
+    when(bankAccountLookupPort.findByIban(RECIPIENT_IBAN)).thenReturn(Optional.of(ACTIVE_RECIPIENT_SUMMARY));
 
     var exception = new IllegalStateException("database unavailable");
 
@@ -142,6 +148,21 @@ class RequestInternalTransferCommandHandlerTest {
     verify(bankAccountLookupPort).findByIban(RECIPIENT_IBAN);
     verify(bankTransferRepository).save(any(BankTransfer.class));
     verifyNoMoreInteractions(bankAccountLookupPort, bankTransferRepository);
+  }
+
+  @ParameterizedTest
+  @EnumSource(value = BankAccountStatus.class, names = "ACTIVE", mode = EnumSource.Mode.EXCLUDE)
+  void shouldThrowException_whenRecipientBankAccountIsNotActive(BankAccountStatus status) {
+    when(bankAccountLookupPort.findByIban(RECIPIENT_IBAN))
+      .thenReturn(Optional.of(new BankAccountSummary(RECIPIENT_ACCOUNT_ID, status)));
+
+    assertThatThrownBy(() -> commandHandler.handle(command()))
+      .isInstanceOf(RecipientBankAccountNotActiveException.class)
+      .hasMessage(RecipientBankAccountNotActiveException.MESSAGE);
+
+    verify(bankAccountLookupPort).findByIban(RECIPIENT_IBAN);
+    verifyNoInteractions(bankTransferRepository);
+    verifyNoMoreInteractions(bankAccountLookupPort);
   }
 
   private static RequestInternalTransferCommand command() {

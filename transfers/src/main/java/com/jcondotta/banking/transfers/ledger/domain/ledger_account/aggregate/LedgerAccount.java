@@ -1,7 +1,7 @@
 package com.jcondotta.banking.transfers.ledger.domain.ledger_account.aggregate;
 
 import com.jcondotta.banking.money.Currency;
-import com.jcondotta.banking.money.MonetaryMovement;
+import com.jcondotta.banking.transfers.domain.movement.Movement;
 import com.jcondotta.banking.transfers.ledger.domain.ledger_account.enums.LedgerAccountStatus;
 import com.jcondotta.banking.transfers.ledger.domain.ledger_account.enums.LedgerAccountType;
 import com.jcondotta.banking.transfers.ledger.domain.ledger_account.identity.LedgerAccountId;
@@ -99,7 +99,7 @@ public final class LedgerAccount extends AggregateRoot<LedgerAccountId> {
         return balance;
     }
 
-    public void applyMovement(MonetaryMovement movement) {
+    public void applyMovement(Movement movement) {
         var updatedBooked = balance.booked().apply(movement);
         balance = new AccountBalance(updatedBooked, balance.held());
     }

@@ -1,7 +1,7 @@
 package com.jcondotta.banking.transfers.ledger.domain.ledger_account.value_objects;
 
 import com.jcondotta.banking.money.Currency;
-import com.jcondotta.banking.money.MonetaryMovement;
+import com.jcondotta.banking.transfers.domain.movement.Movement;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -26,7 +26,7 @@ public record Balance(BigDecimal amount, Currency currency) {
         return new Balance(BigDecimal.ZERO, currency);
     }
 
-    public Balance apply(MonetaryMovement movement) {
+    public Balance apply(Movement movement) {
         required(movement, MONETARY_MOVEMENT_NOT_PROVIDED);
         currency.requireSameAs(movement.currency());
 

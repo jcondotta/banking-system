@@ -3,36 +3,36 @@ package com.jcondotta.banking.transfers.domain.bank_transfer.value_objects.trans
 import com.jcondotta.banking.transfers.domain.bank_transfer.value_objects.party.PartyRecipient;
 import com.jcondotta.banking.transfers.domain.bank_transfer.value_objects.party.PartySender;
 import com.jcondotta.banking.money.Currency;
-import com.jcondotta.banking.money.MonetaryMovement;
-import com.jcondotta.banking.money.MovementType;
+import com.jcondotta.banking.transfers.domain.movement.Movement;
+import com.jcondotta.banking.transfers.domain.movement.MovementType;
 
 import java.math.BigDecimal;
 
 public sealed interface TransferEntry permits InternalTransferEntry {
 
-    String MONETARY_MOVEMENT_NOT_PROVIDED = "monetary movement must be provided.";
+    String MONETARY_MOVEMENT_NOT_PROVIDED = "monetary movement must be provided";
 
     PartySender partySender();
     PartyRecipient partyRecipient();
-    MonetaryMovement monetaryMovement();
+    Movement movement();
 
     default BigDecimal amount() {
-        return monetaryMovement().amount();
+        return movement().amount();
     }
 
     default Currency currency() {
-        return monetaryMovement().currency();
+        return movement().currency();
     }
 
     default MovementType movementType() {
-        return monetaryMovement().movementType();
+        return movement().movementType();
     }
 
     default boolean isDebit() {
-        return monetaryMovement().isDebit();
+        return movement().isDebit();
     }
 
     default boolean isCredit() {
-        return monetaryMovement().isCredit();
+        return movement().isCredit();
     }
 }

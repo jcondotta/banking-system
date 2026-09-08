@@ -3,8 +3,8 @@ package com.jcondotta.banking.transfers.ledger.application.ledger_account.comman
 import com.jcondotta.application.command.CommandHandler;
 import com.jcondotta.application.logging.LogContext;
 import com.jcondotta.application.logging.LogKey;
-import com.jcondotta.banking.transfers.domain.common.FailureReason;
 import com.jcondotta.banking.money.Currency;
+import com.jcondotta.banking.transfers.ledger.application.common.log.LedgerFailureReason;
 import com.jcondotta.banking.transfers.ledger.application.common.log.LedgerOperation;
 import com.jcondotta.banking.transfers.ledger.application.common.log.LedgerLogKey;
 import com.jcondotta.banking.transfers.ledger.domain.ledger_account.aggregate.LedgerAccount;
@@ -15,7 +15,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Component;
 
-@Component
+// @Component
 public class ProvisionLedgerAccountCommandHandler implements CommandHandler<ProvisionLedgerAccountCommand> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ProvisionLedgerAccountCommandHandler.class);
@@ -55,7 +55,7 @@ public class ProvisionLedgerAccountCommandHandler implements CommandHandler<Prov
         catch (Exception ex) {
             logContext.error("Unexpected error during ledger account provisioning", ex)
                     .failure()
-                    .with(LogKey.REASON, FailureReason.INTERNAL_ERROR.normalize())
+                    .with(LogKey.REASON, LedgerFailureReason.INTERNAL_ERROR.normalize())
                     .log();
 
             throw ex;

@@ -5,7 +5,7 @@ import com.jcondotta.banking.transfers.domain.bank_account.identity.BankAccountI
 import com.jcondotta.banking.transfers.domain.bank_account.value_objects.Iban;
 import com.jcondotta.banking.transfers.domain.bank_transfer.identity.BankTransferId;
 import com.jcondotta.banking.transfers.domain.bank_transfer.value_objects.party.PartyName;
-import com.jcondotta.banking.money.MonetaryAmount;
+import com.jcondotta.banking.transfers.domain.movement.MovementAmount;
 
 import static java.util.Objects.requireNonNull;
 
@@ -13,19 +13,19 @@ public record RequestInternalTransferCommand(
   BankAccountId senderAccountId,
   PartyName recipientName,
   Iban recipientIban,
-  MonetaryAmount monetaryAmount,
+  MovementAmount movementAmount,
   String reference
 ) implements Command<BankTransferId> {
 
   public static final String SENDER_ACCOUNT_ID_REQUIRED = "senderAccountId must be provided";
   public static final String RECIPIENT_NAME_REQUIRED = "recipientName must be provided";
   public static final String RECIPIENT_IBAN_REQUIRED = "recipientIban must be provided";
-  public static final String MONETARY_AMOUNT_REQUIRED = "monetaryAmount must be provided";
+  public static final String MONETARY_AMOUNT_REQUIRED = "movementAmount must be provided";
 
   public RequestInternalTransferCommand {
     requireNonNull(senderAccountId, SENDER_ACCOUNT_ID_REQUIRED);
     requireNonNull(recipientName, RECIPIENT_NAME_REQUIRED);
     requireNonNull(recipientIban, RECIPIENT_IBAN_REQUIRED);
-    requireNonNull(monetaryAmount, MONETARY_AMOUNT_REQUIRED);
+    requireNonNull(movementAmount, MONETARY_AMOUNT_REQUIRED);
   }
 }

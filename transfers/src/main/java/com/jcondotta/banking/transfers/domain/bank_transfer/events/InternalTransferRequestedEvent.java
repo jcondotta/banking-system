@@ -1,13 +1,16 @@
 package com.jcondotta.banking.transfers.domain.bank_transfer.events;
 
+import com.jcondotta.banking.money.Currency;
 import com.jcondotta.banking.transfers.domain.bank_account.identity.BankAccountId;
 import com.jcondotta.banking.transfers.domain.bank_transfer.identity.BankTransferId;
-import com.jcondotta.banking.money.MonetaryAmount;
+import com.jcondotta.banking.transfers.domain.bank_transfer.validation.BankTransferErrors;
+import com.jcondotta.banking.transfers.domain.movement.MovementAmount;
 import com.jcondotta.domain.events.DomainEvent;
 import com.jcondotta.domain.events.DomainEventMetadata;
 import com.jcondotta.domain.identity.EventId;
 import com.jcondotta.domain.validation.DomainEventErrors;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 
 import static com.jcondotta.domain.support.Preconditions.required;
@@ -29,13 +32,30 @@ public record InternalTransferRequestedEvent(
         BankTransferId aggregateId,
         BankAccountId senderAccountId,
         BankAccountId recipientAccountId,
-        MonetaryAmount monetaryAmount,
+        MovementAmount movementAmount,
         String reference,
         Instant occurredAt
     ) {
         this(
             DomainEventMetadata.of(eventId, aggregateId, occurredAt),
-            new InternalTransferRequestedData(senderAccountId, recipientAccountId, monetaryAmount, reference)
+            createData(senderAccountId, recipientAccountId, movementAmount, reference)
+        );
+    }
+
+    private static InternalTransferRequestedData createData(
+        BankAccountId senderAccountId,
+        BankAccountId recipientAccountId,
+        MovementAmount movementAmount,
+        String reference
+    ) {
+        required(movementAmount, BankTransferErrors.MOVEMENT_AMOUNT_MUST_BE_PROVIDED);
+
+        return new InternalTransferRequestedData(
+            senderAccountId,
+            recipientAccountId,
+            movementAmount.amount(),
+            movementAmount.currency(),
+            reference
         );
     }
 
@@ -52,8 +72,12 @@ public record InternalTransferRequestedEvent(
         return data.recipientAccountId();
     }
 
-    public MonetaryAmount monetaryAmount() {
-        return data.monetaryAmount();
+    public BigDecimal amount() {
+        return data.amount();
+    }
+
+    public Currency currency() {
+        return data.currency();
     }
 
     public String reference() {

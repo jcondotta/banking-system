@@ -3,10 +3,10 @@ package com.jcondotta.banking.transfers.ledger.application.ledger_account.comman
 import com.jcondotta.application.command.CommandHandler;
 import com.jcondotta.application.logging.LogContext;
 import com.jcondotta.application.logging.LogKey;
-import com.jcondotta.banking.money.MonetaryMovement;
+import com.jcondotta.banking.transfers.domain.movement.Movement;
 import com.jcondotta.banking.transfers.domain.bank_transfer.identity.BankTransferId;
 import com.jcondotta.banking.transfers.domain.bank_transfer.repository.BankTransferRepository;
-import com.jcondotta.banking.transfers.domain.common.FailureReason;
+import com.jcondotta.banking.transfers.ledger.application.common.log.LedgerFailureReason;
 import com.jcondotta.banking.transfers.ledger.application.common.log.LedgerOperation;
 import com.jcondotta.banking.transfers.ledger.application.common.log.LedgerLogKey;
 import com.jcondotta.banking.transfers.ledger.domain.ledger_account.exceptions.LedgerAccountNotYetProvisionedException;
@@ -16,7 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-@Component
+// @Component
 public class ApplyInternalTransferCommandHandler implements CommandHandler<ApplyInternalTransferCommand> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ApplyInternalTransferCommandHandler.class);
@@ -48,8 +48,8 @@ public class ApplyInternalTransferCommandHandler implements CommandHandler<Apply
                     .findByAccountReference(AccountReference.of(command.recipientAccountId()))
                     .orElseThrow(() -> new LedgerAccountNotYetProvisionedException(command.recipientAccountId()));
 
-            senderAccount.applyMovement(MonetaryMovement.ofDebit(command.monetaryAmount()));
-            recipientAccount.applyMovement(MonetaryMovement.ofCredit(command.monetaryAmount()));
+            senderAccount.applyMovement(Movement.ofDebit(command.movementAmount()));
+            recipientAccount.applyMovement(Movement.ofCredit(command.movementAmount()));
 
             ledgerAccountRepository.updateBalance(senderAccount);
             ledgerAccountRepository.updateBalance(recipientAccount);
@@ -68,7 +68,7 @@ public class ApplyInternalTransferCommandHandler implements CommandHandler<Apply
         catch (Exception ex) {
             logContext.error("Failed to apply internal transfer to ledger", ex)
                     .failure()
-                    .with(LogKey.REASON, FailureReason.INTERNAL_ERROR.normalize())
+                    .with(LogKey.REASON, LedgerFailureReason.INTERNAL_ERROR.normalize())
                     .log();
 
             throw ex;
