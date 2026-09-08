@@ -64,7 +64,7 @@ class OutboxEventCollectorTest {
     assertThat(collector.collect(aggregate)).isEmpty();
 
     verify(publicationRegistry, never()).publicationFor(any());
-    verify(outboxEntityMapper, never()).toOutboxEntity(any(), any());
+    verify(outboxEntityMapper, never()).toOutboxEntity(any(), any(), any());
   }
 
   @Test
@@ -78,10 +78,10 @@ class OutboxEventCollectorTest {
     when(correlationIdProvider.get()).thenReturn(CORRELATION_ID);
     when(eventSourceProvider.get()).thenReturn(EVENT_SOURCE);
     doReturn(publication).when(publicationRegistry).publicationFor(event);
-    when(outboxEntityMapper.toOutboxEntity(eq(event), any(EventEnvelope.class))).thenReturn(outboxEntity);
+    when(outboxEntityMapper.toOutboxEntity(eq(event), any(EventPublication.class), any(EventEnvelope.class))).thenReturn(outboxEntity);
 
     assertThat(collector.collect(aggregate)).containsExactly(outboxEntity);
-    verify(outboxEntityMapper).toOutboxEntity(eq(event), any(EventEnvelope.class));
+    verify(outboxEntityMapper).toOutboxEntity(eq(event), any(EventPublication.class), any(EventEnvelope.class));
   }
 
   @Test
@@ -99,12 +99,12 @@ class OutboxEventCollectorTest {
     when(eventSourceProvider.get()).thenReturn(EVENT_SOURCE);
     doReturn(publication1).when(publicationRegistry).publicationFor(event1);
     doReturn(publication2).when(publicationRegistry).publicationFor(event2);
-    when(outboxEntityMapper.toOutboxEntity(eq(event1), any(EventEnvelope.class))).thenReturn(outboxEntity1);
-    when(outboxEntityMapper.toOutboxEntity(eq(event2), any(EventEnvelope.class))).thenReturn(outboxEntity2);
+    when(outboxEntityMapper.toOutboxEntity(eq(event1), any(EventPublication.class), any(EventEnvelope.class))).thenReturn(outboxEntity1);
+    when(outboxEntityMapper.toOutboxEntity(eq(event2), any(EventPublication.class), any(EventEnvelope.class))).thenReturn(outboxEntity2);
 
     assertThat(collector.collect(aggregate)).containsExactly(outboxEntity1, outboxEntity2);
-    verify(outboxEntityMapper).toOutboxEntity(eq(event1), any(EventEnvelope.class));
-    verify(outboxEntityMapper).toOutboxEntity(eq(event2), any(EventEnvelope.class));
+    verify(outboxEntityMapper).toOutboxEntity(eq(event1), any(EventPublication.class), any(EventEnvelope.class));
+    verify(outboxEntityMapper).toOutboxEntity(eq(event2), any(EventPublication.class), any(EventEnvelope.class));
   }
 
   @Test
@@ -118,7 +118,7 @@ class OutboxEventCollectorTest {
     when(eventSourceProvider.get()).thenReturn(EVENT_SOURCE);
     doReturn(mockPublicationFor(event1)).when(publicationRegistry).publicationFor(event1);
     doReturn(mockPublicationFor(event2)).when(publicationRegistry).publicationFor(event2);
-    when(outboxEntityMapper.toOutboxEntity(any(), any())).thenReturn(mock(StubEntity.class));
+    when(outboxEntityMapper.toOutboxEntity(any(), any(), any())).thenReturn(mock(StubEntity.class));
 
     collector.collect(aggregate);
 

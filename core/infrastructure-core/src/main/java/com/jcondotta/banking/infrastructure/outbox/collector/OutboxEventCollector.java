@@ -30,7 +30,7 @@ public class OutboxEventCollector<T extends OutboxRecord> {
       .map(event -> {
         var publication = publicationRegistry.publicationFor(event);
         var envelope = EventEnvelope.from(publication, context);
-        return outboxMapper.toOutboxEntity(event, envelope);
+        return outboxMapper.toOutboxEntity(event, publication, envelope);
       })
       .toList();
   }
