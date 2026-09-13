@@ -35,6 +35,12 @@
                 <artifactId>infrastructure-core</artifactId>
                 <version>${shared-modules.version}</version>
             </dependency>
+
+            <dependency>
+                <groupId>com.jcondotta</groupId>
+                <artifactId>outbox-infrastructure</artifactId>
+                <version>${shared-modules.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -50,6 +56,10 @@
         <dependency>
             <groupId>com.jcondotta</groupId>
             <artifactId>infrastructure-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.jcondotta</groupId>
+            <artifactId>outbox-infrastructure</artifactId>
         </dependency>
 
         <dependency>

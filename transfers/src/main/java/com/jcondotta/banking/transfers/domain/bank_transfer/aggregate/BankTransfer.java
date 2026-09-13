@@ -11,7 +11,7 @@ import com.jcondotta.banking.transfers.domain.bank_transfer.identity.BankTransfe
 import com.jcondotta.banking.transfers.domain.bank_transfer.validation.BankTransferErrors;
 import com.jcondotta.banking.transfers.domain.bank_transfer.value_objects.transfer_entry.InternalTransferEntry;
 import com.jcondotta.banking.transfers.domain.bank_transfer.value_objects.transfer_entry.TransferEntry;
-import com.jcondotta.banking.transfers.domain.movement.MovementAmount;
+import com.jcondotta.banking.movement.MovementAmount;
 import com.jcondotta.domain.core.AggregateRoot;
 import com.jcondotta.domain.identity.EventId;
 

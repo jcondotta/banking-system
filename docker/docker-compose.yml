@@ -1,6 +1,9 @@
 name: banking
 
 services:
+
+  # ── Shared Infrastructure ─────────────────────────────────────────────────
+
   opensearch:
     image: opensearchproject/opensearch:2.13.0
     container_name: banking-opensearch
@@ -118,11 +121,107 @@ services:
     networks:
       - banking_network
 
+  # ── Accounts ──────────────────────────────────────────────────────────────
+
+  localstack:
+    container_name: "accounts-localstack-4.6.0"
+    image: localstack/localstack:4.6.0
+    ports:
+      - '127.0.0.1:4566:4566'
+    environment:
+      SERVICES: dynamodb
+      AWS_ACCESS_KEY_ID: test
+      AWS_SECRET_ACCESS_KEY: test
+      AWS_DEFAULT_REGION: us-east-1
+      LS_LOG: ${LS_LOG:-debug}
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:4566/_localstack/health" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - banking_network
+    volumes:
+      - '/var/run/docker.sock:/var/run/docker.sock'
+      - ../accounts/docker/localstack:/etc/localstack/init/ready.d
+      - accounts_localstack_volume:/var/lib/localstack
+
+  # ── Recipients ────────────────────────────────────────────────────────────
+
+  postgres-recipients:
+    image: postgres:17-alpine
+    container_name: recipients-postgres-17
+    ports:
+      - "127.0.0.1:5432:5432"
+    environment:
+      POSTGRES_DB: recipients_db
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: password
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U admin -d recipients_db" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - banking_network
+    volumes:
+      - recipients_postgres_volume:/var/lib/postgresql/data
+
+  # ── Transfers ─────────────────────────────────────────────────────────────
+
+  postgres-transfers:
+    image: postgres:17-alpine
+    container_name: transfers-postgres-17
+    ports:
+      - "127.0.0.1:5433:5432"
+    environment:
+      POSTGRES_DB: transfers_db
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: password
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U admin -d transfers_db" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - banking_network
+    volumes:
+      - transfers_postgres_volume:/var/lib/postgresql/data
+
+  # ── Ledger ────────────────────────────────────────────────────────────────
+
+  postgres-ledger:
+    image: postgres:17-alpine
+    container_name: ledger-postgres-17
+    ports:
+      - "127.0.0.1:5434:5432"
+    environment:
+      POSTGRES_DB: ledger_db
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: password
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U admin -d ledger_db" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - banking_network
+    volumes:
+      - ledger_postgres_volume:/var/lib/postgresql/data
+
 volumes:
   opensearch_data:
     name: banking-opensearch-data
   kafka_1_data:
     name: banking-kafka-1-data
+  accounts_localstack_volume:
+    name: accounts-localstack-data
+  recipients_postgres_volume:
+    name: recipients-postgres-data
+  transfers_postgres_volume:
+    name: transfers-postgres-data
+  ledger_postgres_volume:
+    name: ledger-postgres-data
 
 networks:
   banking_network:

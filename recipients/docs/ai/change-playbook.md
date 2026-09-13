@@ -101,7 +101,7 @@ Run:
 Read:
 - `src/main/resources/application*.yml`
 - `src/main/resources/logback-spring.xml`
-- `docker/docker-compose.yml`
+- `../docker/docker-compose.yml`
 - manifests under `k8s`
 - integration test configuration under `src/test/resources`
 

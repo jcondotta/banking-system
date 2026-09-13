@@ -17,7 +17,9 @@
     <modules>
         <module>domain-core</module>
         <module>money-core</module>
+        <module>movement-core</module>
         <module>application-core</module>
         <module>infrastructure-core</module>
+        <module>outbox-infrastructure</module>
     </modules>
 </project>

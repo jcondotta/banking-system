@@ -2,18 +2,18 @@ package com.jcondotta.banking.accounts.infrastructure.adapters.output.persistenc
 
 import com.jcondotta.banking.accounts.infrastructure.adapters.output.persistence.dynamodb.outbox.entity.OutboxEntity;
 import com.jcondotta.banking.accounts.infrastructure.adapters.output.persistence.dynamodb.outbox.entity.OutboxKey;
-import com.jcondotta.banking.infrastructure.outbox.exceptions.OutboxSerializationException;
-import com.jcondotta.banking.infrastructure.outbox.shard.OutboxShardResolver;
 import com.jcondotta.banking.infrastructure.adapters.output.messaging.EventEnvelope;
 import com.jcondotta.banking.infrastructure.adapters.output.messaging.EventPublication;
+import com.jcondotta.banking.infrastructure.outbox.exceptions.OutboxSerializationException;
 import com.jcondotta.banking.infrastructure.outbox.mapper.OutboxEntityMapper;
-import com.jcondotta.domain.events.DomainEvent;
+import com.jcondotta.banking.infrastructure.outbox.shard.OutboxShardResolver;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import tools.jackson.core.JacksonException;
 import tools.jackson.databind.ObjectMapper;
 
 import java.time.Instant;
+import java.util.UUID;
 
 @Component
 @RequiredArgsConstructor
@@ -23,14 +23,13 @@ public class OutboxEntityMapperImpl implements OutboxEntityMapper<OutboxEntity> 
   private final OutboxShardResolver shardResolver;
 
   @Override
-  public OutboxEntity toOutboxEntity(DomainEvent<?, ?> event, EventPublication<?> publication, EventEnvelope envelope) {
-    var aggregateId = event.aggregateId();
-    var eventId = event.eventId().value();
-
-    var outboxKey = OutboxKey.of(aggregateId, eventId);
+  public OutboxEntity toOutboxEntity(EventPublication publication) {
+    var envelope = publication.envelope();
+    var routing = publication.routing();
+    var outboxKey = OutboxKey.of(envelope.aggregateId(), envelope.eventId());
     var now = Instant.now();
 
-    var shard = shardResolver.resolve(aggregateId);
+    var shard = shardResolver.resolve(envelope.aggregateId());
     var gsi1pk = "OUTBOX#" + shard;
 
     return OutboxEntity.builder()
@@ -40,12 +39,12 @@ public class OutboxEntityMapperImpl implements OutboxEntityMapper<OutboxEntity> 
       .gsi1sk(now.toString())
       .shard(shard)
       .nextAttemptAt(now)
-      .aggregateId(aggregateId.asString())
-      .messageKey(publication.key())
-      .eventId(eventId)
+      .aggregateId(envelope.aggregateId())
+      .messageKey(routing.key())
+      .eventId(UUID.fromString(envelope.eventId()))
       .correlationId(envelope.correlationId())
-      .eventType(event.eventType())
-      .destination(publication.destination())
+      .eventType(envelope.eventType())
+      .destination(routing.destination())
       .payload(serialize(envelope))
       .createdAt(now)
       .build();

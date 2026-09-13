@@ -4,7 +4,7 @@ import com.jcondotta.banking.transfers.domain.bank_account.identity.BankAccountI
 import com.jcondotta.banking.transfers.domain.bank_transfer.identity.BankTransferId;
 import com.jcondotta.banking.transfers.domain.bank_transfer.validation.BankTransferErrors;
 import com.jcondotta.banking.money.Currency;
-import com.jcondotta.banking.transfers.domain.movement.MovementAmount;
+import com.jcondotta.banking.movement.MovementAmount;
 import com.jcondotta.domain.exception.DomainValidationException;
 import com.jcondotta.domain.identity.EventId;
 import com.jcondotta.domain.validation.DomainEventErrors;

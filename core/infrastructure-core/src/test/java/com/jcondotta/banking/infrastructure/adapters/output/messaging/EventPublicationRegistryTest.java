@@ -14,23 +14,22 @@ class EventPublicationRegistryTest {
   private static final String MESSAGE_KEY = "test-key";
 
   @Test
-  void shouldCreatePublication_whenFactoryIsRegistered() {
+  void shouldReturnRouting_whenFactoryIsRegistered() {
     var registry = EventPublicationRegistryFactory.of(domainEventFactory());
     var event = domainEvent();
 
-    var publication = registry.publicationFor(event);
+    var routing = registry.routingFor(event);
 
-    assertThat(publication).isInstanceOf(DefaultEventPublication.class);
-    assertThat(publication.event()).isSameAs(event);
-    assertThat(publication.destination()).isEqualTo(DESTINATION);
-    assertThat(publication.key()).isEqualTo(MESSAGE_KEY);
+    assertThat(routing).isInstanceOf(EventRouting.class);
+    assertThat(routing.destination()).isEqualTo(DESTINATION);
+    assertThat(routing.key()).isEqualTo(MESSAGE_KEY);
   }
 
   @Test
   void shouldThrowException_whenFactoryIsMissing() {
     var registry = EventPublicationRegistryFactory.of();
 
-    assertThatThrownBy(() -> registry.publicationFor(domainEvent()))
+    assertThatThrownBy(() -> registry.routingFor(domainEvent()))
       .isInstanceOf(IllegalStateException.class)
       .hasMessageContaining("No EventPublication factory registered");
   }
@@ -39,7 +38,7 @@ class EventPublicationRegistryTest {
   void shouldRejectNullEvent() {
     var registry = EventPublicationRegistryFactory.of();
 
-    assertThatThrownBy(() -> registry.publicationFor(null))
+    assertThatThrownBy(() -> registry.routingFor(null))
       .isInstanceOf(IllegalArgumentException.class)
       .hasMessage("event must not be null");
   }
@@ -53,16 +52,16 @@ class EventPublicationRegistryTest {
       .hasMessageContaining("Multiple EventPublication factories registered");
   }
 
-  private static EventPublicationFactory<TestDomainEvent> domainEventFactory() {
-    return new EventPublicationFactory<>() {
+  private static EventRoutingResolver<TestDomainEvent> domainEventFactory() {
+    return new EventRoutingResolver<>() {
       @Override
       public Class<TestDomainEvent> domainEventType() {
         return TestDomainEvent.class;
       }
 
       @Override
-      public EventPublication<TestDomainEvent> create(TestDomainEvent event) {
-        return new DefaultEventPublication<>(event, DESTINATION, MESSAGE_KEY);
+      public EventRouting resolve(TestDomainEvent event) {
+        return new EventRouting(DESTINATION, MESSAGE_KEY);
       }
     };
   }

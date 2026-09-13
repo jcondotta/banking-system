@@ -9,7 +9,7 @@ This is the `accounts` bounded context: a Java 25, Spring Boot 4, single-module 
 - `src/main/java/com/jcondotta/banking/accounts/contracts/`: integration-event contracts published by accounts.
 - `src/main/java/com/jcondotta/banking/accounts/infrastructure/adapters/input/`: REST endpoints, correlation filtering, and the outbox worker entrypoint.
 - `src/main/java/com/jcondotta/banking/accounts/infrastructure/adapters/output/`: DynamoDB persistence/outbox adapters and Kafka publishers.
-- `src/main/java/com/jcondotta/banking/accounts/infrastructure/outbox/`: outbox dispatch, processing, concurrency, logging, properties, and internal configuration.
+- `src/main/java/com/jcondotta/banking/accounts/infrastructure/outbox/`: accounts-specific wiring for the shared `outbox-infrastructure` worker.
 - `src/main/resources/`: the shared Spring and logging configuration for the API and outbox worker.
 - `src/test/java/`: unit and integration tests; integration tests live under `.../integration` and use `@IntegrationTest`.
 
@@ -22,7 +22,7 @@ Run commands from this directory. The Maven wrapper lives one level up.
 - `../mvnw clean verify`: build the service, run Surefire/Failsafe, and generate JaCoCo reports.
 - `../mvnw test`: run unit tests.
 - `../mvnw spring-boot:run -Dspring-boot.run.profiles=local`: run the API and outbox worker locally on port `8080`.
-- `docker compose -f docker/docker-compose.yml up -d`: start the local DynamoDB dependency.
+- `docker compose -f ../docker/docker-compose.yml up -d localstack`: start the local DynamoDB dependency.
 - `../mvnw pitest:mutationCoverage`: run mutation testing for the consolidated service.
 
 ## Coding Style & Naming Conventions

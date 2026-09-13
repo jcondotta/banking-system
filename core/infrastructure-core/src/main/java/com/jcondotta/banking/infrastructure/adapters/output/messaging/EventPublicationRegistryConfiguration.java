@@ -10,7 +10,7 @@ import org.springframework.context.annotation.Configuration;
 public class EventPublicationRegistryConfiguration {
 
   @Bean
-  EventPublicationRegistry eventPublicationRegistry(ObjectProvider<EventPublicationFactory<?>> factories) {
+  EventPublicationRegistry eventPublicationRegistry(ObjectProvider<EventRoutingResolver<?>> factories) {
     return new EventPublicationRegistryFactory().create(factories.orderedStream().toList());
   }
 }

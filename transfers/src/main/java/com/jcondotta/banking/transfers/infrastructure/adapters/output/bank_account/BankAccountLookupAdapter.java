@@ -18,6 +18,22 @@ class BankAccountLookupAdapter implements BankAccountLookupPort {
   private final BankAccountLookupClient bankAccountLookupClient;
 
   @Override
+  public Optional<BankAccountSummary> findById(BankAccountId bankAccountId) {
+    try {
+      var response = bankAccountLookupClient.findById(bankAccountId.asString());
+
+      return Optional.ofNullable(response)
+        .map(r -> new BankAccountSummary(
+          BankAccountId.of(r.id()),
+          BankAccountStatus.valueOf(r.accountStatus())
+        ));
+    }
+    catch (HttpClientErrorException.NotFound ex) {
+      return Optional.empty();
+    }
+  }
+
+  @Override
   public Optional<BankAccountSummary> findByIban(Iban iban) {
     try {
       var response = bankAccountLookupClient.findByIban(iban.value());

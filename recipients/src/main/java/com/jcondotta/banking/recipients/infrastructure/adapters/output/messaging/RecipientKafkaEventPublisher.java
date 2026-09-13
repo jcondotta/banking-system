@@ -2,6 +2,8 @@ package com.jcondotta.banking.recipients.infrastructure.adapters.output.messagin
 
 import com.jcondotta.application.events.CorrelationIdProvider;
 import com.jcondotta.application.events.EventSourceProvider;
+import com.jcondotta.banking.infrastructure.adapters.output.messaging.EventEnvelope;
+import com.jcondotta.banking.infrastructure.adapters.output.messaging.EventPublication;
 import com.jcondotta.banking.infrastructure.adapters.output.messaging.EventPublicationContext;
 import com.jcondotta.banking.infrastructure.adapters.output.messaging.EventPublicationRegistry;
 import com.jcondotta.banking.recipients.application.recipient.ports.output.RecipientEventPublisher;
@@ -41,6 +43,8 @@ public class RecipientKafkaEventPublisher implements RecipientEventPublisher {
   }
 
   private void publishDomainEvent(DomainEvent<?, ?> event, EventPublicationContext context) {
-    brokerPublisher.publish(publicationRegistry.publicationFor(event), context);
+    var routing = publicationRegistry.routingFor(event);
+    var envelope = EventEnvelope.from(event, context);
+    brokerPublisher.publish(new EventPublication(envelope, routing));
   }
 }

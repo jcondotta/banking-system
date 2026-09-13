@@ -21,6 +21,7 @@
 		<module>accounts</module>
 		<module>recipients</module>
 		<module>transfers</module>
+		<module>ledger</module>
 	</modules>
 
 	<properties>
@@ -108,6 +109,18 @@
 			<dependency>
 				<groupId>com.jcondotta</groupId>
 				<artifactId>infrastructure-core</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>com.jcondotta</groupId>
+				<artifactId>outbox-infrastructure</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>com.jcondotta</groupId>
+				<artifactId>movement-core</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 

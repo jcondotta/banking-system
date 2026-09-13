@@ -6,9 +6,7 @@ import com.jcondotta.banking.accounts.infrastructure.adapters.output.persistence
 import com.jcondotta.banking.infrastructure.outbox.shard.OutboxShardResolver;
 import com.jcondotta.banking.infrastructure.adapters.output.messaging.EventEnvelope;
 import com.jcondotta.banking.infrastructure.adapters.output.messaging.EventPublication;
-import com.jcondotta.domain.events.DomainEvent;
-import com.jcondotta.domain.identity.AggregateId;
-import com.jcondotta.domain.identity.EventId;
+import com.jcondotta.banking.infrastructure.adapters.output.messaging.EventRouting;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -23,7 +21,6 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -31,6 +28,7 @@ import static org.mockito.Mockito.when;
 class OutboxEntityMapperImplTest {
 
   private static final String AGGREGATE_ID = "123e4567-e89b-12d3-a456-426614174000";
+  private static final String EVENT_ID = "9f1c2a44-6b7e-4c1a-8d3e-2f7a9b6c5d01";
   private static final String MESSAGE_KEY = "bba3f1c2-9999-4d2a-0000-000000000001";
   private static final String EVENT_TYPE = "bank-account-opened";
   private static final String DESTINATION = "bank-account-opened";
@@ -44,43 +42,31 @@ class OutboxEntityMapperImplTest {
   private OutboxShardResolver shardResolver;
 
   @Mock
-  private AggregateId<?> aggregateId;
-
-  @Mock
-  private DomainEvent<?, ?> domainEvent;
-
-  @Mock
   private EventEnvelope envelope;
-
-  @Mock
-  private EventPublication<?> publication;
 
   @InjectMocks
   private OutboxEntityMapperImpl mapper;
 
-  private final EventId eventId = EventId.of(UUID.fromString("9f1c2a44-6b7e-4c1a-8d3e-2f7a9b6c5d01"));
+  private final EventRouting routing = new EventRouting(DESTINATION, MESSAGE_KEY);
 
   @BeforeEach
   void setUp() {
-    doReturn(aggregateId).when(domainEvent).aggregateId();
-    when(domainEvent.eventId()).thenReturn(eventId);
-    when(domainEvent.eventType()).thenReturn(EVENT_TYPE);
-    when(aggregateId.asString()).thenReturn(AGGREGATE_ID);
-    when(shardResolver.resolve(aggregateId)).thenReturn(0);
+    when(envelope.aggregateId()).thenReturn(AGGREGATE_ID);
+    when(envelope.eventId()).thenReturn(EVENT_ID);
+    when(shardResolver.resolve(AGGREGATE_ID)).thenReturn(0);
   }
 
   @Test
   void shouldMapToOutboxEntity_whenValidInput() {
     when(objectMapper.writeValueAsString(envelope)).thenReturn(SERIALIZED_PAYLOAD);
     when(envelope.correlationId()).thenReturn(CORRELATION_ID);
-    when(publication.key()).thenReturn(MESSAGE_KEY);
-    when(publication.destination()).thenReturn(DESTINATION);
+    when(envelope.eventType()).thenReturn(EVENT_TYPE);
 
-    OutboxEntity outboxEntity = mapper.toOutboxEntity(domainEvent, publication, envelope);
+    OutboxEntity outboxEntity = mapper.toOutboxEntity(new EventPublication(envelope, routing));
 
     assertThat(outboxEntity.getAggregateId()).isEqualTo(AGGREGATE_ID);
     assertThat(outboxEntity.getMessageKey()).isEqualTo(MESSAGE_KEY);
-    assertThat(outboxEntity.getEventId()).isEqualTo(eventId.value());
+    assertThat(outboxEntity.getEventId()).isEqualTo(UUID.fromString(EVENT_ID));
     assertThat(outboxEntity.getCorrelationId()).isEqualTo(CORRELATION_ID);
     assertThat(outboxEntity.getEventType()).isEqualTo(EVENT_TYPE);
     assertThat(outboxEntity.getDestination()).isEqualTo(DESTINATION);
@@ -99,7 +85,7 @@ class OutboxEntityMapperImplTest {
     when(objectMapper.writeValueAsString(any(EventEnvelope.class)))
       .thenThrow(new JacksonException("serialization failed") {});
 
-    assertThatThrownBy(() -> mapper.toOutboxEntity(domainEvent, publication, envelope))
+    assertThatThrownBy(() -> mapper.toOutboxEntity(new EventPublication(envelope, routing)))
       .isInstanceOf(OutboxSerializationException.class)
       .hasMessageContaining(EventEnvelope.class.getSimpleName());
 

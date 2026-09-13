@@ -30,6 +30,12 @@
 
             <dependency>
                 <groupId>com.jcondotta</groupId>
+                <artifactId>movement-core</artifactId>
+                <version>${shared-modules.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.jcondotta</groupId>
                 <artifactId>application-core</artifactId>
                 <version>${shared-modules.version}</version>
             </dependency>
@@ -37,6 +43,12 @@
             <dependency>
                 <groupId>com.jcondotta</groupId>
                 <artifactId>infrastructure-core</artifactId>
+                <version>${shared-modules.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.jcondotta</groupId>
+                <artifactId>outbox-infrastructure</artifactId>
                 <version>${shared-modules.version}</version>
             </dependency>
         </dependencies>
@@ -50,7 +62,7 @@
 
         <dependency>
             <groupId>com.jcondotta</groupId>
-            <artifactId>money-core</artifactId>
+            <artifactId>movement-core</artifactId>
         </dependency>
 
         <dependency>
@@ -61,6 +73,10 @@
         <dependency>
             <groupId>com.jcondotta</groupId>
             <artifactId>infrastructure-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.jcondotta</groupId>
+            <artifactId>outbox-infrastructure</artifactId>
         </dependency>
 
         <dependency>

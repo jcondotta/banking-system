@@ -1,5 +1,7 @@
 package com.jcondotta.banking.infrastructure.adapters.output.messaging;
 
+import com.jcondotta.domain.events.DomainEvent;
+
 import java.time.Instant;
 import java.util.UUID;
 
@@ -14,9 +16,7 @@ public record EventEnvelope(
   Object data
 ) {
 
-  public static EventEnvelope from(EventPublication<?> publication, EventPublicationContext context) {
-    var event = publication.event();
-
+  public static EventEnvelope from(DomainEvent<?, ?> event, EventPublicationContext context) {
     return new EventEnvelope(
       event.eventId().value().toString(),
       context.correlationId(),
@@ -28,4 +28,5 @@ public record EventEnvelope(
       event.data()
     );
   }
+
 }

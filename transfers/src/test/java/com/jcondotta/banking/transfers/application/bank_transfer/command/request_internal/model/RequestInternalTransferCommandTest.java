@@ -4,7 +4,7 @@ import com.jcondotta.banking.transfers.domain.bank_account.identity.BankAccountI
 import com.jcondotta.banking.transfers.domain.bank_account.value_objects.Iban;
 import com.jcondotta.banking.transfers.domain.bank_transfer.value_objects.party.PartyName;
 import com.jcondotta.banking.money.Currency;
-import com.jcondotta.banking.transfers.domain.movement.MovementAmount;
+import com.jcondotta.banking.movement.MovementAmount;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;

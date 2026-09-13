@@ -37,6 +37,16 @@ public final class OutboxKey {
     );
   }
 
+  public static OutboxKey of(String aggregateId, String eventId) {
+    requiredNotBlank(aggregateId, AGGREGATE_ID_REQUIRED);
+    requiredNotBlank(eventId, EVENT_ID_REQUIRED);
+
+    return new OutboxKey(
+      PARTITION_KEY_TEMPLATE.formatted(aggregateId),
+      SORT_KEY_TEMPLATE.formatted(eventId)
+    );
+  }
+
   public String partitionKey() {
     return partitionKey;
   }

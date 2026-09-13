@@ -1,6 +1,7 @@
 package com.jcondotta.banking.accounts.infrastructure.outbox.config;
 
 import com.jcondotta.banking.accounts.infrastructure.adapters.output.persistence.dynamodb.outbox.entity.OutboxEntity;
+import com.jcondotta.banking.infrastructure.adapters.output.messaging.BrokerMessageSender;
 import com.jcondotta.banking.infrastructure.outbox.concurrency.ShardExecutor;
 import com.jcondotta.banking.infrastructure.outbox.config.OutboxWorkerConfiguration;
 import com.jcondotta.banking.infrastructure.outbox.dispatcher.OutboxDispatcher;
@@ -11,7 +12,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.springframework.kafka.core.KafkaTemplate;
 
 @Configuration
 @ConditionalOnProperty(
@@ -25,10 +25,10 @@ class AccountsOutboxWorkerConfiguration {
   @Bean
   OutboxDispatcher outboxDispatcher(
     OutboxEventStore<OutboxEntity> eventStore,
-    KafkaTemplate<String, byte[]> kafkaTemplate,
+    BrokerMessageSender messageSender,
     ShardExecutor<Integer> shardExecutor,
     OutboxProperties outboxProperties
   ) {
-    return KafkaOutboxWorkerFactory.createDispatcher(eventStore, kafkaTemplate, shardExecutor, outboxProperties);
+    return KafkaOutboxWorkerFactory.createDispatcher(eventStore, messageSender, shardExecutor, outboxProperties);
   }
 }

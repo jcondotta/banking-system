@@ -1,51 +1,48 @@
 package com.jcondotta.banking.recipients.infrastructure.adapters.output.messaging;
 
+import com.jcondotta.banking.infrastructure.adapters.output.messaging.BrokerMessage;
+import com.jcondotta.banking.infrastructure.adapters.output.messaging.BrokerMessageSender;
 import com.jcondotta.banking.infrastructure.adapters.output.messaging.EventPublication;
-import com.jcondotta.banking.infrastructure.adapters.output.messaging.EventEnvelope;
-import com.jcondotta.banking.infrastructure.adapters.output.messaging.EventPublicationContext;
-import org.apache.kafka.clients.producer.ProducerRecord;
-import org.springframework.kafka.core.KafkaTemplate;
+import com.jcondotta.banking.infrastructure.adapters.output.messaging.exceptions.BrokerMessageSendException;
 import org.springframework.stereotype.Component;
 import tools.jackson.core.JacksonException;
 import tools.jackson.databind.ObjectMapper;
 
-import java.util.concurrent.TimeUnit;
-
 @Component
 public class KafkaBrokerPublisher implements BrokerPublisher {
 
-  private final KafkaTemplate<String, byte[]> kafkaTemplate;
+  private final BrokerMessageSender messageSender;
   private final ObjectMapper objectMapper;
   private final KafkaPublisherProperties publisherProperties;
 
   public KafkaBrokerPublisher(
-    KafkaTemplate<String, byte[]> kafkaTemplate,
+    BrokerMessageSender messageSender,
     ObjectMapper objectMapper,
     KafkaPublisherProperties publisherProperties
   ) {
-    this.kafkaTemplate = kafkaTemplate;
+    this.messageSender = messageSender;
     this.objectMapper = objectMapper;
     this.publisherProperties = publisherProperties;
   }
 
   @Override
-  public void publish(EventPublication<?> publication, EventPublicationContext context) {
-    try {
-      var payload = objectMapper.writeValueAsBytes(EventEnvelope.from(publication, context));
-      var record = new ProducerRecord<>(publication.destination(), publication.key(), payload);
+  public void publish(EventPublication publication) {
+    var envelope = publication.envelope();
+    var routing = publication.routing();
 
-      kafkaTemplate.send(record)
-        .get(publisherProperties.publishTimeout().toMillis(), TimeUnit.MILLISECONDS);
+    try {
+      var payload = objectMapper.writeValueAsBytes(envelope);
+      var message = new BrokerMessage(routing.destination(), routing.key(), payload);
+      messageSender.send(message, publisherProperties.publishTimeout());
     }
     catch (JacksonException ex) {
-      throw new RecipientEventPublishException(publication.event().eventType(), ex);
+      throw new RecipientEventPublishException(envelope.eventType(), ex);
     }
-    catch (InterruptedException ex) {
-      Thread.currentThread().interrupt();
-      throw new RecipientEventPublishException(publication.event().eventType(), ex);
+    catch (BrokerMessageSendException ex) {
+      throw new RecipientEventPublishException(envelope.eventType(), ex.getCause());
     }
     catch (Exception ex) {
-      throw new RecipientEventPublishException(publication.event().eventType(), ex);
+      throw new RecipientEventPublishException(envelope.eventType(), ex);
     }
   }
 }

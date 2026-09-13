@@ -11,14 +11,11 @@ import org.slf4j.MDC;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
-import org.springframework.web.accept.ApiVersionStrategy;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
-import java.util.Optional;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 
 @Component
 @Order(Ordered.HIGHEST_PRECEDENCE)
@@ -28,41 +25,23 @@ public class CorrelationFilter extends OncePerRequestFilter {
 
     static final String MDC_CORRELATION_ID = LogKey.CORRELATION_ID;
 
-    private final ApiVersionStrategy apiVersionStrategy;
+    private final CorrelationIdResolver correlationIdResolver;
 
-    public CorrelationFilter(ApiVersionStrategy apiVersionStrategy) {
-        this.apiVersionStrategy = apiVersionStrategy;
+    public CorrelationFilter(CorrelationIdResolver correlationIdResolver) {
+        this.correlationIdResolver = correlationIdResolver;
     }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
         throws ServletException, IOException {
 
-        UUID correlationId;
-
-        try {
-            correlationId = Optional.ofNullable(request.getHeader(HttpHeadersConstants.CORRELATION_ID))
-                .map(UUID::fromString)
-                .orElse(UUID.randomUUID());
-        }
-        catch (IllegalArgumentException ex) {
-            correlationId = UUID.randomUUID();
-        }
-
+        var correlationId = correlationIdResolver.resolve(request);
         response.setHeader(HttpHeadersConstants.CORRELATION_ID, correlationId.toString());
 
-        var startNs = System.nanoTime();
-        request.setAttribute(REQUEST_START_NS_ATTRIBUTE, startNs);
-
+        request.setAttribute(REQUEST_START_NS_ATTRIBUTE, System.nanoTime());
         MDC.put(MDC_CORRELATION_ID, correlationId.toString());
-
         try {
             doFilterWithScopedCorrelationId(request, response, chain, correlationId);
-            resolvedApiVersion(request).ifPresent(version ->
-                response.setHeader(HttpHeadersConstants.RESOLVED_API_VERSION, version));
-        }
-        catch (ServletException | IOException | RuntimeException ex) {
-            throw ex;
         }
         finally {
             MDC.remove(MDC_CORRELATION_ID);
@@ -72,14 +51,6 @@ public class CorrelationFilter extends OncePerRequestFilter {
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
         return request.getRequestURI().startsWith("/actuator");
-    }
-
-    public static long durationMs(HttpServletRequest request) {
-        var startedAt = request.getAttribute(REQUEST_START_NS_ATTRIBUTE);
-        if (startedAt instanceof Long startNs) {
-            return TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startNs);
-        }
-        return 0L;
     }
 
     private static void doFilterWithScopedCorrelationId(
@@ -108,15 +79,6 @@ public class CorrelationFilter extends OncePerRequestFilter {
         catch (FilterChainServletException ex) {
             throw ex.getCause();
         }
-    }
-
-    private Optional<String> resolvedApiVersion(HttpServletRequest request) {
-        if (apiVersionStrategy == null) {
-            return Optional.empty();
-        }
-
-        return Optional.ofNullable(apiVersionStrategy.resolveVersion(request))
-            .or(() -> Optional.ofNullable(apiVersionStrategy.getDefaultVersion()).map(String::valueOf));
     }
 
     private static final class FilterChainServletException extends RuntimeException {

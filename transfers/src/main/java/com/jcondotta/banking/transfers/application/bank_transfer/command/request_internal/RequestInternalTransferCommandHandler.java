@@ -10,6 +10,8 @@ import com.jcondotta.banking.transfers.application.common.log.BankTransferOperat
 import com.jcondotta.banking.transfers.application.common.log.BankTransferLogKey;
 import com.jcondotta.banking.transfers.domain.bank_account.exceptions.RecipientBankAccountNotActiveException;
 import com.jcondotta.banking.transfers.domain.bank_account.exceptions.RecipientBankAccountNotFoundException;
+import com.jcondotta.banking.transfers.domain.bank_account.exceptions.SenderBankAccountNotActiveException;
+import com.jcondotta.banking.transfers.domain.bank_account.exceptions.SenderBankAccountNotFoundException;
 import com.jcondotta.banking.transfers.domain.bank_transfer.aggregate.BankTransfer;
 import com.jcondotta.banking.transfers.domain.bank_transfer.identity.BankTransferId;
 import com.jcondotta.banking.transfers.domain.bank_transfer.repository.BankTransferRepository;
@@ -59,6 +61,13 @@ public class RequestInternalTransferCommandHandler implements CommandHandlerWith
       .with(BankTransferLogKey.RECIPIENT_NAME, command.recipientName().value());
 
     try {
+      var senderSummary = bankAccountLookupPort.findById(command.senderAccountId())
+        .orElseThrow(() -> new SenderBankAccountNotFoundException(command.senderAccountId()));
+
+      if (!senderSummary.status().isActive()) {
+        throw new SenderBankAccountNotActiveException(senderSummary.status());
+      }
+
       var recipientSummary = bankAccountLookupPort.findByIban(command.recipientIban())
         .orElseThrow(() -> new RecipientBankAccountNotFoundException(command.recipientIban()));
 

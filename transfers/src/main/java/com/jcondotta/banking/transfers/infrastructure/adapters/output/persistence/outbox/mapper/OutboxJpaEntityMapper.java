@@ -6,13 +6,13 @@ import com.jcondotta.banking.infrastructure.outbox.exceptions.OutboxSerializatio
 import com.jcondotta.banking.infrastructure.outbox.mapper.OutboxEntityMapper;
 import com.jcondotta.banking.infrastructure.outbox.shard.OutboxShardResolver;
 import com.jcondotta.banking.transfers.infrastructure.adapters.output.persistence.outbox.entity.OutboxJpaEntity;
-import com.jcondotta.domain.events.DomainEvent;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import tools.jackson.core.JacksonException;
 import tools.jackson.databind.ObjectMapper;
 
 import java.time.Instant;
+import java.util.UUID;
 
 @Component
 @RequiredArgsConstructor
@@ -22,18 +22,19 @@ public class OutboxJpaEntityMapper implements OutboxEntityMapper<OutboxJpaEntity
   private final OutboxShardResolver shardResolver;
 
   @Override
-  public OutboxJpaEntity toOutboxEntity(DomainEvent<?, ?> event, EventPublication<?> publication, EventEnvelope envelope) {
-    var aggregateId = event.aggregateId();
+  public OutboxJpaEntity toOutboxEntity(EventPublication publication) {
+    var envelope = publication.envelope();
+    var routing = publication.routing();
     var now = Instant.now();
-    var shard = shardResolver.resolve(aggregateId);
+    var shard = shardResolver.resolve(envelope.aggregateId());
 
     return OutboxJpaEntity.builder()
-      .eventId(event.eventId().value())
+      .eventId(UUID.fromString(envelope.eventId()))
       .correlationId(envelope.correlationId())
-      .aggregateId(aggregateId.asString())
-      .messageKey(publication.key())
-      .eventType(event.eventType())
-      .destination(publication.destination())
+      .aggregateId(envelope.aggregateId())
+      .messageKey(routing.key())
+      .eventType(envelope.eventType())
+      .destination(routing.destination())
       .payload(serialize(envelope))
       .shard(shard)
       .attemptCount(0)

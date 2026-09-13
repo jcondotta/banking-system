@@ -8,6 +8,7 @@ This is the `recipients` bounded context: a Java 25, Spring Boot 4, single-modul
 - `domain/`: tem framework-free recipient model. It owns the `Recipient` aggregate, `BankAccountId`, `RecipientId`, `RecipientName`, `Iban`, domain exceptions, domain events, validation constants, and repository ports.
 - `application/`: use-case orchestration. It owns commands, queries, handlers, query models, logging event names/keys, failure classification and normalization, `@Observed` instrumentation, and concurrency limits.
 - `infrastructure/`: Spring and adapter code. It owns REST controllers, request/response DTOs, mappers, `ProblemDetail` exception handlers, correlation filtering, JPA entities/repositories, PostgreSQL adapters, persistence mappers, and runtime configuration.
+- Recipient events are published directly through the shared broker sender in `infrastructure-core`; this bounded context does not depend on `outbox-infrastructure`.
 - `src/main/resources/`: Spring `application*.yml`, Liquibase changelogs, SQL migrations, and `logback-spring.xml`.
 - `src/test/java/`: unit and integration tests. Integration tests live under `.../integration` and use `@IntegrationTest`.
 - `docker/`: local PostgreSQL Compose.
@@ -32,7 +33,7 @@ Run commands from this directory. The Maven wrapper lives one level up.
 - `../mvnw clean verify`: build the service, run Surefire/Failsafe, and produce JaCoCo output.
 - `../mvnw test`: run unit tests only.
 - `../mvnw spring-boot:run -Dspring-boot.run.profiles=local`: start the service locally on port `8081`.
-- `docker compose -f docker/docker-compose.yml up -d`: start PostgreSQL `recipients_db` on `127.0.0.1:5432`.
+- `docker compose -f ../docker/docker-compose.yml up -d postgres-recipients`: start PostgreSQL `recipients_db` on `127.0.0.1:5432`.
 - `../mvnw pitest:mutationCoverage`: run PIT mutation testing for the consolidated service.
 
 ## Coding Style & Naming Conventions

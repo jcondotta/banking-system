@@ -7,16 +7,16 @@ import java.util.Map;
 
 public final class EventPublicationRegistry {
 
-  private final Map<Class<? extends DomainEvent<?, ?>>, EventPublicationFactory<?>> factories;
+  private final Map<Class<? extends DomainEvent<?, ?>>, EventRoutingResolver<?>> factories;
 
-  public EventPublicationRegistry(Map<Class<? extends DomainEvent<?, ?>>, EventPublicationFactory<?>> factories) {
+  public EventPublicationRegistry(Map<Class<? extends DomainEvent<?, ?>>, EventRoutingResolver<?>> factories) {
     if (factories == null) {
       throw new IllegalArgumentException("registry must not be null");
     }
     this.factories = Map.copyOf(factories);
   }
 
-  public EventPublication<?> publicationFor(DomainEvent<?, ?> event) {
+  public EventRouting routingFor(DomainEvent<?, ?> event) {
     if (event == null) {
       throw new IllegalArgumentException("event must not be null");
     }
@@ -30,10 +30,7 @@ public final class EventPublicationRegistry {
   }
 
   @SuppressWarnings("unchecked")
-  private static <E extends DomainEvent<?, ?>> EventPublication<E> create(
-    EventPublicationFactory<?> factory,
-    DomainEvent<?, ?> event
-  ) {
-    return ((EventPublicationFactory<E>) factory).create((E) event);
+  private static <E extends DomainEvent<?, ?>> EventRouting create(EventRoutingResolver<?> factory, DomainEvent<?, ?> event) {
+    return ((EventRoutingResolver<E>) factory).resolve((E) event);
   }
 }

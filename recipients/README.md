@@ -198,14 +198,14 @@ Metrics use low-cardinality tags such as `application`, `operation`, `aggregate`
 From the `recipients` directory:
 
 ```bash
-docker compose -f docker/docker-compose.yml up -d
+docker compose -f ../docker/docker-compose.yml up -d postgres-recipients
 ```
 
 This starts:
 
 - PostgreSQL on `127.0.0.1:5432`
 
-Optional full observability is provided by the monorepo-level Compose stack:
+Optional full observability stack:
 
 ```bash
 docker compose -f ../docker/docker-compose.yml up -d opensearch data-prepper opensearch-dashboards

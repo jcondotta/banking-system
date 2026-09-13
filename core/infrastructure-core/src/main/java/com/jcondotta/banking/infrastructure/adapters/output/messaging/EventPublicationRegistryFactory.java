@@ -9,7 +9,7 @@ import java.util.Map;
 
 public final class EventPublicationRegistryFactory {
 
-  public EventPublicationRegistry create(List<EventPublicationFactory<?>> factories) {
+  public EventPublicationRegistry create(List<EventRoutingResolver<?>> factories) {
     if (factories == null) {
       throw new IllegalArgumentException("eventPublicationFactories must not be null");
     }
@@ -23,7 +23,7 @@ public final class EventPublicationRegistryFactory {
       }
     });
 
-    Map<Class<? extends DomainEvent<?, ?>>, EventPublicationFactory<?>> registry = new HashMap<>();
+    Map<Class<? extends DomainEvent<?, ?>>, EventRoutingResolver<?>> registry = new HashMap<>();
     factories.forEach(factory -> {
       if (registry.putIfAbsent(factory.domainEventType(), factory) != null) {
         throw new DuplicateEventPublicationFactoryException(factory.domainEventType());
@@ -33,7 +33,7 @@ public final class EventPublicationRegistryFactory {
     return new EventPublicationRegistry(registry);
   }
 
-  public static EventPublicationRegistry of(EventPublicationFactory<?>... factories) {
+  public static EventPublicationRegistry of(EventRoutingResolver<?>... factories) {
     if (factories == null) {
       throw new IllegalArgumentException("eventPublicationFactories must not be null");
     }

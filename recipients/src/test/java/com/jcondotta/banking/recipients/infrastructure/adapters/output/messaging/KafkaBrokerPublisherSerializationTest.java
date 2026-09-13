@@ -1,7 +1,10 @@
 package com.jcondotta.banking.recipients.infrastructure.adapters.output.messaging;
 
-import com.jcondotta.banking.infrastructure.adapters.output.messaging.DefaultEventPublication;
+import com.jcondotta.banking.infrastructure.adapters.output.messaging.EventEnvelope;
+import com.jcondotta.banking.infrastructure.adapters.output.messaging.EventPublication;
 import com.jcondotta.banking.infrastructure.adapters.output.messaging.EventPublicationContext;
+import com.jcondotta.banking.infrastructure.adapters.output.messaging.EventRouting;
+import com.jcondotta.banking.infrastructure.adapters.output.messaging.KafkaBrokerMessageSender;
 import com.jcondotta.banking.recipients.domain.recipient.events.RecipientCreatedData;
 import com.jcondotta.banking.recipients.domain.recipient.events.RecipientCreatedEvent;
 import com.jcondotta.banking.recipients.domain.recipient.identity.BankAccountId;
@@ -41,12 +44,12 @@ class KafkaBrokerPublisherSerializationTest {
   private static final Instant OCCURRED_AT = Instant.parse("2026-01-01T00:00:00Z");
 
   @Test
-  void shouldPublishEventPublicationEnvelope_whenPublicationIsValid() throws Exception {
+  void shouldPublishEventEnvelope_whenRoutingAndEnvelopeAreValid() throws Exception {
     var mockProducer = new MockProducer<String, byte[]>(true, null, new StringSerializer(), new ByteArraySerializer());
     var producerFactory = new MockProducerFactory<String, byte[]>(() -> mockProducer);
     var kafkaTemplate = new KafkaTemplate<>(producerFactory);
     var publisher = new KafkaBrokerPublisher(
-      kafkaTemplate,
+      new KafkaBrokerMessageSender(kafkaTemplate),
       JsonMapper.builder().build(),
       new KafkaPublisherProperties(Duration.ofSeconds(1))
     );
@@ -58,9 +61,10 @@ class KafkaBrokerPublisherSerializationTest {
       new TopicConfig(TOPIC_NAME),
       new TopicConfig("recipients-deleted")
     );
-    var publication = new RecipientCreatedPublicationFactory(topicsProperties).create(event);
+    var routing = new RecipientCreatedRoutingResolver(topicsProperties).resolve(event);
+    var envelope = EventEnvelope.from(event, publicationContext());
 
-    publisher.publish(publication, publicationContext());
+    publisher.publish(new EventPublication(envelope, routing));
 
     var record = mockProducer.history().getFirst();
 
@@ -73,7 +77,7 @@ class KafkaBrokerPublisherSerializationTest {
 
   @Test
   @SuppressWarnings("unchecked")
-  void shouldPublishEachPublicationToItsOwnDestination() {
+  void shouldPublishEachRoutingToItsOwnDestination() {
     var kafkaTemplate = (KafkaTemplate<String, byte[]>) mock(KafkaTemplate.class);
     var publishedRecords = new ArrayList<ProducerRecord<String, byte[]>>();
     when(kafkaTemplate.send(any(ProducerRecord.class))).thenAnswer(invocation -> {
@@ -82,7 +86,7 @@ class KafkaBrokerPublisherSerializationTest {
       return CompletableFuture.completedFuture(null);
     });
     var publisher = new KafkaBrokerPublisher(
-      kafkaTemplate,
+      new KafkaBrokerMessageSender(kafkaTemplate),
       JsonMapper.builder().build(),
       new KafkaPublisherProperties(Duration.ofSeconds(1))
     );
@@ -90,9 +94,10 @@ class KafkaBrokerPublisherSerializationTest {
       DomainEventMetadata.of(EVENT_ID, RECIPIENT_ID, OCCURRED_AT),
       new RecipientCreatedData(BANK_ACCOUNT_ID.value(), "Isabella Condotta", "BE68539007547034")
     );
+    var envelope = EventEnvelope.from(event, publicationContext());
 
-    publisher.publish(new DefaultEventPublication<>(event, "first-topic", "first-key"), publicationContext());
-    publisher.publish(new DefaultEventPublication<>(event, "second-topic", "second-key"), publicationContext());
+    publisher.publish(new EventPublication(envelope, new EventRouting("first-topic", "first-key")));
+    publisher.publish(new EventPublication(envelope, new EventRouting("second-topic", "second-key")));
 
     assertThat(publishedRecords)
       .extracting(record -> record.topic() + ":" + record.key())

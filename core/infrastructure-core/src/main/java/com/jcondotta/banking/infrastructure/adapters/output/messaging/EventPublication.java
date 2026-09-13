@@ -1,18 +1,13 @@
 package com.jcondotta.banking.infrastructure.adapters.output.messaging;
 
-import com.jcondotta.domain.events.DomainEvent;
+public record EventPublication(EventEnvelope envelope, EventRouting routing) {
 
-public interface EventPublication<E extends DomainEvent<?, ?>> {
-
-  E event();
-
-  /**
-   * Logical destination interpreted by the selected broker adapter.
-   */
-  String destination();
-
-  /**
-   * Stable key that the selected broker adapter may use for routing or partitioning.
-   */
-  String key();
+  public EventPublication {
+    if (envelope == null) {
+      throw new IllegalArgumentException("envelope must not be null");
+    }
+    if (routing == null) {
+      throw new IllegalArgumentException("routing must not be null");
+    }
+  }
 }

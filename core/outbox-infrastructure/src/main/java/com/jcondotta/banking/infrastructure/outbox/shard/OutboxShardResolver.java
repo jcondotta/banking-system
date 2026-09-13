@@ -1,0 +1,19 @@
+package com.jcondotta.banking.infrastructure.outbox.shard;
+
+import com.jcondotta.banking.infrastructure.outbox.properties.OutboxProperties;
+import com.jcondotta.domain.identity.AggregateId;
+import lombok.RequiredArgsConstructor;
+
+@RequiredArgsConstructor
+public class OutboxShardResolver {
+
+    private final OutboxProperties.Shards shards;
+
+    public int resolve(AggregateId<?> aggregateId) {
+        return resolve(aggregateId.asString());
+    }
+
+    public int resolve(String aggregateId) {
+        return (aggregateId.hashCode() & Integer.MAX_VALUE) % shards.count();
+    }
+}

@@ -7,6 +7,8 @@ import com.jcondotta.banking.transfers.domain.bank_account.BankAccountSummary;
 import com.jcondotta.banking.transfers.domain.bank_account.enums.BankAccountStatus;
 import com.jcondotta.banking.transfers.domain.bank_account.exceptions.RecipientBankAccountNotActiveException;
 import com.jcondotta.banking.transfers.domain.bank_account.exceptions.RecipientBankAccountNotFoundException;
+import com.jcondotta.banking.transfers.domain.bank_account.exceptions.SenderBankAccountNotActiveException;
+import com.jcondotta.banking.transfers.domain.bank_account.exceptions.SenderBankAccountNotFoundException;
 import com.jcondotta.banking.transfers.domain.bank_account.identity.BankAccountId;
 import com.jcondotta.banking.transfers.domain.bank_account.value_objects.Iban;
 import com.jcondotta.banking.transfers.domain.bank_transfer.aggregate.BankTransfer;
@@ -17,7 +19,7 @@ import com.jcondotta.banking.transfers.domain.bank_transfer.identity.BankTransfe
 import com.jcondotta.banking.transfers.domain.bank_transfer.repository.BankTransferRepository;
 import com.jcondotta.banking.transfers.domain.bank_transfer.value_objects.party.PartyName;
 import com.jcondotta.banking.money.Currency;
-import com.jcondotta.banking.transfers.domain.movement.MovementAmount;
+import com.jcondotta.banking.movement.MovementAmount;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -49,6 +51,7 @@ class RequestInternalTransferCommandHandlerTest {
 
   private static final BankAccountId SENDER_ACCOUNT_ID = BankAccountId.of(UUID.randomUUID());
   private static final BankAccountId RECIPIENT_ACCOUNT_ID = BankAccountId.of(UUID.randomUUID());
+  private static final BankAccountSummary ACTIVE_SENDER_SUMMARY = new BankAccountSummary(SENDER_ACCOUNT_ID, BankAccountStatus.ACTIVE);
   private static final BankAccountSummary ACTIVE_RECIPIENT_SUMMARY = new BankAccountSummary(RECIPIENT_ACCOUNT_ID, BankAccountStatus.ACTIVE);
   private static final PartyName RECIPIENT_NAME = PartyName.of("Jane Recipient");
   private static final Iban RECIPIENT_IBAN = Iban.of("ES9121000418450200051332");
@@ -75,12 +78,14 @@ class RequestInternalTransferCommandHandlerTest {
 
   @Test
   void shouldRequestInternalTransfer_whenCommandIsValid() {
+    when(bankAccountLookupPort.findById(SENDER_ACCOUNT_ID)).thenReturn(Optional.of(ACTIVE_SENDER_SUMMARY));
     when(bankAccountLookupPort.findByIban(RECIPIENT_IBAN)).thenReturn(Optional.of(ACTIVE_RECIPIENT_SUMMARY));
 
     var command = command();
 
     var bankTransferId = commandHandler.handle(command);
 
+    verify(bankAccountLookupPort).findById(SENDER_ACCOUNT_ID);
     verify(bankAccountLookupPort).findByIban(RECIPIENT_IBAN);
     verify(bankTransferRepository).save(bankTransferCaptor.capture());
     verifyNoMoreInteractions(bankAccountLookupPort, bankTransferRepository);
@@ -100,6 +105,7 @@ class RequestInternalTransferCommandHandlerTest {
 
   @Test
   void shouldThrowDomainException_whenCommandBreaksDomainRule() {
+    when(bankAccountLookupPort.findById(SENDER_ACCOUNT_ID)).thenReturn(Optional.of(ACTIVE_SENDER_SUMMARY));
     when(bankAccountLookupPort.findByIban(RECIPIENT_IBAN)).thenReturn(Optional.of(new BankAccountSummary(SENDER_ACCOUNT_ID, BankAccountStatus.ACTIVE)));
 
     var command = new RequestInternalTransferCommand(
@@ -114,19 +120,35 @@ class RequestInternalTransferCommandHandlerTest {
       .isInstanceOf(IdenticalInternalPartiesException.class)
       .hasMessage(IdenticalInternalPartiesException.MESSAGE);
 
+    verify(bankAccountLookupPort).findById(SENDER_ACCOUNT_ID);
     verify(bankAccountLookupPort).findByIban(RECIPIENT_IBAN);
     verifyNoInteractions(bankTransferRepository);
     verifyNoMoreInteractions(bankAccountLookupPort);
   }
 
   @Test
+  void shouldThrowDomainException_whenSenderBankAccountNotFound() {
+    when(bankAccountLookupPort.findById(SENDER_ACCOUNT_ID)).thenReturn(Optional.empty());
+
+    assertThatThrownBy(() -> commandHandler.handle(command()))
+      .isInstanceOf(SenderBankAccountNotFoundException.class)
+      .hasMessage(SenderBankAccountNotFoundException.MESSAGE);
+
+    verify(bankAccountLookupPort).findById(SENDER_ACCOUNT_ID);
+    verifyNoInteractions(bankTransferRepository);
+    verifyNoMoreInteractions(bankAccountLookupPort);
+  }
+
+  @Test
   void shouldThrowDomainException_whenRecipientIbanDoesNotResolveToInternalAccount() {
+    when(bankAccountLookupPort.findById(SENDER_ACCOUNT_ID)).thenReturn(Optional.of(ACTIVE_SENDER_SUMMARY));
     when(bankAccountLookupPort.findByIban(RECIPIENT_IBAN)).thenReturn(Optional.empty());
 
     assertThatThrownBy(() -> commandHandler.handle(command()))
       .isInstanceOf(RecipientBankAccountNotFoundException.class)
       .hasMessage(RecipientBankAccountNotFoundException.MESSAGE);
 
+    verify(bankAccountLookupPort).findById(SENDER_ACCOUNT_ID);
     verify(bankAccountLookupPort).findByIban(RECIPIENT_IBAN);
     verifyNoInteractions(bankTransferRepository);
     verifyNoMoreInteractions(bankAccountLookupPort);
@@ -134,6 +156,7 @@ class RequestInternalTransferCommandHandlerTest {
 
   @Test
   void shouldThrowUnexpectedException_whenRepositoryThrowsUnexpectedException() {
+    when(bankAccountLookupPort.findById(SENDER_ACCOUNT_ID)).thenReturn(Optional.of(ACTIVE_SENDER_SUMMARY));
     when(bankAccountLookupPort.findByIban(RECIPIENT_IBAN)).thenReturn(Optional.of(ACTIVE_RECIPIENT_SUMMARY));
 
     var exception = new IllegalStateException("database unavailable");
@@ -145,6 +168,7 @@ class RequestInternalTransferCommandHandlerTest {
     assertThatThrownBy(() -> commandHandler.handle(command()))
       .isSameAs(exception);
 
+    verify(bankAccountLookupPort).findById(SENDER_ACCOUNT_ID);
     verify(bankAccountLookupPort).findByIban(RECIPIENT_IBAN);
     verify(bankTransferRepository).save(any(BankTransfer.class));
     verifyNoMoreInteractions(bankAccountLookupPort, bankTransferRepository);
@@ -152,7 +176,23 @@ class RequestInternalTransferCommandHandlerTest {
 
   @ParameterizedTest
   @EnumSource(value = BankAccountStatus.class, names = "ACTIVE", mode = EnumSource.Mode.EXCLUDE)
+  void shouldThrowException_whenSenderBankAccountIsNotActive(BankAccountStatus status) {
+    when(bankAccountLookupPort.findById(SENDER_ACCOUNT_ID))
+      .thenReturn(Optional.of(new BankAccountSummary(SENDER_ACCOUNT_ID, status)));
+
+    assertThatThrownBy(() -> commandHandler.handle(command()))
+      .isInstanceOf(SenderBankAccountNotActiveException.class)
+      .hasMessage(SenderBankAccountNotActiveException.MESSAGE);
+
+    verify(bankAccountLookupPort).findById(SENDER_ACCOUNT_ID);
+    verifyNoInteractions(bankTransferRepository);
+    verifyNoMoreInteractions(bankAccountLookupPort);
+  }
+
+  @ParameterizedTest
+  @EnumSource(value = BankAccountStatus.class, names = "ACTIVE", mode = EnumSource.Mode.EXCLUDE)
   void shouldThrowException_whenRecipientBankAccountIsNotActive(BankAccountStatus status) {
+    when(bankAccountLookupPort.findById(SENDER_ACCOUNT_ID)).thenReturn(Optional.of(ACTIVE_SENDER_SUMMARY));
     when(bankAccountLookupPort.findByIban(RECIPIENT_IBAN))
       .thenReturn(Optional.of(new BankAccountSummary(RECIPIENT_ACCOUNT_ID, status)));
 
@@ -160,6 +200,7 @@ class RequestInternalTransferCommandHandlerTest {
       .isInstanceOf(RecipientBankAccountNotActiveException.class)
       .hasMessage(RecipientBankAccountNotActiveException.MESSAGE);
 
+    verify(bankAccountLookupPort).findById(SENDER_ACCOUNT_ID);
     verify(bankAccountLookupPort).findByIban(RECIPIENT_IBAN);
     verifyNoInteractions(bankTransferRepository);
     verifyNoMoreInteractions(bankAccountLookupPort);

@@ -4,7 +4,7 @@
 
 This is a Java 25, Spring Boot 4, Maven banking system. The root `pom.xml` builds `core`, `accounts`, and `recipients`; `transfers` has its own Maven tree but is not listed in the root modules.
 
-- `core/`: shared `domain-core`, `application-core`, and `infrastructure-core` modules.
+- `core/`: shared modules including `domain-core`, `application-core`, `infrastructure-core`, and the opt-in `outbox-infrastructure` module.
 - `accounts/`: bounded context implemented as a flat single Maven module. Its API and transactional-outbox worker run in the same Spring Boot application.
 - `recipients/`: bounded context implemented as a flat single Maven module, organized by package into domain, application, infrastructure, and bootstrap/runtime concerns.
 - `transfers/`: bounded context with its own Maven tree outside the root reactor.
@@ -77,7 +77,7 @@ Validation must complete its review before reporting questions, findings, sugges
 - `./mvnw clean verify`: build root modules, run unit and integration tests, and generate JaCoCo reports.
 - `./mvnw test`: run unit tests through Surefire.
 - `./mvnw -pl recipients -am spring-boot:run -Dspring-boot.run.profiles=local`: run the recipients service locally with required upstream modules.
-- `cd recipients && docker compose -f docker/docker-compose.yml up -d`: start recipients local dependencies.
+- `docker compose -f docker/docker-compose.yml up -d`: start all local dependencies (Kafka, OpenSearch, Postgres instances, LocalStack).
 - `./mvnw -pl accounts -am spring-boot:run -Dspring-boot.run.profiles=local`: run the accounts API and outbox worker locally.
 - `./mvnw -pl accounts -am pitest:mutationCoverage`: run PIT mutation testing for accounts.
 

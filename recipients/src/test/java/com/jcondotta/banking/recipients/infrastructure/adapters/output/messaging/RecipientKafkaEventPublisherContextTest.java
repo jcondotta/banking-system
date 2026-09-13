@@ -2,7 +2,7 @@ package com.jcondotta.banking.recipients.infrastructure.adapters.output.messagin
 
 import com.jcondotta.application.events.CorrelationIdProvider;
 import com.jcondotta.application.events.EventSourceProvider;
-import com.jcondotta.banking.infrastructure.adapters.output.messaging.EventPublicationContext;
+import com.jcondotta.banking.infrastructure.adapters.output.messaging.EventPublication;
 import com.jcondotta.banking.infrastructure.adapters.output.messaging.EventPublicationRegistry;
 import com.jcondotta.banking.recipients.domain.recipient.events.RecipientCreatedData;
 import com.jcondotta.banking.recipients.domain.recipient.events.RecipientCreatedEvent;
@@ -19,7 +19,7 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -39,12 +39,12 @@ class RecipientKafkaEventPublisherContextTest {
       new TopicConfig("recipients-created"),
       new TopicConfig("recipients-deleted")
     );
-    var publication = new RecipientCreatedPublicationFactory(topicsProperties).create(event);
+    var routing = new RecipientCreatedRoutingResolver(topicsProperties).resolve(event);
     var publicationRegistry = mock(EventPublicationRegistry.class);
     var brokerPublisher = mock(BrokerPublisher.class);
     var correlationIdProvider = mock(CorrelationIdProvider.class);
     var eventSourceProvider = mock(EventSourceProvider.class);
-    doReturn(publication).when(publicationRegistry).publicationFor(event);
+    doReturn(routing).when(publicationRegistry).routingFor(event);
     when(correlationIdProvider.get()).thenReturn(CORRELATION_ID);
     when(eventSourceProvider.get()).thenReturn(EVENT_SOURCE);
     var publisher = new RecipientKafkaEventPublisher(
@@ -53,19 +53,19 @@ class RecipientKafkaEventPublisherContextTest {
       correlationIdProvider,
       eventSourceProvider
     );
-    var contextCaptor = ArgumentCaptor.forClass(EventPublicationContext.class);
+    var publicationCaptor = ArgumentCaptor.forClass(EventPublication.class);
 
     publisher.publish(List.of(event, event));
 
     verify(correlationIdProvider).get();
     verify(eventSourceProvider).get();
-    verify(brokerPublisher, times(2)).publish(eq(publication), contextCaptor.capture());
-    assertThat(contextCaptor.getAllValues())
+    verify(brokerPublisher, times(2)).publish(publicationCaptor.capture());
+    assertThat(publicationCaptor.getAllValues())
       .hasSize(2)
-      .allSatisfy(context -> {
-        assertThat(context).isSameAs(contextCaptor.getAllValues().getFirst());
-        assertThat(context.correlationId()).isEqualTo(CORRELATION_ID);
-        assertThat(context.eventSource()).isEqualTo(EVENT_SOURCE);
+      .allSatisfy(publication -> {
+        assertThat(publication.routing()).isEqualTo(routing);
+        assertThat(publication.envelope().correlationId()).isEqualTo(CORRELATION_ID);
+        assertThat(publication.envelope().eventSource()).isEqualTo(EVENT_SOURCE);
       });
   }
 

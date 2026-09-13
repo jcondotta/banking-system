@@ -7,7 +7,7 @@ This is the `transfers` bounded context: a Java 25, Spring Boot 4, single-module
 - `src/main/java/com/jcondotta/banking/transfers/`: application entrypoint and all production code.
 - `domain/`: framework-free transfer model, including bank accounts, transfer aggregates, parties, monetary movements, domain events, exceptions, identities, value objects, and repository ports.
 - `application/`: use-case orchestration, commands, handlers, output ports, observability, and structured logging definitions.
-- `infrastructure/`: Spring and adapter code for REST delivery, accounts-service lookup, PostgreSQL persistence, and runtime configuration.
+- `infrastructure/`: Spring and adapter code for REST delivery, accounts-service lookup, PostgreSQL persistence, runtime configuration, and context-specific wiring for the shared `outbox-infrastructure` module.
 - `src/main/resources/`: Spring `application*.yml`, Liquibase changelogs, SQL migrations, and `logback-spring.xml`.
 - `src/test/java/`: unit and integration tests organized under packages matching production code, plus shared test support.
 - `docker/`: local PostgreSQL Compose configuration.
@@ -25,7 +25,7 @@ Run commands from this directory. The Maven wrapper lives one level up.
 - `../mvnw clean verify`: build the service, run Surefire/Failsafe, and generate JaCoCo reports.
 - `../mvnw test`: run unit tests.
 - `../mvnw spring-boot:run -Dspring-boot.run.profiles=local`: run the service locally on port `8082`.
-- `docker compose -f docker/docker-compose.yml up -d`: start PostgreSQL `transfers_db` on `127.0.0.1:5433`.
+- `docker compose -f ../docker/docker-compose.yml up -d postgres-transfers`: start PostgreSQL `transfers_db` on `127.0.0.1:5433`.
 - `../mvnw pitest:mutationCoverage`: run PIT mutation testing.
 
 ## Coding Style & Naming Conventions
