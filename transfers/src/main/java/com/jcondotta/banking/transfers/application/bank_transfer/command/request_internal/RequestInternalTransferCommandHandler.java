@@ -8,6 +8,7 @@ import com.jcondotta.banking.transfers.application.bank_transfer.command.request
 import com.jcondotta.banking.transfers.application.common.log.BankTransferFailureReason;
 import com.jcondotta.banking.transfers.application.common.log.BankTransferOperation;
 import com.jcondotta.banking.transfers.application.common.log.BankTransferLogKey;
+import com.jcondotta.banking.transfers.domain.bank_account.BankAccountSummary;
 import com.jcondotta.banking.transfers.domain.bank_account.exceptions.RecipientBankAccountNotActiveException;
 import com.jcondotta.banking.transfers.domain.bank_account.exceptions.RecipientBankAccountNotFoundException;
 import com.jcondotta.banking.transfers.domain.bank_account.exceptions.SenderBankAccountNotActiveException;
@@ -16,6 +17,7 @@ import com.jcondotta.banking.transfers.domain.bank_transfer.aggregate.BankTransf
 import com.jcondotta.banking.transfers.domain.bank_transfer.identity.BankTransferId;
 import com.jcondotta.banking.transfers.domain.bank_transfer.repository.BankTransferRepository;
 import com.jcondotta.domain.exception.DomainException;
+import io.micrometer.context.ContextSnapshotFactory;
 import io.micrometer.observation.annotation.Observed;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,11 +25,13 @@ import org.springframework.stereotype.Component;
 
 import java.time.Clock;
 import java.time.Instant;
+import java.util.concurrent.StructuredTaskScope;
 
 @Component
 public class RequestInternalTransferCommandHandler implements CommandHandlerWithResult<RequestInternalTransferCommand, BankTransferId> {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(RequestInternalTransferCommandHandler.class);
+  private static final ContextSnapshotFactory CONTEXT_SNAPSHOT_FACTORY = ContextSnapshotFactory.builder().build();
 
   private final BankTransferRepository bankTransferRepository;
   private final BankAccountLookupPort bankAccountLookupPort;
@@ -61,18 +65,41 @@ public class RequestInternalTransferCommandHandler implements CommandHandlerWith
       .with(BankTransferLogKey.RECIPIENT_NAME, command.recipientName().value());
 
     try {
-      var senderSummary = bankAccountLookupPort.findById(command.senderAccountId())
-        .orElseThrow(() -> new SenderBankAccountNotFoundException(command.senderAccountId()));
+      var contextSnapshot = CONTEXT_SNAPSHOT_FACTORY.captureAll();
+      BankAccountSummary recipientSummary;
 
-      if (!senderSummary.status().isActive()) {
-        throw new SenderBankAccountNotActiveException(senderSummary.status());
+      try (var scope = StructuredTaskScope.open()) {
+        var senderLookup = scope.fork(contextSnapshot.wrap(() -> bankAccountLookupPort.findById(command.senderAccountId())));
+        var recipientLookup = scope.fork(contextSnapshot.wrap(() -> bankAccountLookupPort.findByIban(command.recipientIban())));
+        scope.join();
+
+        var senderSummary = senderLookup.get()
+          .orElseThrow(() -> new SenderBankAccountNotFoundException(command.senderAccountId()));
+
+        if (!senderSummary.status().isActive()) {
+          throw new SenderBankAccountNotActiveException(senderSummary.status());
+        }
+
+        recipientSummary = recipientLookup.get()
+          .orElseThrow(() -> new RecipientBankAccountNotFoundException(command.recipientIban()));
+
+        if (!recipientSummary.status().isActive()) {
+          throw new RecipientBankAccountNotActiveException(recipientSummary.status());
+        }
       }
-
-      var recipientSummary = bankAccountLookupPort.findByIban(command.recipientIban())
-        .orElseThrow(() -> new RecipientBankAccountNotFoundException(command.recipientIban()));
-
-      if (!recipientSummary.status().isActive()) {
-        throw new RecipientBankAccountNotActiveException(recipientSummary.status());
+      catch (InterruptedException ex) {
+        Thread.currentThread().interrupt();
+        throw new IllegalStateException("Interrupted while looking up bank accounts", ex);
+      }
+      catch (StructuredTaskScope.FailedException ex) {
+        var failure = ex.getCause();
+        if (failure instanceof RuntimeException runtimeException) {
+          throw runtimeException;
+        }
+        if (failure instanceof Error error) {
+          throw error;
+        }
+        throw new IllegalStateException("Bank account lookup failed", failure);
       }
 
       var recipientAccountId = recipientSummary.bankAccountId();

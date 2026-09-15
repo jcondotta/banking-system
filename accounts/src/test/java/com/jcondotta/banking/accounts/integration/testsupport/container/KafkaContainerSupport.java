@@ -12,7 +12,6 @@ public final class KafkaContainerSupport {
 
   @SuppressWarnings("resource")
   private static final KafkaContainer KAFKA = new KafkaContainer(KAFKA_IMAGE)
-    .withNetwork(AccountsTestNetworkSupport.network())
     .withReuse(true);
 
   private KafkaContainerSupport() {

@@ -33,7 +33,7 @@ class AddJointHolderIT extends BankAccountIntegrationSupport {
     assertThat(details.holders())
       .hasSize(2)
       .anySatisfy(holder -> {
-        assertThat(holder.type().name()).isEqualTo("JOINT");
+        assertThat(holder.type()).isEqualTo("JOINT");
         assertThat(holder.personalInfo().firstName()).isEqualTo(AccountHolderFixtures.PATRIZIO.personalInfo().holderName().firstName());
         assertThat(holder.personalInfo().lastName()).isEqualTo(AccountHolderFixtures.PATRIZIO.personalInfo().holderName().lastName());
       });

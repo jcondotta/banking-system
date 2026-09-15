@@ -27,7 +27,7 @@ public record AccountHolderDetailsResponse(
     allowableValues = {"PRIMARY", "JOINT"},
     requiredMode = RequiredMode.REQUIRED
   )
-  HolderTypeResponse type,
+  String type,
 
   @NotNull
   @Schema(

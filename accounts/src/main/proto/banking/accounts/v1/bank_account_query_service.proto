@@ -1,0 +1,72 @@
+syntax = "proto3";
+
+package banking.accounts.v1;
+
+import "google/protobuf/timestamp.proto";
+import "google/type/date.proto";
+
+option java_multiple_files = true;
+option java_package = "com.jcondotta.banking.accounts.infrastructure.adapters.input.grpc.generated.v1";
+option java_outer_classname = "BankAccountQueryServiceProto";
+
+service BankAccountQueryService {
+  rpc FindById(FindBankAccountByIdRequest) returns (BankAccountDetailsGrpcResponse);
+  rpc FindByIban(FindBankAccountByIbanRequest) returns (BankAccountDetailsGrpcResponse);
+}
+
+message FindBankAccountByIdRequest {
+  string bank_account_id = 1;
+}
+
+message FindBankAccountByIbanRequest {
+  string iban = 1;
+}
+
+message BankAccountDetailsGrpcResponse {
+  BankAccount bank_account = 1;
+}
+
+message BankAccount {
+  string id            = 1;
+  string account_type  = 2;
+  string currency      = 3;
+  optional string iban = 4;
+  string status        = 5;
+  google.protobuf.Timestamp created_at = 6;
+  repeated AccountHolder holders = 7;
+}
+
+message AccountHolder {
+  string id   = 1;
+  string type = 2;
+  PersonalInfo personal_info = 3;
+  ContactInfo contact_info   = 4;
+  Address address             = 5;
+  google.protobuf.Timestamp created_at = 6;
+}
+
+message PersonalInfo {
+  string first_name = 1;
+  string last_name  = 2;
+  IdentityDocument identity_document = 3;
+  google.type.Date date_of_birth     = 4;
+}
+
+message IdentityDocument {
+  string country = 1;
+  string type    = 2;
+  string number  = 3;
+}
+
+message ContactInfo {
+  string email        = 1;
+  string phone_number = 2;
+}
+
+message Address {
+  string street        = 1;
+  string street_number = 2;
+  optional string complement = 3;
+  string postal_code   = 4;
+  string city          = 5;
+}

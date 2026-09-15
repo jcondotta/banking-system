@@ -58,7 +58,7 @@ class AccountHolderDetailsResponseMapperTest {
 
     assertThat(response).isNotNull();
     assertThat(response.id()).isEqualTo(ACCOUNT_HOLDER_ID);
-    assertThat(response.type().name()).isEqualTo(type.name());
+    assertThat(response.type()).isEqualTo(type.name());
     assertThat(response.personalInfo().firstName()).isEqualTo(personalInfo.firstName());
     assertThat(response.personalInfo().lastName()).isEqualTo(personalInfo.lastName());
     assertThat(response.personalInfo().identityDocument().number()).isEqualTo(identityDocument.number());

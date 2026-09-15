@@ -1,4 +1,8 @@
 spring:
+  grpc:
+    server:
+      reflection:
+        enabled: true
   kafka:
     bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
 

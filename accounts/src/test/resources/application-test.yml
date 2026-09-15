@@ -4,6 +4,13 @@ app:
     worker:
       enabled: false
 
+spring:
+  grpc:
+    server:
+      port: 0
+      reflection:
+        enabled: true
+
 cloud:
   aws:
     region:

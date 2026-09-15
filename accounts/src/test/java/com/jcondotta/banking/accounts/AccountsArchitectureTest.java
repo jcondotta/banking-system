@@ -18,6 +18,7 @@ class AccountsArchitectureTest {
   private static final String INPUT_ADAPTER_PACKAGE = ROOT_PACKAGE + ".infrastructure.adapters.input..";
   private static final String OUTPUT_ADAPTER_PACKAGE = ROOT_PACKAGE + ".infrastructure.adapters.output..";
   private static final String REST_ADAPTER_PACKAGE = ROOT_PACKAGE + ".infrastructure.adapters.input.rest..";
+  private static final String GRPC_ADAPTER_PACKAGE = ROOT_PACKAGE + ".infrastructure.adapters.input.grpc..";
   private static final String PERSISTENCE_ENTITY_PACKAGE =
     ROOT_PACKAGE + ".infrastructure.adapters.output.persistence.dynamodb.entity..";
 
@@ -71,15 +72,18 @@ class AccountsArchitectureTest {
   }
 
   @Test
-  void dynamoDbAndRestTypesShouldRemainInsideInfrastructure() {
+  void infrastructureTechnologyTypesShouldRemainInsideInfrastructure() {
     noClasses()
       .that().resideOutsideOfPackage(INFRASTRUCTURE_PACKAGE)
       .should().dependOnClassesThat().resideInAnyPackage(
         "software.amazon.awssdk..",
+        "io.grpc..",
+        "com.google.protobuf..",
+        GRPC_ADAPTER_PACKAGE,
         REST_ADAPTER_PACKAGE,
         PERSISTENCE_ENTITY_PACKAGE
       )
-      .because("DynamoDB and REST types belong to infrastructure")
+      .because("DynamoDB, REST, protobuf, and gRPC types belong to infrastructure")
       .check(accountsClasses);
   }
 

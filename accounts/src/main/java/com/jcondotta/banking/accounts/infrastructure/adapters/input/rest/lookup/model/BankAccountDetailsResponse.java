@@ -16,12 +16,17 @@ public record BankAccountDetailsResponse(
     requiredMode = RequiredMode.REQUIRED)
   UUID id,
 
-  @Schema(description = "Type of bank account (e.g., SAVINGS, CHECKING)", example = "SAVINGS",
+  @Schema(description = "Type of bank account.",
+    example = "SAVINGS",
+    allowableValues = {"SAVINGS", "CHECKING"},
     requiredMode = RequiredMode.REQUIRED)
-  AccountTypeResponse accountType,
+  String accountType,
 
-  @Schema(description = "Currency for the bank account (e.g., USD, EUR)", example = "USD", requiredMode = RequiredMode.REQUIRED)
-  CurrencyResponse currency,
+  @Schema(description = "Currency for the bank account.",
+    example = "USD",
+    allowableValues = {"EUR", "USD"},
+    requiredMode = RequiredMode.REQUIRED)
+  String currency,
 
   @Schema(description = "International Bank Account Number (IBAN) for the bank account.",
     example = "GB29NWBK60161331926819",
@@ -29,18 +34,18 @@ public record BankAccountDetailsResponse(
     requiredMode = RequiredMode.REQUIRED)
   String iban,
 
-  @Schema(
-    description = "Date and time when the bank account was opened (UTC).",
+  @Schema(description = "Date and time when the bank account was opened (UTC).",
     example = "2023-08-23T12:55:00Z",
-    requiredMode = RequiredMode.REQUIRED
-  )
+    requiredMode = RequiredMode.REQUIRED)
   Instant createdAt,
 
-  @Schema(description = "Current accountStatus of the bank account",
+  @Schema(description = "Current status of the bank account.",
+    example = "ACTIVE",
+    allowableValues = {"PENDING", "ACTIVE", "BLOCKED", "CLOSED"},
     requiredMode = RequiredMode.REQUIRED)
-  AccountStatusResponse accountStatus,
+  String accountStatus,
 
   @Schema(description = "Account holders associated with this bank account.", requiredMode = RequiredMode.REQUIRED)
   List<AccountHolderDetailsResponse> holders
-) {
-}
+
+) {}

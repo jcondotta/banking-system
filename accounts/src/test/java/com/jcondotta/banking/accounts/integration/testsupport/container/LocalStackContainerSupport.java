@@ -18,7 +18,6 @@ public final class LocalStackContainerSupport {
   @SuppressWarnings("resource")
   private static final LocalStackContainer LOCALSTACK = new LocalStackContainer(LOCALSTACK_IMAGE)
     .withServices("dynamodb")
-    .withNetwork(AccountsTestNetworkSupport.network())
     .withLogConsumer(outputFrame -> log.info(outputFrame.getUtf8StringWithoutLineEnding()))
     .withReuse(true);
 

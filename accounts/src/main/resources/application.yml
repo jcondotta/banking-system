@@ -5,6 +5,21 @@ spring:
   application:
     name: accounts
     version: "@project.version@"
+  grpc:
+    server:
+      enabled: ${GRPC_SERVER_ENABLED:true}
+      host: ${GRPC_SERVER_HOST:127.0.0.1}
+      port: ${GRPC_SERVER_PORT:9090}
+      servlet:
+        enabled: false
+      ssl:
+        enabled: false
+      health:
+        enabled: true
+      reflection:
+        enabled: false
+      observation:
+        enabled: true
   mvc:
     apiversion:
       supported:

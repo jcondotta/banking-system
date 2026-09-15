@@ -14,6 +14,10 @@
 
     <properties>
         <shared-modules.version>2.0.0</shared-modules.version>
+        <proto-google-common-protos.version>2.63.2</proto-google-common-protos.version>
+        <protoc.version>4.33.4</protoc.version>
+        <grpc.version>1.77.1</grpc.version>
+        <protobuf-maven-plugin.version>4.0.3</protobuf-maven-plugin.version>
     </properties>
 
     <dependencyManagement>
@@ -89,6 +93,20 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-tx</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-grpc-server</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.grpc</groupId>
+            <artifactId>grpc-services</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.google.api.grpc</groupId>
+            <artifactId>proto-google-common-protos</artifactId>
+            <version>${proto-google-common-protos.version}</version>
         </dependency>
 
         <dependency>
@@ -181,6 +199,11 @@
             <artifactId>archunit</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-grpc-server-test</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
@@ -229,6 +252,29 @@
                         <param>com.jcondotta.application.logging.LogEvent</param>
                     </avoidCallsTo>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>io.github.ascopes</groupId>
+                <artifactId>protobuf-maven-plugin</artifactId>
+                <version>${protobuf-maven-plugin.version}</version>
+                <configuration>
+                    <protocVersion>${protoc.version}</protocVersion>
+                    <binaryMavenPlugins>
+                        <binaryMavenPlugin>
+                            <groupId>io.grpc</groupId>
+                            <artifactId>protoc-gen-grpc-java</artifactId>
+                            <version>${grpc.version}</version>
+                            <options>@generated=omit</options>
+                        </binaryMavenPlugin>
+                    </binaryMavenPlugins>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>

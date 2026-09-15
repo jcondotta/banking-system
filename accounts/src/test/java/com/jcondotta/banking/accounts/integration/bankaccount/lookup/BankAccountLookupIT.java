@@ -32,15 +32,15 @@ class BankAccountLookupIT extends BankAccountIntegrationSupport {
 
     assertAll(
       () -> assertThat(response.id()).isEqualTo(id.value()),
-      () -> assertThat(response.accountType().name()).isEqualTo(accountType.name()),
-      () -> assertThat(response.currency().name()).isEqualTo(currency.name()),
+      () -> assertThat(response.accountType()).isEqualTo(accountType.name()),
+      () -> assertThat(response.currency()).isEqualTo(currency.name()),
       () -> assertThat(response.iban()).isNull(),
       () -> assertThat(response.createdAt()).isNotNull(),
       () -> assertThat(response.holders())
         .hasSize(1)
         .singleElement()
         .satisfies(holder -> {
-          assertThat(holder.type().name()).isEqualTo("PRIMARY");
+          assertThat(holder.type()).isEqualTo("PRIMARY");
           assertThat(holder.personalInfo().firstName()).isEqualTo(AccountHolderFixtures.JEFFERSON.personalInfo().holderName().firstName());
           assertThat(holder.personalInfo().lastName()).isEqualTo(AccountHolderFixtures.JEFFERSON.personalInfo().holderName().lastName());
           assertThat(holder.createdAt()).isNotNull();
@@ -62,11 +62,11 @@ class BankAccountLookupIT extends BankAccountIntegrationSupport {
     assertThat(response.holders())
       .hasSize(2)
       .anySatisfy(holder -> {
-        assertThat(holder.type().name()).isEqualTo("PRIMARY");
+        assertThat(holder.type()).isEqualTo("PRIMARY");
         assertThat(holder.personalInfo().firstName()).isEqualTo(AccountHolderFixtures.JEFFERSON.personalInfo().holderName().firstName());
       })
       .anySatisfy(holder -> {
-        assertThat(holder.type().name()).isEqualTo("JOINT");
+        assertThat(holder.type()).isEqualTo("JOINT");
         assertThat(holder.personalInfo().firstName()).isEqualTo(AccountHolderFixtures.PATRIZIO.personalInfo().holderName().firstName());
       });
 
@@ -91,8 +91,8 @@ class BankAccountLookupIT extends BankAccountIntegrationSupport {
     assertAll(
       () -> assertThat(response.id()).isEqualTo(id.value()),
       () -> assertThat(response.iban()).isEqualTo(ibanValue),
-      () -> assertThat(response.accountType().name()).isEqualTo(accountType.name()),
-      () -> assertThat(response.currency().name()).isEqualTo(currency.name())
+      () -> assertThat(response.accountType()).isEqualTo(accountType.name()),
+      () -> assertThat(response.currency()).isEqualTo(currency.name())
     );
   }
 

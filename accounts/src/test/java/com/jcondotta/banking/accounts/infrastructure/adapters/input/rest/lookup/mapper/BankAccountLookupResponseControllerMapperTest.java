@@ -71,16 +71,16 @@ class BankAccountLookupResponseControllerMapperTest {
 
     assertThat(response).isNotNull();
     assertThat(response.id()).isEqualTo(BANK_ACCOUNT_ID);
-    assertThat(response.accountType().name()).isEqualTo(AccountType.CHECKING.name());
-    assertThat(response.currency().name()).isEqualTo(Currency.EUR.name());
+    assertThat(response.accountType()).isEqualTo(AccountType.CHECKING.name());
+    assertThat(response.currency()).isEqualTo(Currency.EUR.name());
     assertThat(response.iban()).isEqualTo(VALID_IBAN);
-    assertThat(response.accountStatus().name()).isEqualTo(AccountStatus.ACTIVE.name());
+    assertThat(response.accountStatus()).isEqualTo(AccountStatus.ACTIVE.name());
     assertThat(response.createdAt()).isEqualTo(CREATED_AT);
 
     assertThat(response.holders()).hasSize(1);
     AccountHolderDetailsResponse holder = response.holders().getFirst();
     assertThat(holder.id()).isEqualTo(ACCOUNT_HOLDER_ID);
-    assertThat(holder.type().name()).isEqualTo(holderType.name());
+    assertThat(holder.type()).isEqualTo(holderType.name());
     assertThat(holder.personalInfo().firstName()).isEqualTo(personalInfo.firstName());
     assertThat(holder.personalInfo().lastName()).isEqualTo(personalInfo.lastName());
     assertThat(holder.contactInfo().email()).isEqualTo(contactInfo.email());
