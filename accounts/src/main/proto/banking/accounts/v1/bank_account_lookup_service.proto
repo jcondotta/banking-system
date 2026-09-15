@@ -7,9 +7,9 @@ import "google/type/date.proto";
 
 option java_multiple_files = true;
 option java_package = "com.jcondotta.banking.accounts.infrastructure.adapters.input.grpc.generated.v1";
-option java_outer_classname = "BankAccountQueryServiceProto";
+option java_outer_classname = "BankAccountLookupServiceProto";
 
-service BankAccountQueryService {
+service BankAccountLookupService {
   rpc FindById(FindBankAccountByIdRequest) returns (BankAccountDetailsGrpcResponse);
   rpc FindByIban(FindBankAccountByIbanRequest) returns (BankAccountDetailsGrpcResponse);
 }

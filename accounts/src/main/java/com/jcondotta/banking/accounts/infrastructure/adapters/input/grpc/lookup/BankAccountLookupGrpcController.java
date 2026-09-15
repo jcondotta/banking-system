@@ -6,11 +6,10 @@ import com.jcondotta.banking.accounts.application.bankaccount.query.get.GetBankA
 import com.jcondotta.banking.accounts.application.bankaccount.query.get.model.BankAccountSummary;
 import com.jcondotta.banking.accounts.domain.bankaccount.identity.BankAccountId;
 import com.jcondotta.banking.accounts.domain.bankaccount.value_objects.Iban;
-import com.jcondotta.banking.accounts.infrastructure.adapters.input.grpc.generated.v1.BankAccountQueryServiceGrpc;
+import com.jcondotta.banking.accounts.infrastructure.adapters.input.grpc.generated.v1.BankAccountDetailsGrpcResponse;
+import com.jcondotta.banking.accounts.infrastructure.adapters.input.grpc.generated.v1.BankAccountLookupServiceGrpc;
 import com.jcondotta.banking.accounts.infrastructure.adapters.input.grpc.generated.v1.FindBankAccountByIbanRequest;
-import com.jcondotta.banking.accounts.infrastructure.adapters.input.grpc.generated.v1.FindBankAccountByIbanResponse;
 import com.jcondotta.banking.accounts.infrastructure.adapters.input.grpc.generated.v1.FindBankAccountByIdRequest;
-import com.jcondotta.banking.accounts.infrastructure.adapters.input.grpc.generated.v1.FindBankAccountByIdResponse;
 import com.jcondotta.domain.exception.DomainValidationException;
 import io.grpc.stub.StreamObserver;
 import lombok.RequiredArgsConstructor;
@@ -20,7 +19,7 @@ import java.util.UUID;
 
 @GrpcService
 @RequiredArgsConstructor
-public class BankAccountQueryGrpcService extends BankAccountQueryServiceGrpc.BankAccountQueryServiceImplBase {
+public class BankAccountLookupGrpcController extends BankAccountLookupServiceGrpc.BankAccountLookupServiceImplBase {
 
   static final String INVALID_BANK_ACCOUNT_ID = "bank_account_id must be a valid UUID";
   static final String INVALID_IBAN = "iban must be a valid IBAN";
@@ -30,9 +29,9 @@ public class BankAccountQueryGrpcService extends BankAccountQueryServiceGrpc.Ban
   private final BankAccountGrpcMapper mapper;
 
   @Override
-  public void findById(FindBankAccountByIdRequest request, StreamObserver<FindBankAccountByIdResponse> responseObserver) {
+  public void findById(FindBankAccountByIdRequest request, StreamObserver<BankAccountDetailsGrpcResponse> responseObserver) {
     var query = new GetBankAccountByIdQuery(BankAccountId.of(parseBankAccountId(request.getBankAccountId())));
-    var response = FindBankAccountByIdResponse.newBuilder()
+    var response = BankAccountDetailsGrpcResponse.newBuilder()
       .setBankAccount(mapper.toResponse(getByIdQueryHandler.handle(query)))
       .build();
 
@@ -41,9 +40,9 @@ public class BankAccountQueryGrpcService extends BankAccountQueryServiceGrpc.Ban
   }
 
   @Override
-  public void findByIban(FindBankAccountByIbanRequest request, StreamObserver<FindBankAccountByIbanResponse> responseObserver) {
+  public void findByIban(FindBankAccountByIbanRequest request, StreamObserver<BankAccountDetailsGrpcResponse> responseObserver) {
     var query = new GetBankAccountByIbanQuery(parseIban(request.getIban()));
-    var response = FindBankAccountByIbanResponse.newBuilder()
+    var response = BankAccountDetailsGrpcResponse.newBuilder()
       .setBankAccount(mapper.toResponse(getByIbanQueryHandler.handle(query)))
       .build();
 

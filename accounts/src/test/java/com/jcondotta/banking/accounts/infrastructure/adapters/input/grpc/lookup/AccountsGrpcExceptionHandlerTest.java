@@ -14,19 +14,19 @@ class AccountsGrpcExceptionHandlerTest {
   @Test
   void shouldReturnInvalidArgument_whenBankAccountIdIsInvalid() {
     var exception = configuration.grpcExceptionHandler()
-      .handleException(new InvalidGrpcRequestException(BankAccountQueryGrpcService.INVALID_BANK_ACCOUNT_ID));
+      .handleException(new InvalidGrpcRequestException(BankAccountLookupGrpcController.INVALID_BANK_ACCOUNT_ID));
 
     assertThat(exception.getStatus().getCode()).isEqualTo(Status.Code.INVALID_ARGUMENT);
-    assertThat(exception.getStatus().getDescription()).isEqualTo(BankAccountQueryGrpcService.INVALID_BANK_ACCOUNT_ID);
+    assertThat(exception.getStatus().getDescription()).isEqualTo(BankAccountLookupGrpcController.INVALID_BANK_ACCOUNT_ID);
   }
 
   @Test
   void shouldReturnInvalidArgument_whenIbanIsInvalid() {
     var exception = configuration.grpcExceptionHandler()
-      .handleException(new InvalidGrpcRequestException(BankAccountQueryGrpcService.INVALID_IBAN));
+      .handleException(new InvalidGrpcRequestException(BankAccountLookupGrpcController.INVALID_IBAN));
 
     assertThat(exception.getStatus().getCode()).isEqualTo(Status.Code.INVALID_ARGUMENT);
-    assertThat(exception.getStatus().getDescription()).isEqualTo(BankAccountQueryGrpcService.INVALID_IBAN);
+    assertThat(exception.getStatus().getDescription()).isEqualTo(BankAccountLookupGrpcController.INVALID_IBAN);
   }
 
   @Test
