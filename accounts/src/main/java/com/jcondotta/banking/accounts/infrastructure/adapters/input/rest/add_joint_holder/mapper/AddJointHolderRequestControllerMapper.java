@@ -68,7 +68,8 @@ public interface AddJointHolderRequestControllerMapper {
       StreetNumber.of(value.streetNumber()),
       AddressComplement.ofNullable(value.complement()),
       PostalCode.of(value.postalCode()),
-      City.of(value.city())
+      City.of(value.city()),
+      Country.of(value.country())
     );
   }
 }

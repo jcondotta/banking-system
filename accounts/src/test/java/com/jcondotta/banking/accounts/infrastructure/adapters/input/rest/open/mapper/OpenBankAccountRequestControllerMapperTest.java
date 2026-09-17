@@ -41,6 +41,7 @@ class OpenBankAccountRequestControllerMapperTest {
     assertThat(command.personalInfo().identityDocument().number().value()).isEqualTo(VALID_DOCUMENT_NUMBER);
     assertThat(command.contactInfo().email().value()).isEqualTo(VALID_EMAIL);
     assertThat(command.contactInfo().phoneNumber().value()).isEqualTo(VALID_PHONE);
+    assertThat(command.address().country().isoCode()).isEqualTo("ES");
     assertThat(command.accountType()).isEqualTo(AccountType.valueOf(accountType.name()));
     assertThat(command.currency()).isEqualTo(Currency.EUR);
   }
@@ -65,7 +66,7 @@ class OpenBankAccountRequestControllerMapperTest {
       PersonalInfoFixtures.JEFFERSON.dateOfBirth().value()
     );
     var contactInfo = new ContactInfoRequest(VALID_EMAIL, VALID_PHONE);
-    var address = new AddressRequest("Carrer de Mallorca", "401", null, "08013", "Barcelona");
+    var address = new AddressRequest("Carrer de Mallorca", "401", null, "08013", "Barcelona", "ES");
     var holder = new AccountHolderRequest(personalInfo, contactInfo, address);
     return new OpenBankAccountRequest(accountType, currency, holder);
   }

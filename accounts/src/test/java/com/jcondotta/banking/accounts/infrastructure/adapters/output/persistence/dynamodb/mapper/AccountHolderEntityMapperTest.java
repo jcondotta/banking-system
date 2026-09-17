@@ -70,6 +70,7 @@ class AccountHolderEntityMapperTest {
             assertThat(entity.getStreetNumber()).isEqualTo(fixture.address().streetNumber().value());
             assertThat(entity.getPostalCode()).isEqualTo(fixture.address().postalCode().value());
             assertThat(entity.getCity()).isEqualTo(fixture.address().city().value());
+            assertThat(entity.getAddressCountry()).isEqualTo(fixture.address().country().isoCode());
         }
     }
 
@@ -107,6 +108,7 @@ class AccountHolderEntityMapperTest {
             assertThat(domain.getAddress().streetNumber().value()).isEqualTo(fixture.address().streetNumber().value());
             assertThat(domain.getAddress().postalCode().value()).isEqualTo(fixture.address().postalCode().value());
             assertThat(domain.getAddress().city().value()).isEqualTo(fixture.address().city().value());
+            assertThat(domain.getAddress().country().isoCode()).isEqualTo(fixture.address().country().isoCode());
         }
     }
 
@@ -154,6 +156,7 @@ class AccountHolderEntityMapperTest {
         assertThat(entity.getAddressComplement()).isEqualTo(address.addressComplement().value());
         assertThat(entity.getPostalCode()).isEqualTo(address.postalCode().value());
         assertThat(entity.getCity()).isEqualTo(address.city().value());
+        assertThat(entity.getAddressCountry()).isEqualTo(address.country().isoCode());
     }
 
     private void assertPersonalInfoDomain(AccountHolder domain, AccountHolderFixtures fixture) {

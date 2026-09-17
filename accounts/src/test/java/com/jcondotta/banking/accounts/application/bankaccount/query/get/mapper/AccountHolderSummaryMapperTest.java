@@ -87,5 +87,6 @@ class AccountHolderSummaryMapperTest {
     assertThat(address.addressComplement()).isEqualTo(source.addressComplement().value());
     assertThat(address.postalCode()).isEqualTo(source.postalCode().value());
     assertThat(address.city()).isEqualTo(source.city().value());
+    assertThat(address.country()).isEqualTo(source.country().isoCode());
   }
 }

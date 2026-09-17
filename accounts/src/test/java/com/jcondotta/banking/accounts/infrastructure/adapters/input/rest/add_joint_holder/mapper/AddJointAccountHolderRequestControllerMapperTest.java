@@ -41,7 +41,7 @@ class AddJointAccountHolderRequestControllerMapperTest {
       PersonalInfoFixtures.JEFFERSON.dateOfBirth().value()
     );
     var contactInfo = new ContactInfoRequest(VALID_EMAIL, VALID_PHONE);
-    var address = new AddressRequest("Carrer de Mallorca", "401", null, "08013", "Barcelona");
+    var address = new AddressRequest("Carrer de Mallorca", "401", null, "08013", "Barcelona", "ES");
     var request = new AddJointHolderRequest(personalInfo, contactInfo, address);
 
     AddJointHolderCommand command = mapper.toCommand(BANK_ACCOUNT_UUID, request);
@@ -57,6 +57,7 @@ class AddJointAccountHolderRequestControllerMapperTest {
     assertThat(command.address().street().value()).isEqualTo("Carrer de Mallorca");
     assertThat(command.address().postalCode().value()).isEqualTo("08013");
     assertThat(command.address().city().value()).isEqualTo("Barcelona");
+    assertThat(command.address().country().isoCode()).isEqualTo("ES");
   }
 
   @Test

@@ -9,7 +9,8 @@ public enum AddressFixtures {
     "01",
     "3º - 1ª",
     "08013",
-    "Barcelona"
+    "Barcelona",
+    "ES"
   ),
 
   BERLIN_HOUSE(
@@ -17,7 +18,8 @@ public enum AddressFixtures {
     "1",
     null,
     "10178",
-    "Berlin"
+    "Berlin",
+    "DE"
   ),
 
   MADRID_OFFICE(
@@ -25,7 +27,8 @@ public enum AddressFixtures {
     "28B",
     "Floor 2",
     "28013",
-    "Madrid"
+    "Madrid",
+    "ES"
   );
 
   private final String street;
@@ -33,22 +36,25 @@ public enum AddressFixtures {
   private final String complement;
   private final String postalCode;
   private final String city;
+  private final String country;
 
   AddressFixtures(
     String street,
     String number,
     String complement,
     String postalCode,
-    String city
+    String city,
+    String country
   ) {
     this.street = street;
     this.number = number;
     this.complement = complement;
     this.postalCode = postalCode;
     this.city = city;
+    this.country = country;
   }
 
   public Address address() {
-    return Address.of(street, number, complement, postalCode, city);
+    return Address.of(street, number, complement, postalCode, city, country);
   }
 }

@@ -8,6 +8,7 @@ import com.jcondotta.banking.accounts.domain.bankaccount.enums.Currency;
 import com.jcondotta.banking.accounts.domain.bankaccount.identity.BankAccountId;
 import com.jcondotta.banking.accounts.domain.testsupport.AccountHolderFixtures;
 import com.jcondotta.banking.accounts.infrastructure.adapters.input.rest.common.AccountHolderRequest;
+import com.jcondotta.banking.accounts.infrastructure.adapters.input.rest.common.AddressRequest;
 import com.jcondotta.banking.accounts.infrastructure.adapters.input.rest.open.model.AccountTypeRequest;
 import com.jcondotta.banking.accounts.infrastructure.adapters.input.rest.open.model.CurrencyRequest;
 import com.jcondotta.banking.accounts.infrastructure.adapters.input.rest.open.model.OpenBankAccountRequest;
@@ -81,5 +82,39 @@ class OpenBankAccountIT extends BankAccountIntegrationSupport {
     var response = postOpenBankAccount(request);
 
     assertThat(response.statusCode()).isEqualTo(HttpStatus.UNPROCESSABLE_CONTENT.value());
+  }
+
+  @Test
+  void shouldDescribeExpectedCountryFormat_whenCountryFormatIsInvalid() {
+    var validRequest = BankAccountRequestFactory.openBankAccount(
+      AccountType.CHECKING,
+      Currency.EUR,
+      AccountHolderFixtures.JEFFERSON
+    );
+    var validHolder = validRequest.primaryHolder();
+    var validAddress = validHolder.address();
+    var invalidAddress = new AddressRequest(
+      validAddress.street(),
+      validAddress.streetNumber(),
+      validAddress.complement(),
+      validAddress.postalCode(),
+      validAddress.city(),
+      "es"
+    );
+    var request = new OpenBankAccountRequest(
+      validRequest.accountType(),
+      validRequest.currency(),
+      new AccountHolderRequest(validHolder.personalInfo(), validHolder.contactInfo(), invalidAddress)
+    );
+
+    var response = postOpenBankAccount(request);
+
+    assertAll(
+      () -> assertThat(response.statusCode()).isEqualTo(HttpStatus.UNPROCESSABLE_CONTENT.value()),
+      () -> assertThat(response.jsonPath().getString("errors[0].field"))
+        .isEqualTo("primaryHolder.address.country"),
+      () -> assertThat(response.jsonPath().getList("errors[0].messages", String.class))
+        .containsExactly("must contain exactly two uppercase letters (for example, ES)")
+    );
   }
 }

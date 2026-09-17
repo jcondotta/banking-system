@@ -13,82 +13,99 @@ class AddressTest {
   private static final String VALID_COMPLEMENT = "Apartment 42B";
   private static final String VALID_POSTAL_CODE = "08001";
   private static final String VALID_CITY = "Barcelona";
+  private static final String VALID_COUNTRY = "ES";
 
   @Test
   void shouldCreateAddress_whenAllRequiredFieldsAreProvided_withoutComplement() {
-    var address = Address.of(VALID_STREET, VALID_NUMBER, null, VALID_POSTAL_CODE, VALID_CITY);
+    var address = Address.of(VALID_STREET, VALID_NUMBER, null, VALID_POSTAL_CODE, VALID_CITY, VALID_COUNTRY);
 
     assertThat(address.street().value()).isEqualTo(VALID_STREET);
     assertThat(address.streetNumber().value()).isEqualTo(VALID_NUMBER);
     assertThat(address.addressComplement()).isNull();
     assertThat(address.postalCode().value()).isEqualTo(VALID_POSTAL_CODE);
     assertThat(address.city().value()).isEqualTo(VALID_CITY);
+    assertThat(address.country().isoCode()).isEqualTo(VALID_COUNTRY);
   }
 
   @Test
   void shouldCreateAddress_whenAllFieldsAreProvided_withComplement() {
-    var address = Address.of(VALID_STREET, VALID_NUMBER, VALID_COMPLEMENT, VALID_POSTAL_CODE, VALID_CITY);
+    var address = Address.of(VALID_STREET, VALID_NUMBER, VALID_COMPLEMENT, VALID_POSTAL_CODE, VALID_CITY, VALID_COUNTRY);
 
     assertThat(address.street().value()).isEqualTo(VALID_STREET);
     assertThat(address.streetNumber().value()).isEqualTo(VALID_NUMBER);
     assertThat(address.addressComplement().value()).isEqualTo(VALID_COMPLEMENT);
     assertThat(address.postalCode().value()).isEqualTo(VALID_POSTAL_CODE);
     assertThat(address.city().value()).isEqualTo(VALID_CITY);
+    assertThat(address.country().isoCode()).isEqualTo(VALID_COUNTRY);
   }
 
   @Test
   void shouldThrowException_whenStreetIsNull() {
-    assertThatThrownBy(() -> new Address(null, StreetNumber.of(VALID_NUMBER), null, PostalCode.of(VALID_POSTAL_CODE), City.of(VALID_CITY)))
+    assertThatThrownBy(() -> new Address(null, StreetNumber.of(VALID_NUMBER), null, PostalCode.of(VALID_POSTAL_CODE), City.of(VALID_CITY), Country.of(VALID_COUNTRY)))
       .isInstanceOf(DomainValidationException.class)
       .hasMessage(Address.STREET_MUST_BE_PROVIDED);
   }
 
   @Test
   void shouldThrowException_whenStreetNumberIsNull() {
-    assertThatThrownBy(() -> new Address(Street.of(VALID_STREET), null, null, PostalCode.of(VALID_POSTAL_CODE), City.of(VALID_CITY)))
+    assertThatThrownBy(() -> new Address(Street.of(VALID_STREET), null, null, PostalCode.of(VALID_POSTAL_CODE), City.of(VALID_CITY), Country.of(VALID_COUNTRY)))
       .isInstanceOf(DomainValidationException.class)
       .hasMessage(Address.NUMBER_MUST_BE_PROVIDED);
   }
 
   @Test
   void shouldThrowException_whenPostalCodeIsNull() {
-    assertThatThrownBy(() -> new Address(Street.of(VALID_STREET), StreetNumber.of(VALID_NUMBER), null, null, City.of(VALID_CITY)))
+    assertThatThrownBy(() -> new Address(Street.of(VALID_STREET), StreetNumber.of(VALID_NUMBER), null, null, City.of(VALID_CITY), Country.of(VALID_COUNTRY)))
       .isInstanceOf(DomainValidationException.class)
       .hasMessage(Address.POSTAL_MUST_BE_PROVIDED);
   }
 
   @Test
   void shouldThrowException_whenCityIsNull() {
-    assertThatThrownBy(() -> new Address(Street.of(VALID_STREET), StreetNumber.of(VALID_NUMBER), null, PostalCode.of(VALID_POSTAL_CODE), null))
+    assertThatThrownBy(() -> new Address(Street.of(VALID_STREET), StreetNumber.of(VALID_NUMBER), null, PostalCode.of(VALID_POSTAL_CODE), null, Country.of(VALID_COUNTRY)))
       .isInstanceOf(DomainValidationException.class)
       .hasMessage(Address.CITY_MUST_BE_PROVIDED);
   }
 
   @Test
+  void shouldThrowException_whenCountryIsNull() {
+    assertThatThrownBy(() -> new Address(Street.of(VALID_STREET), StreetNumber.of(VALID_NUMBER), null, PostalCode.of(VALID_POSTAL_CODE), City.of(VALID_CITY), null))
+      .isInstanceOf(DomainValidationException.class)
+      .hasMessage(Address.COUNTRY_MUST_BE_PROVIDED);
+  }
+
+  @Test
   void shouldThrowException_whenStreetIsNull_usingFactoryMethod() {
-    assertThatThrownBy(() -> Address.of(null, VALID_NUMBER, null, VALID_POSTAL_CODE, VALID_CITY))
+    assertThatThrownBy(() -> Address.of(null, VALID_NUMBER, null, VALID_POSTAL_CODE, VALID_CITY, VALID_COUNTRY))
       .isInstanceOf(DomainValidationException.class)
       .hasMessage(Street.MUST_NOT_BE_EMPTY);
   }
 
   @Test
   void shouldThrowException_whenStreetNumberIsNull_usingFactoryMethod() {
-    assertThatThrownBy(() -> Address.of(VALID_STREET, null, null, VALID_POSTAL_CODE, VALID_CITY))
+    assertThatThrownBy(() -> Address.of(VALID_STREET, null, null, VALID_POSTAL_CODE, VALID_CITY, VALID_COUNTRY))
       .isInstanceOf(DomainValidationException.class)
       .hasMessage(StreetNumber.MUST_NOT_BE_EMPTY);
   }
 
   @Test
   void shouldThrowException_whenPostalCodeIsNull_usingFactoryMethod() {
-    assertThatThrownBy(() -> Address.of(VALID_STREET, VALID_NUMBER, null, null, VALID_CITY))
+    assertThatThrownBy(() -> Address.of(VALID_STREET, VALID_NUMBER, null, null, VALID_CITY, VALID_COUNTRY))
       .isInstanceOf(DomainValidationException.class)
       .hasMessage(PostalCode.MUST_NOT_BE_EMPTY);
   }
 
   @Test
   void shouldThrowException_whenCityIsNull_usingFactoryMethod() {
-    assertThatThrownBy(() -> Address.of(VALID_STREET, VALID_NUMBER, null, VALID_POSTAL_CODE, null))
+    assertThatThrownBy(() -> Address.of(VALID_STREET, VALID_NUMBER, null, VALID_POSTAL_CODE, null, VALID_COUNTRY))
       .isInstanceOf(DomainValidationException.class)
       .hasMessage(City.MUST_NOT_BE_EMPTY);
+  }
+
+  @Test
+  void shouldThrowException_whenCountryIsNull_usingFactoryMethod() {
+    assertThatThrownBy(() -> Address.of(VALID_STREET, VALID_NUMBER, null, VALID_POSTAL_CODE, VALID_CITY, null))
+      .isInstanceOf(DomainValidationException.class)
+      .hasMessage(Country.ISO_CODE_MUST_BE_PROVIDED);
   }
 }

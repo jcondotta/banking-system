@@ -7,18 +7,21 @@ public record AddressSummary(
   String streetNumber,
   String addressComplement,
   String postalCode,
-  String city
+  String city,
+  String country
 ) {
 
   static final String STREET_REQUIRED = "street must be provided";
   static final String STREET_NUMBER_REQUIRED = "streetNumber must be provided";
   static final String POSTAL_CODE_REQUIRED = "postalCode must be provided";
   static final String CITY_REQUIRED = "city must be provided";
+  static final String COUNTRY_REQUIRED = "country must be provided";
 
   public AddressSummary {
     requireNonNull(street, STREET_REQUIRED);
     requireNonNull(streetNumber, STREET_NUMBER_REQUIRED);
     requireNonNull(postalCode, POSTAL_CODE_REQUIRED);
     requireNonNull(city, CITY_REQUIRED);
+    requireNonNull(country, COUNTRY_REQUIRED);
   }
 }

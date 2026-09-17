@@ -54,7 +54,8 @@ class BankAccountLookupResponseControllerMapperTest {
       AddressFixtures.BARCELONA_APT.address().streetNumber().value(),
       AddressFixtures.BARCELONA_APT.address().addressComplement().value(),
       AddressFixtures.BARCELONA_APT.address().postalCode().value(),
-      AddressFixtures.BARCELONA_APT.address().city().value()
+      AddressFixtures.BARCELONA_APT.address().city().value(),
+      AddressFixtures.BARCELONA_APT.address().country().isoCode()
     );
     var holderSummary = new AccountHolderSummary(ACCOUNT_HOLDER_ID, personalInfo, contactInfo, address, holderType, CREATED_AT);
     var bankAccountSummary = new BankAccountSummary(
@@ -85,6 +86,7 @@ class BankAccountLookupResponseControllerMapperTest {
     assertThat(holder.personalInfo().lastName()).isEqualTo(personalInfo.lastName());
     assertThat(holder.contactInfo().email()).isEqualTo(contactInfo.email());
     assertThat(holder.address().street()).isEqualTo(address.street());
+    assertThat(holder.address().country()).isEqualTo(address.country());
     assertThat(holder.createdAt()).isEqualTo(CREATED_AT);
   }
 }

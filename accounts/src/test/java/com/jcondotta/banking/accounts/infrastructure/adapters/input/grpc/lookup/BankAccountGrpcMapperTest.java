@@ -62,6 +62,7 @@ class BankAccountGrpcMapperTest {
     softly.assertThat(holder.getAddress().getComplement()).isEqualTo("3º - 1ª");
     softly.assertThat(holder.getAddress().getPostalCode()).isEqualTo("08013");
     softly.assertThat(holder.getAddress().getCity()).isEqualTo("Barcelona");
+    softly.assertThat(holder.getAddress().getCountry()).isEqualTo("ES");
     softly.assertAll();
   }
 
@@ -80,7 +81,7 @@ class BankAccountGrpcMapperTest {
     var identityDocument = new IdentityDocumentSummary("SPAIN", "FOREIGNER_ID", "X7566995H");
     var personalInfo = new PersonalInfoSummary("Jefferson", "Condotta", identityDocument, DATE_OF_BIRTH);
     var contactInfo = new ContactInfoSummary("jefferson.condotta@email.com", "+49123456789");
-    var address = new AddressSummary("Carrer de Mallorca", "01", addressComplement, "08013", "Barcelona");
+    var address = new AddressSummary("Carrer de Mallorca", "01", addressComplement, "08013", "Barcelona", "ES");
     var holder = new AccountHolderSummary(HOLDER_ID, personalInfo, contactInfo, address, HolderType.PRIMARY, CREATED_AT);
 
     return new BankAccountSummary(

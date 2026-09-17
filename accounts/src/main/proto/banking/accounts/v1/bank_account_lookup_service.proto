@@ -69,4 +69,5 @@ message Address {
   optional string complement = 3;
   string postal_code   = 4;
   string city          = 5;
+  string country       = 6;
 }

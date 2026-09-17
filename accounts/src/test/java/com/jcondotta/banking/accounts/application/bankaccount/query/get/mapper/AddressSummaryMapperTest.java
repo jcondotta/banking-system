@@ -4,6 +4,7 @@ import com.jcondotta.banking.accounts.application.bankaccount.query.get.model.Ad
 import com.jcondotta.banking.accounts.domain.bankaccount.value_objects.address.AddressComplement;
 import com.jcondotta.banking.accounts.domain.bankaccount.value_objects.address.Address;
 import com.jcondotta.banking.accounts.domain.bankaccount.value_objects.address.City;
+import com.jcondotta.banking.accounts.domain.bankaccount.value_objects.address.Country;
 import com.jcondotta.banking.accounts.domain.bankaccount.value_objects.address.PostalCode;
 import com.jcondotta.banking.accounts.domain.bankaccount.value_objects.address.Street;
 import com.jcondotta.banking.accounts.domain.bankaccount.value_objects.address.StreetNumber;
@@ -18,12 +19,13 @@ class AddressSummaryMapperTest {
   private static final String COMPLEMENT = "2º Andar";
   private static final String POSTAL_CODE = "08013";
   private static final String CITY = "Barcelona";
+  private static final String COUNTRY = "ES";
 
   private final AddressSummaryMapper mapper = new AddressSummaryMapperImpl();
 
   @Test
   void shouldMapAddressDetails_whenComplementIsPresent() {
-    Address address = Address.of(STREET, NUMBER, COMPLEMENT, POSTAL_CODE, CITY);
+    Address address = Address.of(STREET, NUMBER, COMPLEMENT, POSTAL_CODE, CITY, COUNTRY);
 
     AddressSummary details = mapper.toSummary(address);
 
@@ -32,11 +34,12 @@ class AddressSummaryMapperTest {
     assertThat(details.addressComplement()).isEqualTo(COMPLEMENT);
     assertThat(details.postalCode()).isEqualTo(POSTAL_CODE);
     assertThat(details.city()).isEqualTo(CITY);
+    assertThat(details.country()).isEqualTo(COUNTRY);
   }
 
   @Test
   void shouldMapAddressDetails_whenComplementIsNull() {
-    var address = Address.of(STREET, NUMBER, null, POSTAL_CODE, CITY);
+    var address = Address.of(STREET, NUMBER, null, POSTAL_CODE, CITY, COUNTRY);
 
     AddressSummary details = mapper.toSummary(address);
 
@@ -45,6 +48,7 @@ class AddressSummaryMapperTest {
     assertThat(details.addressComplement()).isNull();
     assertThat(details.postalCode()).isEqualTo(POSTAL_CODE);
     assertThat(details.city()).isEqualTo(CITY);
+    assertThat(details.country()).isEqualTo(COUNTRY);
   }
 
   @Test
@@ -61,5 +65,6 @@ class AddressSummaryMapperTest {
     assertThat(mapper.map((AddressComplement) null)).isNull();
     assertThat(mapper.map((PostalCode) null)).isNull();
     assertThat(mapper.map((City) null)).isNull();
+    assertThat(mapper.map((Country) null)).isNull();
   }
 }

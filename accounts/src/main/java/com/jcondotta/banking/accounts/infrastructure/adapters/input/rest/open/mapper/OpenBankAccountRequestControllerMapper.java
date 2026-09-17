@@ -69,7 +69,8 @@ public interface OpenBankAccountRequestControllerMapper {
           StreetNumber.of(request.primaryHolder().address().streetNumber()),
           request.primaryHolder().address().complement() != null ? AddressComplement.ofNullable(request.primaryHolder().address().complement()) : null,
           PostalCode.of(request.primaryHolder().address().postalCode()),
-          City.of(request.primaryHolder().address().city())
+          City.of(request.primaryHolder().address().city()),
+          Country.of(request.primaryHolder().address().country())
         );
     }
 }

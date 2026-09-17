@@ -13,6 +13,7 @@ public interface AddressSummaryMapper {
   @Mapping(target = "addressComplement", source = "addressComplement")
   @Mapping(target = "postalCode", source = "postalCode")
   @Mapping(target = "city", source = "city")
+  @Mapping(target = "country", source = "country")
   AddressSummary toSummary(Address address);
 
   default String map(Street street) {
@@ -33,5 +34,9 @@ public interface AddressSummaryMapper {
 
   default String map(City city) {
     return city != null ? city.value() : null;
+  }
+
+  default String map(Country country) {
+    return country != null ? country.isoCode() : null;
   }
 }

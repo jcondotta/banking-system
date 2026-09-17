@@ -2,6 +2,7 @@ package com.jcondotta.banking.accounts.infrastructure.adapters.input.rest.common
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 @Schema(name = "AddressRequest", description = "Represents the address information of the account holder.")
@@ -49,6 +50,19 @@ public record AddressRequest(
     example = "Barcelona",
     requiredMode = Schema.RequiredMode.REQUIRED
   )
-  String city
+  String city,
+
+  @NotBlank
+  @Pattern(
+    regexp = "[A-Z]{2}",
+    message = "must contain exactly two uppercase letters (for example, ES)"
+  )
+  @Schema(
+    description = "ISO 3166-1 alpha-2 country code.",
+    example = "ES",
+    pattern = "[A-Z]{2}",
+    requiredMode = Schema.RequiredMode.REQUIRED
+  )
+  String country
 ) {
 }

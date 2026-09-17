@@ -7,28 +7,32 @@ public record Address(
   StreetNumber streetNumber,
   AddressComplement addressComplement,
   PostalCode postalCode,
-  City city
+  City city,
+  Country country
 ) {
 
   public static final String STREET_MUST_BE_PROVIDED = "Street must be provided";
   public static final String NUMBER_MUST_BE_PROVIDED = "Street number must be provided";
   public static final String POSTAL_MUST_BE_PROVIDED = "Postal code must be provided";
   public static final String CITY_MUST_BE_PROVIDED = "City must be provided";
+  public static final String COUNTRY_MUST_BE_PROVIDED = "Country must be provided";
 
   public Address {
     required(street, STREET_MUST_BE_PROVIDED);
     required(streetNumber, NUMBER_MUST_BE_PROVIDED);
     required(postalCode, POSTAL_MUST_BE_PROVIDED);
     required(city, CITY_MUST_BE_PROVIDED);
+    required(country, COUNTRY_MUST_BE_PROVIDED);
   }
 
-  public static Address of(String street, String number, String addressComplement, String postalCode, String city) {
+  public static Address of(String street, String number, String addressComplement, String postalCode, String city, String country) {
     return new Address(
       Street.of(street),
       StreetNumber.of(number),
       AddressComplement.ofNullable(addressComplement),
       PostalCode.of(postalCode),
-      City.of(city)
+      City.of(city),
+      Country.of(country)
     );
   }
 }

@@ -43,6 +43,7 @@ class BankAccountLookupIT extends BankAccountIntegrationSupport {
           assertThat(holder.type()).isEqualTo("PRIMARY");
           assertThat(holder.personalInfo().firstName()).isEqualTo(AccountHolderFixtures.JEFFERSON.personalInfo().holderName().firstName());
           assertThat(holder.personalInfo().lastName()).isEqualTo(AccountHolderFixtures.JEFFERSON.personalInfo().holderName().lastName());
+          assertThat(holder.address().country()).isEqualTo(AccountHolderFixtures.JEFFERSON.address().country().isoCode());
           assertThat(holder.createdAt()).isNotNull();
         })
     );

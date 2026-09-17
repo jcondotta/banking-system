@@ -44,6 +44,7 @@ public class BankingEntity {
   private String addressComplement;
   private String postalCode;
   private String city;
+  private String addressCountry;
 
   private String holderType;
   private Instant createdAt;

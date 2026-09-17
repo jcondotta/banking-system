@@ -61,7 +61,8 @@ public final class BankAccountRequestFactory {
         address.streetNumber().value(),
         address.addressComplement() == null ? null : address.addressComplement().value(),
         address.postalCode().value(),
-        address.city().value()
+        address.city().value(),
+        address.country().isoCode()
       )
     );
   }

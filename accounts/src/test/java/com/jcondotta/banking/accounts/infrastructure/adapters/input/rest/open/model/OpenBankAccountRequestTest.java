@@ -86,7 +86,7 @@ class OpenBankAccountRequestTest {
       ContactInfoFixtures.JEFFERSON.email().value(),
       ContactInfoFixtures.JEFFERSON.phoneNumber().value()
     );
-    var address = new AddressRequest("Carrer de Mallorca", "401", null, "08013", "Barcelona");
+    var address = new AddressRequest("Carrer de Mallorca", "401", null, "08013", "Barcelona", "ES");
     return new AccountHolderRequest(personalInfo, contactInfo, address);
   }
 }

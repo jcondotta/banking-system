@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 class AddressRequestTest {
 
@@ -17,17 +18,18 @@ class AddressRequestTest {
   private static final String VALID_STREET_NUMBER = "401";
   private static final String VALID_POSTAL_CODE = "08013";
   private static final String VALID_CITY = "Barcelona";
+  private static final String VALID_COUNTRY = "ES";
 
   @Test
   void shouldNotDetectConstraintViolation_whenRequestIsValid() {
-    var request = new AddressRequest(VALID_STREET, VALID_STREET_NUMBER, null, VALID_POSTAL_CODE, VALID_CITY);
+    var request = new AddressRequest(VALID_STREET, VALID_STREET_NUMBER, null, VALID_POSTAL_CODE, VALID_CITY, VALID_COUNTRY);
 
     assertThat(VALIDATOR.validate(request)).isEmpty();
   }
 
   @Test
   void shouldNotDetectConstraintViolation_whenComplementIsProvided() {
-    var request = new AddressRequest(VALID_STREET, VALID_STREET_NUMBER, "3º - 1ª", VALID_POSTAL_CODE, VALID_CITY);
+    var request = new AddressRequest(VALID_STREET, VALID_STREET_NUMBER, "3º - 1ª", VALID_POSTAL_CODE, VALID_CITY, VALID_COUNTRY);
 
     assertThat(VALIDATOR.validate(request)).isEmpty();
   }
@@ -35,7 +37,7 @@ class AddressRequestTest {
   @ParameterizedTest
   @BlankValuesSource
   void shouldDetectConstraintViolation_whenStreetIsBlank(String blankStreet) {
-    var request = new AddressRequest(blankStreet, VALID_STREET_NUMBER, null, VALID_POSTAL_CODE, VALID_CITY);
+    var request = new AddressRequest(blankStreet, VALID_STREET_NUMBER, null, VALID_POSTAL_CODE, VALID_CITY, VALID_COUNTRY);
 
     assertThat(VALIDATOR.validate(request))
       .hasSize(1)
@@ -46,7 +48,7 @@ class AddressRequestTest {
   @ParameterizedTest
   @BlankValuesSource
   void shouldDetectConstraintViolation_whenStreetNumberIsBlank(String blankStreetNumber) {
-    var request = new AddressRequest(VALID_STREET, blankStreetNumber, null, VALID_POSTAL_CODE, VALID_CITY);
+    var request = new AddressRequest(VALID_STREET, blankStreetNumber, null, VALID_POSTAL_CODE, VALID_CITY, VALID_COUNTRY);
 
     assertThat(VALIDATOR.validate(request))
       .hasSize(1)
@@ -57,7 +59,7 @@ class AddressRequestTest {
   @ParameterizedTest
   @BlankValuesSource
   void shouldDetectConstraintViolation_whenPostalCodeIsBlank(String blankPostalCode) {
-    var request = new AddressRequest(VALID_STREET, VALID_STREET_NUMBER, null, blankPostalCode, VALID_CITY);
+    var request = new AddressRequest(VALID_STREET, VALID_STREET_NUMBER, null, blankPostalCode, VALID_CITY, VALID_COUNTRY);
 
     assertThat(VALIDATOR.validate(request))
       .hasSize(1)
@@ -68,11 +70,34 @@ class AddressRequestTest {
   @ParameterizedTest
   @BlankValuesSource
   void shouldDetectConstraintViolation_whenCityIsBlank(String blankCity) {
-    var request = new AddressRequest(VALID_STREET, VALID_STREET_NUMBER, null, VALID_POSTAL_CODE, blankCity);
+    var request = new AddressRequest(VALID_STREET, VALID_STREET_NUMBER, null, VALID_POSTAL_CODE, blankCity, VALID_COUNTRY);
 
     assertThat(VALIDATOR.validate(request))
       .hasSize(1)
       .first()
       .satisfies(violation -> assertThat(violation.getPropertyPath()).hasToString("city"));
+  }
+
+  @ParameterizedTest
+  @BlankValuesSource
+  void shouldDetectConstraintViolation_whenCountryIsBlank(String blankCountry) {
+    var request = new AddressRequest(VALID_STREET, VALID_STREET_NUMBER, null, VALID_POSTAL_CODE, VALID_CITY, blankCountry);
+
+    assertThat(VALIDATOR.validate(request))
+      .anySatisfy(violation -> assertThat(violation.getPropertyPath()).hasToString("country"));
+  }
+
+  @ParameterizedTest
+  @org.junit.jupiter.params.provider.ValueSource(strings = {"es", "E", "ESP", "E1", " ES "})
+  void shouldDetectConstraintViolation_whenCountryFormatIsInvalid(String invalidCountry) {
+    var request = new AddressRequest(VALID_STREET, VALID_STREET_NUMBER, null, VALID_POSTAL_CODE, VALID_CITY, invalidCountry);
+
+    assertThat(VALIDATOR.validate(request))
+      .singleElement()
+      .satisfies(violation -> assertAll(
+        () -> assertThat(violation.getPropertyPath()).hasToString("country"),
+        () -> assertThat(violation.getMessage())
+          .isEqualTo("must contain exactly two uppercase letters (for example, ES)")
+      ));
   }
 }

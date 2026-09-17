@@ -23,5 +23,9 @@ public record AddressResponse(
 
     @NotBlank
     @Schema(description = "City name.", example = "Barcelona")
-    String city
+    String city,
+
+    @NotBlank
+    @Schema(description = "ISO 3166-1 alpha-2 country code.", example = "ES")
+    String country
 ) {}

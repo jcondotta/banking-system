@@ -49,7 +49,8 @@ class AccountHolderDetailsResponseMapperTest {
       AddressFixtures.BARCELONA_APT.address().streetNumber().value(),
       AddressFixtures.BARCELONA_APT.address().addressComplement().value(),
       AddressFixtures.BARCELONA_APT.address().postalCode().value(),
-      AddressFixtures.BARCELONA_APT.address().city().value()
+      AddressFixtures.BARCELONA_APT.address().city().value(),
+      AddressFixtures.BARCELONA_APT.address().country().isoCode()
     );
 
     var summary = new AccountHolderSummary(ACCOUNT_HOLDER_ID, personalInfo, contactInfo, address, type, CREATED_AT);
@@ -68,6 +69,7 @@ class AccountHolderDetailsResponseMapperTest {
     assertThat(response.address().street()).isEqualTo(address.street());
     assertThat(response.address().postalCode()).isEqualTo(address.postalCode());
     assertThat(response.address().city()).isEqualTo(address.city());
+    assertThat(response.address().country()).isEqualTo(address.country());
     assertThat(response.createdAt()).isEqualTo(CREATED_AT);
   }
 

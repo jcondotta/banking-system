@@ -3,6 +3,7 @@ package com.jcondotta.banking.accounts.integration.bankaccount.add_joint_holder;
 import com.jcondotta.banking.accounts.domain.bankaccount.events.BankAccountActivatedEvent;
 import com.jcondotta.banking.accounts.domain.bankaccount.events.BankAccountJointHolderAddedEvent;
 import com.jcondotta.banking.accounts.domain.bankaccount.events.BankAccountOpenedEvent;
+import com.jcondotta.banking.accounts.domain.bankaccount.identity.BankAccountId;
 import com.jcondotta.banking.accounts.domain.testsupport.AccountTypeAndCurrencySource;
 import com.jcondotta.banking.accounts.domain.bankaccount.enums.AccountType;
 import com.jcondotta.banking.accounts.domain.bankaccount.enums.Currency;
@@ -36,6 +37,7 @@ class AddJointHolderIT extends BankAccountIntegrationSupport {
         assertThat(holder.type()).isEqualTo("JOINT");
         assertThat(holder.personalInfo().firstName()).isEqualTo(AccountHolderFixtures.PATRIZIO.personalInfo().holderName().firstName());
         assertThat(holder.personalInfo().lastName()).isEqualTo(AccountHolderFixtures.PATRIZIO.personalInfo().holderName().lastName());
+        assertThat(holder.address().country()).isEqualTo(AccountHolderFixtures.PATRIZIO.address().country().isoCode());
       });
 
     assertOutboxEvents(
@@ -61,7 +63,7 @@ class AddJointHolderIT extends BankAccountIntegrationSupport {
   @Test
   void shouldReturn404NotFound_whenBankAccountIsNotFound() {
     var response = postJointHolder(
-      com.jcondotta.banking.accounts.domain.bankaccount.identity.BankAccountId.of(UUID.fromString("08d8cf86-bc25-4535-8b88-920c07d3e5fe")),
+      BankAccountId.of(UUID.fromString("08d8cf86-bc25-4535-8b88-920c07d3e5fe")),
       BankAccountRequestFactory.addJointHolder(AccountHolderFixtures.PATRIZIO)
     );
 

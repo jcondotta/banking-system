@@ -26,10 +26,13 @@ public class BankAccountGrpcMapper {
       .setId(summary.id().toString())
       .setAccountType(summary.accountType().name())
       .setCurrency(summary.currency().name())
-      .setIban(summary.iban())
       .setStatus(summary.accountStatus().name())
       .setCreatedAt(toTimestamp(summary.createdAt()))
       .addAllHolders(summary.holders().stream().map(this::toAccountHolder).toList());
+
+    if (summary.iban() != null) {
+      builder.setIban(summary.iban());
+    }
 
     return builder.build();
   }
@@ -74,7 +77,8 @@ public class BankAccountGrpcMapper {
       .setStreet(summary.street())
       .setStreetNumber(summary.streetNumber())
       .setPostalCode(summary.postalCode())
-      .setCity(summary.city());
+      .setCity(summary.city())
+      .setCountry(summary.country());
 
     if (summary.addressComplement() != null) {
       builder.setComplement(summary.addressComplement());

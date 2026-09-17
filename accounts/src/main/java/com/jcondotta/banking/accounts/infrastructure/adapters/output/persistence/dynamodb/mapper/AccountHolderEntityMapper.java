@@ -43,6 +43,7 @@ public interface AccountHolderEntityMapper {
         .orElse(null))
       .postalCode(accountHolder.getAddress().postalCode().value())
       .city(accountHolder.getAddress().city().value())
+      .addressCountry(accountHolder.getAddress().country().isoCode())
       .holderType(accountHolder.getAccountHolderType().name())
       .createdAt(accountHolder.getCreatedAt())
       .build();
@@ -69,7 +70,8 @@ public interface AccountHolderEntityMapper {
       StreetNumber.of(entity.getStreetNumber()),
       entity.getAddressComplement() != null ? AddressComplement.ofNullable(entity.getAddressComplement()) : null,
       PostalCode.of(entity.getPostalCode()),
-      City.of(entity.getCity())
+      City.of(entity.getCity()),
+      Country.of(entity.getAddressCountry())
     );
 
     return AccountHolder.restore(

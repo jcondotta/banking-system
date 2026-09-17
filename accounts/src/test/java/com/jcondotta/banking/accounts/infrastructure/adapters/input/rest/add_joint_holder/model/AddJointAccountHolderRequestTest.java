@@ -32,7 +32,7 @@ class AddJointAccountHolderRequestTest {
   );
 
   private static final AddressRequest VALID_ADDRESS =
-    new AddressRequest("Carrer de Mallorca", "401", null, "08013", "Barcelona");
+    new AddressRequest("Carrer de Mallorca", "401", null, "08013", "Barcelona", "ES");
 
   @Test
   void shouldNotDetectConstraintViolation_whenRequestIsValid() {

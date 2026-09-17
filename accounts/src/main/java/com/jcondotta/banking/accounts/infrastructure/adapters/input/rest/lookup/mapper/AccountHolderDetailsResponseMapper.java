@@ -38,7 +38,8 @@ public interface AccountHolderDetailsResponseMapper {
       addressSummary.streetNumber(),
       addressSummary.addressComplement(),
       addressSummary.postalCode(),
-      addressSummary.city()
+      addressSummary.city(),
+      addressSummary.country()
     );
   }
 
