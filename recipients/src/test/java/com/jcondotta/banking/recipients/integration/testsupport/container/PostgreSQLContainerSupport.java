@@ -1,7 +1,6 @@
 package com.jcondotta.banking.recipients.integration.testsupport.container;
 
 import lombok.extern.slf4j.Slf4j;
-import org.testcontainers.lifecycle.Startables;
 import org.testcontainers.postgresql.PostgreSQLContainer;
 import org.testcontainers.utility.DockerImageName;
 
@@ -26,28 +25,28 @@ public final class PostgreSQLContainerSupport {
       .withNetworkAliases(POSTGRES_NETWORK_ALIAS)
       .withLogConsumer(outputFrame -> log.info(outputFrame.getUtf8StringWithoutLineEnding()));
 
-    static {
-        try {
-            Startables.deepStart(POSTGRES).join();
-            log.info("PostgreSQL JDBC URL: {}", POSTGRES.getJdbcUrl());
-        }
-        catch (Exception e) {
-            log.error("Failed to start PostgreSQL container: {}", e.getMessage());
-            throw new RuntimeException("Failed to start PostgreSQL container", e);
-        }
-    }
-
     private PostgreSQLContainerSupport() {}
 
     public static String jdbcUrl() {
+        RecipientsContainerSupport.start();
         return POSTGRES.getJdbcUrl();
     }
 
     public static String username() {
+        RecipientsContainerSupport.start();
         return POSTGRES.getUsername();
     }
 
     public static String password() {
+        RecipientsContainerSupport.start();
         return POSTGRES.getPassword();
+    }
+
+    static PostgreSQLContainer container() {
+        return POSTGRES;
+    }
+
+    static void logStarted() {
+        log.info("PostgreSQL JDBC URL: {}", POSTGRES.getJdbcUrl());
     }
 }

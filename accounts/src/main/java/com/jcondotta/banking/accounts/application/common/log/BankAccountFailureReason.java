@@ -1,5 +1,6 @@
 package com.jcondotta.banking.accounts.application.common.log;
 
+import com.jcondotta.banking.accounts.application.common.exception.BankAccountOptimisticLockException;
 import com.jcondotta.banking.accounts.domain.bankaccount.exceptions.AccountHolderNotFoundException;
 import com.jcondotta.banking.accounts.domain.bankaccount.exceptions.BankAccountNotActiveException;
 import com.jcondotta.banking.accounts.domain.bankaccount.exceptions.BankAccountNotFoundException;
@@ -17,6 +18,7 @@ public enum BankAccountFailureReason {
   MAX_JOINT_HOLDERS_EXCEEDED,
   ACCOUNT_HOLDER_NOT_FOUND,
   CANNOT_DEACTIVATE_PRIMARY_HOLDER,
+  OPTIMISTIC_LOCK_CONFLICT,
   DOMAIN_ERROR,
   INTERNAL_ERROR;
 
@@ -36,6 +38,7 @@ public enum BankAccountFailureReason {
       case InvalidBankAccountStateTransitionException ignored -> INVALID_STATE_TRANSITION;
       case MaxJointHoldersExceededException ignored -> MAX_JOINT_HOLDERS_EXCEEDED;
       case CannotDeactivatePrimaryHolderException ignored -> CANNOT_DEACTIVATE_PRIMARY_HOLDER;
+      case BankAccountOptimisticLockException ignored -> OPTIMISTIC_LOCK_CONFLICT;
       default -> DOMAIN_ERROR;
     };
   }

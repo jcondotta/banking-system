@@ -1,5 +1,6 @@
 package com.jcondotta.banking.accounts.application.common.log;
 
+import com.jcondotta.banking.accounts.application.common.exception.BankAccountOptimisticLockException;
 import com.jcondotta.banking.accounts.domain.bankaccount.enums.AccountStatus;
 import com.jcondotta.banking.accounts.domain.bankaccount.exceptions.*;
 import com.jcondotta.banking.accounts.domain.bankaccount.identity.AccountHolderId;
@@ -25,6 +26,7 @@ class BankAccountFailureReasonTest {
     "MAX_JOINT_HOLDERS_EXCEEDED, max_joint_holders_exceeded",
     "ACCOUNT_HOLDER_NOT_FOUND, account_holder_not_found",
     "CANNOT_DEACTIVATE_PRIMARY_HOLDER, cannot_deactivate_primary_holder",
+    "OPTIMISTIC_LOCK_CONFLICT, optimistic_lock_conflict",
     "DOMAIN_ERROR, domain_error",
     "INTERNAL_ERROR, internal_error"
   })
@@ -61,7 +63,8 @@ class BankAccountFailureReasonTest {
       Arguments.of(new BankAccountNotActiveException(AccountStatus.PENDING), BankAccountFailureReason.NOT_ACTIVE),
       Arguments.of(new InvalidBankAccountStateTransitionException(AccountStatus.PENDING, AccountStatus.CLOSED), BankAccountFailureReason.INVALID_STATE_TRANSITION),
       Arguments.of(new MaxJointHoldersExceededException(3), BankAccountFailureReason.MAX_JOINT_HOLDERS_EXCEEDED),
-      Arguments.of(new CannotDeactivatePrimaryHolderException(), BankAccountFailureReason.CANNOT_DEACTIVATE_PRIMARY_HOLDER)
+      Arguments.of(new CannotDeactivatePrimaryHolderException(), BankAccountFailureReason.CANNOT_DEACTIVATE_PRIMARY_HOLDER),
+      Arguments.of(new BankAccountOptimisticLockException(BankAccountId.newId()), BankAccountFailureReason.OPTIMISTIC_LOCK_CONFLICT)
     );
   }
 

@@ -1,7 +1,7 @@
 package com.jcondotta.banking.accounts.infrastructure.adapters.output.persistence.dynamodb.repository;
 
 import com.jcondotta.banking.accounts.domain.bankaccount.enums.HolderType;
-import com.jcondotta.banking.accounts.domain.bankaccount.exceptions.BankAccountConcurrentModificationException;
+import com.jcondotta.banking.accounts.application.common.exception.BankAccountOptimisticLockException;
 import com.jcondotta.banking.accounts.domain.bankaccount.identity.BankAccountId;
 import com.jcondotta.banking.accounts.domain.testsupport.AccountHolderFixtures;
 import com.jcondotta.banking.accounts.domain.testsupport.BankAccountTestFactory;
@@ -238,7 +238,7 @@ class BankAccountDynamoDbRepositoryTest {
     }
 
     @Test
-    void shouldThrowBankAccountConcurrentModificationException_whenConditionalCheckFailsOnBankAccountEntity() {
+    void shouldThrowBankAccountOptimisticLockException_whenConditionalCheckFailsOnBankAccountEntity() {
       var account = BankAccountTestFactory.withPrimary(PRIMARY);
       var bankingEntities = List.of(
         BankingEntity.builder().entityType(EntityType.BANK_ACCOUNT).build(),
@@ -255,7 +255,7 @@ class BankAccountDynamoDbRepositoryTest {
       doThrow(exception).when(dynamoDbClient).transactWriteItems(any(TransactWriteItemsEnhancedRequest.class));
 
       assertThatThrownBy(() -> repository.save(account))
-        .isInstanceOf(BankAccountConcurrentModificationException.class);
+        .isInstanceOf(BankAccountOptimisticLockException.class);
     }
 
     @Test

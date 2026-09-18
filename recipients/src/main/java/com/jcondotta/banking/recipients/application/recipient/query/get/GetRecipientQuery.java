@@ -6,10 +6,8 @@ import com.jcondotta.banking.recipients.domain.recipient.identity.RecipientId;
 
 import static java.util.Objects.requireNonNull;
 
-public record GetRecipientQuery(
-  BankAccountId bankAccountId,
-  RecipientId recipientId
-) implements Query<GetRecipientQueryResult> {
+public record GetRecipientQuery(BankAccountId bankAccountId, RecipientId recipientId)
+  implements Query<GetRecipientQueryResult> {
 
   static final String BANK_ACCOUNT_ID_REQUIRED = "bankAccountId must be provided";
   static final String RECIPIENT_ID_REQUIRED = "recipientId must be provided";

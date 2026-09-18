@@ -1,6 +1,6 @@
 package com.jcondotta.banking.accounts.infrastructure.adapters.output.persistence.dynamodb.repository;
 
-import com.jcondotta.banking.accounts.domain.bankaccount.exceptions.BankAccountConcurrentModificationException;
+import com.jcondotta.banking.accounts.application.common.exception.BankAccountOptimisticLockException;
 import com.jcondotta.banking.accounts.domain.bankaccount.value_objects.Iban;
 import com.jcondotta.banking.accounts.infrastructure.adapters.output.persistence.dynamodb.DynamoDbTransactionContext;
 import com.jcondotta.banking.accounts.application.bankaccount.ports.output.TransactionalAppender;
@@ -109,7 +109,7 @@ public class BankAccountDynamoDbRepository implements BankAccountRepository {
     catch (TransactionCanceledException e) {
       var reasons = e.cancellationReasons();
       if (!reasons.isEmpty() && "ConditionalCheckFailed".equals(reasons.get(0).code())) {
-        throw new BankAccountConcurrentModificationException(bankAccount.getId());
+        throw new BankAccountOptimisticLockException(bankAccount.getId());
       }
       throw e;
     }
