@@ -48,6 +48,7 @@ public class BankingEntity {
 
   private String holderType;
   private Instant createdAt;
+  private long version;
 
   @DynamoDbPartitionKey
   public String getPartitionKey() {

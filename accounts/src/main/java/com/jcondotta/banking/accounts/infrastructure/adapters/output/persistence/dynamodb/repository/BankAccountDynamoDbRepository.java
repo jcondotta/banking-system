@@ -1,5 +1,6 @@
 package com.jcondotta.banking.accounts.infrastructure.adapters.output.persistence.dynamodb.repository;
 
+import com.jcondotta.banking.accounts.domain.bankaccount.exceptions.BankAccountConcurrentModificationException;
 import com.jcondotta.banking.accounts.domain.bankaccount.value_objects.Iban;
 import com.jcondotta.banking.accounts.infrastructure.adapters.output.persistence.dynamodb.DynamoDbTransactionContext;
 import com.jcondotta.banking.accounts.application.bankaccount.ports.output.TransactionalAppender;
@@ -15,10 +16,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
+import software.amazon.awssdk.enhanced.dynamodb.Expression;
 import software.amazon.awssdk.enhanced.dynamodb.Key;
 import software.amazon.awssdk.enhanced.dynamodb.model.QueryConditional;
 import software.amazon.awssdk.enhanced.dynamodb.model.QueryEnhancedRequest;
+import software.amazon.awssdk.enhanced.dynamodb.model.TransactPutItemEnhancedRequest;
 import software.amazon.awssdk.enhanced.dynamodb.model.TransactWriteItemsEnhancedRequest;
+import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
+import software.amazon.awssdk.services.dynamodb.model.TransactionCanceledException;
 
 import java.util.List;
 import java.util.Optional;
@@ -85,11 +90,41 @@ public class BankAccountDynamoDbRepository implements BankAccountRepository {
     var builder = TransactWriteItemsEnhancedRequest.builder();
     var transactionContext = new DynamoDbTransactionContext(builder);
 
-    bankAccountEntityMapper.toEntities(bankAccount)
-      .forEach(entity -> transactionContext.addPutItem(bankingTable, entity));
+    var entities = bankAccountEntityMapper.toEntities(bankAccount);
+    var bankAccountEntity = entities.get(0);
+    var holderEntities = entities.subList(1, entities.size());
+
+    builder.addPutItem(bankingTable, TransactPutItemEnhancedRequest.builder(BankingEntity.class)
+      .item(bankAccountEntity)
+      .conditionExpression(buildVersionCondition(bankAccount.getVersion()))
+      .build());
+
+    holderEntities.forEach(entity -> transactionContext.addPutItem(bankingTable, entity));
 
     appenders.forEach(appender -> appender.append(bankAccount, transactionContext));
 
-    dynamoDbClient.transactWriteItems(transactionContext.builder().build());
+    try {
+      dynamoDbClient.transactWriteItems(transactionContext.builder().build());
+    }
+    catch (TransactionCanceledException e) {
+      var reasons = e.cancellationReasons();
+      if (!reasons.isEmpty() && "ConditionalCheckFailed".equals(reasons.get(0).code())) {
+        throw new BankAccountConcurrentModificationException(bankAccount.getId());
+      }
+      throw e;
+    }
+  }
+
+  private static Expression buildVersionCondition(long currentVersion) {
+    if (currentVersion == 0) {
+      return Expression.builder()
+        .expression("attribute_not_exists(sortKey)")
+        .build();
+    }
+    return Expression.builder()
+      .expression("#v = :currentVersion")
+      .putExpressionName("#v", "version")
+      .putExpressionValue(":currentVersion", AttributeValue.fromN(String.valueOf(currentVersion)))
+      .build();
   }
 }

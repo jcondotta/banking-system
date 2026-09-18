@@ -44,7 +44,8 @@ class BankAccountRestoreTest {
       null,
       AccountStatus.PENDING,
       ACCOUNT_CREATED_AT,
-      AccountHolders.of(primaryAccountHolder)
+      AccountHolders.of(primaryAccountHolder),
+      0L
     );
 
     assertThat(bankAccount.getAccountStatus()).isEqualTo(AccountStatus.PENDING);
@@ -63,7 +64,8 @@ class BankAccountRestoreTest {
       VALID_IBAN,
       accountStatus,
       ACCOUNT_CREATED_AT,
-      AccountHolders.of(primaryAccountHolder)
+      AccountHolders.of(primaryAccountHolder),
+      0L
     );
 
     assertThat(bankAccount.getAccountStatus()).isEqualTo(accountStatus);
@@ -82,7 +84,8 @@ class BankAccountRestoreTest {
         VALID_IBAN,
         AccountStatus.PENDING,
         ACCOUNT_CREATED_AT,
-        AccountHolders.of(primaryAccountHolder)
+        AccountHolders.of(primaryAccountHolder),
+      0L
       ))
       .isInstanceOf(InvalidBankAccountIbanConfigurationException.class)
       .hasMessage("Bank account with PENDING status must not have an IBAN");
@@ -103,7 +106,8 @@ class BankAccountRestoreTest {
         null,
         accountStatus,
         ACCOUNT_CREATED_AT,
-        AccountHolders.of(primaryAccountHolder)
+        AccountHolders.of(primaryAccountHolder),
+      0L
       ))
       .isInstanceOf(InvalidBankAccountIbanConfigurationException.class)
       .hasMessage("Bank account with " + accountStatus + " status must have an IBAN");
@@ -122,7 +126,8 @@ class BankAccountRestoreTest {
       VALID_IBAN,
       AccountStatus.ACTIVE,
       ACCOUNT_CREATED_AT,
-      AccountHolders.of(primaryAccountHolder)
+      AccountHolders.of(primaryAccountHolder),
+      0L
     );
 
     assertThat(bankAccount).isNotNull();
@@ -152,7 +157,8 @@ class BankAccountRestoreTest {
       BankAccountTestFixture.VALID_IBAN,
       AccountStatus.ACTIVE,
       ACCOUNT_CREATED_AT,
-      AccountHolders.of(jointAccountHolder, primaryAccountHolder)
+      AccountHolders.of(jointAccountHolder, primaryAccountHolder),
+      0L
     );
 
     assertThat(bankAccount).isNotNull();
@@ -182,7 +188,8 @@ class BankAccountRestoreTest {
       BankAccountTestFixture.VALID_IBAN,
       AccountStatus.ACTIVE,
       ACCOUNT_CREATED_AT,
-      AccountHolders.of(primaryAccountHolder, jointAccountHolder)
+      AccountHolders.of(primaryAccountHolder, jointAccountHolder),
+      0L
     );
 
     jointAccountHolder.deactivate();
@@ -201,7 +208,8 @@ class BankAccountRestoreTest {
         BankAccountTestFixture.VALID_IBAN,
         AccountStatus.ACTIVE,
         ACCOUNT_CREATED_AT,
-        AccountHolders.of()
+        AccountHolders.of(),
+      0L
       ))
       .isInstanceOf(InvalidBankAccountHoldersConfigurationException.class);
   }
@@ -218,7 +226,8 @@ class BankAccountRestoreTest {
         BankAccountTestFixture.VALID_IBAN,
         AccountStatus.ACTIVE,
         ACCOUNT_CREATED_AT,
-        AccountHolders.of(jointAccountHolder)
+        AccountHolders.of(jointAccountHolder),
+      0L
       ))
       .isInstanceOf(InvalidBankAccountHoldersConfigurationException.class);
   }
@@ -236,7 +245,8 @@ class BankAccountRestoreTest {
         BankAccountTestFixture.VALID_IBAN,
         AccountStatus.ACTIVE,
         ACCOUNT_CREATED_AT,
-        AccountHolders.of(primaryAccountHolder1, primaryAccountHolder2)
+        AccountHolders.of(primaryAccountHolder1, primaryAccountHolder2),
+      0L
       ))
       .isInstanceOf(InvalidBankAccountHoldersConfigurationException.class);
   }
@@ -255,7 +265,8 @@ class BankAccountRestoreTest {
         BankAccountTestFixture.VALID_IBAN,
         AccountStatus.ACTIVE,
         ACCOUNT_CREATED_AT,
-        AccountHolders.of(primaryAccountHolder, jointAccountHolder1, jointAccountHolder2)
+        AccountHolders.of(primaryAccountHolder, jointAccountHolder1, jointAccountHolder2),
+      0L
       ))
       .isInstanceOf(MaxJointHoldersExceededException.class);
   }

@@ -19,7 +19,7 @@ public final class BankAccountTestFactory {
 
   public static BankAccount build(BankAccountId id, AccountType accountType, Currency currency, Iban iban,
                                   AccountStatus status, Instant createdAt, AccountHolders accountHolders) {
-    return BankAccount.restore(id, accountType, currency, iban, status, createdAt, accountHolders);
+    return BankAccount.restore(id, accountType, currency, iban, status, createdAt, accountHolders, 0L);
   }
 
   public static BankAccount build(BankAccountId id, AccountType accountType, Currency currency,

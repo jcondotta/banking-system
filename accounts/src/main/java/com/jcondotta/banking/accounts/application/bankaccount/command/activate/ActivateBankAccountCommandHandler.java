@@ -42,8 +42,8 @@ public class ActivateBankAccountCommandHandler implements CommandHandler<Activat
         .orElseThrow(() -> new BankAccountNotFoundException(command.bankAccountId()));
 
       var iban = ibanGenerator.generate();
-      var activatedAccount = bankAccount.activate(iban);
-      bankAccountRepository.save(activatedAccount);
+      bankAccount.activate(iban);
+      bankAccountRepository.save(bankAccount);
 
       logContext.info("Bank account activated")
         .success()

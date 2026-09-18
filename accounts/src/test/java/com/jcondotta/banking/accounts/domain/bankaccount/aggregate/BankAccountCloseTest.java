@@ -75,7 +75,8 @@ class BankAccountCloseTest {
       iban,
       status,
       ACCOUNT_CREATED_AT,
-      AccountHolders.of(primaryAccountHolder)
+      AccountHolders.of(primaryAccountHolder),
+      0L
     );
 
     assertThatThrownBy(bankAccount::close)

@@ -53,7 +53,7 @@ public interface AccountHolderEntityMapper {
     PersonalInfo personalInfo = PersonalInfo.of(
       AccountHolderName.of(entity.getHolderFirstName(), entity.getHolderLastName()),
       IdentityDocument.of(
-        DocumentCountry.SPAIN,
+        DocumentCountry.valueOf(entity.getDocumentCountry()),
         DocumentType.valueOf(entity.getDocumentType()),
         DocumentNumber.of(entity.getDocumentNumber())
       ),

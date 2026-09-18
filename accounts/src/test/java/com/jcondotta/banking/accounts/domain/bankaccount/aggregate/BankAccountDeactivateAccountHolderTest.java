@@ -36,7 +36,8 @@ class BankAccountDeactivateAccountHolderTest {
       BankAccountTestFixture.VALID_IBAN,
       AccountStatus.ACTIVE,
       ACCOUNT_CREATED_AT,
-      AccountHolders.of(primary, joint)
+      AccountHolders.of(primary, joint),
+      0L
     );
 
     bankAccount.deactivateHolder(joint.getId());
@@ -55,7 +56,8 @@ class BankAccountDeactivateAccountHolderTest {
       BankAccountTestFixture.VALID_IBAN,
       AccountStatus.ACTIVE,
       ACCOUNT_CREATED_AT,
-      AccountHolders.of(primary)
+      AccountHolders.of(primary),
+      0L
     );
 
     assertThatThrownBy(() -> bankAccount.deactivateHolder(primary.getId()))
@@ -74,7 +76,8 @@ class BankAccountDeactivateAccountHolderTest {
       BankAccountTestFixture.VALID_IBAN,
       AccountStatus.ACTIVE,
       ACCOUNT_CREATED_AT,
-      AccountHolders.of(primary)
+      AccountHolders.of(primary),
+      0L
     );
 
     assertThatThrownBy(() -> bankAccount.deactivateHolder(AccountHolderId.newId()))

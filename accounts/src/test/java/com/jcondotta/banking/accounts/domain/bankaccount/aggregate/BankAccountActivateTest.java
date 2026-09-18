@@ -36,18 +36,18 @@ class BankAccountActivateTest {
     var bankAccount = BankAccountTestFixture.openPendingAccount(PRIMARY_ACCOUNT_HOLDER);
     bankAccount.pullEvents();
 
-    var activated = bankAccount.activate(VALID_IBAN);
+    bankAccount.activate(VALID_IBAN);
 
-    assertThat(activated.getAccountStatus().isActive()).isTrue();
-    assertThat(activated.getIban()).contains(VALID_IBAN);
+    assertThat(bankAccount.getAccountStatus().isActive()).isTrue();
+    assertThat(bankAccount.getIban()).contains(VALID_IBAN);
 
-    var events = activated.pullEvents();
+    var events = bankAccount.pullEvents();
 
     assertThat(events)
       .hasSize(1)
       .singleElement()
       .isInstanceOfSatisfying(BankAccountActivatedEvent.class, event -> {
-        assertThat(event.aggregateId()).isEqualTo(activated.getId());
+        assertThat(event.aggregateId()).isEqualTo(bankAccount.getId());
         assertThat(event.iban()).isEqualTo(VALID_IBAN.value());
         assertThat(event.currency()).isEqualTo(BankAccountTestFixture.DEFAULT_CURRENCY);
         assertThat(event.occurredAt()).isNotNull();
@@ -58,12 +58,11 @@ class BankAccountActivateTest {
   void shouldNotThrowAnyException_whenActivateIsCalledTwice() {
     var bankAccount = BankAccountTestFixture.openPendingAccount(PRIMARY_ACCOUNT_HOLDER, ACCOUNT_TYPE_SAVINGS, CURRENCY_USD);
 
-    var activated = bankAccount.activate(VALID_IBAN);
-    var activatedAgain = activated.activate(VALID_IBAN);
+    bankAccount.activate(VALID_IBAN);
+    bankAccount.activate(VALID_IBAN);
 
-    assertThat(activatedAgain).isSameAs(activated);
-    assertThat(activatedAgain.getAccountStatus().isActive()).isTrue();
-    assertThat(activatedAgain.getIban()).contains(VALID_IBAN);
+    assertThat(bankAccount.getAccountStatus().isActive()).isTrue();
+    assertThat(bankAccount.getIban()).contains(VALID_IBAN);
   }
 
   @Test
@@ -87,7 +86,8 @@ class BankAccountActivateTest {
       VALID_IBAN,
       status,
       ACCOUNT_CREATED_AT,
-      AccountHolders.of(primaryAccountHolder)
+      AccountHolders.of(primaryAccountHolder),
+      0L
     );
 
     assertThatThrownBy(() -> bankAccount.activate(VALID_IBAN))

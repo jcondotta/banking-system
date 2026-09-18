@@ -1,6 +1,7 @@
 package com.jcondotta.banking.accounts.infrastructure.adapters.output.persistence.dynamodb.repository;
 
 import com.jcondotta.banking.accounts.domain.bankaccount.enums.HolderType;
+import com.jcondotta.banking.accounts.domain.bankaccount.exceptions.BankAccountConcurrentModificationException;
 import com.jcondotta.banking.accounts.domain.bankaccount.identity.BankAccountId;
 import com.jcondotta.banking.accounts.domain.testsupport.AccountHolderFixtures;
 import com.jcondotta.banking.accounts.domain.testsupport.BankAccountTestFactory;
@@ -27,10 +28,13 @@ import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
 import software.amazon.awssdk.enhanced.dynamodb.model.QueryConditional;
 import software.amazon.awssdk.enhanced.dynamodb.model.QueryEnhancedRequest;
 import software.amazon.awssdk.enhanced.dynamodb.model.TransactWriteItemsEnhancedRequest;
+import software.amazon.awssdk.services.dynamodb.model.CancellationReason;
+import software.amazon.awssdk.services.dynamodb.model.TransactionCanceledException;
 
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -231,6 +235,27 @@ class BankAccountDynamoDbRepositoryTest {
 
       verify(transactionalAppender).append(eq(account), any(DynamoDbTransactionContext.class));
       verify(dynamoDbClient).transactWriteItems(any(TransactWriteItemsEnhancedRequest.class));
+    }
+
+    @Test
+    void shouldThrowBankAccountConcurrentModificationException_whenConditionalCheckFailsOnBankAccountEntity() {
+      var account = BankAccountTestFactory.withPrimary(PRIMARY);
+      var bankingEntities = List.of(
+        BankingEntity.builder().entityType(EntityType.BANK_ACCOUNT).build(),
+        BankingEntity.builder().entityType(EntityType.ACCOUNT_HOLDER).build()
+      );
+
+      when(bankAccountEntityMapper.toEntities(account)).thenReturn(bankingEntities);
+
+      var conditionalCheckFailed = CancellationReason.builder().code("ConditionalCheckFailed").build();
+      var exception = TransactionCanceledException.builder()
+        .cancellationReasons(conditionalCheckFailed)
+        .build();
+
+      doThrow(exception).when(dynamoDbClient).transactWriteItems(any(TransactWriteItemsEnhancedRequest.class));
+
+      assertThatThrownBy(() -> repository.save(account))
+        .isInstanceOf(BankAccountConcurrentModificationException.class);
     }
 
     @Test

@@ -37,9 +37,10 @@ public final class BankAccount extends AggregateRoot<BankAccountId> {
   private final Currency currency;
 
   @Nullable
-  private final Iban iban;
+  private Iban iban;
   private final Instant createdAt;
   private final AccountHolders accountHolders;
+  private final long version;
 
   private AccountStatus accountStatus;
 
@@ -50,7 +51,8 @@ public final class BankAccount extends AggregateRoot<BankAccountId> {
     @Nullable Iban iban,
     AccountStatus accountStatus,
     Instant createdAt,
-    AccountHolders accountHolders
+    AccountHolders accountHolders,
+    long version
   ) {
     super(required(id, BankAccountErrors.ID_MUST_BE_PROVIDED));
     this.accountType = required(accountType, BankAccountErrors.ACCOUNT_TYPE_MUST_BE_PROVIDED);
@@ -60,6 +62,7 @@ public final class BankAccount extends AggregateRoot<BankAccountId> {
     this.iban = iban;
     this.createdAt = required(createdAt, BankAccountErrors.CREATED_AT_MUST_BE_PROVIDED);
     this.accountHolders = required(accountHolders, BankAccountErrors.ACCOUNT_HOLDERS_MUST_BE_PROVIDED);
+    this.version = version;
   }
 
   private static void validateIbanConfiguration(@Nullable Iban iban, AccountStatus accountStatus) {
@@ -88,7 +91,8 @@ public final class BankAccount extends AggregateRoot<BankAccountId> {
       IBAN_ON_OPENING,
       ACCOUNT_STATUS_ON_OPENING,
       now,
-      AccountHolders.of(primaryHolder)
+      AccountHolders.of(primaryHolder),
+      0L
     );
 
     bankAccount.registerEvent(
@@ -112,7 +116,8 @@ public final class BankAccount extends AggregateRoot<BankAccountId> {
     @Nullable Iban iban,
     AccountStatus accountStatus,
     Instant createdAt,
-    AccountHolders accountHolders
+    AccountHolders accountHolders,
+    long version
   ) {
     return new BankAccount(
       bankAccountId,
@@ -121,24 +126,25 @@ public final class BankAccount extends AggregateRoot<BankAccountId> {
       iban,
       accountStatus,
       createdAt,
-      accountHolders
+      accountHolders,
+      version
     );
   }
 
-  public BankAccount activate(Iban iban) {
+  public void activate(Iban iban) {
     required(iban, BankAccountErrors.IBAN_MUST_BE_PROVIDED);
 
     if (accountStatus == AccountStatus.ACTIVE) {
-      return this;
+      return;
     }
 
     if (accountStatus != AccountStatus.PENDING) {
       throw new InvalidBankAccountStateTransitionException(accountStatus, AccountStatus.ACTIVE);
     }
 
-    var activated = new BankAccount(getId(), accountType, currency, iban, AccountStatus.ACTIVE, createdAt, accountHolders);
-    activated.registerEvent(new BankAccountActivatedEvent(EventId.newId(), activated.getId(), iban, currency, Instant.now()));
-    return activated;
+    this.iban = iban;
+    this.accountStatus = AccountStatus.ACTIVE;
+    registerEvent(new BankAccountActivatedEvent(EventId.newId(), getId(), iban, currency, Instant.now()));
   }
 
   public void block() {
@@ -229,5 +235,9 @@ public final class BankAccount extends AggregateRoot<BankAccountId> {
 
   public List<AccountHolder> getActiveHolders() {
     return accountHolders.active();
+  }
+
+  public long getVersion() {
+    return version;
   }
 }
