@@ -9,8 +9,8 @@ import com.jcondotta.banking.accounts.domain.bankaccount.events.BankAccountJoint
 import com.jcondotta.banking.accounts.domain.bankaccount.events.BankAccountOpenedEvent;
 import com.jcondotta.banking.accounts.domain.bankaccount.events.BankAccountStatusChangedEvent;
 import com.jcondotta.banking.accounts.domain.bankaccount.exceptions.BankAccountNotActiveException;
-import com.jcondotta.banking.accounts.domain.bankaccount.exceptions.InvalidBankAccountIbanConfigurationException;
 import com.jcondotta.banking.accounts.domain.bankaccount.exceptions.InvalidBankAccountStateTransitionException;
+import com.jcondotta.banking.accounts.domain.bankaccount.policies.BankAccountIbanPolicy;
 import com.jcondotta.banking.accounts.domain.bankaccount.identity.AccountHolderId;
 import com.jcondotta.banking.accounts.domain.bankaccount.identity.BankAccountId;
 import com.jcondotta.banking.accounts.domain.bankaccount.validation.BankAccountErrors;
@@ -58,19 +58,11 @@ public final class BankAccount extends AggregateRoot<BankAccountId> {
     this.accountType = required(accountType, BankAccountErrors.ACCOUNT_TYPE_MUST_BE_PROVIDED);
     this.currency = required(currency, BankAccountErrors.CURRENCY_MUST_BE_PROVIDED);
     this.accountStatus = required(accountStatus, BankAccountErrors.ACCOUNT_STATUS_MUST_BE_PROVIDED);
-    validateIbanConfiguration(iban, this.accountStatus);
+    BankAccountIbanPolicy.validate(iban, this.accountStatus);
     this.iban = iban;
     this.createdAt = required(createdAt, BankAccountErrors.CREATED_AT_MUST_BE_PROVIDED);
     this.accountHolders = required(accountHolders, BankAccountErrors.ACCOUNT_HOLDERS_MUST_BE_PROVIDED);
     this.version = version;
-  }
-
-  private static void validateIbanConfiguration(@Nullable Iban iban, AccountStatus accountStatus) {
-    var hasIban = iban != null;
-
-    if (accountStatus.isPending() == hasIban) {
-      throw new InvalidBankAccountIbanConfigurationException(accountStatus);
-    }
   }
 
   public static BankAccount open(
