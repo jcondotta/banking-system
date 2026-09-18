@@ -22,7 +22,9 @@ class RecipientDeletedRoutingResolverTest {
   private static final Instant OCCURRED_AT = Instant.parse("2026-01-01T00:00:00Z");
   private static final KafkaTopicsProperties TOPICS_PROPERTIES = new KafkaTopicsProperties(
       new TopicConfig("custom-recipient-created"),
-      new TopicConfig("custom-recipient-deleted")
+      new TopicConfig("custom-recipient-deleted"),
+      new TopicConfig("bank-account-activated"),
+      new TopicConfig("bank-account-status-changed")
   );
 
   @Test

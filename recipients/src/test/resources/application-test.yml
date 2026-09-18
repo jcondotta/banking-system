@@ -6,8 +6,15 @@ app:
         topic-name: recipients-created
       recipient-deleted:
         topic-name: recipients-deleted
+      bank-account-activated:
+        topic-name: bank-account-activated
+      bank-account-status-changed:
+        topic-name: bank-account-status-changed
 
 spring:
+  kafka:
+    listener:
+      auto-startup: false
   output:
     ansi:
       enabled: always

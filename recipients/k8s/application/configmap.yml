@@ -8,4 +8,6 @@ data:
   SPRING_DATASOURCE_URL: "jdbc:postgresql://recipients-postgres:5432/recipients_db?connectTimeout=3&socketTimeout=30"
   KAFKA_RECIPIENT_CREATED_TOPIC_NAME: "recipients-created"
   KAFKA_RECIPIENT_DELETED_TOPIC_NAME: "recipients-deleted"
+  KAFKA_BANK_ACCOUNT_ACTIVATED_TOPIC_NAME: "bank-account-activated"
+  KAFKA_BANK_ACCOUNT_STATUS_CHANGED_TOPIC_NAME: "bank-account-status-changed"
   MANAGEMENT_OTLP_METRICS_EXPORT_ENABLED: "false"

@@ -37,7 +37,9 @@ class RecipientKafkaEventPublisherContextTest {
     var event = recipientCreatedEvent();
     var topicsProperties = new KafkaTopicsProperties(
       new TopicConfig("recipients-created"),
-      new TopicConfig("recipients-deleted")
+      new TopicConfig("recipients-deleted"),
+      new TopicConfig("bank-account-activated"),
+      new TopicConfig("bank-account-status-changed")
     );
     var routing = new RecipientCreatedRoutingResolver(topicsProperties).resolve(event);
     var publicationRegistry = mock(EventPublicationRegistry.class);

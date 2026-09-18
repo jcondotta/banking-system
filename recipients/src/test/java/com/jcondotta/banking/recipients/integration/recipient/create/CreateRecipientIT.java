@@ -1,7 +1,13 @@
 package com.jcondotta.banking.recipients.integration.recipient.create;
 
 import com.jcondotta.banking.infrastructure.adapters.input.rest.http.HttpHeadersConstants;
+import com.jcondotta.banking.recipients.domain.bank_account.BankAccount;
+import com.jcondotta.banking.recipients.domain.bank_account.enums.BankAccountStatus;
+import com.jcondotta.banking.recipients.domain.bank_account.exceptions.BankAccountNotActiveException;
+import com.jcondotta.banking.recipients.domain.bank_account.exceptions.BankAccountNotFoundException;
+import com.jcondotta.banking.recipients.domain.bank_account.repository.BankAccountRepository;
 import com.jcondotta.banking.recipients.domain.recipient.exceptions.DuplicateRecipientIbanException;
+import com.jcondotta.banking.recipients.domain.recipient.identity.BankAccountId;
 import com.jcondotta.banking.recipients.domain.recipient.identity.RecipientId;
 import com.jcondotta.banking.recipients.domain.recipient.repository.RecipientRepository;
 import com.jcondotta.banking.recipients.domain.recipient.value_objects.Iban;
@@ -10,6 +16,7 @@ import com.jcondotta.banking.recipients.domain.testsupport.BlankValuesSource;
 import com.jcondotta.banking.recipients.domain.testsupport.RecipientFixtures;
 import com.jcondotta.banking.recipients.infrastructure.adapters.input.rest.create_recipient.model.CreateRecipientRestRequest;
 import com.jcondotta.banking.recipients.infrastructure.adapters.input.rest.properties.RecipientsURIProperties;
+import com.jcondotta.banking.recipients.infrastructure.adapters.output.persistence.repository.RecipientEntityRepository;
 import com.jcondotta.banking.recipients.integration.testsupport.annotation.IntegrationTest;
 import io.restassured.RestAssured;
 import io.restassured.builder.RequestSpecBuilder;
@@ -21,6 +28,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.NullSource;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.HttpHeaders;
@@ -49,6 +57,12 @@ class CreateRecipientIT {
   private RecipientRepository recipientRepository;
 
   @Autowired
+  private BankAccountRepository bankAccountRepository;
+
+  @Autowired
+  private RecipientEntityRepository recipientEntityRepository;
+
+  @Autowired
   private RecipientsURIProperties uriProperties;
 
   private UUID bankAccountId;
@@ -66,6 +80,7 @@ class CreateRecipientIT {
     RestAssured.port = port;
 
     bankAccountId = UUID.randomUUID();
+    bankAccountRepository.registerIfAbsent(BankAccount.active(BankAccountId.of(bankAccountId)));
     requestSpecification = buildRequestSpecification();
   }
 
@@ -129,6 +144,37 @@ class CreateRecipientIT {
     assertThat(conflictResponse.statusCode()).isEqualTo(HttpStatus.CONFLICT.value());
     var problemDetail = conflictResponse.as(ProblemDetail.class);
     assertThat(problemDetail.getDetail()).isEqualTo(DuplicateRecipientIbanException.MESSAGE);
+  }
+
+  @Test
+  void shouldReturn404NotFoundAndNotPersistRecipient_whenBankAccountDoesNotExist() {
+    var unknownBankAccountId = UUID.randomUUID();
+    var countBefore = recipientEntityRepository.count();
+
+    var response = postRecipient(
+      unknownBankAccountId,
+      new CreateRecipientRestRequest(RECIPIENT_NAME, RECIPIENT_IBAN)
+    );
+
+    assertThat(response.statusCode()).isEqualTo(HttpStatus.NOT_FOUND.value());
+    assertThat(response.as(ProblemDetail.class).getDetail()).isEqualTo(BankAccountNotFoundException.MESSAGE);
+    assertThat(recipientEntityRepository.count()).isEqualTo(countBefore);
+  }
+
+  @ParameterizedTest
+  @EnumSource(value = BankAccountStatus.class, names = "ACTIVE", mode = EnumSource.Mode.EXCLUDE)
+  void shouldReturn422AndNotPersistRecipient_whenBankAccountIsNotActive(BankAccountStatus status) {
+    bankAccountRepository.save(new BankAccount(BankAccountId.of(bankAccountId), status));
+    var countBefore = recipientEntityRepository.count();
+
+    var response = postRecipient(
+      bankAccountId,
+      new CreateRecipientRestRequest(RECIPIENT_NAME, RECIPIENT_IBAN)
+    );
+
+    assertThat(response.statusCode()).isEqualTo(HttpStatus.UNPROCESSABLE_CONTENT.value());
+    assertThat(response.as(ProblemDetail.class).getDetail()).isEqualTo(BankAccountNotActiveException.MESSAGE);
+    assertThat(recipientEntityRepository.count()).isEqualTo(countBefore);
   }
 
   @ParameterizedTest

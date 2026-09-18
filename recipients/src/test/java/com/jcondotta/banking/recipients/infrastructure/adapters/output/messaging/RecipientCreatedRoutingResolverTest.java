@@ -23,7 +23,9 @@ class RecipientCreatedRoutingResolverTest {
 
   private static final KafkaTopicsProperties TOPICS_PROPERTIES = new KafkaTopicsProperties(
       new TopicConfig("custom-recipient-created"),
-      new TopicConfig("custom-recipient-deleted")
+      new TopicConfig("custom-recipient-deleted"),
+      new TopicConfig("bank-account-activated"),
+      new TopicConfig("bank-account-status-changed")
   );
 
   private final RecipientCreatedRoutingResolver resolver = new RecipientCreatedRoutingResolver(TOPICS_PROPERTIES);

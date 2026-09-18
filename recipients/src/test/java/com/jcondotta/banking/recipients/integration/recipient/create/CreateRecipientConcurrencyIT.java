@@ -1,6 +1,9 @@
 package com.jcondotta.banking.recipients.integration.recipient.create;
 
 import com.jcondotta.banking.infrastructure.adapters.input.rest.http.HttpHeadersConstants;
+import com.jcondotta.banking.recipients.domain.bank_account.BankAccount;
+import com.jcondotta.banking.recipients.domain.bank_account.repository.BankAccountRepository;
+import com.jcondotta.banking.recipients.domain.recipient.identity.BankAccountId;
 import com.jcondotta.banking.recipients.domain.testsupport.RecipientFixtures;
 import com.jcondotta.banking.recipients.infrastructure.adapters.input.rest.create_recipient.model.CreateRecipientRestRequest;
 import com.jcondotta.banking.recipients.infrastructure.adapters.input.rest.properties.RecipientsURIProperties;
@@ -46,6 +49,9 @@ class CreateRecipientConcurrencyIT {
   @Autowired
   private RecipientsURIProperties uriProperties;
 
+  @Autowired
+  private BankAccountRepository bankAccountRepository;
+
   @Value("${app.concurrency.recipients.create.limit}")
   private int createRecipientConcurrencyLimit;
 
@@ -63,6 +69,7 @@ class CreateRecipientConcurrencyIT {
     RestAssured.port = port;
 
     bankAccountId = UUID.randomUUID();
+    bankAccountRepository.registerIfAbsent(BankAccount.active(BankAccountId.of(bankAccountId)));
     requestSpecification = buildRequestSpecification();
   }
 
@@ -82,9 +89,16 @@ class CreateRecipientConcurrencyIT {
       return invocationOnMock.callRealMethod();
     }).when(clock).instant();
 
+    var concurrentAccountIds = IntStream.range(0, createRecipientConcurrencyLimit)
+      .mapToObj(i -> UUID.randomUUID())
+      .toList();
+    concurrentAccountIds.forEach(id ->
+      bankAccountRepository.registerIfAbsent(BankAccount.active(BankAccountId.of(id)))
+    );
+
     try (var scope = StructuredTaskScope.open()) {
-      var concurrentCreateTasks = IntStream.range(0, createRecipientConcurrencyLimit)
-        .mapToObj(i -> scope.fork(() -> postRecipient(UUID.randomUUID(), restRequest)))
+      var concurrentCreateTasks = concurrentAccountIds.stream()
+        .map(id -> scope.fork(() -> postRecipient(id, restRequest)))
         .toList();
 
       assertThat(allSlotsOccupied.await(2, TimeUnit.SECONDS))

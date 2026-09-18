@@ -1,6 +1,9 @@
 package com.jcondotta.banking.recipients.application.common.log;
 
 import com.jcondotta.banking.recipients.application.common.exception.RecipientOptimisticLockException;
+import com.jcondotta.banking.recipients.domain.bank_account.enums.BankAccountStatus;
+import com.jcondotta.banking.recipients.domain.bank_account.exceptions.BankAccountNotActiveException;
+import com.jcondotta.banking.recipients.domain.bank_account.exceptions.BankAccountNotFoundException;
 import com.jcondotta.banking.recipients.domain.recipient.exceptions.DuplicateRecipientIbanException;
 import com.jcondotta.banking.recipients.domain.recipient.exceptions.RecipientNotFoundException;
 import com.jcondotta.banking.recipients.domain.recipient.identity.BankAccountId;
@@ -23,6 +26,8 @@ class RecipientFailureReasonTest {
   @ParameterizedTest
   @CsvSource({
     "DUPLICATE_IBAN,duplicate_iban",
+    "BANK_ACCOUNT_NOT_FOUND,bank_account_not_found",
+    "BANK_ACCOUNT_NOT_ACTIVE,bank_account_not_active",
     "NOT_FOUND,not_found",
     "OPTIMISTIC_LOCK_CONFLICT,optimistic_lock_conflict",
     "DOMAIN_ERROR,domain_error",
@@ -47,6 +52,20 @@ class RecipientFailureReasonTest {
     var exception = new RecipientNotFoundException(RECIPIENT_ID, BANK_ACCOUNT_ID);
 
     assertThat(RecipientFailureReason.from(exception)).isEqualTo(RecipientFailureReason.NOT_FOUND);
+  }
+
+  @Test
+  void shouldResolveBankAccountNotFoundReason_whenBankAccountNotFoundExceptionIsProvided() {
+    var exception = new BankAccountNotFoundException(BANK_ACCOUNT_ID);
+
+    assertThat(RecipientFailureReason.from(exception)).isEqualTo(RecipientFailureReason.BANK_ACCOUNT_NOT_FOUND);
+  }
+
+  @Test
+  void shouldResolveBankAccountNotActiveReason_whenBankAccountNotActiveExceptionIsProvided() {
+    var exception = new BankAccountNotActiveException(BankAccountStatus.BLOCKED);
+
+    assertThat(RecipientFailureReason.from(exception)).isEqualTo(RecipientFailureReason.BANK_ACCOUNT_NOT_ACTIVE);
   }
 
   @Test

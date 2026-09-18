@@ -25,6 +25,11 @@ spring:
 
   kafka:
     bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    consumer:
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.ByteArrayDeserializer
+      auto-offset-reset: earliest
+      enable-auto-commit: false
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.apache.kafka.common.serialization.ByteArraySerializer
@@ -44,6 +49,8 @@ spring:
 
 app:
   kafka:
+    consumer:
+      group-id: recipients-bank-account-projector
     publisher:
       publish-timeout: ${KAFKA_PUBLISH_TIMEOUT:5s}
     topics:
@@ -51,6 +58,10 @@ app:
         topic-name: ${KAFKA_RECIPIENT_CREATED_TOPIC_NAME}
       recipient-deleted:
         topic-name: ${KAFKA_RECIPIENT_DELETED_TOPIC_NAME}
+      bank-account-activated:
+        topic-name: ${KAFKA_BANK_ACCOUNT_ACTIVATED_TOPIC_NAME}
+      bank-account-status-changed:
+        topic-name: ${KAFKA_BANK_ACCOUNT_STATUS_CHANGED_TOPIC_NAME}
   concurrency:
     recipients:
       create:

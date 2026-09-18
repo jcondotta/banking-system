@@ -8,6 +8,11 @@ import com.jcondotta.banking.recipients.application.common.log.RecipientLogKey;
 import com.jcondotta.application.logging.LogOutcome;
 import com.jcondotta.banking.recipients.application.common.log.RecipientOperation;
 import com.jcondotta.application.logging.StructuredLogEventSupport;
+import com.jcondotta.banking.recipients.domain.bank_account.BankAccount;
+import com.jcondotta.banking.recipients.domain.bank_account.enums.BankAccountStatus;
+import com.jcondotta.banking.recipients.domain.bank_account.exceptions.BankAccountNotActiveException;
+import com.jcondotta.banking.recipients.domain.bank_account.exceptions.BankAccountNotFoundException;
+import com.jcondotta.banking.recipients.domain.bank_account.repository.BankAccountRepository;
 import com.jcondotta.banking.recipients.domain.recipient.aggregate.Recipient;
 import com.jcondotta.banking.recipients.domain.recipient.events.RecipientCreatedEvent;
 import com.jcondotta.banking.recipients.domain.recipient.exceptions.DuplicateRecipientIbanException;
@@ -23,6 +28,8 @@ import com.jcondotta.domain.events.DomainEvent;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
@@ -55,6 +62,9 @@ class CreateRecipientCommandHandlerTest {
   @Mock
   private RecipientEventPublisher recipientEventPublisher;
 
+  @Mock
+  private BankAccountRepository bankAccountRepository;
+
   @Captor
   private ArgumentCaptor<List<DomainEvent<?, ?>>> eventsCaptor;
 
@@ -67,7 +77,14 @@ class CreateRecipientCommandHandlerTest {
 
   @BeforeEach
   void setUp() {
-    commandHandler = new CreateRecipientCommandHandler(recipientRepository, recipientEventPublisher, CLOCK);
+    lenient().when(bankAccountRepository.findById(BANK_ACCOUNT_ID))
+      .thenReturn(java.util.Optional.of(BankAccount.active(BANK_ACCOUNT_ID)));
+    commandHandler = new CreateRecipientCommandHandler(
+      recipientRepository,
+      recipientEventPublisher,
+      bankAccountRepository,
+      CLOCK
+    );
     logAppender = StructuredLogEventSupport.attachAppender(CreateRecipientCommandHandler.class);
   }
 
@@ -143,6 +160,36 @@ class CreateRecipientCommandHandlerTest {
 
     verify(recipientRepository).save(recipientCaptor.capture());
     assertThat(recipientId).isEqualTo(recipientCaptor.getValue().getId());
+  }
+
+  @Test
+  void shouldRejectCreation_whenBankAccountDoesNotExist() {
+    when(bankAccountRepository.findById(BANK_ACCOUNT_ID)).thenReturn(java.util.Optional.empty());
+    var command = new CreateRecipientCommand(BANK_ACCOUNT_ID, RECIPIENT_NAME, IBAN);
+
+    assertThatThrownBy(() -> commandHandler.handle(command))
+      .isInstanceOf(BankAccountNotFoundException.class);
+
+    verify(bankAccountRepository).findById(BANK_ACCOUNT_ID);
+    verifyNoInteractions(recipientRepository, recipientEventPublisher);
+    assertThat(StructuredLogEventSupport.lastEventKeyValues(logAppender))
+      .containsEntry(LogKey.REASON, "bank_account_not_found");
+  }
+
+  @ParameterizedTest
+  @EnumSource(value = BankAccountStatus.class, names = "ACTIVE", mode = EnumSource.Mode.EXCLUDE)
+  void shouldRejectCreation_whenBankAccountIsNotActive(BankAccountStatus status) {
+    when(bankAccountRepository.findById(BANK_ACCOUNT_ID))
+      .thenReturn(java.util.Optional.of(new BankAccount(BANK_ACCOUNT_ID, status)));
+    var command = new CreateRecipientCommand(BANK_ACCOUNT_ID, RECIPIENT_NAME, IBAN);
+
+    assertThatThrownBy(() -> commandHandler.handle(command))
+      .isInstanceOf(BankAccountNotActiveException.class);
+
+    verify(bankAccountRepository).findById(BANK_ACCOUNT_ID);
+    verifyNoInteractions(recipientRepository, recipientEventPublisher);
+    assertThat(StructuredLogEventSupport.lastEventKeyValues(logAppender))
+      .containsEntry(LogKey.REASON, "bank_account_not_active");
   }
 
   @Test

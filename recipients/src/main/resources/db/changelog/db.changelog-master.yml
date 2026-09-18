@@ -5,3 +5,5 @@ databaseChangeLog:
       file: db/changelog/changes/0002-create-recipients-indexes.sql
   - include:
       file: db/changelog/changes/0003-limit-recipient-name-length.sql
+  - include:
+      file: db/changelog/changes/0004-create-bank-accounts-table.sql

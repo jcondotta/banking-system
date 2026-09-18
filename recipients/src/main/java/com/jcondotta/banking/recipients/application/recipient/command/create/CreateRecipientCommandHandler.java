@@ -6,6 +6,9 @@ import com.jcondotta.application.logging.LogKey;
 import com.jcondotta.banking.recipients.application.common.log.RecipientLogKey;
 import com.jcondotta.banking.recipients.application.common.log.RecipientOperation;
 import com.jcondotta.banking.recipients.application.common.log.RecipientFailureReason;
+import com.jcondotta.banking.recipients.domain.bank_account.exceptions.BankAccountNotActiveException;
+import com.jcondotta.banking.recipients.domain.bank_account.exceptions.BankAccountNotFoundException;
+import com.jcondotta.banking.recipients.domain.bank_account.repository.BankAccountRepository;
 import com.jcondotta.banking.recipients.domain.recipient.aggregate.Recipient;
 import com.jcondotta.banking.recipients.domain.recipient.identity.RecipientId;
 import com.jcondotta.banking.recipients.domain.recipient.repository.RecipientRepository;
@@ -27,15 +30,18 @@ public class CreateRecipientCommandHandler implements CommandHandlerWithResult<C
 
   private final RecipientRepository recipientRepository;
   private final RecipientEventPublisher recipientEventPublisher;
+  private final BankAccountRepository bankAccountRepository;
   private final Clock clock;
 
   public CreateRecipientCommandHandler(
     RecipientRepository recipientRepository,
     RecipientEventPublisher recipientEventPublisher,
+    BankAccountRepository bankAccountRepository,
     Clock clock
   ) {
     this.recipientRepository = recipientRepository;
     this.recipientEventPublisher = recipientEventPublisher;
+    this.bankAccountRepository = bankAccountRepository;
     this.clock = clock;
   }
 
@@ -54,6 +60,13 @@ public class CreateRecipientCommandHandler implements CommandHandlerWithResult<C
       .with(RecipientLogKey.BANK_ACCOUNT_ID, command.bankAccountId().asString());
 
     try {
+      var bankAccount = bankAccountRepository.findById(command.bankAccountId())
+        .orElseThrow(() -> new BankAccountNotFoundException(command.bankAccountId()));
+
+      if (!bankAccount.isActive()) {
+        throw new BankAccountNotActiveException(bankAccount.status());
+      }
+
       var recipient = Recipient.create(
         RecipientId.newId(),
         command.bankAccountId(),
