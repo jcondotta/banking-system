@@ -2,6 +2,44 @@
 
 All notable changes to the accounts service are documented in this file.
 
+## Future Improvements
+
+- Add end-to-end gRPC integration tests covering the running server, protobuf serialization, and gRPC status mapping.
+- Add an end-to-end transactional-outbox integration test covering event persistence, worker processing, Kafka publication, and outbox completion.
+- Add an integration test exercising optimistic locking through concurrent updates against DynamoDB.
+- Guarantee IBAN uniqueness during account activation and handle generated IBAN collisions.
+- Align the configurable IBAN GSI name with the fixed `gsi-iban` DynamoDB schema annotation.
+- Clean up the protobuf Maven configuration to remove the unsupported-parameter warning and duplicate `generate` execution.
+
+## 2.1.0 - 2026-10-02
+
+### Added
+
+- gRPC `BankAccountLookupService` v1 with bank account lookup by ID and IBAN, reusing the existing query handlers and mapping failures to `INVALID_ARGUMENT`, `NOT_FOUND`, and `INTERNAL` statuses.
+- `BankAccountActivated` integration event with dedicated Kafka routing, carrying the assigned IBAN and account currency.
+- Optimistic concurrency control for DynamoDB aggregate writes using persisted versions, conditional transactional writes, and conflict reporting through `BankAccountOptimisticLockException`.
+- ISO 3166-1 alpha-2 country support for account-holder addresses across domain, REST, gRPC, query models, and DynamoDB persistence.
+
+### Changed
+
+- Bank accounts are now opened in `PENDING` status without an IBAN; the IBAN is generated and assigned during activation.
+- Enforced consistency between account status and IBAN: pending accounts must not have an IBAN, while activated and subsequent states must have one.
+- Activation now emits `BankAccountActivated` instead of the generic `BankAccountStatusChanged` event.
+- Bank account lookup by IBAN now uses the DynamoDB `gsi-iban` global secondary index.
+- Refactored the accounts outbox implementation to use the shared `outbox-infrastructure` module while retaining accounts-specific DynamoDB storage, event routing, worker wiring, and the operational kill switch.
+- Address country is now mandatory in account-opening and joint-holder REST requests and is returned by REST and gRPC lookup responses.
+
+### Breaking Changes
+
+- Existing REST clients must provide `address.country` as a two-letter uppercase country code.
+- Consumers that previously interpreted activation through `BankAccountStatusChanged` must consume the new `BankAccountActivated` event.
+- Newly opened pending accounts no longer expose an IBAN until activation.
+
+### Verified
+
+- `../mvnw test` passes with 635 unit tests.
+- `../mvnw verify` passes, including 62 integration tests.
+
 ## 2.0.0 - 2026-09-03
 
 ### Added
