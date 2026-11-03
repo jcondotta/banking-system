@@ -10,6 +10,7 @@ import com.jcondotta.banking.accounts.domain.bankaccount.exceptions.BankAccountN
 import com.jcondotta.banking.accounts.domain.bankaccount.repository.BankAccountRepository;
 import com.jcondotta.banking.accounts.application.common.log.BankAccountFailureReason;
 import com.jcondotta.banking.accounts.application.bankaccount.services.IbanGenerator;
+import com.jcondotta.banking.accounts.domain.bankaccount.enums.BankAccountActivationResult;
 import com.jcondotta.domain.exception.DomainException;
 import io.micrometer.observation.annotation.Observed;
 import lombok.RequiredArgsConstructor;
@@ -42,12 +43,22 @@ public class ActivateBankAccountCommandHandler implements CommandHandler<Activat
         .orElseThrow(() -> new BankAccountNotFoundException(command.bankAccountId()));
 
       var iban = ibanGenerator.generate();
-      bankAccount.activate(iban);
-      bankAccountRepository.save(bankAccount);
+      var activationResult = bankAccount.activate(iban);
 
-      logContext.info("Bank account activated")
-        .success()
-        .log();
+      if (activationResult == BankAccountActivationResult.ACTIVATED) {
+        bankAccountRepository.save(bankAccount);
+
+        logContext.info("Bank account activated")
+          .success()
+          .with(BankAccountLogKey.ACTIVATION_RESULT, "activated")
+          .log();
+      }
+      else {
+        logContext.info("Bank account activation skipped; account already active")
+          .success()
+          .with(BankAccountLogKey.ACTIVATION_RESULT, "already_active")
+          .log();
+      }
     }
     catch (DomainException ex) {
       var reason = BankAccountFailureReason.from(ex);

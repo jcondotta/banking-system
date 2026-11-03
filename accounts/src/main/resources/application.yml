@@ -76,13 +76,13 @@ cloud:
           table-name: ${AWS_DYNAMODB_BANK_ACCOUNTS_TABLE_NAME}
           indexes:
             gsi1:
-              name: ${AWS_DYNAMODB_BANK_ACCOUNTS_GSI1_NAME:gsi-iban}
+              name: ${AWS_DYNAMODB_BANK_ACCOUNTS_GSI1_NAME}
 
         outbox:
           table-name: ${AWS_DYNAMODB_BANK_ACCOUNTS_TABLE_NAME}
           indexes:
             gsi1:
-              name: ${AWS_DYNAMODB_OUTBOX_GSI1_NAME:gsi-outbox-status}
+              name: ${AWS_DYNAMODB_OUTBOX_GSI1_NAME}
 
 api:
   bank-accounts:

@@ -33,10 +33,7 @@ class ActivateBankAccountIT extends BankAccountIntegrationSupport {
 
   @ParameterizedTest
   @AccountTypeAndCurrencySource
-  void shouldReturn204NoContentAndActivateBankAccount_whenBankAccountIsPending(
-    AccountType accountType,
-    Currency currency
-  ) {
+  void shouldReturn204NoContentAndActivateBankAccount_whenBankAccountIsPending(AccountType accountType, Currency currency) {
     var id = openBankAccount(accountType, currency);
     var correlationId = UUID.randomUUID();
 

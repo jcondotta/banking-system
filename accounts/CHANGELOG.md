@@ -4,6 +4,8 @@ All notable changes to the accounts service are documented in this file.
 
 ## Future Improvements
 
+- Define and implement idempotency for bank account commands, including retry-safe account opening, state transitions, and joint-holder creation.
+- Add account search by account-holder document and flexible filters using an OpenSearch read model, including projection updates and reindexing support.
 - Add end-to-end gRPC integration tests covering the running server, protobuf serialization, and gRPC status mapping.
 - Add an integration test exercising optimistic locking through concurrent updates against DynamoDB.
 - Guarantee IBAN uniqueness during account activation and handle generated IBAN collisions.

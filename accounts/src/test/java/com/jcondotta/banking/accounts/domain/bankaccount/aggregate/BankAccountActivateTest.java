@@ -2,6 +2,7 @@ package com.jcondotta.banking.accounts.domain.bankaccount.aggregate;
 
 import com.jcondotta.banking.accounts.domain.bankaccount.enums.AccountStatus;
 import com.jcondotta.banking.accounts.domain.bankaccount.enums.AccountType;
+import com.jcondotta.banking.accounts.domain.bankaccount.enums.BankAccountActivationResult;
 import com.jcondotta.banking.accounts.domain.bankaccount.enums.Currency;
 import com.jcondotta.banking.accounts.domain.bankaccount.events.BankAccountActivatedEvent;
 import com.jcondotta.banking.accounts.domain.bankaccount.exceptions.InvalidBankAccountStateTransitionException;
@@ -36,8 +37,9 @@ class BankAccountActivateTest {
     var bankAccount = BankAccountTestFixture.openPendingAccount(PRIMARY_ACCOUNT_HOLDER);
     bankAccount.pullEvents();
 
-    bankAccount.activate(VALID_IBAN);
+    var result = bankAccount.activate(VALID_IBAN);
 
+    assertThat(result).isEqualTo(BankAccountActivationResult.ACTIVATED);
     assertThat(bankAccount.getAccountStatus().isActive()).isTrue();
     assertThat(bankAccount.getIban()).contains(VALID_IBAN);
 
@@ -55,14 +57,26 @@ class BankAccountActivateTest {
   }
 
   @Test
-  void shouldNotThrowAnyException_whenActivateIsCalledTwice() {
+  void shouldReturnAlreadyActiveAndNotRegisterAnotherEvent_whenActivateIsCalledTwice() {
     var bankAccount = BankAccountTestFixture.openPendingAccount(PRIMARY_ACCOUNT_HOLDER, ACCOUNT_TYPE_SAVINGS, CURRENCY_USD);
+    bankAccount.pullEvents();
 
-    bankAccount.activate(VALID_IBAN);
-    bankAccount.activate(VALID_IBAN);
+    var firstResult = bankAccount.activate(VALID_IBAN);
+    var eventsAfterFirstActivation = bankAccount.pullEvents();
+
+    var secondResult = bankAccount.activate(VALID_IBAN);
+    var eventsAfterSecondActivation = bankAccount.pullEvents();
+
+    assertThat(firstResult).isEqualTo(BankAccountActivationResult.ACTIVATED);
+    assertThat(secondResult).isEqualTo(BankAccountActivationResult.ALREADY_ACTIVE);
 
     assertThat(bankAccount.getAccountStatus().isActive()).isTrue();
     assertThat(bankAccount.getIban()).contains(VALID_IBAN);
+    assertThat(eventsAfterFirstActivation)
+      .hasSize(1)
+      .singleElement()
+      .isInstanceOf(BankAccountActivatedEvent.class);
+    assertThat(eventsAfterSecondActivation).isEmpty();
   }
 
   @Test

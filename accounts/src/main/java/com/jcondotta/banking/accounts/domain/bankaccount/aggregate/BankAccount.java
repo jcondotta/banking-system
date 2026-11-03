@@ -3,6 +3,7 @@ package com.jcondotta.banking.accounts.domain.bankaccount.aggregate;
 import com.jcondotta.banking.accounts.domain.bankaccount.enums.AccountStatus;
 import com.jcondotta.banking.accounts.domain.bankaccount.enums.AccountType;
 import com.jcondotta.banking.accounts.domain.bankaccount.enums.Currency;
+import com.jcondotta.banking.accounts.domain.bankaccount.enums.BankAccountActivationResult;
 import com.jcondotta.banking.accounts.domain.bankaccount.events.BankAccountActivatedEvent;
 import com.jcondotta.banking.accounts.domain.bankaccount.events.BankAccountJointHolderAddedEvent;
 import com.jcondotta.banking.accounts.domain.bankaccount.events.BankAccountJointHolderDeactivatedEvent;
@@ -123,11 +124,11 @@ public final class BankAccount extends AggregateRoot<BankAccountId> {
     );
   }
 
-  public void activate(Iban iban) {
+  public BankAccountActivationResult activate(Iban iban) {
     required(iban, BankAccountErrors.IBAN_MUST_BE_PROVIDED);
 
     if (accountStatus == AccountStatus.ACTIVE) {
-      return;
+      return BankAccountActivationResult.ALREADY_ACTIVE;
     }
 
     if (accountStatus != AccountStatus.PENDING) {
@@ -137,6 +138,8 @@ public final class BankAccount extends AggregateRoot<BankAccountId> {
     this.iban = iban;
     this.accountStatus = AccountStatus.ACTIVE;
     registerEvent(new BankAccountActivatedEvent(EventId.newId(), getId(), iban, currency, Instant.now()));
+
+    return BankAccountActivationResult.ACTIVATED;
   }
 
   public void block() {

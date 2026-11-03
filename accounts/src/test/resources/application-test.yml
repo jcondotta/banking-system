@@ -25,4 +25,4 @@ cloud:
           table-name: ${AWS_DYNAMODB_BANK_ACCOUNTS_TABLE_NAME:bank-accounts}
           indexes:
             gsi1:
-              name: ${AWS_DYNAMODB_BANK_ACCOUNTS_GSI1_NAME:gsi-iban}
+              name: ${AWS_DYNAMODB_BANK_ACCOUNTS_GSI1_NAME}

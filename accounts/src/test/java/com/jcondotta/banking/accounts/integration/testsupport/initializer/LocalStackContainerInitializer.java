@@ -22,7 +22,9 @@ public class LocalStackContainerInitializer
       "AWS_SECRET_ACCESS_KEY", LocalStackContainerSupport.secretKey(),
       "AWS_DEFAULT_REGION", LocalStackContainerSupport.region(),
       "AWS_DYNAMODB_ENDPOINT", LocalStackContainerSupport.localStackEndpoint(),
-      "AWS_DYNAMODB_BANK_ACCOUNTS_TABLE_NAME", "bank-accounts"
+      "AWS_DYNAMODB_BANK_ACCOUNTS_TABLE_NAME", "bank-accounts",
+      "AWS_DYNAMODB_BANK_ACCOUNTS_GSI1_NAME", "gsi-iban",
+      "AWS_DYNAMODB_OUTBOX_GSI1_NAME", "gsi-outbox-status"
     );
   }
 }

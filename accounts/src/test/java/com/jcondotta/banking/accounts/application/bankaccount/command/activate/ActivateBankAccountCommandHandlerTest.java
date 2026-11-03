@@ -64,6 +64,21 @@ class ActivateBankAccountCommandHandlerTest {
   }
 
   @Test
+  void shouldNotSaveBankAccount_whenBankAccountIsAlreadyActive() {
+    var bankAccount = BankAccountFixture.openActiveAccount(AccountHolderFixtures.JEFFERSON);
+
+    when(bankAccountRepository.findById(bankAccount.getId()))
+      .thenReturn(Optional.of(bankAccount));
+
+    var command = new ActivateBankAccountCommand(bankAccount.getId());
+
+    commandHandler.handle(command);
+
+    verify(bankAccountRepository).findById(bankAccount.getId());
+    verifyNoMoreInteractions(bankAccountRepository);
+  }
+
+  @Test
   void shouldThrowBankAccountNotFoundException_whenAccountDoesNotExist() {
     var bankAccountId = BankAccountId.newId();
     when(bankAccountRepository.findById(bankAccountId))
