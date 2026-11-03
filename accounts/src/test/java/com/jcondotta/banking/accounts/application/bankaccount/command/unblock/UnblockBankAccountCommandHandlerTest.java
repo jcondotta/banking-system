@@ -55,6 +55,19 @@ class UnblockBankAccountCommandHandlerTest {
   }
 
   @Test
+  void shouldNotSaveBankAccount_whenBankAccountIsAlreadyActive() {
+    var bankAccount = BankAccountFixture.openActiveAccount(AccountHolderFixtures.JEFFERSON);
+
+    when(bankAccountRepository.findById(bankAccount.getId()))
+      .thenReturn(Optional.of(bankAccount));
+
+    commandHandler.handle(new UnblockBankAccountCommand(bankAccount.getId()));
+
+    verify(bankAccountRepository).findById(bankAccount.getId());
+    verifyNoMoreInteractions(bankAccountRepository);
+  }
+
+  @Test
   void shouldThrowBankAccountNotFoundException_whenBankAccountDoesNotExist() {
     var bankAccountId = BankAccountId.newId();
 

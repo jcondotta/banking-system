@@ -54,6 +54,20 @@ class CloseBankAccountCommandHandlerTest {
   }
 
   @Test
+  void shouldNotSaveBankAccount_whenBankAccountIsAlreadyClosed() {
+    var bankAccount = BankAccountFixture.openActiveAccount(AccountHolderFixtures.JEFFERSON);
+    bankAccount.close();
+
+    when(bankAccountRepository.findById(bankAccount.getId()))
+      .thenReturn(Optional.of(bankAccount));
+
+    useCase.handle(new CloseBankAccountCommand(bankAccount.getId()));
+
+    verify(bankAccountRepository).findById(bankAccount.getId());
+    verifyNoMoreInteractions(bankAccountRepository);
+  }
+
+  @Test
   void shouldThrowBankAccountNotFoundException_whenBankAccountDoesNotExist() {
     var bankAccountId = BankAccountId.newId();
 

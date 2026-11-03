@@ -54,6 +54,20 @@ class BlockBankAccountCommandHandlerTest {
   }
 
   @Test
+  void shouldNotSaveBankAccount_whenBankAccountIsAlreadyBlocked() {
+    var bankAccount = BankAccountFixture.openActiveAccount(AccountHolderFixtures.JEFFERSON);
+    bankAccount.block();
+
+    when(bankAccountRepository.findById(bankAccount.getId()))
+      .thenReturn(Optional.of(bankAccount));
+
+    commandHandler.handle(new BlockBankAccountCommand(bankAccount.getId()));
+
+    verify(bankAccountRepository).findById(bankAccount.getId());
+    verifyNoMoreInteractions(bankAccountRepository);
+  }
+
+  @Test
   void shouldThrowBankAccountNotFoundException_whenAccountDoesNotExist() {
 
     var bankAccountId = BankAccountId.newId();

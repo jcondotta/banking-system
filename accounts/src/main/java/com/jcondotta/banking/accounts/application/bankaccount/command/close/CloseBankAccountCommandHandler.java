@@ -7,6 +7,7 @@ import com.jcondotta.banking.accounts.application.bankaccount.command.close.mode
 import com.jcondotta.banking.accounts.application.common.log.BankAccountOperation;
 import com.jcondotta.banking.accounts.application.common.log.BankAccountLogKey;
 import com.jcondotta.banking.accounts.domain.bankaccount.exceptions.BankAccountNotFoundException;
+import com.jcondotta.banking.accounts.domain.bankaccount.enums.BankAccountStateChangeResult;
 import com.jcondotta.banking.accounts.domain.bankaccount.repository.BankAccountRepository;
 import com.jcondotta.banking.accounts.application.common.log.BankAccountFailureReason;
 import com.jcondotta.domain.exception.DomainException;
@@ -39,12 +40,22 @@ public class CloseBankAccountCommandHandler implements CommandHandler<CloseBankA
       var bankAccount = bankAccountRepository.findById(command.bankAccountId())
         .orElseThrow(() -> new BankAccountNotFoundException(command.bankAccountId()));
 
-      bankAccount.close();
-      bankAccountRepository.save(bankAccount);
+      var stateChangeResult = bankAccount.close();
 
-      logContext.info("Bank account closed")
-        .success()
-        .log();
+      if (stateChangeResult == BankAccountStateChangeResult.CHANGED) {
+        bankAccountRepository.save(bankAccount);
+
+        logContext.info("Bank account closed")
+          .success()
+          .with(BankAccountLogKey.STATE_CHANGE_RESULT, "changed")
+          .log();
+      }
+      else {
+        logContext.info("Bank account closing skipped; account already closed")
+          .success()
+          .with(BankAccountLogKey.STATE_CHANGE_RESULT, "already_in_target_state")
+          .log();
+      }
     }
     catch (DomainException ex) {
       var reason = BankAccountFailureReason.from(ex);

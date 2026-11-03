@@ -10,7 +10,7 @@ import com.jcondotta.banking.accounts.domain.bankaccount.exceptions.BankAccountN
 import com.jcondotta.banking.accounts.domain.bankaccount.repository.BankAccountRepository;
 import com.jcondotta.banking.accounts.application.common.log.BankAccountFailureReason;
 import com.jcondotta.banking.accounts.application.bankaccount.services.IbanGenerator;
-import com.jcondotta.banking.accounts.domain.bankaccount.enums.BankAccountActivationResult;
+import com.jcondotta.banking.accounts.domain.bankaccount.enums.BankAccountStateChangeResult;
 import com.jcondotta.domain.exception.DomainException;
 import io.micrometer.observation.annotation.Observed;
 import lombok.RequiredArgsConstructor;
@@ -45,18 +45,18 @@ public class ActivateBankAccountCommandHandler implements CommandHandler<Activat
       var iban = ibanGenerator.generate();
       var activationResult = bankAccount.activate(iban);
 
-      if (activationResult == BankAccountActivationResult.ACTIVATED) {
+      if (activationResult == BankAccountStateChangeResult.CHANGED) {
         bankAccountRepository.save(bankAccount);
 
         logContext.info("Bank account activated")
           .success()
-          .with(BankAccountLogKey.ACTIVATION_RESULT, "activated")
+          .with(BankAccountLogKey.STATE_CHANGE_RESULT, "changed")
           .log();
       }
       else {
         logContext.info("Bank account activation skipped; account already active")
           .success()
-          .with(BankAccountLogKey.ACTIVATION_RESULT, "already_active")
+          .with(BankAccountLogKey.STATE_CHANGE_RESULT, "already_in_target_state")
           .log();
       }
     }

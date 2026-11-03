@@ -7,6 +7,7 @@ import com.jcondotta.banking.accounts.application.bankaccount.command.block.mode
 import com.jcondotta.banking.accounts.application.common.log.BankAccountOperation;
 import com.jcondotta.banking.accounts.application.common.log.BankAccountLogKey;
 import com.jcondotta.banking.accounts.domain.bankaccount.exceptions.BankAccountNotFoundException;
+import com.jcondotta.banking.accounts.domain.bankaccount.enums.BankAccountStateChangeResult;
 import com.jcondotta.banking.accounts.domain.bankaccount.repository.BankAccountRepository;
 import com.jcondotta.banking.accounts.application.common.log.BankAccountFailureReason;
 import com.jcondotta.domain.exception.DomainException;
@@ -39,12 +40,22 @@ public class BlockBankAccountCommandHandler implements CommandHandler<BlockBankA
       var bankAccount = bankAccountRepository.findById(command.bankAccountId())
         .orElseThrow(() -> new BankAccountNotFoundException(command.bankAccountId()));
 
-      bankAccount.block();
-      bankAccountRepository.save(bankAccount);
+      var stateChangeResult = bankAccount.block();
 
-      logContext.info("Bank account blocked")
-        .success()
-        .log();
+      if (stateChangeResult == BankAccountStateChangeResult.CHANGED) {
+        bankAccountRepository.save(bankAccount);
+
+        logContext.info("Bank account blocked")
+          .success()
+          .with(BankAccountLogKey.STATE_CHANGE_RESULT, "changed")
+          .log();
+      }
+      else {
+        logContext.info("Bank account blocking skipped; account already blocked")
+          .success()
+          .with(BankAccountLogKey.STATE_CHANGE_RESULT, "already_in_target_state")
+          .log();
+      }
     }
     catch (DomainException ex) {
       var reason = BankAccountFailureReason.from(ex);

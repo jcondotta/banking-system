@@ -7,6 +7,7 @@ import com.jcondotta.banking.accounts.application.bankaccount.command.unblock.mo
 import com.jcondotta.banking.accounts.application.common.log.BankAccountOperation;
 import com.jcondotta.banking.accounts.application.common.log.BankAccountLogKey;
 import com.jcondotta.banking.accounts.domain.bankaccount.exceptions.BankAccountNotFoundException;
+import com.jcondotta.banking.accounts.domain.bankaccount.enums.BankAccountStateChangeResult;
 import com.jcondotta.banking.accounts.domain.bankaccount.repository.BankAccountRepository;
 import com.jcondotta.banking.accounts.application.common.log.BankAccountFailureReason;
 import com.jcondotta.domain.exception.DomainException;
@@ -39,13 +40,22 @@ public class UnblockBankAccountCommandHandler implements CommandHandler<UnblockB
       var bankAccount = bankAccountRepository.findById(command.bankAccountId())
         .orElseThrow(() -> new BankAccountNotFoundException(command.bankAccountId()));
 
-      bankAccount.unblock();
+      var stateChangeResult = bankAccount.unblock();
 
-      bankAccountRepository.save(bankAccount);
+      if (stateChangeResult == BankAccountStateChangeResult.CHANGED) {
+        bankAccountRepository.save(bankAccount);
 
-      logContext.info("Bank account unblocked")
-        .success()
-        .log();
+        logContext.info("Bank account unblocked")
+          .success()
+          .with(BankAccountLogKey.STATE_CHANGE_RESULT, "changed")
+          .log();
+      }
+      else {
+        logContext.info("Bank account unblocking skipped; account already active")
+          .success()
+          .with(BankAccountLogKey.STATE_CHANGE_RESULT, "already_in_target_state")
+          .log();
+      }
     }
     catch (DomainException ex) {
       var reason = BankAccountFailureReason.from(ex);

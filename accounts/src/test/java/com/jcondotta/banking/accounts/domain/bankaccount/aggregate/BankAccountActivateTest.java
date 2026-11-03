@@ -2,7 +2,7 @@ package com.jcondotta.banking.accounts.domain.bankaccount.aggregate;
 
 import com.jcondotta.banking.accounts.domain.bankaccount.enums.AccountStatus;
 import com.jcondotta.banking.accounts.domain.bankaccount.enums.AccountType;
-import com.jcondotta.banking.accounts.domain.bankaccount.enums.BankAccountActivationResult;
+import com.jcondotta.banking.accounts.domain.bankaccount.enums.BankAccountStateChangeResult;
 import com.jcondotta.banking.accounts.domain.bankaccount.enums.Currency;
 import com.jcondotta.banking.accounts.domain.bankaccount.events.BankAccountActivatedEvent;
 import com.jcondotta.banking.accounts.domain.bankaccount.exceptions.InvalidBankAccountStateTransitionException;
@@ -39,7 +39,7 @@ class BankAccountActivateTest {
 
     var result = bankAccount.activate(VALID_IBAN);
 
-    assertThat(result).isEqualTo(BankAccountActivationResult.ACTIVATED);
+    assertThat(result).isEqualTo(BankAccountStateChangeResult.CHANGED);
     assertThat(bankAccount.getAccountStatus().isActive()).isTrue();
     assertThat(bankAccount.getIban()).contains(VALID_IBAN);
 
@@ -67,8 +67,8 @@ class BankAccountActivateTest {
     var secondResult = bankAccount.activate(VALID_IBAN);
     var eventsAfterSecondActivation = bankAccount.pullEvents();
 
-    assertThat(firstResult).isEqualTo(BankAccountActivationResult.ACTIVATED);
-    assertThat(secondResult).isEqualTo(BankAccountActivationResult.ALREADY_ACTIVE);
+    assertThat(firstResult).isEqualTo(BankAccountStateChangeResult.CHANGED);
+    assertThat(secondResult).isEqualTo(BankAccountStateChangeResult.ALREADY_IN_TARGET_STATE);
 
     assertThat(bankAccount.getAccountStatus().isActive()).isTrue();
     assertThat(bankAccount.getIban()).contains(VALID_IBAN);

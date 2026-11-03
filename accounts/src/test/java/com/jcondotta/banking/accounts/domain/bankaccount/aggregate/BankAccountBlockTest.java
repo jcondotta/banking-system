@@ -2,6 +2,7 @@ package com.jcondotta.banking.accounts.domain.bankaccount.aggregate;
 
 import com.jcondotta.banking.accounts.domain.bankaccount.enums.AccountStatus;
 import com.jcondotta.banking.accounts.domain.bankaccount.enums.AccountType;
+import com.jcondotta.banking.accounts.domain.bankaccount.enums.BankAccountStateChangeResult;
 import com.jcondotta.banking.accounts.domain.bankaccount.enums.Currency;
 import com.jcondotta.banking.accounts.domain.bankaccount.events.BankAccountStatusChangedEvent;
 import com.jcondotta.banking.accounts.domain.bankaccount.exceptions.InvalidBankAccountStateTransitionException;
@@ -34,8 +35,9 @@ class BankAccountBlockTest {
     var bankAccount = BankAccountTestFixture.openActiveAccount(PRIMARY_ACCOUNT_HOLDER);
     bankAccount.pullEvents();
 
-    bankAccount.block();
+    var result = bankAccount.block();
 
+    assertThat(result).isEqualTo(BankAccountStateChangeResult.CHANGED);
     assertThat(bankAccount.getAccountStatus().isBlocked()).isTrue();
 
     var events = bankAccount.pullEvents();
@@ -52,13 +54,20 @@ class BankAccountBlockTest {
   }
 
   @Test
-  void shouldNotThrowAnyException_whenBlockIsCalledTwice() {
+  void shouldReturnAlreadyInTargetStateAndNotRegisterAnotherEvent_whenBlockIsCalledTwice() {
     var bankAccount = BankAccountTestFixture.openActiveAccount(PRIMARY_ACCOUNT_HOLDER);
+    bankAccount.pullEvents();
 
-    bankAccount.block();
-    bankAccount.block();
+    var firstResult = bankAccount.block();
+    var eventsAfterFirstBlock = bankAccount.pullEvents();
+    var secondResult = bankAccount.block();
+    var eventsAfterSecondBlock = bankAccount.pullEvents();
 
+    assertThat(firstResult).isEqualTo(BankAccountStateChangeResult.CHANGED);
+    assertThat(secondResult).isEqualTo(BankAccountStateChangeResult.ALREADY_IN_TARGET_STATE);
     assertThat(bankAccount.getAccountStatus().isBlocked()).isTrue();
+    assertThat(eventsAfterFirstBlock).hasSize(1);
+    assertThat(eventsAfterSecondBlock).isEmpty();
   }
 
   @ParameterizedTest

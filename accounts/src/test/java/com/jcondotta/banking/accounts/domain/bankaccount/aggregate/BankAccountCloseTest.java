@@ -2,6 +2,7 @@ package com.jcondotta.banking.accounts.domain.bankaccount.aggregate;
 
 import com.jcondotta.banking.accounts.domain.bankaccount.enums.AccountStatus;
 import com.jcondotta.banking.accounts.domain.bankaccount.enums.AccountType;
+import com.jcondotta.banking.accounts.domain.bankaccount.enums.BankAccountStateChangeResult;
 import com.jcondotta.banking.accounts.domain.bankaccount.enums.Currency;
 import com.jcondotta.banking.accounts.domain.bankaccount.events.BankAccountStatusChangedEvent;
 import com.jcondotta.banking.accounts.domain.bankaccount.exceptions.InvalidBankAccountStateTransitionException;
@@ -34,8 +35,9 @@ class BankAccountCloseTest {
     var bankAccount = BankAccountTestFixture.openActiveAccount(PRIMARY_ACCOUNT_HOLDER);
     bankAccount.pullEvents();
 
-    bankAccount.close();
+    var result = bankAccount.close();
 
+    assertThat(result).isEqualTo(BankAccountStateChangeResult.CHANGED);
     assertThat(bankAccount.getAccountStatus().isClosed()).isTrue();
 
     var events = bankAccount.pullEvents();
@@ -53,13 +55,20 @@ class BankAccountCloseTest {
   }
 
   @Test
-  void shouldNotThrowAnyException_whenCloseIsCalledTwice() {
+  void shouldReturnAlreadyInTargetStateAndNotRegisterAnotherEvent_whenCloseIsCalledTwice() {
     var bankAccount = BankAccountTestFixture.openActiveAccount(PRIMARY_ACCOUNT_HOLDER);
+    bankAccount.pullEvents();
 
-    bankAccount.close();
-    bankAccount.close();
+    var firstResult = bankAccount.close();
+    var eventsAfterFirstClose = bankAccount.pullEvents();
+    var secondResult = bankAccount.close();
+    var eventsAfterSecondClose = bankAccount.pullEvents();
 
+    assertThat(firstResult).isEqualTo(BankAccountStateChangeResult.CHANGED);
+    assertThat(secondResult).isEqualTo(BankAccountStateChangeResult.ALREADY_IN_TARGET_STATE);
     assertThat(bankAccount.getAccountStatus().isClosed()).isTrue();
+    assertThat(eventsAfterFirstClose).hasSize(1);
+    assertThat(eventsAfterSecondClose).isEmpty();
   }
 
   @ParameterizedTest
