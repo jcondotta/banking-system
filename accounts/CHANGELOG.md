@@ -5,7 +5,6 @@ All notable changes to the accounts service are documented in this file.
 ## Future Improvements
 
 - Add end-to-end gRPC integration tests covering the running server, protobuf serialization, and gRPC status mapping.
-- Add an end-to-end transactional-outbox integration test covering event persistence, worker processing, Kafka publication, and outbox completion.
 - Add an integration test exercising optimistic locking through concurrent updates against DynamoDB.
 - Guarantee IBAN uniqueness during account activation and handle generated IBAN collisions.
 - Align the configurable IBAN GSI name with the fixed `gsi-iban` DynamoDB schema annotation.
@@ -38,7 +37,7 @@ All notable changes to the accounts service are documented in this file.
 ### Verified
 
 - `../mvnw test` passes with 635 unit tests.
-- `../mvnw verify` passes, including 62 integration tests.
+- `../mvnw verify` passes, including 63 integration tests.
 
 ## 2.0.0 - 2026-09-03
 

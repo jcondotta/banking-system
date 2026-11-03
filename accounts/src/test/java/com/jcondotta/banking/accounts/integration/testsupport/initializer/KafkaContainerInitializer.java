@@ -21,7 +21,8 @@ public class KafkaContainerInitializer
       "KAFKA_BOOTSTRAP_SERVERS", KafkaContainerSupport.bootstrapServers(),
       "KAFKA_BANK_ACCOUNT_OPENED_TOPIC_NAME", "bank-account-opened",
       "KAFKA_BANK_ACCOUNT_STATUS_CHANGED_TOPIC_NAME", "bank-account-status-changed",
-      "KAFKA_JOINT_ACCOUNT_HOLDER_ADDED_TOPIC_NAME", "joint-account-holder-added"
+      "KAFKA_JOINT_ACCOUNT_HOLDER_ADDED_TOPIC_NAME", "joint-account-holder-added",
+      "KAFKA_BANK_ACCOUNT_ACTIVATED_TOPIC_NAME", "bank-account-activated"
     );
   }
 }

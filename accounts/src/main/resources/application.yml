@@ -48,7 +48,7 @@ app:
       joint-account-holder-added:
         topic-name: ${KAFKA_JOINT_ACCOUNT_HOLDER_ADDED_TOPIC_NAME}
       bank-account-activated:
-        topic-name: ${KAFKA_BANK_ACCOUNT_ACTIVATED_TOPIC_NAME}
+        topic-name: ${KAFKA_BANK_ACCOUNT_ACTIVATED_TOPIC_NAME:bank-account-activated}
   outbox:
     shards:
       count: 4

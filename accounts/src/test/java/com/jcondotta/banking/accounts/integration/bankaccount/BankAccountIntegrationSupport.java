@@ -79,6 +79,20 @@ public abstract class BankAccountIntegrationSupport {
     patchBankAccount(id, "/activate", HttpStatus.NO_CONTENT);
   }
 
+  protected void activateBankAccount(BankAccountId id, UUID correlationId) {
+    var response = given()
+      .spec(requestSpecification(uriProperties.bankAccountIdPath() + "/activate"))
+      .header(HttpHeadersConstants.CORRELATION_ID, correlationId)
+      .pathParam("bank-account-id", id.value())
+      .when()
+      .patch()
+      .then()
+      .extract()
+      .response();
+
+    assertThat(response.statusCode()).isEqualTo(HttpStatus.NO_CONTENT.value());
+  }
+
   protected void blockBankAccount(BankAccountId id) {
     patchBankAccount(id, "/block", HttpStatus.NO_CONTENT);
   }
@@ -175,6 +189,12 @@ public abstract class BankAccountIntegrationSupport {
       .stream()
       .filter(item -> item.getSortKey().startsWith("OUTBOX#"))
       .toList();
+  }
+
+  protected void clearOutboxEvents() {
+    outboxTable.scan().items().stream()
+      .filter(item -> item.getSortKey().startsWith("OUTBOX#"))
+      .forEach(outboxTable::deleteItem);
   }
 
   protected void assertOutboxEvents(BankAccountId id, String... eventTypes) {
