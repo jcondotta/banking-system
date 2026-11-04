@@ -1,8 +1,7 @@
 package com.jcondotta.banking.accounts.application.bankaccount.command.open.model;
 
-import com.jcondotta.application.command.Command;
-import com.jcondotta.banking.accounts.application.common.idempotency.IdempotencyKey;
-import com.jcondotta.banking.accounts.application.common.idempotency.IdempotentCommand;
+import com.jcondotta.application.idempotency.IdempotencyKey;
+import com.jcondotta.application.idempotency.IdempotentCommand;
 import com.jcondotta.banking.accounts.domain.bankaccount.enums.AccountType;
 import com.jcondotta.banking.accounts.domain.bankaccount.enums.Currency;
 import com.jcondotta.banking.accounts.domain.bankaccount.identity.BankAccountId;
@@ -19,7 +18,7 @@ public record OpenBankAccountCommand(
   AccountType accountType,
   Currency currency,
   IdempotencyKey idempotencyKey
-) implements Command<BankAccountId>, IdempotentCommand {
+) implements IdempotentCommand<BankAccountId> {
 
   static final String PERSONAL_INFO_REQUIRED = "personalInfo must be provided";
   static final String CONTACT_INFO_REQUIRED = "contactInfo must be provided";

@@ -1,8 +1,7 @@
 package com.jcondotta.banking.accounts.application.bankaccount.command.add_joint_holder.model;
 
-import com.jcondotta.application.command.Command;
-import com.jcondotta.banking.accounts.application.common.idempotency.IdempotencyKey;
-import com.jcondotta.banking.accounts.application.common.idempotency.IdempotentCommand;
+import com.jcondotta.application.idempotency.IdempotencyKey;
+import com.jcondotta.application.idempotency.IdempotentCommand;
 import com.jcondotta.banking.accounts.domain.bankaccount.identity.BankAccountId;
 import com.jcondotta.banking.accounts.domain.bankaccount.value_objects.address.Address;
 import com.jcondotta.banking.accounts.domain.bankaccount.value_objects.contact.ContactInfo;
@@ -16,7 +15,7 @@ public record AddJointHolderCommand(
   ContactInfo contactInfo,
   Address address,
   IdempotencyKey idempotencyKey
-) implements Command<Void>, IdempotentCommand {
+) implements IdempotentCommand<Void> {
 
   static final String BANK_ACCOUNT_ID_REQUIRED = "bankAccountId must be provided";
   static final String PERSONAL_INFO_REQUIRED = "personalInfo must be provided";

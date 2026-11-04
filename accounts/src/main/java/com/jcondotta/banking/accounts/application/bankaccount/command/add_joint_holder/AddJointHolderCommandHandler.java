@@ -3,6 +3,7 @@ package com.jcondotta.banking.accounts.application.bankaccount.command.add_joint
 import com.jcondotta.application.command.CommandHandler;
 import com.jcondotta.application.logging.LogContext;
 import com.jcondotta.application.logging.LogKey;
+import com.jcondotta.application.logging.IdempotencyLogKey;
 import com.jcondotta.banking.accounts.application.bankaccount.command.add_joint_holder.model.AddJointHolderCommand;
 import com.jcondotta.banking.accounts.application.common.idempotency.*;
 import com.jcondotta.banking.accounts.application.common.exception.IdempotencyKeyConflictException;
