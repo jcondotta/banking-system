@@ -14,6 +14,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.ResponseEntity;
 
+import com.jcondotta.banking.accounts.application.common.idempotency.*;
+import com.jcondotta.application.idempotency.IdempotencyKey;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -49,11 +51,12 @@ class AddJointHolderControllerImplTest {
 
   @Test
   void shouldCreateJointAccountHolderAndReturnNoContent() {
-    when(requestMapper.toCommand(BANK_ACCOUNT_UUID, restRequest)).thenReturn(command);
+    var key = IdempotencyKey.of(BANK_ACCOUNT_UUID);
+    when(requestMapper.toCommand(BANK_ACCOUNT_UUID, restRequest, key)).thenReturn(command);
 
-    ResponseEntity<Void> response = controller.createJointAccountHolder(BANK_ACCOUNT_UUID, restRequest);
+    ResponseEntity<Void> response = controller.createJointAccountHolder(BANK_ACCOUNT_UUID, restRequest, BANK_ACCOUNT_UUID);
 
-    verify(requestMapper).toCommand(BANK_ACCOUNT_UUID, restRequest);
+    verify(requestMapper).toCommand(BANK_ACCOUNT_UUID, restRequest, key);
     verify(commandHandler).handle(commandCaptor.capture());
 
     assertThat(commandCaptor.getValue()).isEqualTo(command);

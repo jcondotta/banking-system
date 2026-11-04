@@ -15,6 +15,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.ResponseEntity;
 
+import com.jcondotta.banking.accounts.application.common.idempotency.*;
+import com.jcondotta.application.idempotency.IdempotencyKey;
 import java.net.URI;
 import java.util.UUID;
 
@@ -54,13 +56,14 @@ class OpenBankAccountControllerImplTest {
   @ParameterizedTest
   @EnumSource(AccountTypeRequest.class)
   void shouldCreateBankAccountAndReturnCreatedResponse_whenRequestIsValid(AccountTypeRequest accountType) {
-    when(requestMapper.toCommand(request)).thenReturn(command);
+    var key = IdempotencyKey.of(BANK_ACCOUNT_UUID);
+    when(requestMapper.toCommand(request, key)).thenReturn(command);
     when(commandHandler.handle(command)).thenReturn(BankAccountId.of(BANK_ACCOUNT_UUID));
     when(uriProperties.bankAccountURI(BANK_ACCOUNT_UUID)).thenReturn(EXPECTED_LOCATION_URI);
 
-    ResponseEntity<Void> response = controller.openBankAccount(request);
+    ResponseEntity<Void> response = controller.openBankAccount(request, BANK_ACCOUNT_UUID);
 
-    verify(requestMapper).toCommand(request);
+    verify(requestMapper).toCommand(request, key);
     verify(commandHandler).handle(command);
     verify(uriProperties).bankAccountURI(BANK_ACCOUNT_UUID);
 

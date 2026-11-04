@@ -1,6 +1,7 @@
 package com.jcondotta.banking.accounts.infrastructure.adapters.input.rest.open.mapper;
 
 import com.jcondotta.banking.accounts.application.bankaccount.command.open.model.OpenBankAccountCommand;
+import com.jcondotta.application.idempotency.IdempotencyKey;
 import com.jcondotta.banking.accounts.domain.bankaccount.enums.AccountType;
 import com.jcondotta.banking.accounts.domain.bankaccount.enums.Currency;
 import com.jcondotta.banking.accounts.domain.testsupport.ContactInfoFixtures;
@@ -16,6 +17,7 @@ import org.junit.jupiter.params.provider.EnumSource;
 import org.mapstruct.factory.Mappers;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import java.util.UUID;
 
 class OpenBankAccountRequestControllerMapperTest {
 
@@ -33,7 +35,7 @@ class OpenBankAccountRequestControllerMapperTest {
   void shouldMapOpenBankAccountRequestToCommand_whenValuesAreValid(AccountTypeRequest accountType) {
     var request = buildValidRequest(accountType, CurrencyRequest.EUR);
 
-    OpenBankAccountCommand command = mapper.toCommand(request);
+    OpenBankAccountCommand command = mapper.toCommand(request, IdempotencyKey.of(UUID.randomUUID()));
 
     assertThat(command).isNotNull();
     assertThat(command.personalInfo().holderName().firstName()).isEqualTo(VALID_FIRST_NAME);
@@ -48,7 +50,7 @@ class OpenBankAccountRequestControllerMapperTest {
 
   @Test
   void shouldReturnNull_whenMappedRequestIsNull() {
-    OpenBankAccountCommand command = mapper.toCommand(null);
+    OpenBankAccountCommand command = mapper.toCommand(null, IdempotencyKey.of(UUID.randomUUID()));
 
     assertThat(command).isNull();
   }

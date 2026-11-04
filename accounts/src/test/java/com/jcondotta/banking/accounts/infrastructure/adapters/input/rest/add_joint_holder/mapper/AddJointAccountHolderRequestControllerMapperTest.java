@@ -1,6 +1,7 @@
 package com.jcondotta.banking.accounts.infrastructure.adapters.input.rest.add_joint_holder.mapper;
 
 import com.jcondotta.banking.accounts.application.bankaccount.command.add_joint_holder.model.AddJointHolderCommand;
+import com.jcondotta.application.idempotency.IdempotencyKey;
 import com.jcondotta.banking.accounts.domain.bankaccount.identity.BankAccountId;
 import com.jcondotta.banking.accounts.domain.testsupport.ContactInfoFixtures;
 import com.jcondotta.banking.accounts.domain.testsupport.IdentityDocumentFixtures;
@@ -44,7 +45,7 @@ class AddJointAccountHolderRequestControllerMapperTest {
     var address = new AddressRequest("Carrer de Mallorca", "401", null, "08013", "Barcelona", "ES");
     var request = new AddJointHolderRequest(personalInfo, contactInfo, address);
 
-    AddJointHolderCommand command = mapper.toCommand(BANK_ACCOUNT_UUID, request);
+    AddJointHolderCommand command = mapper.toCommand(BANK_ACCOUNT_UUID, request, IdempotencyKey.of(UUID.randomUUID()));
 
     assertThat(command).isNotNull();
     assertThat(command.bankAccountId().value()).isEqualTo(BANK_ACCOUNT_UUID);
