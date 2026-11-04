@@ -1,6 +1,7 @@
 package com.jcondotta.banking.accounts.infrastructure.adapters.input.rest.add_joint_holder;
 
 import com.jcondotta.application.command.CommandHandler;
+import com.jcondotta.banking.accounts.application.common.idempotency.IdempotencyKey;
 import com.jcondotta.banking.accounts.application.bankaccount.command.add_joint_holder.model.AddJointHolderCommand;
 import com.jcondotta.banking.accounts.infrastructure.adapters.input.rest.add_joint_holder.mapper.AddJointHolderRequestControllerMapper;
 import com.jcondotta.banking.accounts.infrastructure.adapters.input.rest.add_joint_holder.model.AddJointHolderRequest;
@@ -20,8 +21,8 @@ public class AddJointHolderControllerImpl implements AddJointHolderController {
     private final AddJointHolderRequestControllerMapper requestMapper;
 
     @Override
-    public ResponseEntity<Void> createJointAccountHolder(UUID bankAccountId, AddJointHolderRequest restRequest) {
-        commandHandler.handle(requestMapper.toCommand(bankAccountId, restRequest));
+    public ResponseEntity<Void> createJointAccountHolder(UUID bankAccountId, AddJointHolderRequest restRequest, UUID idempotencyKey) {
+        commandHandler.handle(requestMapper.toCommand(bankAccountId, restRequest, IdempotencyKey.of(idempotencyKey)));
         return ResponseEntity.noContent().build();
     }
 }

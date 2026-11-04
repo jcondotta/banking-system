@@ -1,6 +1,7 @@
 package com.jcondotta.banking.accounts.infrastructure.adapters.input.rest.open.mapper;
 
 import com.jcondotta.banking.accounts.application.bankaccount.command.open.model.OpenBankAccountCommand;
+import com.jcondotta.banking.accounts.application.common.idempotency.IdempotencyKey;
 import com.jcondotta.banking.accounts.domain.bankaccount.enums.AccountType;
 import com.jcondotta.banking.accounts.domain.bankaccount.enums.Currency;
 import com.jcondotta.banking.accounts.domain.bankaccount.enums.DocumentCountry;
@@ -34,7 +35,8 @@ public interface OpenBankAccountRequestControllerMapper {
     )
     @Mapping(target = "accountType", expression = "java(toAccountType(request.accountType()))")
     @Mapping(target = "currency", expression = "java(toCurrency(request.currency()))")
-    OpenBankAccountCommand toCommand(OpenBankAccountRequest request);
+    @Mapping(target = "idempotencyKey", source = "key")
+    OpenBankAccountCommand toCommand(OpenBankAccountRequest request, IdempotencyKey key);
 
     default AccountType toAccountType(AccountTypeRequest accountTypeRequest) {
         return AccountType.valueOf(accountTypeRequest.name());

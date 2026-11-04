@@ -1,6 +1,7 @@
 package com.jcondotta.banking.accounts.infrastructure.adapters.input.rest.add_joint_holder.mapper;
 
 import com.jcondotta.banking.accounts.application.bankaccount.command.add_joint_holder.model.AddJointHolderCommand;
+import com.jcondotta.banking.accounts.application.common.idempotency.IdempotencyKey;
 import com.jcondotta.banking.accounts.domain.bankaccount.enums.DocumentCountry;
 import com.jcondotta.banking.accounts.domain.bankaccount.enums.DocumentType;
 import com.jcondotta.banking.accounts.domain.bankaccount.identity.BankAccountId;
@@ -27,7 +28,8 @@ public interface AddJointHolderRequestControllerMapper {
   @Mapping(target = "personalInfo", source = "request.personalInfo", qualifiedByName = "toPersonalInfo")
   @Mapping(target = "contactInfo", source = "request.contactInfo", qualifiedByName = "toContactInfo")
   @Mapping(target = "address", source = "request.address", qualifiedByName = "toAddress")
-  AddJointHolderCommand toCommand(UUID id, AddJointHolderRequest request);
+  @Mapping(target = "idempotencyKey", source = "key")
+  AddJointHolderCommand toCommand(UUID id, AddJointHolderRequest request, IdempotencyKey key);
 
   @Named("toBankAccountId")
   default BankAccountId toBankAccountId(UUID value) {
