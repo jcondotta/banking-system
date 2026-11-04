@@ -1,6 +1,6 @@
 package com.jcondotta.banking.accounts.infrastructure.adapters.output.persistence.dynamodb.idempotency.mapper;
 
-import com.jcondotta.banking.accounts.application.common.idempotency.IdempotencyKey;
+import com.jcondotta.application.idempotency.IdempotencyKey;
 import com.jcondotta.banking.accounts.application.common.idempotency.IdempotencyRecord;
 import com.jcondotta.banking.accounts.domain.bankaccount.identity.BankAccountId;
 import com.jcondotta.banking.accounts.infrastructure.adapters.output.persistence.dynamodb.enums.EntityType;

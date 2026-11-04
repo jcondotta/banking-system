@@ -1,5 +1,7 @@
 package com.jcondotta.banking.accounts.infrastructure.adapters.output.persistence.dynamodb.idempotency.repository;
 
+import com.jcondotta.application.idempotency.IdempotencyKey;
+import com.jcondotta.application.idempotency.IdempotencyRepository;
 import com.jcondotta.banking.accounts.application.common.idempotency.*;
 import com.jcondotta.banking.accounts.infrastructure.adapters.output.persistence.dynamodb.enums.EntityType;
 import com.jcondotta.banking.accounts.infrastructure.adapters.output.persistence.dynamodb.idempotency.entity.IdempotencyEntity;
@@ -13,7 +15,7 @@ import java.util.Optional;
 
 @Repository
 @RequiredArgsConstructor
-public class IdempotencyDynamoDbRepository implements IdempotencyRepository {
+public class IdempotencyDynamoDbRepository implements IdempotencyRepository<IdempotencyRecord> {
     private final DynamoDbTable<IdempotencyEntity> table;
 
     @Override

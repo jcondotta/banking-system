@@ -3,6 +3,7 @@ package com.jcondotta.banking.accounts.application.bankaccount.command.open;
 import com.jcondotta.application.command.CommandHandlerWithResult;
 import com.jcondotta.banking.accounts.application.common.idempotency.*;
 import com.jcondotta.application.idempotency.IdempotencyKey;
+import com.jcondotta.application.idempotency.IdempotencyRepository;
 import com.jcondotta.banking.accounts.application.bankaccount.ports.output.BankAccountTransactionalRepository;
 import com.jcondotta.banking.accounts.application.bankaccount.command.open.model.OpenBankAccountCommand;
 import com.jcondotta.banking.accounts.domain.bankaccount.aggregate.BankAccount;
@@ -31,7 +32,7 @@ class OpenBankAccountCommandHandlerTest {
   private BankAccountTransactionalRepository bankAccountRepository;
 
   @Mock
-  private IdempotencyRepository records;
+  private IdempotencyRepository<IdempotencyRecord> records;
 
   @Captor
   private ArgumentCaptor<BankAccount> bankAccountCaptor;

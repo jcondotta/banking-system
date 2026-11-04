@@ -3,6 +3,7 @@ package com.jcondotta.banking.accounts.application.bankaccount.command.add_joint
 import com.jcondotta.application.command.CommandHandler;
 import com.jcondotta.banking.accounts.application.common.idempotency.*;
 import com.jcondotta.application.idempotency.IdempotencyKey;
+import com.jcondotta.application.idempotency.IdempotencyRepository;
 import com.jcondotta.banking.accounts.application.bankaccount.ports.output.BankAccountTransactionalRepository;
 import com.jcondotta.banking.accounts.application.bankaccount.command.add_joint_holder.model.AddJointHolderCommand;
 import com.jcondotta.banking.accounts.domain.bankaccount.aggregate.BankAccount;
@@ -31,7 +32,7 @@ class AddJointHolderCommandHandlerTest {
   private BankAccountRepository bankAccountRepository;
 
   @Mock
-  private IdempotencyRepository records;
+  private IdempotencyRepository<IdempotencyRecord> records;
   @Mock
   private BankAccountTransactionalRepository writer;
 
