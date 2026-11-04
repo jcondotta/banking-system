@@ -146,6 +146,22 @@ services:
       - ../accounts/docker/localstack:/etc/localstack/init/ready.d
       - accounts_localstack_volume:/var/lib/localstack
 
+  dynamodb-admin:
+    image: aaronshaf/dynamodb-admin:latest
+    container_name: accounts-dynamodb-admin
+    ports:
+      - "127.0.0.1:8001:8001"
+    environment:
+      DYNAMO_ENDPOINT: http://localstack:4566
+      AWS_REGION: us-east-1
+      AWS_ACCESS_KEY_ID: test
+      AWS_SECRET_ACCESS_KEY: test
+    depends_on:
+      localstack:
+        condition: service_healthy
+    networks:
+      - banking_network
+
   # ── Recipients ────────────────────────────────────────────────────────────
 
   postgres-recipients:
