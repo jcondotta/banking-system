@@ -20,18 +20,13 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.http.HttpStatus;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
-import software.amazon.awssdk.enhanced.dynamodb.Key;
-import software.amazon.awssdk.enhanced.dynamodb.model.QueryConditional;
 
 import java.util.List;
 import java.util.UUID;
 
 import static com.jcondotta.banking.accounts.integration.testsupport.rest.RestAssuredTestConstants.API_VERSION_1;
 import static com.jcondotta.banking.accounts.integration.testsupport.rest.RestAssuredTestConstants.BASE_URI;
-import static io.restassured.RestAssured.given;
-import static org.assertj.core.api.Assertions.assertThat;
 
 public abstract class BankAccountIntegrationSupport {
 
@@ -44,6 +39,13 @@ public abstract class BankAccountIntegrationSupport {
   @Autowired
   private DynamoDbTable<OutboxEntity> outboxTable;
 
+  private OpenBankAccountIntegrationOperations openBankAccountOperations;
+  private ActivateBankAccountIntegrationOperations activateBankAccountOperations;
+  private AddJointHolderIntegrationOperations addJointHolderOperations;
+  private GetBankAccountIntegrationOperations getBankAccountOperations;
+  private BankAccountLifecycleIntegrationOperations bankAccountLifecycleOperations;
+  private OutboxIntegrationOperations outboxOperations;
+
   @BeforeAll
   static void beforeAll() {
     RestAssured.enableLoggingOfRequestAndResponseIfValidationFails();
@@ -53,165 +55,89 @@ public abstract class BankAccountIntegrationSupport {
   void beforeEach(@LocalServerPort int port) {
     RestAssured.baseURI = BASE_URI;
     RestAssured.port = port;
+    openBankAccountOperations = new OpenBankAccountIntegrationOperations(uriProperties, this::requestSpecification);
+    activateBankAccountOperations = new ActivateBankAccountIntegrationOperations(uriProperties, this::requestSpecification);
+    addJointHolderOperations = new AddJointHolderIntegrationOperations(uriProperties, this::requestSpecification);
+    getBankAccountOperations = new GetBankAccountIntegrationOperations(uriProperties, this::requestSpecification);
+    bankAccountLifecycleOperations = new BankAccountLifecycleIntegrationOperations(uriProperties, this::requestSpecification);
+    outboxOperations = new OutboxIntegrationOperations(outboxTable);
   }
 
   protected BankAccountId openBankAccount(AccountType accountType, Currency currency) {
-    var response = postOpenBankAccount(
-      BankAccountRequestFactory.openBankAccount(accountType, currency, AccountHolderFixtures.JEFFERSON)
-    );
-
-    assertThat(response.statusCode()).isEqualTo(HttpStatus.CREATED.value());
-    return extractBankAccountId(response);
+    return openBankAccountOperations.openBankAccount(accountType, currency);
   }
 
   protected Response postOpenBankAccount(OpenBankAccountRequest request) {
-    return given()
-      .spec(requestSpecification(uriProperties.rootPath()))
-      .body(request)
-      .when()
-      .post()
-      .then()
-      .extract()
-      .response();
+    return openBankAccountOperations.postOpenBankAccount(request);
+  }
+
+  protected Response postOpenBankAccount(OpenBankAccountRequest request, UUID key) {
+    return openBankAccountOperations.postOpenBankAccount(request, key);
   }
 
   protected void activateBankAccount(BankAccountId id) {
-    patchBankAccount(id, "/activate", HttpStatus.NO_CONTENT);
+    activateBankAccountOperations.activateBankAccount(id);
   }
 
   protected void activateBankAccount(BankAccountId id, UUID correlationId) {
-    var response = given()
-      .spec(requestSpecification(uriProperties.bankAccountIdPath() + "/activate"))
-      .header(HttpHeadersConstants.CORRELATION_ID, correlationId)
-      .pathParam("bank-account-id", id.value())
-      .when()
-      .patch()
-      .then()
-      .extract()
-      .response();
-
-    assertThat(response.statusCode()).isEqualTo(HttpStatus.NO_CONTENT.value());
+    activateBankAccountOperations.activateBankAccount(id, correlationId);
   }
 
   protected void blockBankAccount(BankAccountId id) {
-    patchBankAccount(id, "/block", HttpStatus.NO_CONTENT);
+    bankAccountLifecycleOperations.blockBankAccount(id);
   }
 
   protected void unblockBankAccount(BankAccountId id) {
-    patchBankAccount(id, "/unblock", HttpStatus.NO_CONTENT);
+    bankAccountLifecycleOperations.unblockBankAccount(id);
   }
 
   protected void closeBankAccount(BankAccountId id) {
-    patchBankAccount(id, "/close", HttpStatus.NO_CONTENT);
+    bankAccountLifecycleOperations.closeBankAccount(id);
   }
 
   protected Response patchBankAccount(BankAccountId id, String actionPath) {
-    return given()
-      .spec(requestSpecification(uriProperties.bankAccountIdPath() + actionPath))
-      .pathParam("bank-account-id", id.value())
-      .when()
-      .patch()
-      .then()
-      .extract()
-      .response();
+    return bankAccountLifecycleOperations.patchBankAccount(id, actionPath);
   }
 
   protected void addJointHolder(BankAccountId id, AccountHolderFixtures fixture) {
-    var response = postJointHolder(id, BankAccountRequestFactory.addJointHolder(fixture));
-    assertThat(response.statusCode()).isEqualTo(HttpStatus.NO_CONTENT.value());
+    addJointHolderOperations.addJointHolder(id, fixture);
   }
 
   protected Response postJointHolder(BankAccountId id, AddJointHolderRequest request) {
-    return given()
-      .spec(requestSpecification(uriProperties.bankAccountIdPath() + "/account-holders"))
-      .pathParam("bank-account-id", id.value())
-      .body(request)
-      .when()
-      .post()
-      .then()
-      .extract()
-      .response();
+    return addJointHolderOperations.postJointHolder(id, request);
+  }
+
+  protected Response postJointHolder(BankAccountId id, AddJointHolderRequest request, UUID key) {
+    return addJointHolderOperations.postJointHolder(id, request, key);
   }
 
   protected BankAccountDetailsResponse getBankAccount(BankAccountId id) {
-    return given()
-      .spec(requestSpecification(uriProperties.bankAccountIdPath()))
-      .pathParam("bank-account-id", id.value())
-      .when()
-      .get()
-      .then()
-      .statusCode(HttpStatus.OK.value())
-      .extract()
-      .as(BankAccountDetailsResponse.class);
+    return getBankAccountOperations.getBankAccount(id);
   }
 
   protected BankAccountDetailsResponse getBankAccountByIban(String iban) {
-    return given()
-      .spec(requestSpecification(uriProperties.rootPath()))
-      .queryParam("iban", iban)
-      .when()
-      .get()
-      .then()
-      .statusCode(HttpStatus.OK.value())
-      .extract()
+    return getBankAccountOperations.getBankAccountByIban(iban)
       .as(BankAccountDetailsResponse.class);
   }
 
   protected Response getBankAccountByIbanResponse(String iban) {
-    return given()
-      .spec(requestSpecification(uriProperties.rootPath()))
-      .queryParam("iban", iban)
-      .when()
-      .get()
-      .then()
-      .extract()
-      .response();
+    return getBankAccountOperations.getBankAccountByIban(iban);
   }
 
   protected Response getBankAccount(UUID id) {
-    return given()
-      .spec(requestSpecification(uriProperties.bankAccountIdPath()))
-      .pathParam("bank-account-id", id)
-      .when()
-      .get()
-      .then()
-      .extract()
-      .response();
+    return getBankAccountOperations.getBankAccount(id);
   }
 
   protected List<OutboxEntity> findOutboxEvents(BankAccountId id) {
-    var query = QueryConditional.keyEqualTo(Key.builder()
-      .partitionValue("BANK_ACCOUNT#%s".formatted(id.asString()))
-      .build());
-
-    return outboxTable.query(query)
-      .items()
-      .stream()
-      .filter(item -> item.getSortKey().startsWith("OUTBOX#"))
-      .toList();
+    return outboxOperations.findOutboxEvents(id);
   }
 
   protected void clearOutboxEvents() {
-    outboxTable.scan().items().stream()
-      .filter(item -> item.getSortKey().startsWith("OUTBOX#"))
-      .forEach(outboxTable::deleteItem);
+    outboxOperations.clearOutboxEvents();
   }
 
   protected void assertOutboxEvents(BankAccountId id, String... eventTypes) {
-    var events = findOutboxEvents(id);
-
-    assertThat(events)
-      .extracting(OutboxEntity::getEventType)
-      .containsExactlyInAnyOrder(eventTypes);
-
-    assertThat(events)
-      .allSatisfy(event -> {
-        assertThat(event.getAggregateId()).isEqualTo(id.asString());
-        assertThat(event.getEventId()).isNotNull();
-        assertThat(event.getPayload()).contains(id.asString());
-        assertThat(event.getCreatedAt()).isNotNull();
-        assertThat(event.getNextAttemptAt()).isNotNull();
-      });
+    outboxOperations.assertOutboxEvents(id, eventTypes);
   }
 
   protected RequestSpecification requestSpecification(String basePath) {
@@ -223,17 +149,5 @@ public abstract class BankAccountIntegrationSupport {
       .setAccept(ContentType.JSON)
       .addHeader(HttpHeadersConstants.API_VERSION, API_VERSION_1)
       .build();
-  }
-
-  private void patchBankAccount(BankAccountId id, String actionPath, HttpStatus expectedStatus) {
-    var response = patchBankAccount(id, actionPath);
-    assertThat(response.statusCode()).isEqualTo(expectedStatus.value());
-  }
-
-  private static BankAccountId extractBankAccountId(Response response) {
-    var location = response.getHeader("Location");
-    assertThat(location).isNotBlank();
-
-    return BankAccountId.of(UUID.fromString(location.substring(location.lastIndexOf('/') + 1)));
   }
 }
