@@ -1,7 +1,7 @@
 package com.jcondotta.banking.accounts.infrastructure.adapters.input.rest.add_joint_holder;
 
 import com.jcondotta.application.command.CommandHandler;
-import com.jcondotta.banking.accounts.application.common.idempotency.IdempotencyKey;
+import com.jcondotta.application.idempotency.IdempotencyKey;
 import com.jcondotta.banking.accounts.application.bankaccount.command.add_joint_holder.model.AddJointHolderCommand;
 import com.jcondotta.banking.accounts.infrastructure.adapters.input.rest.add_joint_holder.mapper.AddJointHolderRequestControllerMapper;
 import com.jcondotta.banking.accounts.infrastructure.adapters.input.rest.add_joint_holder.model.AddJointHolderRequest;

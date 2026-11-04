@@ -1,7 +1,7 @@
 package com.jcondotta.banking.accounts.infrastructure.adapters.input.rest.open.mapper;
 
 import com.jcondotta.banking.accounts.application.bankaccount.command.open.model.OpenBankAccountCommand;
-import com.jcondotta.banking.accounts.application.common.idempotency.IdempotencyKey;
+import com.jcondotta.application.idempotency.IdempotencyKey;
 import com.jcondotta.banking.accounts.domain.bankaccount.enums.AccountType;
 import com.jcondotta.banking.accounts.domain.bankaccount.enums.Currency;
 import com.jcondotta.banking.accounts.domain.bankaccount.enums.DocumentCountry;
