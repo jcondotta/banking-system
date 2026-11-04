@@ -1,6 +1,7 @@
 package com.jcondotta.banking.accounts.infrastructure.adapters.output.persistence.dynamodb.outbox.entity;
 
 import com.jcondotta.banking.infrastructure.outbox.record.OutboxRecord;
+import com.jcondotta.banking.accounts.infrastructure.adapters.output.persistence.dynamodb.enums.EntityType;
 import lombok.*;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.*;
 
@@ -17,6 +18,7 @@ public class OutboxEntity implements OutboxRecord {
 
   private String partitionKey;
   private String sortKey;
+  private EntityType entityType;
 
   private String gsi1pk;
   private String gsi1sk;

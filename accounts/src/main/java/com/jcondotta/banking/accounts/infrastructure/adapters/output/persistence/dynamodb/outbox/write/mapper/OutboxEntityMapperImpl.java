@@ -2,6 +2,7 @@ package com.jcondotta.banking.accounts.infrastructure.adapters.output.persistenc
 
 import com.jcondotta.banking.accounts.infrastructure.adapters.output.persistence.dynamodb.outbox.entity.OutboxEntity;
 import com.jcondotta.banking.accounts.infrastructure.adapters.output.persistence.dynamodb.outbox.entity.OutboxKey;
+import com.jcondotta.banking.accounts.infrastructure.adapters.output.persistence.dynamodb.enums.EntityType;
 import com.jcondotta.banking.infrastructure.adapters.output.messaging.EventEnvelope;
 import com.jcondotta.banking.infrastructure.adapters.output.messaging.EventPublication;
 import com.jcondotta.banking.infrastructure.outbox.exceptions.OutboxSerializationException;
@@ -33,6 +34,7 @@ public class OutboxEntityMapperImpl implements OutboxEntityMapper<OutboxEntity> 
     var gsi1pk = "OUTBOX#" + shard;
 
     return OutboxEntity.builder()
+      .entityType(EntityType.OUTBOX)
       .partitionKey(outboxKey.partitionKey())
       .sortKey(outboxKey.sortKey())
       .gsi1pk(gsi1pk)
