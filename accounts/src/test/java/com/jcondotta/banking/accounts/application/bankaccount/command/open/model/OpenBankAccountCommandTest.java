@@ -6,6 +6,8 @@ import com.jcondotta.banking.accounts.domain.testsupport.AccountHolderFixtures;
 import com.jcondotta.banking.accounts.domain.bankaccount.value_objects.address.Address;
 import com.jcondotta.banking.accounts.domain.bankaccount.value_objects.contact.ContactInfo;
 import com.jcondotta.banking.accounts.domain.bankaccount.value_objects.personal.PersonalInfo;
+import com.jcondotta.application.idempotency.IdempotencyKey;
+import java.util.UUID;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -27,7 +29,8 @@ class OpenBankAccountCommandTest {
       CONTACT_INFO,
       ADDRESS,
       ACCOUNT_TYPE,
-      CURRENCY
+      CURRENCY,
+      key()
     );
 
     assertThat(command.personalInfo()).isEqualTo(PERSONAL_INFO);
@@ -39,36 +42,40 @@ class OpenBankAccountCommandTest {
 
   @Test
   void shouldThrowNullPointerException_whenPersonalInfoIsNull() {
-    assertThatThrownBy(() -> new OpenBankAccountCommand(null, CONTACT_INFO, ADDRESS, ACCOUNT_TYPE, CURRENCY))
+    assertThatThrownBy(() -> new OpenBankAccountCommand(null, CONTACT_INFO, ADDRESS, ACCOUNT_TYPE, CURRENCY, key()))
       .isInstanceOf(NullPointerException.class)
       .hasMessage(OpenBankAccountCommand.PERSONAL_INFO_REQUIRED);
   }
 
   @Test
   void shouldThrowNullPointerException_whenContactInfoIsNull() {
-    assertThatThrownBy(() -> new OpenBankAccountCommand(PERSONAL_INFO, null, ADDRESS, ACCOUNT_TYPE, CURRENCY))
+    assertThatThrownBy(() -> new OpenBankAccountCommand(PERSONAL_INFO, null, ADDRESS, ACCOUNT_TYPE, CURRENCY, key()))
       .isInstanceOf(NullPointerException.class)
       .hasMessage(OpenBankAccountCommand.CONTACT_INFO_REQUIRED);
   }
 
   @Test
   void shouldThrowNullPointerException_whenAddressIsNull() {
-    assertThatThrownBy(() -> new OpenBankAccountCommand(PERSONAL_INFO, CONTACT_INFO, null, ACCOUNT_TYPE, CURRENCY))
+    assertThatThrownBy(() -> new OpenBankAccountCommand(PERSONAL_INFO, CONTACT_INFO, null, ACCOUNT_TYPE, CURRENCY, key()))
       .isInstanceOf(NullPointerException.class)
       .hasMessage(OpenBankAccountCommand.ADDRESS_REQUIRED);
   }
 
   @Test
   void shouldThrowNullPointerException_whenAccountTypeIsNull() {
-    assertThatThrownBy(() -> new OpenBankAccountCommand(PERSONAL_INFO, CONTACT_INFO, ADDRESS, null, CURRENCY))
+    assertThatThrownBy(() -> new OpenBankAccountCommand(PERSONAL_INFO, CONTACT_INFO, ADDRESS, null, CURRENCY, key()))
       .isInstanceOf(NullPointerException.class)
       .hasMessage(OpenBankAccountCommand.ACCOUNT_TYPE_REQUIRED);
   }
 
   @Test
   void shouldThrowNullPointerException_whenCurrencyIsNull() {
-    assertThatThrownBy(() -> new OpenBankAccountCommand(PERSONAL_INFO, CONTACT_INFO, ADDRESS, ACCOUNT_TYPE, null))
+    assertThatThrownBy(() -> new OpenBankAccountCommand(PERSONAL_INFO, CONTACT_INFO, ADDRESS, ACCOUNT_TYPE, null, key()))
       .isInstanceOf(NullPointerException.class)
       .hasMessage(OpenBankAccountCommand.CURRENCY_REQUIRED);
+  }
+
+  private static IdempotencyKey key() {
+    return IdempotencyKey.of(UUID.randomUUID());
   }
 }

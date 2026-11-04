@@ -4,6 +4,8 @@ import com.jcondotta.banking.accounts.domain.bankaccount.identity.BankAccountId;
 import com.jcondotta.banking.accounts.domain.bankaccount.value_objects.address.Address;
 import com.jcondotta.banking.accounts.domain.bankaccount.value_objects.contact.ContactInfo;
 import com.jcondotta.banking.accounts.domain.bankaccount.value_objects.personal.PersonalInfo;
+import com.jcondotta.application.idempotency.IdempotencyKey;
+import java.util.UUID;
 import org.junit.jupiter.api.Test;
 
 import static com.jcondotta.banking.accounts.domain.testsupport.AccountHolderFixtures.JEFFERSON;
@@ -24,7 +26,8 @@ class AddJointHolderCommandTest {
       bankAccountId,
       PERSONAL_INFO,
       CONTACT_INFO,
-      ADDRESS
+      ADDRESS,
+      key()
     );
 
     assertThat(command.bankAccountId()).isEqualTo(bankAccountId);
@@ -40,7 +43,8 @@ class AddJointHolderCommandTest {
         null,
         PERSONAL_INFO,
         CONTACT_INFO,
-        ADDRESS
+        ADDRESS,
+        key()
       ))
       .isInstanceOf(NullPointerException.class)
       .hasMessage(AddJointHolderCommand.BANK_ACCOUNT_ID_REQUIRED);
@@ -53,7 +57,8 @@ class AddJointHolderCommandTest {
         BankAccountId.newId(),
         null,
         CONTACT_INFO,
-        ADDRESS
+        ADDRESS,
+        key()
       ))
       .isInstanceOf(NullPointerException.class)
       .hasMessage(AddJointHolderCommand.PERSONAL_INFO_REQUIRED);
@@ -66,7 +71,8 @@ class AddJointHolderCommandTest {
         BankAccountId.newId(),
         PERSONAL_INFO,
         null,
-        ADDRESS
+        ADDRESS,
+        key()
       ))
       .isInstanceOf(NullPointerException.class)
       .hasMessage(AddJointHolderCommand.CONTACT_INFO_REQUIRED);
@@ -79,9 +85,14 @@ class AddJointHolderCommandTest {
         BankAccountId.newId(),
         PERSONAL_INFO,
         CONTACT_INFO,
-        null
+        null,
+        key()
       ))
       .isInstanceOf(NullPointerException.class)
       .hasMessage(AddJointHolderCommand.ADDRESS_REQUIRED);
+  }
+
+  private static IdempotencyKey key() {
+    return IdempotencyKey.of(UUID.randomUUID());
   }
 }

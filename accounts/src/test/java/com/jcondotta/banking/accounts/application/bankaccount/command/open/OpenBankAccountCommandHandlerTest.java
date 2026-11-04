@@ -1,6 +1,9 @@
 package com.jcondotta.banking.accounts.application.bankaccount.command.open;
 
 import com.jcondotta.application.command.CommandHandlerWithResult;
+import com.jcondotta.banking.accounts.application.common.idempotency.*;
+import com.jcondotta.application.idempotency.IdempotencyKey;
+import com.jcondotta.banking.accounts.application.bankaccount.ports.output.BankAccountTransactionalRepository;
 import com.jcondotta.banking.accounts.application.bankaccount.command.open.model.OpenBankAccountCommand;
 import com.jcondotta.banking.accounts.domain.bankaccount.aggregate.BankAccount;
 import com.jcondotta.banking.accounts.domain.bankaccount.enums.AccountType;
@@ -25,7 +28,10 @@ import static org.mockito.Mockito.*;
 class OpenBankAccountCommandHandlerTest {
 
   @Mock
-  private BankAccountRepository bankAccountRepository;
+  private BankAccountTransactionalRepository bankAccountRepository;
+
+  @Mock
+  private IdempotencyRepository records;
 
   @Captor
   private ArgumentCaptor<BankAccount> bankAccountCaptor;
@@ -34,7 +40,7 @@ class OpenBankAccountCommandHandlerTest {
 
   @BeforeEach
   void setUp() {
-    commandHandler = new OpenBankAccountCommandHandler(bankAccountRepository);
+    commandHandler = new OpenBankAccountCommandHandler(new IdempotentAccountWriter(records, bankAccountRepository));
   }
 
   @Test
@@ -67,12 +73,13 @@ class OpenBankAccountCommandHandlerTest {
       contactInfo,
       address,
       accountType,
-      currency
+      currency,
+      key()
     );
 
     var bankAccountId = commandHandler.handle(command);
 
-    verify(bankAccountRepository).save(bankAccountCaptor.capture());
+    verify(bankAccountRepository).save(bankAccountCaptor.capture(), any(IdempotencyRecord.class));
     verifyNoMoreInteractions(bankAccountRepository);
 
     assertThat(bankAccountId).isEqualTo(bankAccountCaptor.getValue().getId());
@@ -105,14 +112,14 @@ class OpenBankAccountCommandHandlerTest {
 
     doThrow(exception)
       .when(bankAccountRepository)
-      .save(any(BankAccount.class));
+      .save(any(BankAccount.class), any(IdempotencyRecord.class));
 
     var command = command(AccountType.SAVINGS, Currency.USD);
 
     assertThatThrownBy(() -> commandHandler.handle(command))
       .isSameAs(exception);
 
-    verify(bankAccountRepository).save(any(BankAccount.class));
+    verify(bankAccountRepository).save(any(BankAccount.class), any(IdempotencyRecord.class));
     verifyNoMoreInteractions(bankAccountRepository);
   }
 
@@ -122,14 +129,14 @@ class OpenBankAccountCommandHandlerTest {
 
     doThrow(exception)
       .when(bankAccountRepository)
-      .save(any(BankAccount.class));
+      .save(any(BankAccount.class), any(IdempotencyRecord.class));
 
     var command = command(AccountType.SAVINGS, Currency.USD);
 
     assertThatThrownBy(() -> commandHandler.handle(command))
       .isSameAs(exception);
 
-    verify(bankAccountRepository).save(any(BankAccount.class));
+    verify(bankAccountRepository).save(any(BankAccount.class), any(IdempotencyRecord.class));
     verifyNoMoreInteractions(bankAccountRepository);
   }
 
@@ -139,8 +146,13 @@ class OpenBankAccountCommandHandlerTest {
       AccountHolderFixtures.JEFFERSON.contactInfo(),
       AccountHolderFixtures.JEFFERSON.address(),
       accountType,
-      currency
+      currency,
+      key()
     );
+  }
+
+  private static IdempotencyKey key() {
+    return IdempotencyKey.of(java.util.UUID.randomUUID());
   }
 
   private static final class TestDomainException extends DomainException {

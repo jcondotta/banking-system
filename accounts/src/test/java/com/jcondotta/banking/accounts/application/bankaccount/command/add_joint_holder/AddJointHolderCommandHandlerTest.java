@@ -1,6 +1,9 @@
 package com.jcondotta.banking.accounts.application.bankaccount.command.add_joint_holder;
 
 import com.jcondotta.application.command.CommandHandler;
+import com.jcondotta.banking.accounts.application.common.idempotency.*;
+import com.jcondotta.application.idempotency.IdempotencyKey;
+import com.jcondotta.banking.accounts.application.bankaccount.ports.output.BankAccountTransactionalRepository;
 import com.jcondotta.banking.accounts.application.bankaccount.command.add_joint_holder.model.AddJointHolderCommand;
 import com.jcondotta.banking.accounts.domain.bankaccount.aggregate.BankAccount;
 import com.jcondotta.banking.accounts.domain.bankaccount.exceptions.BankAccountNotActiveException;
@@ -27,11 +30,16 @@ class AddJointHolderCommandHandlerTest {
   @Mock
   private BankAccountRepository bankAccountRepository;
 
+  @Mock
+  private IdempotencyRepository records;
+  @Mock
+  private BankAccountTransactionalRepository writer;
+
   private CommandHandler<AddJointHolderCommand> commandHandler;
 
   @BeforeEach
   void setUp() {
-    commandHandler = new AddJointHolderCommandHandler(bankAccountRepository);
+    commandHandler = new AddJointHolderCommandHandler(new IdempotentAccountWriter(records, writer), bankAccountRepository);
   }
 
   @Test
@@ -45,12 +53,13 @@ class AddJointHolderCommandHandlerTest {
       bankAccount.getId(),
       AccountHolderFixtures.VIRGINIO.personalInfo(),
       AccountHolderFixtures.VIRGINIO.contactInfo(),
-      AccountHolderFixtures.VIRGINIO.address()
+      AccountHolderFixtures.VIRGINIO.address(),
+      key()
     );
 
     commandHandler.handle(command);
     verify(bankAccountRepository).findById(bankAccount.getId());
-    verify(bankAccountRepository).save(bankAccount);
+    verify(writer).save(eq(bankAccount), any(IdempotencyRecord.class));
     verifyNoMoreInteractions(bankAccountRepository);
 
 
@@ -68,7 +77,8 @@ class AddJointHolderCommandHandlerTest {
       bankAccountId,
       AccountHolderFixtures.VIRGINIO.personalInfo(),
       AccountHolderFixtures.VIRGINIO.contactInfo(),
-      AccountHolderFixtures.VIRGINIO.address()
+      AccountHolderFixtures.VIRGINIO.address(),
+      key()
     );
 
     assertThatThrownBy(() -> commandHandler.handle(command))
@@ -89,7 +99,8 @@ class AddJointHolderCommandHandlerTest {
       bankAccount.getId(),
       AccountHolderFixtures.VIRGINIO.personalInfo(),
       AccountHolderFixtures.VIRGINIO.contactInfo(),
-      AccountHolderFixtures.VIRGINIO.address()
+      AccountHolderFixtures.VIRGINIO.address(),
+      key()
     );
 
     assertThatThrownBy(() -> commandHandler.handle(command))
@@ -111,7 +122,8 @@ class AddJointHolderCommandHandlerTest {
       bankAccountId,
       AccountHolderFixtures.VIRGINIO.personalInfo(),
       AccountHolderFixtures.VIRGINIO.contactInfo(),
-      AccountHolderFixtures.VIRGINIO.address()
+      AccountHolderFixtures.VIRGINIO.address(),
+      key()
     );
 
     assertThatThrownBy(() -> commandHandler.handle(command))
@@ -119,5 +131,9 @@ class AddJointHolderCommandHandlerTest {
 
     verify(bankAccountRepository).findById(bankAccountId);
     verifyNoMoreInteractions(bankAccountRepository);
+  }
+
+  private static IdempotencyKey key() {
+    return IdempotencyKey.of(java.util.UUID.randomUUID());
   }
 }
