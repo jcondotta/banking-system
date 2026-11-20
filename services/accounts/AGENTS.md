@@ -17,13 +17,13 @@ The API and outbox processor share one `AccountsApplication`, Boot JAR, lifecycl
 
 ## Build, Test, and Development Commands
 
-Run commands from this directory. The Maven wrapper lives two levels up.
+Run Maven commands from the repository root.
 
-- `../../mvnw -pl services/accounts -am clean verify`: build the service, run Surefire/Failsafe, and generate JaCoCo reports.
-- `../../mvnw -pl services/accounts -am test`: run unit tests.
-- `../../mvnw -pl services/accounts -am spring-boot:run -Dspring-boot.run.profiles=local`: run the API and outbox worker locally on port `8080`.
-- `docker compose -f ../../docker/docker-compose.yml up -d localstack`: start the local DynamoDB dependency.
-- `../../mvnw -pl services/accounts -am pitest:mutationCoverage`: run mutation testing for the consolidated service.
+- `./mvnw -pl services/accounts -am clean verify`: build the service, run Surefire/Failsafe, and generate JaCoCo reports.
+- `./mvnw -pl services/accounts -am test`: run unit tests.
+- `./mvnw -pl services/accounts -am spring-boot:run -Dspring-boot.run.profiles=local`: run the API and outbox worker locally on port `8080`.
+- `docker compose -f docker/docker-compose.yml up -d localstack`: start the local DynamoDB dependency.
+- `./mvnw -pl services/accounts -am pitest:mutationCoverage`: run mutation testing for the consolidated service.
 
 ## Coding Style & Naming Conventions
 
@@ -35,7 +35,7 @@ Tests use JUnit 5, Mockito, Rest Assured, ArchUnit, Testcontainers, JaCoCo, and 
 
 ## Commit & Pull Request Guidelines
 
-Recent commits use imperative, sentence-style messages, for example `Add name filtering to list recipients API`. Keep commits focused and describe the behavioral change. Pull requests should include a short summary, affected modules, test evidence such as `./mvnw clean verify` or targeted module tests, linked issues, and API/configuration notes when endpoints, events, profiles, or infrastructure files change.
+Recent commits use imperative, sentence-style messages, for example `Add name filtering to list recipients API`. Keep commits focused and describe the behavioral change. Pull requests should include a short summary, affected modules, test evidence such as `./mvnw -pl services/accounts -am clean verify` or targeted module tests, linked issues, and API/configuration notes when endpoints, events, profiles, or infrastructure files change.
 
 ## Security & Configuration Tips
 

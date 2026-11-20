@@ -5,7 +5,7 @@
 This is the `recipients` bounded context: a Java 25, Spring Boot 4, single-module Maven service using DDD, CQRS, and hexagonal architecture by package rather than by Maven submodule.
 
 - `src/main/java/com/jcondotta/banking/recipients/`: application entrypoint and all production code.
-- `domain/`: tem framework-free recipient model. It owns the `Recipient` aggregate, `BankAccountId`, `RecipientId`, `RecipientName`, `Iban`, domain exceptions, domain events, validation constants, and repository ports.
+- `domain/`: framework-free recipient model. It owns the `Recipient` aggregate, `BankAccountId`, `RecipientId`, `RecipientName`, `Iban`, domain exceptions, domain events, validation constants, and repository ports.
 - `application/`: use-case orchestration. It owns commands, queries, handlers, query models, logging event names/keys, failure classification and normalization, `@Observed` instrumentation, and concurrency limits.
 - `infrastructure/`: Spring and adapter code. It owns REST controllers, request/response DTOs, mappers, `ProblemDetail` exception handlers, correlation filtering, JPA entities/repositories, PostgreSQL adapters, persistence mappers, and runtime configuration.
 - Recipient events are published directly through the shared broker sender in `infrastructure-core`; this bounded context does not depend on `outbox-infrastructure`.
@@ -20,6 +20,9 @@ Keep dependencies pointing inward by package: infrastructure may depend on appli
 
 Shared development workflow guidance lives under `../../docs/ai/`.
 
+Shared domain-modeling guidance lives in `../../docs/ai/06-domain-guidelines.md`.
+Shared application-layer guidance lives in `../../docs/ai/07-application-guidelines.md`.
+
 Recipients-specific guidance lives under `docs/ai/`.
 
 `docs/ai/change-playbook.md` provides recipients-specific guidance based on the architectural areas affected by a change.
@@ -28,13 +31,13 @@ When shared workflow guidance and local recipients guidance both apply, prefer t
 
 ## Build, Test, and Development Commands
 
-Run commands from this directory. The Maven wrapper lives two levels up.
+Run Maven commands from the repository root.
 
-- `../../mvnw -pl services/recipients -am clean verify`: build the service, run Surefire/Failsafe, and produce JaCoCo output.
-- `../../mvnw -pl services/recipients -am test`: run unit tests only.
-- `../../mvnw -pl services/recipients -am spring-boot:run -Dspring-boot.run.profiles=local`: start the service locally on port `8081`.
-- `docker compose -f ../../docker/docker-compose.yml up -d postgres-recipients`: start PostgreSQL `recipients_db` on `127.0.0.1:5432`.
-- `../../mvnw -pl services/recipients -am pitest:mutationCoverage`: run PIT mutation testing for the consolidated service.
+- `./mvnw -pl services/recipients -am clean verify`: build the service, run Surefire/Failsafe, and produce JaCoCo output.
+- `./mvnw -pl services/recipients -am test`: run unit tests only.
+- `./mvnw -pl services/recipients -am spring-boot:run -Dspring-boot.run.profiles=local`: start the service locally on port `8081`.
+- `docker compose -f docker/docker-compose.yml up -d postgres-recipients`: start PostgreSQL `recipients_db` on `127.0.0.1:5432`.
+- `./mvnw -pl services/recipients -am pitest:mutationCoverage`: run PIT mutation testing for the consolidated service.
 
 ## Coding Style & Naming Conventions
 
@@ -52,7 +55,7 @@ Preserve framework-free domain code even though all layers compile in one Maven 
 
 Recent commits use imperative, sentence-style messages such as `Add name filtering to list recipients API`.
 
-PRs should include summary, affected areas, test evidence (`../../mvnw -pl services/recipients -am verify`, targeted tests, or PIT where relevant), linked issues, and API/config notes when endpoints, profiles, Docker, Kubernetes, or observability behavior change.
+PRs should include summary, affected areas, test evidence (`./mvnw -pl services/recipients -am verify`, targeted tests, or PIT where relevant), linked issues, and API/config notes when endpoints, profiles, Docker, Kubernetes, or observability behavior change.
 
 ## Security & Configuration Tips
 

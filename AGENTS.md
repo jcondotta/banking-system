@@ -2,21 +2,21 @@
 
 ## Project Structure & Module Organization
 
-This is a Java 25, Spring Boot 4, Maven banking system. The root `pom.xml` builds the shared `services/core` modules and the `services/accounts` and `services/recipients` bounded contexts, as well as `transfers` and `ledger`.
+This is a Java 25, Spring Boot 4, Maven banking system. The root `pom.xml` reactor contains all code modules under `services/`: shared `core` modules and the `accounts`, `recipients`, `transfers`, and `ledger` bounded contexts.
 
 - `services/core/`: shared modules including `domain-core`, `application-core`, `infrastructure-core`, and the opt-in `outbox-infrastructure` module.
 - `services/accounts/`: bounded context implemented as a flat single Maven module. Its API and transactional-outbox worker run in the same Spring Boot application.
 - `services/recipients/`: bounded context implemented as a flat single Maven module, organized by package into domain, application, infrastructure, and bootstrap/runtime concerns.
-- `services/transfers/` and `services/ledger/`: bounded contexts implemented as single Maven modules and listed in the root reactor.
-- `src/main/java` and `src/test/java`: production and test code inside each module or bounded context.
-- `src/main/resources`: Spring configuration, Liquibase changelogs, logging config, and other runtime resources.
+- `services/transfers/`: single-module bounded context for internal transfers.
+- `services/ledger/`: single-module bounded context for ledger accounts and entries.
+- Within each module, `src/main/java` and `src/test/java` contain production and test code; `src/main/resources` contains Spring configuration, Liquibase changelogs, logging config, and other runtime resources.
 - `docker/`, `k8s/`, `terraform/`: local infrastructure, Kubernetes manifests, and cloud infrastructure where present.
 
 ## Development Workflow
 
 Shared development workflow guidance lives under `docs/ai/`.
 
-The numbered documents represent stages of the development process. They define how to reason about, design, implement, test, and validate changes.
+The first five numbered documents represent stages of the development process. They define how to reason about, design, implement, test, and validate changes.
 
 | Stage | Purpose | Guidance |
 | --- | --- | --- |
@@ -25,6 +25,9 @@ The numbered documents represent stages of the development process. They define 
 | 3. Implementation | Implement autonomously after relevant requirements and design decisions are resolved | `docs/ai/03-implementation.md` |
 | 4. Testing | Add or update tests according to repository testing conventions | `docs/ai/04-testing.md` |
 | 5. Validation | Independently review the completed change before considering it finished | `docs/ai/05-validation.md` |
+
+Shared domain-modeling guidance lives in `docs/ai/06-domain-guidelines.md`.
+Shared application-layer guidance lives in `docs/ai/07-application-guidelines.md`.
 
 Bounded contexts may provide local guidance under their own `docs/ai/` directory. When shared workflow guidance and local bounded-context guidance both apply, prefer the more specific local guidance for paths, commands, fixtures, contracts, and bounded-context behavior.
 
@@ -74,12 +77,14 @@ Validation must complete its review before reporting questions, findings, sugges
 
 ## Build, Test, and Development Commands
 
-- `./mvnw clean verify`: build root modules, run unit and integration tests, and generate JaCoCo reports.
-- `./mvnw test`: run unit tests through Surefire.
+- `./mvnw clean verify`: build every module in the root reactor, run unit and integration tests, and generate JaCoCo reports.
+- `./mvnw clean test`: run unit tests through Surefire across the full reactor.
 - `./mvnw -pl services/recipients -am spring-boot:run -Dspring-boot.run.profiles=local`: run the recipients service locally with required upstream modules.
 - `docker compose -f docker/docker-compose.yml up -d`: start all local dependencies (Kafka, OpenSearch, Postgres instances, LocalStack).
 - `./mvnw -pl services/accounts -am spring-boot:run -Dspring-boot.run.profiles=local`: run the accounts API and outbox worker locally.
 - `./mvnw -pl services/accounts -am pitest:mutationCoverage`: run PIT mutation testing for accounts.
+- `./mvnw -pl services/transfers -am test`: run unit tests for transfers and required upstream modules.
+- `./mvnw -pl services/ledger -am test`: run unit tests for ledger and required upstream modules.
 
 ## Coding Style & Naming Conventions
 

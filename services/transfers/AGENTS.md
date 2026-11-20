@@ -20,13 +20,13 @@ Shared development workflow guidance lives under `../../docs/ai/`. Use it for re
 
 ## Build, Test, and Development Commands
 
-Run commands from this directory. The Maven wrapper lives two levels up.
+Run Maven commands from the repository root.
 
-- `../../mvnw -pl services/transfers -am clean verify`: build the service, run Surefire/Failsafe, and generate JaCoCo reports.
-- `../../mvnw -pl services/transfers -am test`: run unit tests.
-- `../../mvnw -pl services/transfers -am spring-boot:run -Dspring-boot.run.profiles=local`: run the service locally on port `8082`.
-- `docker compose -f ../../docker/docker-compose.yml up -d postgres-transfers`: start PostgreSQL `transfers_db` on `127.0.0.1:5433`.
-- `../../mvnw -pl services/transfers -am pitest:mutationCoverage`: run PIT mutation testing.
+- `./mvnw -pl services/transfers -am clean verify`: build the service, run Surefire/Failsafe, and generate JaCoCo reports.
+- `./mvnw -pl services/transfers -am test`: run unit tests.
+- `./mvnw -pl services/transfers -am spring-boot:run -Dspring-boot.run.profiles=local`: run the service locally on port `8082`.
+- `docker compose -f docker/docker-compose.yml up -d postgres-transfers`: start PostgreSQL `transfers_db` on `127.0.0.1:5433`.
+- `./mvnw -pl services/transfers -am pitest:mutationCoverage`: run PIT mutation testing.
 
 ## Coding Style & Naming Conventions
 
@@ -44,7 +44,7 @@ Tests use JUnit 5, AssertJ, Mockito, Rest Assured, Spring Boot Test, JaCoCo, and
 
 Use imperative, sentence-style commit messages such as `Add internal transfer request endpoint`. Keep commits focused and describe the behavioral change.
 
-Pull requests should include a short summary, affected areas, test evidence (`../../mvnw -pl services/transfers -am clean verify`, targeted tests, or PIT where relevant), linked issues, and API/configuration notes when endpoints, events, profiles, Docker, or observability behavior change.
+Pull requests should include a short summary, affected areas, test evidence (`./mvnw -pl services/transfers -am clean verify`, targeted tests, or PIT where relevant), linked issues, and API/configuration notes when endpoints, events, profiles, Docker, or observability behavior change.
 
 ## Security & Configuration Tips
 
