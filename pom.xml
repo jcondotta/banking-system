@@ -17,11 +17,11 @@
 	<name>banking-system</name>
 
 	<modules>
-		<module>core</module>
-		<module>accounts</module>
-		<module>recipients</module>
-		<module>transfers</module>
-		<module>ledger</module>
+		<module>services/core</module>
+		<module>services/accounts</module>
+		<module>services/recipients</module>
+		<module>services/transfers</module>
+		<module>services/ledger</module>
 	</modules>
 
 	<properties>
@@ -79,6 +79,7 @@
 				<artifactId>scoped-logging-spring-boot</artifactId>
 				<version>${scoped-logging.version}</version>
 			</dependency>
+
             <!-- ===== BOM IMPORTS ===== -->
 			<dependency>
 				<groupId>software.amazon.awssdk</groupId>

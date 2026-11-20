@@ -6,9 +6,10 @@
         <groupId>com.jcondotta</groupId>
         <artifactId>banking-system</artifactId>
         <version>2.0.0</version>
+        <relativePath>../../pom.xml</relativePath>
     </parent>
 
-    <artifactId>transfers</artifactId>
+    <artifactId>ledger</artifactId>
 
     <properties>
         <shared-modules.version>2.0.0</shared-modules.version>
@@ -19,12 +20,6 @@
             <dependency>
                 <groupId>com.jcondotta</groupId>
                 <artifactId>domain-core</artifactId>
-                <version>${shared-modules.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>com.jcondotta</groupId>
-                <artifactId>money-core</artifactId>
                 <version>${shared-modules.version}</version>
             </dependency>
 
@@ -43,12 +38,6 @@
             <dependency>
                 <groupId>com.jcondotta</groupId>
                 <artifactId>infrastructure-core</artifactId>
-                <version>${shared-modules.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>com.jcondotta</groupId>
-                <artifactId>outbox-infrastructure</artifactId>
                 <version>${shared-modules.version}</version>
             </dependency>
         </dependencies>
@@ -79,10 +68,6 @@
             <groupId>com.jcondotta</groupId>
             <artifactId>infrastructure-core</artifactId>
         </dependency>
-        <dependency>
-            <groupId>com.jcondotta</groupId>
-            <artifactId>outbox-infrastructure</artifactId>
-        </dependency>
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -101,26 +86,22 @@
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-validation</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-actuator</artifactId>
         </dependency>
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-opentelemetry</artifactId>
+            <artifactId>spring-boot-starter-liquibase</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-kafka</artifactId>
         </dependency>
 
         <dependency>
             <groupId>io.micrometer</groupId>
             <artifactId>micrometer-observation</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.micrometer</groupId>
-            <artifactId>context-propagation</artifactId>
         </dependency>
 
         <dependency>
@@ -143,16 +124,6 @@
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
             <scope>runtime</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-liquibase</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-kafka</artifactId>
         </dependency>
 
         <dependency>
@@ -201,12 +172,6 @@
         <dependency>
             <groupId>org.springframework.kafka</groupId>
             <artifactId>spring-kafka-test</artifactId>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>io.rest-assured</groupId>
-            <artifactId>rest-assured</artifactId>
             <scope>test</scope>
         </dependency>
 

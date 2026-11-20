@@ -55,7 +55,7 @@ This service is a focused backend system for practicing production-oriented engi
 The service is a single Maven module with package-level architecture boundaries. Domain, application, and infrastructure code compile together, but dependencies still point inward: infrastructure may depend on application and domain, application may depend on domain, and domain stays free of Spring and infrastructure concerns.
 
 ```text
-recipients/
+services/recipients/
 ├── src/main/java/com/jcondotta/banking/recipients
 │   ├── domain          # Aggregate, value objects, identities, domain exceptions, repository ports
 │   ├── application     # Commands, queries, handlers, structured business events
@@ -198,7 +198,7 @@ Metrics use low-cardinality tags such as `application`, `operation`, `aggregate`
 From the `recipients` directory:
 
 ```bash
-docker compose -f ../docker/docker-compose.yml up -d postgres-recipients
+docker compose -f ../../docker/docker-compose.yml up -d postgres-recipients
 ```
 
 This starts:
@@ -208,7 +208,7 @@ This starts:
 Optional full observability stack:
 
 ```bash
-docker compose -f ../docker/docker-compose.yml up -d opensearch data-prepper opensearch-dashboards
+docker compose -f ../../docker/docker-compose.yml up -d opensearch data-prepper opensearch-dashboards
 ```
 
 This starts:
@@ -220,7 +220,7 @@ This starts:
 ### Run the Application
 
 ```bash
-../mvnw spring-boot:run -Dspring-boot.run.profiles=local
+../../mvnw -pl services/recipients -am spring-boot:run -Dspring-boot.run.profiles=local
 ```
 
 Or run the main class from the IDE with:
@@ -244,19 +244,19 @@ password: password
 Run unit tests:
 
 ```bash
-../mvnw test
+../../mvnw -pl services/recipients -am test
 ```
 
 Run integration tests:
 
 ```bash
-../mvnw verify
+../../mvnw -pl services/recipients -am verify
 ```
 
 Run mutation testing:
 
 ```bash
-../mvnw pitest:mutationCoverage
+../../mvnw -pl services/recipients -am pitest:mutationCoverage
 ```
 
 ## Docker
@@ -280,7 +280,7 @@ Build from the monorepo root:
 cd /Users/jcondotta/development/banking-system
 
 docker build \
-  -f recipients/Dockerfile \
+  -f services/recipients/Dockerfile \
   -t jcondotta/recipients:1.1.0 \
   .
 ```
@@ -303,7 +303,7 @@ Build and push a multi-architecture image:
 ```bash
 docker buildx build \
   --platform linux/amd64,linux/arm64 \
-  -f recipients/Dockerfile \
+  -f services/recipients/Dockerfile \
   -t jcondotta/recipients:1.1.0 \
   -t jcondotta/recipients:latest \
   --push \

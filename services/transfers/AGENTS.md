@@ -2,7 +2,7 @@
 
 ## Project Structure & Module Organization
 
-This is the `transfers` bounded context: a Java 25, Spring Boot 4, single-module Maven service using DDD, CQRS, and hexagonal architecture by package rather than by Maven submodule. It has its own Maven tree outside the root reactor.
+This is the `transfers` bounded context: a Java 25, Spring Boot 4, single-module Maven service using DDD, CQRS, and hexagonal architecture by package rather than by Maven submodule. It is included in the root Maven reactor.
 
 - `src/main/java/com/jcondotta/banking/transfers/`: application entrypoint and all production code.
 - `domain/`: framework-free transfer model, including bank accounts, transfer aggregates, parties, monetary movements, domain events, exceptions, identities, value objects, and repository ports.
@@ -16,17 +16,17 @@ Keep dependencies pointing inward by package: infrastructure may depend on appli
 
 ## Development Workflow
 
-Shared development workflow guidance lives under `../docs/ai/`. Use it for requirements, design, implementation, testing, and validation; when referenced from this bounded context, keep paths relative to this directory.
+Shared development workflow guidance lives under `../../docs/ai/`. Use it for requirements, design, implementation, testing, and validation; when referenced from this bounded context, keep paths relative to this directory.
 
 ## Build, Test, and Development Commands
 
-Run commands from this directory. The Maven wrapper lives one level up.
+Run commands from this directory. The Maven wrapper lives two levels up.
 
-- `../mvnw clean verify`: build the service, run Surefire/Failsafe, and generate JaCoCo reports.
-- `../mvnw test`: run unit tests.
-- `../mvnw spring-boot:run -Dspring-boot.run.profiles=local`: run the service locally on port `8082`.
-- `docker compose -f ../docker/docker-compose.yml up -d postgres-transfers`: start PostgreSQL `transfers_db` on `127.0.0.1:5433`.
-- `../mvnw pitest:mutationCoverage`: run PIT mutation testing.
+- `../../mvnw -pl services/transfers -am clean verify`: build the service, run Surefire/Failsafe, and generate JaCoCo reports.
+- `../../mvnw -pl services/transfers -am test`: run unit tests.
+- `../../mvnw -pl services/transfers -am spring-boot:run -Dspring-boot.run.profiles=local`: run the service locally on port `8082`.
+- `docker compose -f ../../docker/docker-compose.yml up -d postgres-transfers`: start PostgreSQL `transfers_db` on `127.0.0.1:5433`.
+- `../../mvnw -pl services/transfers -am pitest:mutationCoverage`: run PIT mutation testing.
 
 ## Coding Style & Naming Conventions
 
@@ -44,7 +44,7 @@ Tests use JUnit 5, AssertJ, Mockito, Rest Assured, Spring Boot Test, JaCoCo, and
 
 Use imperative, sentence-style commit messages such as `Add internal transfer request endpoint`. Keep commits focused and describe the behavioral change.
 
-Pull requests should include a short summary, affected areas, test evidence (`../mvnw clean verify`, targeted tests, or PIT where relevant), linked issues, and API/configuration notes when endpoints, events, profiles, Docker, or observability behavior change.
+Pull requests should include a short summary, affected areas, test evidence (`../../mvnw -pl services/transfers -am clean verify`, targeted tests, or PIT where relevant), linked issues, and API/configuration notes when endpoints, events, profiles, Docker, or observability behavior change.
 
 ## Security & Configuration Tips
 

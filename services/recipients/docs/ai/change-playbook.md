@@ -6,7 +6,7 @@ This document complements the numbered development workflow by identifying the r
 
 Use only the sections relevant to the current change.
 
-For test style and integration-test conventions, use `../docs/ai/04-testing.md`.
+For test style and integration-test conventions, use `../../../../docs/ai/04-testing.md`.
 
 The rules in this playbook guide recommendations and implementation after Design is resolved. They do not close OPEN Design decisions by themselves. When a rule points to an existing pattern and another viable behavior, public contract, responsibility, abstraction, architecture, security/data-exposure, persistence, consistency, or observability option exists, present the options during Design and use the rule as evidence for the recommendation.
 
@@ -27,8 +27,8 @@ Rules:
 - update exception messages deliberately
 
 Run:
-- `../mvnw test -Dtest=*Recipient*Test`
-- `../mvnw test -Dtest=*Iban*Test,*RecipientName*Test,*BankAccountId*Test,*RecipientId*Test` when value objects or identities change
+- `../../mvnw -pl services/recipients -am test -Dtest=*Recipient*Test`
+- `../../mvnw -pl services/recipients -am test -Dtest=*Iban*Test,*RecipientName*Test,*BankAccountId*Test,*RecipientId*Test` when value objects or identities change
 
 ## Application Changes
 
@@ -48,8 +48,8 @@ Rules:
 - preserve the responsibility and scope of use-case-specific ports unless the agreed design intentionally changes them; when adding a use case with viable port/repository alternatives, resolve the port strategy in Design before implementation
 
 Run:
-- `../mvnw test -Dtest=*CommandHandlerTest,*QueryHandlerTest`
-- `../mvnw test -Dtest=*CreateRecipient*Test,*RemoveRecipient*Test,*ListRecipients*Test` for use-case changes
+- `../../mvnw -pl services/recipients -am test -Dtest=*CommandHandlerTest,*QueryHandlerTest`
+- `../../mvnw -pl services/recipients -am test -Dtest=*CreateRecipient*Test,*RemoveRecipient*Test,*ListRecipients*Test` for use-case changes
 
 ## REST/API Changes
 
@@ -71,8 +71,8 @@ Rules:
 - update integration coverage when endpoint behavior, status codes, headers, or error payloads change
 
 Run:
-- `../mvnw test -Dtest=*ControllerImplTest,*RestMapperTest,*RequestTest,*ResponseTest`
-- `../mvnw verify -Dit.test=*RecipientIT` for API flow changes
+- `../../mvnw -pl services/recipients -am test -Dtest=*ControllerImplTest,*RestMapperTest,*RequestTest,*ResponseTest`
+- `../../mvnw -pl services/recipients -am verify -Dit.test=*RecipientIT` for API flow changes
 
 ## Persistence Changes
 
@@ -93,15 +93,15 @@ Rules:
 - keep the full IBAN in `RecipientSummary`; masking is reserved for logs and error details
 
 Run:
-- `../mvnw test -Dtest=*PostgresRepositoryTest,*EntityMapperTest,*SummaryMapperTest`
-- `../mvnw verify -Dit.test=*RecipientIT` for schema or repository behavior changes
+- `../../mvnw -pl services/recipients -am test -Dtest=*PostgresRepositoryTest,*EntityMapperTest,*SummaryMapperTest`
+- `../../mvnw -pl services/recipients -am verify -Dit.test=*RecipientIT` for schema or repository behavior changes
 
 ## Configuration, Docker, And Kubernetes Changes
 
 Read:
 - `src/main/resources/application*.yml`
 - `src/main/resources/logback-spring.xml`
-- `../docker/docker-compose.yml`
+- `../../docker/docker-compose.yml`
 - manifests under `k8s`
 - integration test configuration under `src/test/resources`
 
@@ -113,8 +113,8 @@ Rules:
 - update tests or docs when profiles, ports, database names, or observability behavior change
 
 Run:
-- `../mvnw test`
-- `../mvnw verify` when configuration affects integration tests or application startup
+- `../../mvnw -pl services/recipients -am test`
+- `../../mvnw -pl services/recipients -am verify` when configuration affects integration tests or application startup
 
 ## Before Finishing
 

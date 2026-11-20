@@ -5,17 +5,17 @@ FROM maven:3.9.15-eclipse-temurin-25 AS builder
 WORKDIR /workspace
 
 COPY pom.xml .
-COPY core core
-COPY recipients recipients
+COPY services/core services/core
+COPY services/recipients services/recipients
 
 RUN --mount=type=cache,target=/root/.m2 \
     mvn -B -N -f pom.xml install -DskipTests
 
 RUN --mount=type=cache,target=/root/.m2 \
-    mvn -B -f core/pom.xml clean install -DskipTests
+    mvn -B -f services/core/pom.xml clean install -DskipTests
 
 RUN --mount=type=cache,target=/root/.m2 \
-    mvn -B -f recipients/pom.xml clean package \
+    mvn -B -f services/recipients/pom.xml clean package \
       -DskipTests
 
 FROM eclipse-temurin:25-jre
@@ -29,7 +29,7 @@ RUN apt-get update \
     && useradd --system --uid 10001 --gid appgroup appuser
 
 COPY --from=builder --chown=10001:10001 \
-  /workspace/recipients/target/recipients-*.jar \
+  /workspace/services/recipients/target/recipients-*.jar \
   /app/app.jar
 
 USER 10001:10001

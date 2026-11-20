@@ -17,13 +17,13 @@ The API and outbox processor share one `AccountsApplication`, Boot JAR, lifecycl
 
 ## Build, Test, and Development Commands
 
-Run commands from this directory. The Maven wrapper lives one level up.
+Run commands from this directory. The Maven wrapper lives two levels up.
 
-- `../mvnw clean verify`: build the service, run Surefire/Failsafe, and generate JaCoCo reports.
-- `../mvnw test`: run unit tests.
-- `../mvnw spring-boot:run -Dspring-boot.run.profiles=local`: run the API and outbox worker locally on port `8080`.
-- `docker compose -f ../docker/docker-compose.yml up -d localstack`: start the local DynamoDB dependency.
-- `../mvnw pitest:mutationCoverage`: run mutation testing for the consolidated service.
+- `../../mvnw -pl services/accounts -am clean verify`: build the service, run Surefire/Failsafe, and generate JaCoCo reports.
+- `../../mvnw -pl services/accounts -am test`: run unit tests.
+- `../../mvnw -pl services/accounts -am spring-boot:run -Dspring-boot.run.profiles=local`: run the API and outbox worker locally on port `8080`.
+- `docker compose -f ../../docker/docker-compose.yml up -d localstack`: start the local DynamoDB dependency.
+- `../../mvnw -pl services/accounts -am pitest:mutationCoverage`: run mutation testing for the consolidated service.
 
 ## Coding Style & Naming Conventions
 

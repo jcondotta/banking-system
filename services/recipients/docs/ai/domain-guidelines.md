@@ -447,8 +447,8 @@ Add or update focused domain tests when changing:
 Focused commands:
 
 ```text
-../mvnw test -Dtest=*Recipient*Test
-../mvnw test -Dtest=*Iban*Test,*RecipientName*Test,*BankAccountId*Test,*RecipientId*Test
+../../mvnw -pl services/recipients -am test -Dtest=*Recipient*Test
+../../mvnw -pl services/recipients -am test -Dtest=*Iban*Test,*RecipientName*Test,*BankAccountId*Test,*RecipientId*Test
 ```
 
 For shared `domain-core` changes, run the relevant core module tests from the

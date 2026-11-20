@@ -18,7 +18,7 @@ Keep dependencies pointing inward by package: infrastructure may depend on appli
 
 ## Development Workflow
 
-Shared development workflow guidance lives under `../docs/ai/`.
+Shared development workflow guidance lives under `../../docs/ai/`.
 
 Recipients-specific guidance lives under `docs/ai/`.
 
@@ -28,13 +28,13 @@ When shared workflow guidance and local recipients guidance both apply, prefer t
 
 ## Build, Test, and Development Commands
 
-Run commands from this directory. The Maven wrapper lives one level up.
+Run commands from this directory. The Maven wrapper lives two levels up.
 
-- `../mvnw clean verify`: build the service, run Surefire/Failsafe, and produce JaCoCo output.
-- `../mvnw test`: run unit tests only.
-- `../mvnw spring-boot:run -Dspring-boot.run.profiles=local`: start the service locally on port `8081`.
-- `docker compose -f ../docker/docker-compose.yml up -d postgres-recipients`: start PostgreSQL `recipients_db` on `127.0.0.1:5432`.
-- `../mvnw pitest:mutationCoverage`: run PIT mutation testing for the consolidated service.
+- `../../mvnw -pl services/recipients -am clean verify`: build the service, run Surefire/Failsafe, and produce JaCoCo output.
+- `../../mvnw -pl services/recipients -am test`: run unit tests only.
+- `../../mvnw -pl services/recipients -am spring-boot:run -Dspring-boot.run.profiles=local`: start the service locally on port `8081`.
+- `docker compose -f ../../docker/docker-compose.yml up -d postgres-recipients`: start PostgreSQL `recipients_db` on `127.0.0.1:5432`.
+- `../../mvnw -pl services/recipients -am pitest:mutationCoverage`: run PIT mutation testing for the consolidated service.
 
 ## Coding Style & Naming Conventions
 
@@ -52,7 +52,7 @@ Preserve framework-free domain code even though all layers compile in one Maven 
 
 Recent commits use imperative, sentence-style messages such as `Add name filtering to list recipients API`.
 
-PRs should include summary, affected areas, test evidence (`../mvnw verify`, targeted tests, or PIT where relevant), linked issues, and API/config notes when endpoints, profiles, Docker, Kubernetes, or observability behavior change.
+PRs should include summary, affected areas, test evidence (`../../mvnw -pl services/recipients -am verify`, targeted tests, or PIT where relevant), linked issues, and API/config notes when endpoints, profiles, Docker, Kubernetes, or observability behavior change.
 
 ## Security & Configuration Tips
 

@@ -6,6 +6,7 @@
         <groupId>com.jcondotta</groupId>
         <artifactId>banking-system</artifactId>
         <version>2.0.0</version>
+        <relativePath>../../pom.xml</relativePath>
     </parent>
 
     <artifactId>recipients</artifactId>

@@ -143,7 +143,7 @@ services:
       - banking_network
     volumes:
       - '/var/run/docker.sock:/var/run/docker.sock'
-      - ../accounts/docker/localstack:/etc/localstack/init/ready.d
+      - ../services/accounts/docker/localstack:/etc/localstack/init/ready.d
       - accounts_localstack_volume:/var/lib/localstack
 
   dynamodb-admin:

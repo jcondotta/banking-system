@@ -2,12 +2,12 @@
 
 ## Project Structure & Module Organization
 
-This is a Java 25, Spring Boot 4, Maven banking system. The root `pom.xml` builds `core`, `accounts`, and `recipients`; `transfers` has its own Maven tree but is not listed in the root modules.
+This is a Java 25, Spring Boot 4, Maven banking system. The root `pom.xml` builds the shared `services/core` modules and the `services/accounts` and `services/recipients` bounded contexts, as well as `transfers` and `ledger`.
 
-- `core/`: shared modules including `domain-core`, `application-core`, `infrastructure-core`, and the opt-in `outbox-infrastructure` module.
-- `accounts/`: bounded context implemented as a flat single Maven module. Its API and transactional-outbox worker run in the same Spring Boot application.
-- `recipients/`: bounded context implemented as a flat single Maven module, organized by package into domain, application, infrastructure, and bootstrap/runtime concerns.
-- `transfers/`: bounded context with its own Maven tree outside the root reactor.
+- `services/core/`: shared modules including `domain-core`, `application-core`, `infrastructure-core`, and the opt-in `outbox-infrastructure` module.
+- `services/accounts/`: bounded context implemented as a flat single Maven module. Its API and transactional-outbox worker run in the same Spring Boot application.
+- `services/recipients/`: bounded context implemented as a flat single Maven module, organized by package into domain, application, infrastructure, and bootstrap/runtime concerns.
+- `services/transfers/` and `services/ledger/`: bounded contexts implemented as single Maven modules and listed in the root reactor.
 - `src/main/java` and `src/test/java`: production and test code inside each module or bounded context.
 - `src/main/resources`: Spring configuration, Liquibase changelogs, logging config, and other runtime resources.
 - `docker/`, `k8s/`, `terraform/`: local infrastructure, Kubernetes manifests, and cloud infrastructure where present.
@@ -76,10 +76,10 @@ Validation must complete its review before reporting questions, findings, sugges
 
 - `./mvnw clean verify`: build root modules, run unit and integration tests, and generate JaCoCo reports.
 - `./mvnw test`: run unit tests through Surefire.
-- `./mvnw -pl recipients -am spring-boot:run -Dspring-boot.run.profiles=local`: run the recipients service locally with required upstream modules.
+- `./mvnw -pl services/recipients -am spring-boot:run -Dspring-boot.run.profiles=local`: run the recipients service locally with required upstream modules.
 - `docker compose -f docker/docker-compose.yml up -d`: start all local dependencies (Kafka, OpenSearch, Postgres instances, LocalStack).
-- `./mvnw -pl accounts -am spring-boot:run -Dspring-boot.run.profiles=local`: run the accounts API and outbox worker locally.
-- `./mvnw -pl accounts -am pitest:mutationCoverage`: run PIT mutation testing for accounts.
+- `./mvnw -pl services/accounts -am spring-boot:run -Dspring-boot.run.profiles=local`: run the accounts API and outbox worker locally.
+- `./mvnw -pl services/accounts -am pitest:mutationCoverage`: run PIT mutation testing for accounts.
 
 ## Coding Style & Naming Conventions
 
