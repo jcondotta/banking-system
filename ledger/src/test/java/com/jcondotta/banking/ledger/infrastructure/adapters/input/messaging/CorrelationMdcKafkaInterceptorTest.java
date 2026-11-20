@@ -1,6 +1,6 @@
 package com.jcondotta.banking.ledger.infrastructure.adapters.input.messaging;
 
-import com.jcondotta.application.logging.LogKey;
+import com.jcondotta.application.logging.ApplicationLogKey;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.junit.jupiter.api.AfterEach;
@@ -38,7 +38,7 @@ class CorrelationMdcKafkaInterceptorTest {
 
     @AfterEach
     void tearDown() {
-        MDC.remove(LogKey.CORRELATION_ID);
+        MDC.remove(ApplicationLogKey.CORRELATION_ID);
     }
 
     @Test
@@ -52,7 +52,7 @@ class CorrelationMdcKafkaInterceptorTest {
         interceptor.intercept(record, consumer);
 
         assertSoftly(softly ->
-                softly.assertThat(MDC.get(LogKey.CORRELATION_ID)).isEqualTo(correlationId.toString())
+                softly.assertThat(MDC.get(ApplicationLogKey.CORRELATION_ID)).isEqualTo(correlationId.toString())
         );
     }
 
@@ -66,7 +66,7 @@ class CorrelationMdcKafkaInterceptorTest {
         interceptor.intercept(record, consumer);
 
         assertSoftly(softly ->
-                softly.assertThat(MDC.get(LogKey.CORRELATION_ID)).isNull()
+                softly.assertThat(MDC.get(ApplicationLogKey.CORRELATION_ID)).isNull()
         );
     }
 
@@ -80,31 +80,31 @@ class CorrelationMdcKafkaInterceptorTest {
         assertThatCode(() -> interceptor.intercept(record, consumer)).doesNotThrowAnyException();
 
         assertSoftly(softly ->
-                softly.assertThat(MDC.get(LogKey.CORRELATION_ID)).isNull()
+                softly.assertThat(MDC.get(ApplicationLogKey.CORRELATION_ID)).isNull()
         );
     }
 
     @Test
     void shouldRemoveCorrelationIdFromMdc_onSuccess() {
-        MDC.put(LogKey.CORRELATION_ID, UUID.randomUUID().toString());
+        MDC.put(ApplicationLogKey.CORRELATION_ID, UUID.randomUUID().toString());
         var record = buildRecord();
 
         interceptor.success(record, consumer);
 
         assertSoftly(softly ->
-                softly.assertThat(MDC.get(LogKey.CORRELATION_ID)).isNull()
+                softly.assertThat(MDC.get(ApplicationLogKey.CORRELATION_ID)).isNull()
         );
     }
 
     @Test
     void shouldRemoveCorrelationIdFromMdc_onFailure() {
-        MDC.put(LogKey.CORRELATION_ID, UUID.randomUUID().toString());
+        MDC.put(ApplicationLogKey.CORRELATION_ID, UUID.randomUUID().toString());
         var record = buildRecord();
 
         interceptor.failure(record, new RuntimeException("consumer error"), consumer);
 
         assertSoftly(softly ->
-                softly.assertThat(MDC.get(LogKey.CORRELATION_ID)).isNull()
+                softly.assertThat(MDC.get(ApplicationLogKey.CORRELATION_ID)).isNull()
         );
     }
 

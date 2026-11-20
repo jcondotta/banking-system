@@ -1,8 +1,9 @@
 package com.jcondotta.banking.infrastructure.outbox.processor;
 
 import com.jcondotta.application.command.CommandHandler;
-import com.jcondotta.application.logging.LogContext;
-import com.jcondotta.application.logging.LogKey;
+import com.jcondotta.banking.infrastructure.outbox.logging.legacy.LogContext;
+import com.jcondotta.application.logging.ApplicationLogKey;
+import com.jcondotta.scopedlogging.domain.logging.LogKey;
 import com.jcondotta.banking.infrastructure.adapters.output.messaging.outbox.OutboxEventPublisher;
 import com.jcondotta.banking.infrastructure.outbox.exceptions.OutboxEventAlreadyProcessedException;
 import com.jcondotta.banking.infrastructure.outbox.log.OutboxOperation;
@@ -11,6 +12,7 @@ import com.jcondotta.banking.infrastructure.outbox.log.OutboxLogKey;
 import com.jcondotta.banking.infrastructure.outbox.record.OutboxRecord;
 import com.jcondotta.banking.infrastructure.outbox.store.OutboxEventStore;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.MDC;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,6 +26,23 @@ public class OutboxEventCompleter<T extends OutboxRecord> implements CommandHand
 
   @Override
   public void handle(T event) {
+    var previousCorrelationId = MDC.get(ApplicationLogKey.CORRELATION_ID);
+    MDC.put(ApplicationLogKey.CORRELATION_ID, event.getCorrelationId().toString());
+
+    try {
+      complete(event);
+    }
+    finally {
+      if (previousCorrelationId == null) {
+        MDC.remove(ApplicationLogKey.CORRELATION_ID);
+      }
+      else {
+        MDC.put(ApplicationLogKey.CORRELATION_ID, previousCorrelationId);
+      }
+    }
+  }
+
+  private void complete(T event) {
     var logContext = logContext(event);
 
     try {
@@ -31,8 +50,8 @@ public class OutboxEventCompleter<T extends OutboxRecord> implements CommandHand
     }
     catch (Exception ex) {
       logContext.error("Outbox event publishing failed", ex)
-        .failure()
         .with(LogKey.REASON, OutboxFailureReason.PUBLISH_FAILED.normalize())
+        .failure()
         .log();
 
       throw ex;
@@ -47,16 +66,16 @@ public class OutboxEventCompleter<T extends OutboxRecord> implements CommandHand
     }
     catch (OutboxEventAlreadyProcessedException ex) {
       logContext.warn("Outbox event cleanup skipped")
-        .failure()
         .with(LogKey.REASON, OutboxFailureReason.ALREADY_PROCESSED.normalize())
+        .failure()
         .log();
 
       throw ex;
     }
     catch (Exception ex) {
       logContext.error("Outbox event cleanup failed", ex)
-        .failure()
         .with(LogKey.REASON, OutboxFailureReason.DELETE_FAILED.normalize())
+        .failure()
         .log();
 
       throw ex;
@@ -67,9 +86,9 @@ public class OutboxEventCompleter<T extends OutboxRecord> implements CommandHand
     return LogContext.timed(LOGGER, OutboxOperation.PUBLISH)
       .with(OutboxLogKey.SHARD, event.getShard())
       .with(OutboxLogKey.EVENT_ID, event.getEventId())
-      .with(LogKey.CORRELATION_ID, event.getCorrelationId())
+      .with(ApplicationLogKey.CORRELATION_ID, event.getCorrelationId())
       .with(OutboxLogKey.AGGREGATE_ID, event.getAggregateId())
-      .with(LogKey.EVENT_TYPE, event.getEventType())
+      .with(ApplicationLogKey.EVENT_TYPE, event.getEventType())
       .with(OutboxLogKey.ATTEMPT_COUNT, event.getAttemptCount());
   }
 }

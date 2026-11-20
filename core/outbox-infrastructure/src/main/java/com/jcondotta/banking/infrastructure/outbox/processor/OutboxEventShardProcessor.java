@@ -1,7 +1,8 @@
 package com.jcondotta.banking.infrastructure.outbox.processor;
 
-import com.jcondotta.application.logging.LogContext;
-import com.jcondotta.application.logging.LogKey;
+import com.jcondotta.banking.infrastructure.outbox.logging.legacy.LogContext;
+import com.jcondotta.application.logging.ApplicationLogKey;
+import com.jcondotta.scopedlogging.domain.logging.LogKey;
 import com.jcondotta.banking.infrastructure.outbox.concurrency.ShardExecutor;
 import com.jcondotta.banking.infrastructure.outbox.concurrency.exceptions.ShardExecutionException;
 import com.jcondotta.banking.infrastructure.outbox.concurrency.exceptions.ShardTimeoutException;
@@ -32,16 +33,16 @@ public class OutboxEventShardProcessor<T extends OutboxRecord> {
     var logContext = LogContext.timed(LOGGER, OutboxOperation.PROCESS)
       .with(OutboxLogKey.SHARD, event.getShard())
       .with(OutboxLogKey.EVENT_ID, event.getEventId())
-      .with(LogKey.CORRELATION_ID, event.getCorrelationId())
+      .with(ApplicationLogKey.CORRELATION_ID, event.getCorrelationId())
       .with(OutboxLogKey.AGGREGATE_ID, event.getAggregateId())
-      .with(LogKey.EVENT_TYPE, event.getEventType())
+      .with(ApplicationLogKey.EVENT_TYPE, event.getEventType())
       .with(OutboxLogKey.ATTEMPT_COUNT, event.getAttemptCount());
 
     if (event.getAttemptCount() >= retry.maxRetries()) {
       eventStore.deadLetterEvent(event);
       logContext.warn("Outbox event moved to dead letter")
-        .failure()
         .with(LogKey.REASON, OutboxFailureReason.MAX_RETRIES_EXCEEDED.normalize())
+        .failure()
         .log();
       return;
     }
@@ -51,8 +52,8 @@ public class OutboxEventShardProcessor<T extends OutboxRecord> {
         var claimed = eventStore.tryClaimEvent(event);
         if (claimed.isEmpty()) {
           logContext.debug("Outbox event claim skipped")
-            .success()
             .with(LogKey.REASON, OutboxFailureReason.ALREADY_CLAIMED.normalize())
+            .success()
             .log();
           return;
         }
@@ -62,15 +63,15 @@ public class OutboxEventShardProcessor<T extends OutboxRecord> {
     }
     catch (ShardTimeoutException e) {
       logContext.warn("Outbox event processing delayed")
-        .failure()
         .with(LogKey.REASON, OutboxFailureReason.SHARD_TIMEOUT.normalize())
+        .failure()
         .log();
       throw e;
     }
     catch (ShardExecutionException e) {
       logContext.error("Outbox event processing failed", e)
-        .failure()
         .with(LogKey.REASON, OutboxFailureReason.SHARD_EXECUTION_ERROR.normalize())
+        .failure()
         .log();
       throw e;
     }

@@ -50,6 +50,11 @@
 
     <dependencies>
         <dependency>
+            <groupId>io.github.jcondotta</groupId>
+            <artifactId>scoped-logging-spring-boot</artifactId>
+        </dependency>
+
+        <dependency>
             <groupId>com.jcondotta</groupId>
             <artifactId>domain-core</artifactId>
         </dependency>
@@ -249,7 +254,7 @@
                 <artifactId>pitest-maven</artifactId>
                 <configuration>
                     <avoidCallsTo>
-                        <param>com.jcondotta.application.logging.LogEvent</param>
+                        <param>com.jcondotta.scopedlogging.application.logscope.LogContext</param>
                     </avoidCallsTo>
                 </configuration>
             </plugin>

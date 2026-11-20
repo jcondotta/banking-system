@@ -6,7 +6,7 @@ import com.jcondotta.banking.accounts.domain.testsupport.AccountHolderFixtures;
 import com.jcondotta.banking.accounts.domain.bankaccount.value_objects.address.Address;
 import com.jcondotta.banking.accounts.domain.bankaccount.value_objects.contact.ContactInfo;
 import com.jcondotta.banking.accounts.domain.bankaccount.value_objects.personal.PersonalInfo;
-import com.jcondotta.application.idempotency.IdempotencyKey;
+import com.jcondotta.application.idempotency.identity.IdempotencyKey;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 

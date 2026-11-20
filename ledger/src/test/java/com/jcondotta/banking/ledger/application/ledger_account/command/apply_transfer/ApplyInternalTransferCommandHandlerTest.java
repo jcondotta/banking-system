@@ -1,5 +1,11 @@
 package com.jcondotta.banking.ledger.application.ledger_account.command.apply_transfer;
 
+import com.jcondotta.scopedlogging.application.logscope.ScopedLogContext;
+import com.jcondotta.scopedlogging.LogScopeAspect;
+import com.jcondotta.scopedlogging.application.logscope.LogScopeExecutor;
+import com.jcondotta.scopedlogging.infrastructure.slf4j.Slf4jLogEventPublisher;
+import org.springframework.aop.aspectj.annotation.AspectJProxyFactory;
+
 import com.jcondotta.banking.ledger.domain.ledger_account.aggregate.LedgerAccount;
 import com.jcondotta.banking.ledger.domain.ledger_account.entries.LedgerEntry;
 import com.jcondotta.banking.ledger.domain.ledger_account.exceptions.LedgerAccountNotYetProvisionedException;
@@ -50,7 +56,11 @@ class ApplyInternalTransferCommandHandlerTest {
 
     @BeforeEach
     void setUp() {
-        handler = new ApplyInternalTransferCommandHandler(ledgerAccountRepository);
+        var logContext = new ScopedLogContext();
+        var proxy = new AspectJProxyFactory(new ApplyInternalTransferCommandHandler(ledgerAccountRepository, logContext));
+        proxy.setProxyTargetClass(true);
+        proxy.addAspect(new LogScopeAspect(new LogScopeExecutor(logContext, new Slf4jLogEventPublisher())));
+        handler = proxy.getProxy();
     }
 
     @Test

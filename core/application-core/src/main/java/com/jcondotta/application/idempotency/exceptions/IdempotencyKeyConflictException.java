@@ -1,4 +1,6 @@
-package com.jcondotta.application.idempotency;
+package com.jcondotta.application.idempotency.exceptions;
+
+import com.jcondotta.application.idempotency.identity.IdempotencyKey;
 
 public final class IdempotencyKeyConflictException extends RuntimeException {
 

@@ -1,4 +1,8 @@
-package com.jcondotta.application.logging;
+package com.jcondotta.banking.infrastructure.outbox.logging.legacy;
+
+import com.jcondotta.application.logging.ApplicationLogKey;
+import com.jcondotta.scopedlogging.domain.logging.LogKey;
+import com.jcondotta.application.logging.StructuredLogEventSupport;
 
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.spi.ILoggingEvent;
@@ -13,14 +17,19 @@ import static org.assertj.core.api.Assertions.assertThat;
 class LogContextTest {
 
   private ListAppender<ILoggingEvent> logAppender;
+  private Level previousLevel;
 
   @BeforeEach
   void setUp() {
+    var logger = (ch.qos.logback.classic.Logger) logger();
+    previousLevel = logger.getLevel();
+    logger.setLevel(Level.DEBUG);
     logAppender = StructuredLogEventSupport.attachAppender(LogContextTest.class);
   }
 
   @AfterEach
   void tearDown() {
+    ((ch.qos.logback.classic.Logger) logger()).setLevel(previousLevel);
     StructuredLogEventSupport.detachAppender(LogContextTest.class, logAppender);
   }
 
@@ -33,20 +42,20 @@ class LogContextTest {
 
     assertThat(StructuredLogEventSupport.lastEventKeyValues(logAppender))
       .containsEntry(LogKey.OPERATION, "accounts.activate")
-      .doesNotContainKey(LogKey.EVENT_TYPE);
+      .doesNotContainKey(ApplicationLogKey.EVENT_TYPE);
   }
 
   @Test
   void shouldLogOperationAndEventType_whenAnEventIsPresent() {
     LogContext.timed(logger(), "outbox.publish")
-      .with(LogKey.EVENT_TYPE, "bank-account-activated")
+      .with(ApplicationLogKey.EVENT_TYPE, "bank-account-activated")
       .info("Outbox event published")
       .success()
       .log();
 
     assertThat(StructuredLogEventSupport.lastEventKeyValues(logAppender))
       .containsEntry(LogKey.OPERATION, "outbox.publish")
-      .containsEntry(LogKey.EVENT_TYPE, "bank-account-activated");
+      .containsEntry(ApplicationLogKey.EVENT_TYPE, "bank-account-activated");
   }
 
   @Test
@@ -67,8 +76,8 @@ class LogContextTest {
   void shouldLogAtWarnLevel_withFailureOutcomeAndReason_whenWarnIsCalled() {
     LogContext.timed(logger(), "accounts.warn-test")
       .warn("Warn event logged")
-      .failure()
       .with(LogKey.REASON, "some-reason")
+      .failure()
       .log();
 
     var softly = new SoftAssertions();

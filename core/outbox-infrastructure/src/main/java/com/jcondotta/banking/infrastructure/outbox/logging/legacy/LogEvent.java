@@ -1,4 +1,6 @@
-package com.jcondotta.application.logging;
+package com.jcondotta.banking.infrastructure.outbox.logging.legacy;
+
+import com.jcondotta.scopedlogging.domain.logging.LogKey;
 
 import org.slf4j.spi.LoggingEventBuilder;
 

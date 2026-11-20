@@ -17,9 +17,9 @@ import java.util.concurrent.atomic.AtomicReference;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-class CorrelationFilterTest {
+class RequestLoggingContextFilterTest {
 
-  private final CorrelationFilter filter = new CorrelationFilter(new CorrelationIdResolver());
+  private final RequestLoggingContextFilter filter = new RequestLoggingContextFilter(new CorrelationIdResolver());
 
   @Test
   void shouldUseCorrelationIdFromHeader_whenHeaderIsValid() throws Exception {
@@ -35,8 +35,8 @@ class CorrelationFilterTest {
 
     assertThat(response.getHeader(HttpHeadersConstants.CORRELATION_ID)).isEqualTo(correlationId.toString());
     assertThat(scopedCorrelationId).hasValue(correlationId);
-    assertThat(request.getAttribute(CorrelationFilter.REQUEST_START_NS_ATTRIBUTE)).isInstanceOf(Long.class);
-    assertThat(MDC.get(CorrelationFilter.MDC_CORRELATION_ID)).isNull();
+    assertThat(request.getAttribute(RequestLoggingContextFilter.REQUEST_START_NS_ATTRIBUTE)).isInstanceOf(Long.class);
+    assertThat(MDC.get(RequestLoggingContextFilter.MDC_CORRELATION_ID)).isNull();
   }
 
   @Test
@@ -81,7 +81,7 @@ class CorrelationFilterTest {
     assertThatThrownBy(() -> filter.doFilterInternal(request, response, new FailingServletFilterChain(exception)))
       .isSameAs(exception);
 
-    assertThat(MDC.get(CorrelationFilter.MDC_CORRELATION_ID)).isNull();
+    assertThat(MDC.get(RequestLoggingContextFilter.MDC_CORRELATION_ID)).isNull();
   }
 
   @Test
@@ -93,7 +93,7 @@ class CorrelationFilterTest {
     assertThatThrownBy(() -> filter.doFilterInternal(request, response, new FailingIoFilterChain(exception)))
       .isSameAs(exception);
 
-    assertThat(MDC.get(CorrelationFilter.MDC_CORRELATION_ID)).isNull();
+    assertThat(MDC.get(RequestLoggingContextFilter.MDC_CORRELATION_ID)).isNull();
   }
 
   private static MockHttpServletRequest request(String uri) {

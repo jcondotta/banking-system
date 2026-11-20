@@ -4,11 +4,16 @@ import com.jcondotta.application.query.QueryHandler;
 import com.jcondotta.banking.accounts.application.bankaccount.query.get.model.BankAccountSummary;
 import com.jcondotta.banking.accounts.domain.bankaccount.exceptions.BankAccountNotFoundException;
 import com.jcondotta.banking.accounts.domain.bankaccount.identity.BankAccountId;
+import com.jcondotta.scopedlogging.LogScopeAspect;
+import com.jcondotta.scopedlogging.application.logscope.LogScopeExecutor;
+import com.jcondotta.scopedlogging.application.logscope.ScopedLogContext;
+import com.jcondotta.scopedlogging.infrastructure.slf4j.Slf4jLogEventPublisher;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.aop.aspectj.annotation.AspectJProxyFactory;
 
 import java.util.Optional;
 
@@ -26,7 +31,11 @@ class GetBankAccountByIdQueryHandlerTest {
 
   @BeforeEach
   void setUp() {
-    queryHandler = new GetBankAccountByIdQueryHandler(bankAccountQueryRepository);
+    var logContext = new ScopedLogContext();
+    var proxy = new AspectJProxyFactory(new GetBankAccountByIdQueryHandler(bankAccountQueryRepository, logContext));
+    proxy.setProxyTargetClass(true);
+    proxy.addAspect(new LogScopeAspect(new LogScopeExecutor(logContext, new Slf4jLogEventPublisher())));
+    queryHandler = proxy.getProxy();
   }
 
   @Test

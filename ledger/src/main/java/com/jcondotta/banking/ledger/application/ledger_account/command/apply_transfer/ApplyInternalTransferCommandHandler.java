@@ -1,8 +1,9 @@
 package com.jcondotta.banking.ledger.application.ledger_account.command.apply_transfer;
 
 import com.jcondotta.application.command.CommandHandler;
-import com.jcondotta.application.logging.LogContext;
-import com.jcondotta.application.logging.LogKey;
+import com.jcondotta.scopedlogging.application.logscope.LogContext;
+import com.jcondotta.scopedlogging.LogScope;
+import com.jcondotta.scopedlogging.domain.logging.LogKey;
 import com.jcondotta.banking.ledger.application.common.log.LedgerFailureReason;
 import com.jcondotta.banking.ledger.application.common.log.LedgerLogKey;
 import com.jcondotta.banking.ledger.application.common.log.LedgerOperation;
@@ -11,8 +12,6 @@ import com.jcondotta.banking.ledger.domain.ledger_account.exceptions.LedgerAccou
 import com.jcondotta.banking.ledger.domain.ledger_account.repository.LedgerAccountRepository;
 import com.jcondotta.banking.ledger.domain.ledger_account.value_objects.AccountReference;
 import com.jcondotta.banking.movement.Movement;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,19 +20,21 @@ import java.util.List;
 @Component
 public class ApplyInternalTransferCommandHandler implements CommandHandler<ApplyInternalTransferCommand> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ApplyInternalTransferCommandHandler.class);
+
+    private final LogContext logContext;
 
     private final LedgerAccountRepository ledgerAccountRepository;
 
-    public ApplyInternalTransferCommandHandler(LedgerAccountRepository ledgerAccountRepository) {
+    public ApplyInternalTransferCommandHandler(LedgerAccountRepository ledgerAccountRepository, LogContext logContext) {
+        this.logContext = logContext;
         this.ledgerAccountRepository = ledgerAccountRepository;
     }
 
     @Override
+    @LogScope(LedgerOperation.APPLY_INTERNAL_TRANSFER)
     @Transactional
     public void handle(ApplyInternalTransferCommand command) {
-        var logContext = LogContext.timed(LOGGER, LedgerOperation.APPLY_INTERNAL_TRANSFER)
-                .with(LedgerLogKey.BANK_TRANSFER_ID, command.transferId().toString())
+        logContext.with(LedgerLogKey.BANK_TRANSFER_ID, command.transferId().toString())
                 .with(LedgerLogKey.SENDER_ACCOUNT_ID, command.senderAccountId().toString())
                 .with(LedgerLogKey.RECIPIENT_ACCOUNT_ID, command.recipientAccountId().toString());
 
@@ -55,14 +56,12 @@ public class ApplyInternalTransferCommandHandler implements CommandHandler<Apply
             ledgerAccountRepository.saveLedgerEntries(List.of(debitEntry, creditEntry));
 
             logContext.info("Internal transfer applied to ledger")
-                    .success()
-                    .log();
+                    .success();
         }
         catch (Exception ex) {
             logContext.error("Failed to apply internal transfer to ledger", ex)
-                    .failure()
                     .with(LogKey.REASON, LedgerFailureReason.INTERNAL_ERROR.normalize())
-                    .log();
+                    .failure();
 
             throw ex;
         }

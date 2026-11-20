@@ -20,6 +20,7 @@ public enum BankAccountFailureReason {
   CANNOT_DEACTIVATE_PRIMARY_HOLDER,
   OPTIMISTIC_LOCK_CONFLICT,
   DOMAIN_ERROR,
+  IDEMPOTENCY_CONFLICT,
   INTERNAL_ERROR;
 
   public String normalize() {

@@ -1,31 +1,32 @@
 package com.jcondotta.banking.recipients.application.recipient.query.list;
 
 import com.jcondotta.application.query.QueryHandler;
-import com.jcondotta.application.logging.LogContext;
-import com.jcondotta.application.logging.LogKey;
+import com.jcondotta.scopedlogging.application.logscope.LogContext;
+import com.jcondotta.scopedlogging.LogScope;
+import com.jcondotta.scopedlogging.domain.logging.LogKey;
 import com.jcondotta.banking.recipients.application.common.log.RecipientLogKey;
 import com.jcondotta.banking.recipients.application.common.log.RecipientOperation;
 import com.jcondotta.banking.recipients.application.recipient.query.RecipientQueryRepository;
 import com.jcondotta.banking.recipients.application.common.log.RecipientFailureReason;
 import com.jcondotta.domain.exception.DomainException;
 import io.micrometer.observation.annotation.Observed;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 @Component
 public class ListRecipientsQueryHandler
   implements QueryHandler<ListRecipientsQuery, ListRecipientsQueryResult> {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(ListRecipientsQueryHandler.class);
+  private final LogContext logContext;
 
   private final RecipientQueryRepository queryRepository;
 
-  public ListRecipientsQueryHandler(RecipientQueryRepository queryRepository) {
+  public ListRecipientsQueryHandler(RecipientQueryRepository queryRepository, LogContext logContext) {
+    this.logContext = logContext;
     this.queryRepository = queryRepository;
   }
 
   @Override
+  @LogScope(RecipientOperation.LIST)
   @Observed(
       name = "recipients.list",
       contextualName = "listRecipients",
@@ -35,8 +36,7 @@ public class ListRecipientsQueryHandler
       }
   )
   public ListRecipientsQueryResult handle(ListRecipientsQuery query) {
-    var logContext = LogContext.timed(LOGGER, RecipientOperation.LIST)
-      .with(RecipientLogKey.BANK_ACCOUNT_ID, query.bankAccountId().asString());
+    logContext.with(RecipientLogKey.BANK_ACCOUNT_ID, query.bankAccountId().asString());
 
     try {
       var result = new ListRecipientsQueryResult(
@@ -44,12 +44,11 @@ public class ListRecipientsQueryHandler
       );
 
       logContext.info("Recipients listed")
-        .success()
         .with(RecipientLogKey.FILTER_NAME_PRESENT, query.filter().hasName())
         .with(RecipientLogKey.RESULT_COUNT, result.page().content().size())
         .with(RecipientLogKey.PAGE, result.page().page())
         .with(RecipientLogKey.SIZE, result.page().size())
-        .log();
+        .success();
 
       return result;
     }
@@ -57,17 +56,15 @@ public class ListRecipientsQueryHandler
       var reason = RecipientFailureReason.from(ex);
 
       logContext.warn("Recipient listing failed: " + reason.name())
-        .failure()
         .with(LogKey.REASON, reason.normalize())
-        .log();
+        .failure();
 
       throw ex;
     }
     catch (Exception ex) {
       logContext.error("Unexpected error during recipient listing", ex)
-        .failure()
         .with(LogKey.REASON, RecipientFailureReason.INTERNAL_ERROR.normalize())
-        .log();
+        .failure();
 
       throw ex;
     }

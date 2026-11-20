@@ -16,6 +16,12 @@
 
     <dependencies>
         <dependency>
+            <groupId>io.github.jcondotta</groupId>
+            <artifactId>scoped-logging-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
             <groupId>com.jcondotta</groupId>
             <artifactId>domain-core</artifactId>
         </dependency>

@@ -1,4 +1,4 @@
-package com.jcondotta.application.logging;
+package com.jcondotta.banking.infrastructure.outbox.logging.legacy;
 
 public final class LogOutcome {
 

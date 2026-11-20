@@ -1,5 +1,12 @@
 package com.jcondotta.banking.accounts.integration.bankaccount.open;
 
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.read.ListAppender;
+import com.jcondotta.scopedlogging.domain.logging.LogKey;
+import com.jcondotta.banking.accounts.application.common.log.BankAccountLogKey;
+import com.jcondotta.application.logging.StructuredLogEventSupport;
+import com.jcondotta.banking.accounts.application.bankaccount.command.open.OpenBankAccountCommandHandler;
 import com.jcondotta.banking.accounts.domain.bankaccount.events.BankAccountOpenedEvent;
 import com.jcondotta.banking.accounts.domain.bankaccount.aggregate.BankAccount;
 import com.jcondotta.banking.accounts.domain.testsupport.AccountTypeAndCurrencySource;
@@ -15,6 +22,9 @@ import com.jcondotta.banking.accounts.infrastructure.adapters.input.rest.open.mo
 import com.jcondotta.banking.accounts.integration.bankaccount.BankAccountIntegrationSupport;
 import com.jcondotta.banking.accounts.integration.bankaccount.BankAccountRequestFactory;
 import com.jcondotta.banking.accounts.integration.testsupport.annotation.IntegrationTest;
+import org.assertj.core.api.SoftAssertions;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.springframework.http.HttpStatus;
@@ -26,6 +36,18 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 
 @IntegrationTest
 class OpenBankAccountIT extends BankAccountIntegrationSupport {
+
+  private ListAppender<ILoggingEvent> logAppender;
+
+  @BeforeEach
+  void attachLogAppender() {
+    logAppender = StructuredLogEventSupport.attachAppender(OpenBankAccountCommandHandler.class);
+  }
+
+  @AfterEach
+  void detachLogAppender() {
+    StructuredLogEventSupport.detachAppender(OpenBankAccountCommandHandler.class, logAppender);
+  }
 
   @ParameterizedTest
   @AccountTypeAndCurrencySource
@@ -59,7 +81,89 @@ class OpenBankAccountIT extends BankAccountIntegrationSupport {
         })
     );
 
+    assertThat(logAppender.list).hasSize(1);
+    assertThat(StructuredLogEventSupport.lastEvent(logAppender, ILoggingEvent::getLevel))
+      .isEqualTo(Level.INFO);
+    var logAttributes = StructuredLogEventSupport.lastEventKeyValues(logAppender);
+    assertThat(logAttributes)
+      .containsEntry(LogKey.OPERATION, "accounts.open")
+      .containsEntry(LogKey.OUTCOME, "success")
+      .containsEntry("bank_account_id", bankAccountId);
+    assertThat(logAttributes).containsKey(LogKey.DURATION_MS);
+    assertThat(StructuredLogEventSupport.lastEvent(logAppender, ILoggingEvent::getFormattedMessage))
+      .isEqualTo("Bank account opened");
+
     assertOutboxEvents(bankAccount.getId(), BankAccountOpenedEvent.EVENT_TYPE);
+  }
+
+  @Test
+  void shouldLogSuccessfulReplay_whenSameIdempotencyKeyAndRequestAreReused() {
+    var request = BankAccountRequestFactory.openBankAccount(
+      AccountType.CHECKING,
+      Currency.EUR,
+      AccountHolderFixtures.JEFFERSON
+    );
+    var idempotencyKey = UUID.randomUUID();
+
+    var firstResponse = postOpenBankAccount(request, idempotencyKey);
+    var replayResponse = postOpenBankAccount(request, idempotencyKey);
+
+    var softly = new SoftAssertions();
+    softly.assertThat(firstResponse.statusCode()).isEqualTo(HttpStatus.CREATED.value());
+    softly.assertThat(replayResponse.statusCode()).isEqualTo(HttpStatus.CREATED.value());
+    softly.assertThat(replayResponse.getHeader("Location")).isEqualTo(firstResponse.getHeader("Location"));
+
+    assertThat(logAppender.list).hasSize(2);
+    var replayAttributes = StructuredLogEventSupport.keyValues(logAppender.list.getLast());
+    softly.assertThat(logAppender.list.getLast().getLevel()).isEqualTo(Level.INFO);
+    softly.assertThat(replayAttributes)
+      .containsEntry(LogKey.OPERATION, "accounts.open")
+      .containsEntry(LogKey.OUTCOME, "success")
+      .containsEntry(BankAccountLogKey.EXECUTION_RESULT, "replayed")
+      .containsEntry("bank_account_id", bankAccountId(firstResponse))
+      .containsKey(LogKey.DURATION_MS);
+    softly.assertThat(logAppender.list.getLast().getFormattedMessage()).isEqualTo("Bank account opening replayed");
+    softly.assertAll();
+  }
+
+  @Test
+  void shouldLogIdempotencyConflict_whenKeyIsReusedWithDifferentRequestData() {
+    var originalRequest = BankAccountRequestFactory.openBankAccount(
+      AccountType.CHECKING,
+      Currency.EUR,
+      AccountHolderFixtures.JEFFERSON
+    );
+    var conflictingRequest = BankAccountRequestFactory.openBankAccount(
+      AccountType.CHECKING,
+      Currency.USD,
+      AccountHolderFixtures.JEFFERSON
+    );
+    var idempotencyKey = UUID.randomUUID();
+
+    var firstResponse = postOpenBankAccount(originalRequest, idempotencyKey);
+    var conflictingResponse = postOpenBankAccount(conflictingRequest, idempotencyKey);
+
+    var softly = new SoftAssertions();
+    softly.assertThat(firstResponse.statusCode()).isEqualTo(HttpStatus.CREATED.value());
+    softly.assertThat(conflictingResponse.statusCode()).isEqualTo(HttpStatus.CONFLICT.value());
+
+    assertThat(logAppender.list).hasSize(2);
+    var conflictEvent = logAppender.list.getLast();
+    var conflictAttributes = StructuredLogEventSupport.keyValues(conflictEvent);
+    softly.assertThat(conflictEvent.getLevel()).isEqualTo(Level.ERROR);
+    softly.assertThat(conflictAttributes)
+      .containsEntry(LogKey.OPERATION, "accounts.open")
+      .containsEntry(LogKey.OUTCOME, "failure")
+      .containsEntry(LogKey.REASON, "idempotency_conflict")
+      .containsKey(LogKey.DURATION_MS);
+    softly.assertThat(conflictEvent.getThrowableProxy()).isNotNull();
+    softly.assertThat(conflictEvent.getFormattedMessage()).isEqualTo("Idempotency key reused with different request data");
+    softly.assertAll();
+  }
+
+  private static String bankAccountId(io.restassured.response.Response response) {
+    var location = response.getHeader("Location");
+    return location.substring(location.lastIndexOf('/') + 1);
   }
 
   @Test

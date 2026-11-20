@@ -15,8 +15,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.ResponseEntity;
 
-import com.jcondotta.banking.accounts.application.common.idempotency.*;
-import com.jcondotta.application.idempotency.IdempotencyKey;
+import com.jcondotta.application.idempotency.identity.IdempotencyKey;
 import java.net.URI;
 import java.util.UUID;
 

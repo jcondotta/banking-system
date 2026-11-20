@@ -1,8 +1,9 @@
 package com.jcondotta.banking.recipients.application.recipient.command.remove;
 
 import com.jcondotta.application.command.CommandHandler;
-import com.jcondotta.application.logging.LogContext;
-import com.jcondotta.application.logging.LogKey;
+import com.jcondotta.scopedlogging.application.logscope.LogContext;
+import com.jcondotta.scopedlogging.LogScope;
+import com.jcondotta.scopedlogging.domain.logging.LogKey;
 import com.jcondotta.banking.recipients.application.common.log.RecipientOperation;
 import com.jcondotta.banking.recipients.application.common.log.RecipientFailureReason;
 import com.jcondotta.banking.recipients.application.common.log.RecipientLogKey;
@@ -11,8 +12,6 @@ import com.jcondotta.banking.recipients.domain.recipient.exceptions.RecipientNot
 import com.jcondotta.banking.recipients.domain.recipient.repository.RecipientRepository;
 import com.jcondotta.domain.exception.DomainException;
 import io.micrometer.observation.annotation.Observed;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.resilience.annotation.ConcurrencyLimit;
 import org.springframework.stereotype.Component;
 
@@ -22,7 +21,7 @@ import java.time.Instant;
 @Component
 public class RemoveRecipientCommandHandler implements CommandHandler<RemoveRecipientCommand> {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(RemoveRecipientCommandHandler.class);
+  private final LogContext logContext;
 
   private final RecipientRepository recipientRepository;
   private final RecipientEventPublisher recipientEventPublisher;
@@ -31,14 +30,17 @@ public class RemoveRecipientCommandHandler implements CommandHandler<RemoveRecip
   public RemoveRecipientCommandHandler(
     RecipientRepository recipientRepository,
     RecipientEventPublisher recipientEventPublisher,
-    Clock clock
+    Clock clock,
+    LogContext logContext
   ) {
+    this.logContext = logContext;
     this.recipientRepository = recipientRepository;
     this.recipientEventPublisher = recipientEventPublisher;
     this.clock = clock;
   }
 
   @Override
+  @LogScope(RecipientOperation.REMOVE)
   @Observed(
       name = "recipients.remove",
       contextualName = "removeRecipient",
@@ -49,8 +51,7 @@ public class RemoveRecipientCommandHandler implements CommandHandler<RemoveRecip
   )
   @ConcurrencyLimit(limitString = "${app.concurrency.recipients.remove.limit}", policy = ConcurrencyLimit.ThrottlePolicy.REJECT)
   public void handle(RemoveRecipientCommand command) {
-    var logContext = LogContext.timed(LOGGER, RecipientOperation.REMOVE)
-      .with(RecipientLogKey.BANK_ACCOUNT_ID, command.bankAccountId().asString())
+    logContext.with(RecipientLogKey.BANK_ACCOUNT_ID, command.bankAccountId().asString())
       .with(RecipientLogKey.RECIPIENT_ID, command.recipientId().asString());
 
     try {
@@ -62,24 +63,21 @@ public class RemoveRecipientCommandHandler implements CommandHandler<RemoveRecip
       recipientEventPublisher.publish(recipient.pullEvents());
 
       logContext.info("Recipient removed")
-        .success()
-        .log();
+        .success();
     }
     catch (DomainException ex) {
       var reason = RecipientFailureReason.from(ex);
 
       logContext.warn("Recipient removal failed")
-        .failure()
         .with(LogKey.REASON, reason.normalize())
-        .log();
+        .failure();
 
       throw ex;
     }
     catch (Exception ex) {
       logContext.error("Unexpected error during recipient removal", ex)
-        .failure()
         .with(LogKey.REASON, RecipientFailureReason.INTERNAL_ERROR.normalize())
-        .log();
+        .failure();
 
       throw ex;
     }

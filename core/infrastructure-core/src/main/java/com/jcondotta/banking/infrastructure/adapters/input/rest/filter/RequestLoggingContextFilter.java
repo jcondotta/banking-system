@@ -1,6 +1,6 @@
 package com.jcondotta.banking.infrastructure.adapters.input.rest.filter;
 
-import com.jcondotta.application.logging.LogKey;
+import com.jcondotta.application.logging.ApplicationLogKey;
 import com.jcondotta.banking.infrastructure.adapters.input.rest.correlation.ScopedCorrelationIdProvider;
 import com.jcondotta.banking.infrastructure.adapters.input.rest.http.HttpHeadersConstants;
 import jakarta.servlet.FilterChain;
@@ -19,15 +19,14 @@ import java.util.UUID;
 
 @Component
 @Order(Ordered.HIGHEST_PRECEDENCE)
-public class CorrelationFilter extends OncePerRequestFilter {
+public class RequestLoggingContextFilter extends OncePerRequestFilter {
 
-    public static final String REQUEST_START_NS_ATTRIBUTE = CorrelationFilter.class.getName() + ".requestStartNs";
+    public static final String REQUEST_START_NS_ATTRIBUTE = RequestLoggingContextFilter.class.getName() + ".requestStartNs";
 
-    static final String MDC_CORRELATION_ID = LogKey.CORRELATION_ID;
-
+    static final String MDC_CORRELATION_ID = ApplicationLogKey.CORRELATION_ID;
     private final CorrelationIdResolver correlationIdResolver;
 
-    public CorrelationFilter(CorrelationIdResolver correlationIdResolver) {
+    public RequestLoggingContextFilter(CorrelationIdResolver correlationIdResolver) {
         this.correlationIdResolver = correlationIdResolver;
     }
 
@@ -35,15 +34,22 @@ public class CorrelationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
         throws ServletException, IOException {
 
+        request.setAttribute(REQUEST_START_NS_ATTRIBUTE, System.nanoTime());
+
         var correlationId = correlationIdResolver.resolve(request);
         response.setHeader(HttpHeadersConstants.CORRELATION_ID, correlationId.toString());
-
-        request.setAttribute(REQUEST_START_NS_ATTRIBUTE, System.nanoTime());
         MDC.put(MDC_CORRELATION_ID, correlationId.toString());
+
+        var idempotencyKey = request.getHeader(HttpHeadersConstants.IDEMPOTENCY_KEY);
+        if (idempotencyKey != null) {
+            MDC.put(ApplicationLogKey.IDEMPOTENCY_KEY, idempotencyKey);
+        }
+
         try {
             doFilterWithScopedCorrelationId(request, response, chain, correlationId);
         }
         finally {
+            MDC.remove(ApplicationLogKey.IDEMPOTENCY_KEY);
             MDC.remove(MDC_CORRELATION_ID);
         }
     }

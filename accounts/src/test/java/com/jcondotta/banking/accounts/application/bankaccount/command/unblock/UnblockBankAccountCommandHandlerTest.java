@@ -8,11 +8,16 @@ import com.jcondotta.banking.accounts.domain.bankaccount.identity.BankAccountId;
 import com.jcondotta.banking.accounts.domain.bankaccount.repository.BankAccountRepository;
 import com.jcondotta.banking.accounts.domain.testsupport.AccountHolderFixtures;
 import com.jcondotta.banking.accounts.domain.testsupport.BankAccountFixture;
+import com.jcondotta.scopedlogging.LogScopeAspect;
+import com.jcondotta.scopedlogging.application.logscope.LogScopeExecutor;
+import com.jcondotta.scopedlogging.application.logscope.ScopedLogContext;
+import com.jcondotta.scopedlogging.infrastructure.slf4j.Slf4jLogEventPublisher;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.aop.aspectj.annotation.AspectJProxyFactory;
 
 import java.util.Optional;
 
@@ -30,7 +35,11 @@ class UnblockBankAccountCommandHandlerTest {
 
   @BeforeEach
   void setUp() {
-    commandHandler = new UnblockBankAccountCommandHandler(bankAccountRepository);
+    var logContext = new ScopedLogContext();
+    var proxy = new AspectJProxyFactory(new UnblockBankAccountCommandHandler(bankAccountRepository, logContext));
+    proxy.setProxyTargetClass(true);
+    proxy.addAspect(new LogScopeAspect(new LogScopeExecutor(logContext, new Slf4jLogEventPublisher())));
+    commandHandler = proxy.getProxy();
   }
 
   @Test

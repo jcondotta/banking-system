@@ -1,10 +1,15 @@
 package com.jcondotta.banking.recipients.application.recipient.command.update;
 
+import com.jcondotta.scopedlogging.application.logscope.ScopedLogContext;
+import com.jcondotta.scopedlogging.LogScopeAspect;
+import com.jcondotta.scopedlogging.application.logscope.LogScopeExecutor;
+import com.jcondotta.scopedlogging.infrastructure.slf4j.Slf4jLogEventPublisher;
+import org.springframework.aop.aspectj.annotation.AspectJProxyFactory;
+
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
-import com.jcondotta.application.logging.LogKey;
-import com.jcondotta.application.logging.LogOutcome;
+import com.jcondotta.scopedlogging.domain.logging.LogKey;
 import com.jcondotta.application.logging.StructuredLogEventSupport;
 import com.jcondotta.banking.recipients.application.common.log.RecipientOperation;
 import com.jcondotta.banking.recipients.domain.recipient.aggregate.Recipient;
@@ -52,7 +57,11 @@ class UpdateRecipientCommandHandlerTest {
 
   @BeforeEach
   void setUp() {
-    commandHandler = new UpdateRecipientCommandHandler(recipientRepository);
+    var logContext = new ScopedLogContext();
+    var proxy = new AspectJProxyFactory(new UpdateRecipientCommandHandler(recipientRepository, logContext));
+    proxy.setProxyTargetClass(true);
+    proxy.addAspect(new LogScopeAspect(new LogScopeExecutor(logContext, new Slf4jLogEventPublisher())));
+    commandHandler = proxy.getProxy();
     logAppender = StructuredLogEventSupport.attachAppender(UpdateRecipientCommandHandler.class);
   }
 
@@ -82,7 +91,7 @@ class UpdateRecipientCommandHandlerTest {
       .isEqualTo(Level.INFO);
     assertThat(StructuredLogEventSupport.lastEventKeyValues(logAppender))
       .containsEntry(LogKey.OPERATION, RecipientOperation.UPDATE)
-      .containsEntry(LogKey.OUTCOME, LogOutcome.SUCCESS);
+      .containsEntry(LogKey.OUTCOME, "success");
     assertThat(StructuredLogEventSupport.operations(logAppender))
       .allMatch(eventType -> !eventType.contains(".failed"));
   }
@@ -101,10 +110,10 @@ class UpdateRecipientCommandHandlerTest {
     verifyNoMoreInteractions(recipientRepository);
 
     assertThat(StructuredLogEventSupport.lastEvent(logAppender, ILoggingEvent::getLevel))
-      .isEqualTo(Level.WARN);
+      .isEqualTo(Level.ERROR);
     assertThat(StructuredLogEventSupport.lastEventKeyValues(logAppender))
       .containsEntry(LogKey.OPERATION, RecipientOperation.UPDATE)
-      .containsEntry(LogKey.OUTCOME, LogOutcome.FAILURE);
+      .containsEntry(LogKey.OUTCOME, "failure");
     assertThat(StructuredLogEventSupport.operations(logAppender))
       .allMatch(eventType -> !eventType.contains(".failed"));
   }
@@ -127,10 +136,10 @@ class UpdateRecipientCommandHandlerTest {
     verifyNoMoreInteractions(recipientRepository);
 
     assertThat(StructuredLogEventSupport.lastEvent(logAppender, ILoggingEvent::getLevel))
-      .isEqualTo(Level.WARN);
+      .isEqualTo(Level.ERROR);
     assertThat(StructuredLogEventSupport.lastEventKeyValues(logAppender))
       .containsEntry(LogKey.OPERATION, RecipientOperation.UPDATE)
-      .containsEntry(LogKey.OUTCOME, LogOutcome.FAILURE);
+      .containsEntry(LogKey.OUTCOME, "failure");
     assertThat(StructuredLogEventSupport.operations(logAppender))
       .allMatch(eventType -> !eventType.contains(".failed"));
   }
@@ -153,7 +162,7 @@ class UpdateRecipientCommandHandlerTest {
       .isEqualTo(Level.ERROR);
     assertThat(StructuredLogEventSupport.lastEventKeyValues(logAppender))
       .containsEntry(LogKey.OPERATION, RecipientOperation.UPDATE)
-      .containsEntry(LogKey.OUTCOME, LogOutcome.FAILURE);
+      .containsEntry(LogKey.OUTCOME, "failure");
     assertThat(StructuredLogEventSupport.operations(logAppender))
       .allMatch(eventType -> !eventType.contains(".failed"));
   }

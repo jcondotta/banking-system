@@ -1,8 +1,9 @@
 package com.jcondotta.banking.accounts.application.bankaccount.command.unblock;
 
 import com.jcondotta.application.command.CommandHandler;
-import com.jcondotta.application.logging.LogContext;
-import com.jcondotta.application.logging.LogKey;
+import com.jcondotta.scopedlogging.LogScope;
+import com.jcondotta.scopedlogging.application.logscope.LogContext;
+import com.jcondotta.scopedlogging.domain.logging.LogKey;
 import com.jcondotta.banking.accounts.application.bankaccount.command.unblock.model.UnblockBankAccountCommand;
 import com.jcondotta.banking.accounts.application.common.log.BankAccountOperation;
 import com.jcondotta.banking.accounts.application.common.log.BankAccountLogKey;
@@ -13,28 +14,27 @@ import com.jcondotta.banking.accounts.application.common.log.BankAccountFailureR
 import com.jcondotta.domain.exception.DomainException;
 import io.micrometer.observation.annotation.Observed;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
-@Slf4j
 @Component
 @RequiredArgsConstructor
 public class UnblockBankAccountCommandHandler implements CommandHandler<UnblockBankAccountCommand> {
 
   private final BankAccountRepository bankAccountRepository;
+  private final LogContext logContext;
 
   @Override
   @Observed(
-    name = "accounts.unblock",
+    name = BankAccountOperation.UNBLOCK,
     contextualName = "unblockBankAccount",
     lowCardinalityKeyValues = {
       "aggregate", "bankAccount",
       "operation", "unblock"
     }
   )
+  @LogScope(BankAccountOperation.UNBLOCK)
   public void handle(UnblockBankAccountCommand command) {
-    var logContext = LogContext.timed(log, BankAccountOperation.UNBLOCK)
-      .with(BankAccountLogKey.BANK_ACCOUNT_ID, command.bankAccountId().value().toString());
+    logContext.with(BankAccountLogKey.BANK_ACCOUNT_ID, command.bankAccountId().value().toString());
 
     try {
       var bankAccount = bankAccountRepository.findById(command.bankAccountId())
@@ -46,32 +46,28 @@ public class UnblockBankAccountCommandHandler implements CommandHandler<UnblockB
         bankAccountRepository.save(bankAccount);
 
         logContext.info("Bank account unblocked")
-          .success()
           .with(BankAccountLogKey.STATE_CHANGE_RESULT, "changed")
-          .log();
+          .success();
       }
       else {
         logContext.info("Bank account unblocking skipped; account already active")
-          .success()
           .with(BankAccountLogKey.STATE_CHANGE_RESULT, "already_in_target_state")
-          .log();
+          .success();
       }
     }
     catch (DomainException ex) {
       var reason = BankAccountFailureReason.from(ex);
 
       logContext.warn("Bank account unblocking failed")
-        .failure()
         .with(LogKey.REASON, reason.normalize())
-        .log();
+        .failure();
 
       throw ex;
     }
     catch (Exception ex) {
       logContext.error("Unexpected error during bank account unblocking", ex)
-        .failure()
         .with(LogKey.REASON, BankAccountFailureReason.INTERNAL_ERROR.normalize())
-        .log();
+        .failure();
 
       throw ex;
     }

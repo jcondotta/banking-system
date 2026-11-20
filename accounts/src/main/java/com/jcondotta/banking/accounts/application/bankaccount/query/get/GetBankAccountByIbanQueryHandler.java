@@ -1,7 +1,8 @@
 package com.jcondotta.banking.accounts.application.bankaccount.query.get;
 
-import com.jcondotta.application.logging.LogContext;
-import com.jcondotta.application.logging.LogKey;
+import com.jcondotta.scopedlogging.LogScope;
+import com.jcondotta.scopedlogging.application.logscope.LogContext;
+import com.jcondotta.scopedlogging.domain.logging.LogKey;
 import com.jcondotta.application.query.QueryHandler;
 import com.jcondotta.banking.accounts.application.bankaccount.query.get.model.BankAccountSummary;
 import com.jcondotta.banking.accounts.application.common.log.BankAccountOperation;
@@ -11,8 +12,6 @@ import com.jcondotta.banking.accounts.application.common.log.BankAccountFailureR
 import com.jcondotta.domain.exception.DomainException;
 import io.micrometer.observation.annotation.Observed;
 import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -20,11 +19,11 @@ import org.springframework.stereotype.Component;
 public class GetBankAccountByIbanQueryHandler
   implements QueryHandler<GetBankAccountByIbanQuery, BankAccountSummary> {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(GetBankAccountByIbanQueryHandler.class);
-
   private final BankAccountQueryRepository bankAccountQueryRepository;
+  private final LogContext logContext;
 
   @Override
+  @LogScope(BankAccountOperation.GET_BY_IBAN)
   @Observed(
     name = "accounts.getByIban",
     contextualName = "getBankAccountByIban",
@@ -34,8 +33,7 @@ public class GetBankAccountByIbanQueryHandler
     }
   )
   public BankAccountSummary handle(GetBankAccountByIbanQuery query) {
-    var logContext = LogContext.timed(LOGGER, BankAccountOperation.GET_BY_IBAN)
-      .with(BankAccountLogKey.MASKED_IBAN, query.iban().masked());
+    logContext.with(BankAccountLogKey.MASKED_IBAN, query.iban().masked());
 
     try {
       var summary = bankAccountQueryRepository
@@ -44,8 +42,7 @@ public class GetBankAccountByIbanQueryHandler
 
       logContext.info("Bank account retrieved by IBAN")
         .with(BankAccountLogKey.BANK_ACCOUNT_ID, summary.id())
-        .success()
-        .log();
+        .success();
 
       return summary;
     }
@@ -53,17 +50,15 @@ public class GetBankAccountByIbanQueryHandler
       var reason = BankAccountFailureReason.from(ex);
 
       logContext.warn("Bank account retrieval by IBAN failed")
-        .failure()
         .with(LogKey.REASON, reason.normalize())
-        .log();
+        .failure();
 
       throw ex;
     }
     catch (Exception ex) {
       logContext.error("Unexpected error during bank account retrieval by IBAN", ex)
-        .failure()
         .with(LogKey.REASON, BankAccountFailureReason.INTERNAL_ERROR.normalize())
-        .log();
+        .failure();
 
       throw ex;
     }

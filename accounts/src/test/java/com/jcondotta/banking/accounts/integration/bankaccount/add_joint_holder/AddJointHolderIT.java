@@ -1,5 +1,11 @@
 package com.jcondotta.banking.accounts.integration.bankaccount.add_joint_holder;
 
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.read.ListAppender;
+import com.jcondotta.scopedlogging.domain.logging.LogKey;
+import com.jcondotta.application.logging.StructuredLogEventSupport;
+import com.jcondotta.banking.accounts.application.bankaccount.command.add_joint_holder.AddJointHolderCommandHandler;
 import com.jcondotta.banking.accounts.domain.bankaccount.events.BankAccountActivatedEvent;
 import com.jcondotta.banking.accounts.domain.bankaccount.events.BankAccountJointHolderAddedEvent;
 import com.jcondotta.banking.accounts.domain.bankaccount.events.BankAccountOpenedEvent;
@@ -11,6 +17,9 @@ import com.jcondotta.banking.accounts.domain.testsupport.AccountHolderFixtures;
 import com.jcondotta.banking.accounts.integration.bankaccount.BankAccountIntegrationSupport;
 import com.jcondotta.banking.accounts.integration.bankaccount.BankAccountRequestFactory;
 import com.jcondotta.banking.accounts.integration.testsupport.annotation.IntegrationTest;
+import org.assertj.core.api.SoftAssertions;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.springframework.http.HttpStatus;
@@ -21,6 +30,18 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @IntegrationTest
 class AddJointHolderIT extends BankAccountIntegrationSupport {
+
+  private ListAppender<ILoggingEvent> logAppender;
+
+  @BeforeEach
+  void attachLogAppender() {
+    logAppender = StructuredLogEventSupport.attachAppender(AddJointHolderCommandHandler.class);
+  }
+
+  @AfterEach
+  void detachLogAppender() {
+    StructuredLogEventSupport.detachAppender(AddJointHolderCommandHandler.class, logAppender);
+  }
 
   @ParameterizedTest
   @AccountTypeAndCurrencySource
@@ -58,6 +79,30 @@ class AddJointHolderIT extends BankAccountIntegrationSupport {
     assertThat(response.statusCode()).isEqualTo(HttpStatus.UNPROCESSABLE_CONTENT.value());
     assertThat(getBankAccount(id).holders()).hasSize(1);
     assertOutboxEvents(id, BankAccountOpenedEvent.EVENT_TYPE);
+  }
+
+  @Test
+  void shouldLogClassifiedFailureAtError_whenBankAccountIsNotActive() {
+    var id = openBankAccount(AccountType.CHECKING, Currency.EUR);
+
+    var response = postJointHolder(id, BankAccountRequestFactory.addJointHolder(AccountHolderFixtures.PATRIZIO));
+
+    var softly = new SoftAssertions();
+    softly.assertThat(response.statusCode()).isEqualTo(HttpStatus.UNPROCESSABLE_CONTENT.value());
+    assertThat(logAppender.list).hasSize(1);
+
+    var event = logAppender.list.getFirst();
+    var attributes = StructuredLogEventSupport.keyValues(event);
+    softly.assertThat(event.getLevel()).isEqualTo(Level.ERROR);
+    softly.assertThat(attributes)
+      .containsEntry(LogKey.OPERATION, "accounts.addJointHolder")
+      .containsEntry(LogKey.OUTCOME, "failure")
+      .containsEntry(LogKey.REASON, "not_active")
+      .containsEntry("bank_account_id", id.asString())
+      .containsKey(LogKey.DURATION_MS);
+    softly.assertThat(event.getFormattedMessage()).isEqualTo("Joint account holder addition failed");
+    softly.assertThat(event.getThrowableProxy()).isNotNull();
+    softly.assertAll();
   }
 
   @Test

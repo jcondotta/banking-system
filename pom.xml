@@ -26,6 +26,7 @@
 
 	<properties>
 		<java.version>25</java.version>
+        <scoped-logging.version>0.1.0-alpha.1</scoped-logging.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
 		<lombok.version>1.18.38</lombok.version>
@@ -68,7 +69,17 @@
 
 	<dependencyManagement>
 		<dependencies>
-			<!-- ===== BOM IMPORTS ===== -->
+			<dependency>
+				<groupId>io.github.jcondotta</groupId>
+				<artifactId>scoped-logging-core</artifactId>
+				<version>${scoped-logging.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>io.github.jcondotta</groupId>
+				<artifactId>scoped-logging-spring-boot</artifactId>
+				<version>${scoped-logging.version}</version>
+			</dependency>
+            <!-- ===== BOM IMPORTS ===== -->
 			<dependency>
 				<groupId>software.amazon.awssdk</groupId>
 				<artifactId>bom</artifactId>

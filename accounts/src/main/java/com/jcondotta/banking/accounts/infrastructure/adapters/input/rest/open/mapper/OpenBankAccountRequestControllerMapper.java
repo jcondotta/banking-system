@@ -1,7 +1,7 @@
 package com.jcondotta.banking.accounts.infrastructure.adapters.input.rest.open.mapper;
 
 import com.jcondotta.banking.accounts.application.bankaccount.command.open.model.OpenBankAccountCommand;
-import com.jcondotta.application.idempotency.IdempotencyKey;
+import com.jcondotta.application.idempotency.identity.IdempotencyKey;
 import com.jcondotta.banking.accounts.domain.bankaccount.enums.AccountType;
 import com.jcondotta.banking.accounts.domain.bankaccount.enums.Currency;
 import com.jcondotta.banking.accounts.domain.bankaccount.enums.DocumentCountry;
@@ -15,28 +15,25 @@ import com.jcondotta.banking.accounts.infrastructure.adapters.input.rest.open.mo
 import com.jcondotta.banking.accounts.infrastructure.adapters.input.rest.open.model.CurrencyRequest;
 import com.jcondotta.banking.accounts.infrastructure.adapters.input.rest.open.model.OpenBankAccountRequest;
 import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;
 
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
 public interface OpenBankAccountRequestControllerMapper {
 
-    @Mapping(
-      target = "personalInfo",
-      expression = "java(toPersonalInfo(request))"
-    )
-    @Mapping(
-      target = "contactInfo",
-      expression = "java(toContactInfo(request))"
-    )
-    @Mapping(
-      target = "address",
-      expression = "java(toAddress(request))"
-    )
-    @Mapping(target = "accountType", expression = "java(toAccountType(request.accountType()))")
-    @Mapping(target = "currency", expression = "java(toCurrency(request.currency()))")
-    @Mapping(target = "idempotencyKey", source = "key")
-    OpenBankAccountCommand toCommand(OpenBankAccountRequest request, IdempotencyKey key);
+    default OpenBankAccountCommand toCommand(OpenBankAccountRequest request, IdempotencyKey key) {
+        if (request == null) {
+            return null;
+        }
+
+        return new OpenBankAccountCommand(
+            toPersonalInfo(request),
+            toContactInfo(request),
+            toAddress(request),
+            toAccountType(request.accountType()),
+            toCurrency(request.currency()),
+            key
+        );
+    }
 
     default AccountType toAccountType(AccountTypeRequest accountTypeRequest) {
         return AccountType.valueOf(accountTypeRequest.name());

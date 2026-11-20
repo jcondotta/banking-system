@@ -1,6 +1,6 @@
 package com.jcondotta.banking.ledger.infrastructure.adapters.input.messaging;
 
-import com.jcondotta.application.logging.LogKey;
+import com.jcondotta.application.logging.ApplicationLogKey;
 import lombok.RequiredArgsConstructor;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -23,7 +23,7 @@ public class CorrelationMdcKafkaInterceptor implements RecordInterceptor<String,
             var json = new String(record.value(), StandardCharsets.UTF_8);
             var envelope = objectMapper.readValue(json, CorrelationEnvelope.class);
             if (envelope.correlationId() != null) {
-                MDC.put(LogKey.CORRELATION_ID, envelope.correlationId().toString());
+                MDC.put(ApplicationLogKey.CORRELATION_ID, envelope.correlationId().toString());
             }
         }
         catch (Exception ignored) {
@@ -33,11 +33,11 @@ public class CorrelationMdcKafkaInterceptor implements RecordInterceptor<String,
 
     @Override
     public void success(ConsumerRecord<String, byte[]> record, Consumer<String, byte[]> consumer) {
-        MDC.remove(LogKey.CORRELATION_ID);
+        MDC.remove(ApplicationLogKey.CORRELATION_ID);
     }
 
     @Override
     public void failure(ConsumerRecord<String, byte[]> record, Exception exception, Consumer<String, byte[]> consumer) {
-        MDC.remove(LogKey.CORRELATION_ID);
+        MDC.remove(ApplicationLogKey.CORRELATION_ID);
     }
 }

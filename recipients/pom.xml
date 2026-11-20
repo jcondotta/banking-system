@@ -39,6 +39,11 @@
 
     <dependencies>
         <dependency>
+            <groupId>io.github.jcondotta</groupId>
+            <artifactId>scoped-logging-spring-boot</artifactId>
+        </dependency>
+
+        <dependency>
             <groupId>com.jcondotta</groupId>
             <artifactId>domain-core</artifactId>
         </dependency>

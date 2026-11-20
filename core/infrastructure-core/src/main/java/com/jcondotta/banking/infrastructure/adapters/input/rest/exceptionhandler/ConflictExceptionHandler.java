@@ -29,4 +29,5 @@ public class ConflictExceptionHandler {
 
     return ResponseEntity.of(problemDetail).build();
   }
+
 }

@@ -1,7 +1,7 @@
 package com.jcondotta.banking.accounts.application.bankaccount.command.add_joint_holder.model;
 
-import com.jcondotta.application.idempotency.IdempotencyKey;
-import com.jcondotta.application.idempotency.IdempotentCommand;
+import com.jcondotta.application.idempotency.identity.IdempotencyKey;
+import com.jcondotta.application.command.IdempotentCommand;
 import com.jcondotta.banking.accounts.domain.bankaccount.identity.BankAccountId;
 import com.jcondotta.banking.accounts.domain.bankaccount.value_objects.address.Address;
 import com.jcondotta.banking.accounts.domain.bankaccount.value_objects.contact.ContactInfo;

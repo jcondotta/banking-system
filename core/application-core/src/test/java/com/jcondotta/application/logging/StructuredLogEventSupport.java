@@ -1,5 +1,7 @@
 package com.jcondotta.application.logging;
 
+import com.jcondotta.scopedlogging.domain.logging.LogKey;
+
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;

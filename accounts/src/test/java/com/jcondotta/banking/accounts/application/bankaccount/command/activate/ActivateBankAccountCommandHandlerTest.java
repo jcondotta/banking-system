@@ -2,6 +2,7 @@ package com.jcondotta.banking.accounts.application.bankaccount.command.activate;
 
 import com.jcondotta.application.command.CommandHandler;
 import com.jcondotta.banking.accounts.application.bankaccount.command.activate.model.ActivateBankAccountCommand;
+import com.jcondotta.banking.accounts.application.bankaccount.services.IbanGenerator;
 import com.jcondotta.banking.accounts.domain.bankaccount.aggregate.BankAccount;
 import com.jcondotta.banking.accounts.domain.bankaccount.enums.AccountStatus;
 import com.jcondotta.banking.accounts.domain.bankaccount.exceptions.BankAccountNotFoundException;
@@ -9,7 +10,10 @@ import com.jcondotta.banking.accounts.domain.bankaccount.identity.BankAccountId;
 import com.jcondotta.banking.accounts.domain.bankaccount.repository.BankAccountRepository;
 import com.jcondotta.banking.accounts.domain.testsupport.AccountHolderFixtures;
 import com.jcondotta.banking.accounts.domain.testsupport.BankAccountFixture;
-import com.jcondotta.banking.accounts.application.bankaccount.services.IbanGenerator;
+import com.jcondotta.scopedlogging.LogScopeAspect;
+import com.jcondotta.scopedlogging.application.logscope.LogScopeExecutor;
+import com.jcondotta.scopedlogging.application.logscope.ScopedLogContext;
+import com.jcondotta.scopedlogging.infrastructure.slf4j.Slf4jLogEventPublisher;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -17,6 +21,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.aop.aspectj.annotation.AspectJProxyFactory;
 
 import java.util.Optional;
 
@@ -37,7 +42,11 @@ class ActivateBankAccountCommandHandlerTest {
 
   @BeforeEach
   void setUp() {
-    commandHandler = new ActivateBankAccountCommandHandler(bankAccountRepository, new IbanGenerator());
+    var logContext = new ScopedLogContext();
+    var proxy = new AspectJProxyFactory(new ActivateBankAccountCommandHandler(bankAccountRepository, new IbanGenerator(), logContext));
+    proxy.setProxyTargetClass(true);
+    proxy.addAspect(new LogScopeAspect(new LogScopeExecutor(logContext, new Slf4jLogEventPublisher())));
+    commandHandler = proxy.getProxy();
   }
 
   @Test

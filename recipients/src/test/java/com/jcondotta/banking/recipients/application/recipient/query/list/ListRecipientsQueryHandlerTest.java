@@ -1,13 +1,18 @@
 package com.jcondotta.banking.recipients.application.recipient.query.list;
 
+import com.jcondotta.scopedlogging.application.logscope.ScopedLogContext;
+import com.jcondotta.scopedlogging.LogScopeAspect;
+import com.jcondotta.scopedlogging.application.logscope.LogScopeExecutor;
+import com.jcondotta.scopedlogging.infrastructure.slf4j.Slf4jLogEventPublisher;
+import org.springframework.aop.aspectj.annotation.AspectJProxyFactory;
+
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
 import com.jcondotta.application.query.PageRequest;
 import com.jcondotta.application.query.PageResult;
-import com.jcondotta.application.logging.LogKey;
+import com.jcondotta.scopedlogging.domain.logging.LogKey;
 import com.jcondotta.banking.recipients.application.common.log.RecipientLogKey;
-import com.jcondotta.application.logging.LogOutcome;
 import com.jcondotta.banking.recipients.application.common.log.RecipientOperation;
 import com.jcondotta.application.logging.StructuredLogEventSupport;
 import com.jcondotta.banking.recipients.application.recipient.query.RecipientQueryRepository;
@@ -52,7 +57,11 @@ class ListRecipientsQueryHandlerTest {
 
   @BeforeEach
   void setUp() {
-    handler = new ListRecipientsQueryHandler(queryRepository);
+    var logContext = new ScopedLogContext();
+    var proxy = new AspectJProxyFactory(new ListRecipientsQueryHandler(queryRepository, logContext));
+    proxy.setProxyTargetClass(true);
+    proxy.addAspect(new LogScopeAspect(new LogScopeExecutor(logContext, new Slf4jLogEventPublisher())));
+    handler = proxy.getProxy();
     logAppender = StructuredLogEventSupport.attachAppender(ListRecipientsQueryHandler.class);
   }
 
@@ -86,7 +95,7 @@ class ListRecipientsQueryHandlerTest {
       .isEqualTo(Level.INFO);
     assertThat(StructuredLogEventSupport.lastEventKeyValues(logAppender))
       .containsEntry(LogKey.OPERATION, RecipientOperation.LIST)
-      .containsEntry(LogKey.OUTCOME, LogOutcome.SUCCESS)
+      .containsEntry(LogKey.OUTCOME, "success")
       .containsEntry(RecipientLogKey.FILTER_NAME_PRESENT, "false");
     assertThat(StructuredLogEventSupport.operations(logAppender))
       .allMatch(eventType -> !eventType.contains(".failed"));
@@ -112,7 +121,7 @@ class ListRecipientsQueryHandlerTest {
       .isEqualTo(Level.INFO);
     assertThat(StructuredLogEventSupport.lastEventKeyValues(logAppender))
       .containsEntry(LogKey.OPERATION, RecipientOperation.LIST)
-      .containsEntry(LogKey.OUTCOME, LogOutcome.SUCCESS)
+      .containsEntry(LogKey.OUTCOME, "success")
       .containsEntry(RecipientLogKey.FILTER_NAME_PRESENT, "false");
     assertThat(StructuredLogEventSupport.operations(logAppender))
       .allMatch(eventType -> !eventType.contains(".failed"));
@@ -134,10 +143,10 @@ class ListRecipientsQueryHandlerTest {
     verifyNoMoreInteractions(queryRepository);
 
     assertThat(StructuredLogEventSupport.lastEvent(logAppender, ILoggingEvent::getLevel))
-      .isEqualTo(Level.WARN);
+      .isEqualTo(Level.ERROR);
     assertThat(StructuredLogEventSupport.lastEventKeyValues(logAppender))
       .containsEntry(LogKey.OPERATION, RecipientOperation.LIST)
-      .containsEntry(LogKey.OUTCOME, LogOutcome.FAILURE);
+      .containsEntry(LogKey.OUTCOME, "failure");
     assertThat(StructuredLogEventSupport.operations(logAppender))
       .allMatch(eventType -> !eventType.contains(".failed"));
   }
@@ -160,7 +169,7 @@ class ListRecipientsQueryHandlerTest {
       .isEqualTo(Level.ERROR);
     assertThat(StructuredLogEventSupport.lastEventKeyValues(logAppender))
       .containsEntry(LogKey.OPERATION, RecipientOperation.LIST)
-      .containsEntry(LogKey.OUTCOME, LogOutcome.FAILURE);
+      .containsEntry(LogKey.OUTCOME, "failure");
     assertThat(StructuredLogEventSupport.operations(logAppender))
       .allMatch(eventType -> !eventType.contains(".failed"));
   }

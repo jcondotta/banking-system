@@ -1,8 +1,9 @@
 package com.jcondotta.banking.recipients.application.recipient.command.create;
 
 import com.jcondotta.application.command.CommandHandlerWithResult;
-import com.jcondotta.application.logging.LogContext;
-import com.jcondotta.application.logging.LogKey;
+import com.jcondotta.scopedlogging.application.logscope.LogContext;
+import com.jcondotta.scopedlogging.LogScope;
+import com.jcondotta.scopedlogging.domain.logging.LogKey;
 import com.jcondotta.banking.recipients.application.common.log.RecipientLogKey;
 import com.jcondotta.banking.recipients.application.common.log.RecipientOperation;
 import com.jcondotta.banking.recipients.application.common.log.RecipientFailureReason;
@@ -15,8 +16,6 @@ import com.jcondotta.banking.recipients.domain.recipient.repository.RecipientRep
 import com.jcondotta.banking.recipients.application.recipient.ports.output.RecipientEventPublisher;
 import com.jcondotta.domain.exception.DomainException;
 import io.micrometer.observation.annotation.Observed;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.resilience.annotation.ConcurrencyLimit;
 import org.springframework.stereotype.Component;
 
@@ -26,7 +25,7 @@ import java.time.Instant;
 @Component
 public class CreateRecipientCommandHandler implements CommandHandlerWithResult<CreateRecipientCommand, RecipientId> {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(CreateRecipientCommandHandler.class);
+  private final LogContext logContext;
 
   private final RecipientRepository recipientRepository;
   private final RecipientEventPublisher recipientEventPublisher;
@@ -37,8 +36,10 @@ public class CreateRecipientCommandHandler implements CommandHandlerWithResult<C
     RecipientRepository recipientRepository,
     RecipientEventPublisher recipientEventPublisher,
     BankAccountRepository bankAccountRepository,
-    Clock clock
+    Clock clock,
+    LogContext logContext
   ) {
+    this.logContext = logContext;
     this.recipientRepository = recipientRepository;
     this.recipientEventPublisher = recipientEventPublisher;
     this.bankAccountRepository = bankAccountRepository;
@@ -46,6 +47,7 @@ public class CreateRecipientCommandHandler implements CommandHandlerWithResult<C
   }
 
   @Override
+  @LogScope(RecipientOperation.CREATE)
   @Observed(
       name = "recipients.create",
       contextualName = "createRecipient",
@@ -56,8 +58,7 @@ public class CreateRecipientCommandHandler implements CommandHandlerWithResult<C
   )
   @ConcurrencyLimit(limitString = "${app.concurrency.recipients.create.limit}", policy = ConcurrencyLimit.ThrottlePolicy.REJECT)
   public RecipientId handle(CreateRecipientCommand command) {
-    var logContext = LogContext.timed(LOGGER, RecipientOperation.CREATE)
-      .with(RecipientLogKey.BANK_ACCOUNT_ID, command.bankAccountId().asString());
+    logContext.with(RecipientLogKey.BANK_ACCOUNT_ID, command.bankAccountId().asString());
 
     try {
       var bankAccount = bankAccountRepository.findById(command.bankAccountId())
@@ -79,9 +80,8 @@ public class CreateRecipientCommandHandler implements CommandHandlerWithResult<C
       recipientEventPublisher.publish(recipient.pullEvents());
 
       logContext.info("Recipient created")
-        .success()
         .with(RecipientLogKey.RECIPIENT_ID, recipient.getId().asString())
-        .log();
+        .success();
 
       return recipient.getId();
     }
@@ -89,19 +89,17 @@ public class CreateRecipientCommandHandler implements CommandHandlerWithResult<C
       var failureReason = RecipientFailureReason.from(ex);
 
       logContext.warn("Recipient creation failed")
-        .failure()
         .with(LogKey.REASON, failureReason.normalize())
         .with(RecipientLogKey.MASKED_IBAN, command.iban().masked())
-        .log();
+        .failure();
 
       throw ex;
     }
     catch (Exception ex) {
       logContext.error("Unexpected error during recipient creation", ex)
-        .failure()
         .with(LogKey.REASON, RecipientFailureReason.INTERNAL_ERROR.normalize())
         .with(RecipientLogKey.MASKED_IBAN, command.iban().masked())
-        .log();
+        .failure();
 
       throw ex;
     }

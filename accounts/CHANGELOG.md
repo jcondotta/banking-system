@@ -4,13 +4,33 @@ All notable changes to the accounts service are documented in this file.
 
 ## Future Improvements
 
-- Define and implement idempotency for bank account commands, including retry-safe account opening, state transitions, and joint-holder creation.
+- Evaluate request-key idempotency for state transitions; account opening and joint-holder creation are covered below.
 - Add account search by account-holder document and flexible filters using an OpenSearch read model, including projection updates and reindexing support.
 - Add end-to-end gRPC integration tests covering the running server, protobuf serialization, and gRPC status mapping.
 - Add an integration test exercising optimistic locking through concurrent updates against DynamoDB.
 - Guarantee IBAN uniqueness during account activation and handle generated IBAN collisions.
 - Align the configurable IBAN GSI name with the fixed `gsi-iban` DynamoDB schema annotation.
 - Clean up the protobuf Maven configuration to remove the unsupported-parameter warning and duplicate `generate` execution.
+
+## Unreleased
+
+### Added
+
+- Durable idempotency for account opening and joint-holder creation, keyed by the client-supplied key.
+- Separate idempotency items in the existing DynamoDB single table, committed atomically with accounts, holders and outbox events.
+- Strongly consistent replay lookups, versioned request fingerprints and bounded transaction-contention retries.
+
+### Changed
+
+- Replace manual command fingerprints with SHA-256 of the complete normalized command JSON, including the idempotency key, using a dedicated deterministic mapper (V2).
+
+### Breaking Changes
+
+- V1 idempotency receipts are unsupported by V2; the replacement assumes previous environment data can be reset.
+- Both creation endpoints require a UUID in `X-Idempotency-Key`. Clients must reuse the key when retrying the same intention and use a fresh key for each new intention across both endpoints.
+- Reusing a key with different normalized request data returns `409`; missing or invalid identifiers return `400`.
+
+See [idempotency contract](docs/idempotency.md) for retention, replay and failure semantics.
 
 ## 2.1.0 - 2026-10-02
 

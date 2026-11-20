@@ -1,18 +1,33 @@
 package com.jcondotta.banking.accounts.application.bankaccount.command.open;
 
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.read.ListAppender;
 import com.jcondotta.application.command.CommandHandlerWithResult;
-import com.jcondotta.banking.accounts.application.common.idempotency.*;
-import com.jcondotta.application.idempotency.IdempotencyKey;
-import com.jcondotta.application.idempotency.IdempotencyRepository;
-import com.jcondotta.banking.accounts.application.bankaccount.ports.output.BankAccountTransactionalRepository;
+import com.jcondotta.application.idempotency.IdempotencyRecord;
+import com.jcondotta.application.idempotency.IdempotentCommandFingerprint;
+import com.jcondotta.application.idempotency.IdempotentSummary;
+import com.jcondotta.application.idempotency.exceptions.IdempotencyKeyConflictException;
+import com.jcondotta.application.idempotency.identity.IdempotencyKey;
+import com.jcondotta.application.idempotency.repository.IdempotencyRepository;
+import com.jcondotta.application.logging.StructuredLogEventSupport;
 import com.jcondotta.banking.accounts.application.bankaccount.command.open.model.OpenBankAccountCommand;
+import com.jcondotta.banking.accounts.application.bankaccount.ports.output.BankAccountTransactionalWriter;
+import com.jcondotta.banking.accounts.application.common.idempotency.IdempotencyService;
+import com.jcondotta.banking.accounts.application.common.log.BankAccountLogKey;
+import com.jcondotta.banking.accounts.application.common.log.BankAccountOperation;
 import com.jcondotta.banking.accounts.domain.bankaccount.aggregate.BankAccount;
 import com.jcondotta.banking.accounts.domain.bankaccount.enums.AccountType;
 import com.jcondotta.banking.accounts.domain.bankaccount.enums.Currency;
 import com.jcondotta.banking.accounts.domain.bankaccount.identity.BankAccountId;
-import com.jcondotta.banking.accounts.domain.bankaccount.repository.BankAccountRepository;
 import com.jcondotta.banking.accounts.domain.testsupport.AccountHolderFixtures;
 import com.jcondotta.domain.exception.DomainException;
+import com.jcondotta.scopedlogging.LogScopeAspect;
+import com.jcondotta.scopedlogging.application.logscope.LogScopeExecutor;
+import com.jcondotta.scopedlogging.application.logscope.ScopedLogContext;
+import com.jcondotta.scopedlogging.domain.logging.LogKey;
+import com.jcondotta.scopedlogging.infrastructure.slf4j.Slf4jLogEventPublisher;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -20,6 +35,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.aop.aspectj.annotation.AspectJProxyFactory;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -29,19 +45,36 @@ import static org.mockito.Mockito.*;
 class OpenBankAccountCommandHandlerTest {
 
   @Mock
-  private BankAccountTransactionalRepository bankAccountRepository;
+  private BankAccountTransactionalWriter bankAccountRepository;
 
   @Mock
-  private IdempotencyRepository<IdempotencyRecord> records;
+  private IdempotencyRepository<IdempotencyRecord<BankAccountId>> records;
+
+  @Mock
+  private IdempotentCommandFingerprint fingerprint;
 
   @Captor
   private ArgumentCaptor<BankAccount> bankAccountCaptor;
 
   private CommandHandlerWithResult<OpenBankAccountCommand, BankAccountId> commandHandler;
 
+  private ListAppender<ILoggingEvent> logAppender;
+
   @BeforeEach
   void setUp() {
-    commandHandler = new OpenBankAccountCommandHandler(new IdempotentAccountWriter(records, bankAccountRepository));
+    var logContext = new ScopedLogContext();
+    when(fingerprint.hash(any())).thenReturn("request-hash");
+    var proxy = new AspectJProxyFactory(new OpenBankAccountCommandHandler(
+      new IdempotencyService(records, fingerprint, logContext), bankAccountRepository, logContext));
+    proxy.setProxyTargetClass(true);
+    proxy.addAspect(new LogScopeAspect(new LogScopeExecutor(logContext, new Slf4jLogEventPublisher())));
+    commandHandler = proxy.getProxy();
+    logAppender = StructuredLogEventSupport.attachAppender(OpenBankAccountCommandHandler.class);
+  }
+
+  @AfterEach
+  void tearDown() {
+    StructuredLogEventSupport.detachAppender(OpenBankAccountCommandHandler.class, logAppender);
   }
 
   @Test
@@ -80,10 +113,11 @@ class OpenBankAccountCommandHandlerTest {
 
     var bankAccountId = commandHandler.handle(command);
 
-    verify(bankAccountRepository).save(bankAccountCaptor.capture(), any(IdempotencyRecord.class));
+    verify(bankAccountRepository).save(bankAccountCaptor.capture(), any(IdempotentSummary.class));
     verifyNoMoreInteractions(bankAccountRepository);
 
     assertThat(bankAccountId).isEqualTo(bankAccountCaptor.getValue().getId());
+    assertLog(Level.INFO, "success", null);
 
     assertThat(bankAccountCaptor.getValue())
       .satisfies(bankAccount -> {
@@ -113,14 +147,15 @@ class OpenBankAccountCommandHandlerTest {
 
     doThrow(exception)
       .when(bankAccountRepository)
-      .save(any(BankAccount.class), any(IdempotencyRecord.class));
+      .save(any(BankAccount.class), any(IdempotentSummary.class));
 
     var command = command(AccountType.SAVINGS, Currency.USD);
 
     assertThatThrownBy(() -> commandHandler.handle(command))
       .isSameAs(exception);
+    assertLog(Level.ERROR, "failure", "domain_error");
 
-    verify(bankAccountRepository).save(any(BankAccount.class), any(IdempotencyRecord.class));
+    verify(bankAccountRepository).save(any(BankAccount.class), any(IdempotentSummary.class));
     verifyNoMoreInteractions(bankAccountRepository);
   }
 
@@ -130,14 +165,15 @@ class OpenBankAccountCommandHandlerTest {
 
     doThrow(exception)
       .when(bankAccountRepository)
-      .save(any(BankAccount.class), any(IdempotencyRecord.class));
+      .save(any(BankAccount.class), any(IdempotentSummary.class));
 
     var command = command(AccountType.SAVINGS, Currency.USD);
 
     assertThatThrownBy(() -> commandHandler.handle(command))
       .isSameAs(exception);
+    assertLog(Level.ERROR, "failure", "internal_error");
 
-    verify(bankAccountRepository).save(any(BankAccount.class), any(IdempotencyRecord.class));
+    verify(bankAccountRepository).save(any(BankAccount.class), any(IdempotentSummary.class));
     verifyNoMoreInteractions(bankAccountRepository);
   }
 
@@ -150,6 +186,46 @@ class OpenBankAccountCommandHandlerTest {
       currency,
       key()
     );
+  }
+
+  @Test
+  void shouldReturnExistingAccountWithoutWriting_whenCommandIsReplayed() {
+    var command = command(AccountType.CHECKING, Currency.EUR);
+    var accountId = BankAccountId.newId();
+    when(records.find(command.idempotencyKey())).thenReturn(java.util.Optional.of(
+      new IdempotencyRecord<>(command.idempotencyKey(), "request-hash", accountId)));
+
+    assertThat(commandHandler.handle(command)).isEqualTo(accountId);
+
+    verifyNoInteractions(bankAccountRepository);
+    assertLog(Level.INFO, "success", null);
+    assertThat(StructuredLogEventSupport.lastEventKeyValues(logAppender))
+      .containsEntry(BankAccountLogKey.EXECUTION_RESULT, "replayed")
+      .containsEntry(BankAccountLogKey.BANK_ACCOUNT_ID, accountId.value().toString());
+  }
+
+  @Test
+  void shouldLogConflictWithoutWriting_whenKeyIsReusedWithDifferentData() {
+    var command = command(AccountType.CHECKING, Currency.EUR);
+    when(records.find(command.idempotencyKey())).thenReturn(java.util.Optional.of(
+      new IdempotencyRecord<>(command.idempotencyKey(), "different-hash", BankAccountId.newId())));
+
+    assertThatThrownBy(() -> commandHandler.handle(command)).isInstanceOf(IdempotencyKeyConflictException.class);
+
+    verifyNoInteractions(bankAccountRepository);
+    assertLog(Level.ERROR, "failure", "idempotency_conflict");
+  }
+
+  private void assertLog(Level level, String outcome, String reason) {
+    assertThat(logAppender.list).hasSize(1);
+    assertThat(StructuredLogEventSupport.lastEvent(logAppender, ILoggingEvent::getLevel)).isEqualTo(level);
+    assertThat(StructuredLogEventSupport.lastEventKeyValues(logAppender))
+      .containsEntry(LogKey.OPERATION, BankAccountOperation.OPEN)
+      .containsEntry(LogKey.OUTCOME, outcome)
+      .containsKey(LogKey.DURATION_MS);
+    if (reason != null) {
+      assertThat(StructuredLogEventSupport.lastEventKeyValues(logAppender)).containsEntry(LogKey.REASON, reason);
+    }
   }
 
   private static IdempotencyKey key() {

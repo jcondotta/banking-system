@@ -1,7 +1,8 @@
 package com.jcondotta.banking.infrastructure.outbox.dispatcher;
 
-import com.jcondotta.application.logging.LogContext;
-import com.jcondotta.application.logging.LogKey;
+import com.jcondotta.banking.infrastructure.outbox.logging.legacy.LogContext;
+import com.jcondotta.application.logging.ApplicationLogKey;
+import com.jcondotta.scopedlogging.domain.logging.LogKey;
 import com.jcondotta.banking.infrastructure.outbox.concurrency.exceptions.ShardExecutionException;
 import com.jcondotta.banking.infrastructure.outbox.concurrency.exceptions.ShardTimeoutException;
 import com.jcondotta.banking.infrastructure.outbox.exceptions.OutboxEventAlreadyProcessedException;
@@ -53,9 +54,9 @@ public class VirtualThreadOutboxDispatcher<T extends OutboxRecord> implements Ou
 
     if (!dispatching.compareAndSet(false, true)) {
       logContext.warn("Outbox dispatch skipped")
-        .failure()
         .with(LogKey.REASON, OutboxFailureReason.DISPATCH_IN_PROGRESS.normalize())
         .with(OutboxLogKey.IN_FLIGHT_TASKS, inFlightTasks.get())
+        .failure()
         .log();
       return;
     }
@@ -86,10 +87,10 @@ public class VirtualThreadOutboxDispatcher<T extends OutboxRecord> implements Ou
                 .with(OutboxLogKey.SHARD, event.getShard())
                 .with(OutboxLogKey.EVENT_ID, event.getEventId())
                 .with(OutboxLogKey.AGGREGATE_ID, event.getAggregateId())
-                .with(LogKey.EVENT_TYPE, event.getEventType())
+                .with(ApplicationLogKey.EVENT_TYPE, event.getEventType())
                 .error("Unexpected error processing outbox event", ex)
-                .failure()
                 .with(LogKey.REASON, OutboxFailureReason.UNHANDLED_ERROR.normalize())
+                .failure()
                 .log();
             }
             finally {
@@ -101,8 +102,8 @@ public class VirtualThreadOutboxDispatcher<T extends OutboxRecord> implements Ou
     }
     catch (Exception ex) {
       logContext.error("Unexpected error during outbox dispatch", ex)
-        .failure()
         .with(LogKey.REASON, OutboxFailureReason.INTERNAL_ERROR.normalize())
+        .failure()
         .log();
     }
     finally {

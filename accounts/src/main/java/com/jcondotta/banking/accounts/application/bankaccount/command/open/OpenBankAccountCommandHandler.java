@@ -1,27 +1,29 @@
 package com.jcondotta.banking.accounts.application.bankaccount.command.open;
 
 import com.jcondotta.application.command.CommandHandlerWithResult;
-import com.jcondotta.application.logging.LogContext;
-import com.jcondotta.application.logging.LogKey;
+import com.jcondotta.scopedlogging.domain.logging.LogKey;
+import com.jcondotta.scopedlogging.LogScope;
+import com.jcondotta.scopedlogging.application.logscope.LogContext;
 import com.jcondotta.banking.accounts.application.bankaccount.command.open.model.OpenBankAccountCommand;
+import com.jcondotta.banking.accounts.application.bankaccount.ports.output.BankAccountTransactionalWriter;
+import com.jcondotta.banking.accounts.application.common.idempotency.IdempotencyService;
 import com.jcondotta.banking.accounts.application.common.log.BankAccountOperation;
 import com.jcondotta.banking.accounts.application.common.log.BankAccountLogKey;
 import com.jcondotta.banking.accounts.domain.bankaccount.aggregate.BankAccount;
 import com.jcondotta.banking.accounts.domain.bankaccount.identity.BankAccountId;
-import com.jcondotta.banking.accounts.domain.bankaccount.repository.BankAccountRepository;
 import com.jcondotta.banking.accounts.application.common.log.BankAccountFailureReason;
 import com.jcondotta.domain.exception.DomainException;
 import io.micrometer.observation.annotation.Observed;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
-@Slf4j
 @Component
 @RequiredArgsConstructor
 public class OpenBankAccountCommandHandler implements CommandHandlerWithResult<OpenBankAccountCommand, BankAccountId> {
 
-  private final BankAccountRepository bankAccountRepository;
+  private final IdempotencyService idempotencyService;
+  private final BankAccountTransactionalWriter transactionalWriter;
+  private final LogContext logContext;
 
   @Override
   @Observed(
@@ -32,13 +34,23 @@ public class OpenBankAccountCommandHandler implements CommandHandlerWithResult<O
       "operation", "open"
     }
   )
+  @LogScope(value = BankAccountOperation.OPEN)
   public BankAccountId handle(OpenBankAccountCommand command) {
-    var bankAccountId = BankAccountId.newId();
+    var summary = idempotencyService.check(command);
 
-    var logContext = LogContext.timed(log, BankAccountOperation.OPEN)
-      .with(BankAccountLogKey.BANK_ACCOUNT_ID, bankAccountId.value().toString());
+    if (summary.alreadyProcessed()) {
+      logContext.with(BankAccountLogKey.BANK_ACCOUNT_ID, summary.aggregateId().value().toString())
+        .with(BankAccountLogKey.EXECUTION_RESULT, "replayed")
+        .info("Bank account opening replayed")
+        .success();
+
+      return summary.aggregateId();
+    }
 
     try {
+      var bankAccountId = BankAccountId.newId();
+      logContext.with(BankAccountLogKey.BANK_ACCOUNT_ID, bankAccountId.value().toString());
+
       BankAccount bankAccount = BankAccount.open(
         bankAccountId,
         command.personalInfo(),
@@ -48,11 +60,10 @@ public class OpenBankAccountCommandHandler implements CommandHandlerWithResult<O
         command.currency()
       );
 
-      bankAccountRepository.save(bankAccount);
+      transactionalWriter.save(bankAccount, summary);
 
       logContext.info("Bank account opened")
-        .success()
-        .log();
+        .success();
 
       return bankAccount.getId();
     }
@@ -60,17 +71,15 @@ public class OpenBankAccountCommandHandler implements CommandHandlerWithResult<O
       var reason = BankAccountFailureReason.from(ex);
 
       logContext.warn("Bank account opening failed")
-        .failure()
         .with(LogKey.REASON, reason.normalize())
-        .log();
+        .failure();
 
       throw ex;
     }
     catch (Exception ex) {
       logContext.error("Unexpected error during bank account opening", ex)
-        .failure()
         .with(LogKey.REASON, BankAccountFailureReason.INTERNAL_ERROR.normalize())
-        .log();
+        .failure();
 
       throw ex;
     }

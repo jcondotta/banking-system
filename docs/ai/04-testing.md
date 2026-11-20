@@ -36,6 +36,8 @@ Use Arrange-Act-Assert as the default structure, but keep the layout natural whe
 
 Use `@ParameterizedTest` for input families such as blank values, invalid identifiers, domain-specific value validation, pagination bounds, and validation limits.
 
+Prefer parameterized tests when the cases exercise the same behavior with different inputs. Keep cases as separate tests when they have distinct business meanings, substantially different setup, or different expected outcomes.
+
 Do not add `@DisplayName` unless the surrounding test class already uses it.
 
 ## Assertions
@@ -52,6 +54,8 @@ Existing tests may use JUnit `assertAll` with AssertJ assertions. Preserve that 
 
 Use direct assertions when there is only one relevant outcome or when grouping assertions would reduce readability.
 
+For collections, use focused AssertJ assertions such as `singleElement()`, `first()`, `last()`, or `containsExactly()` when they make the expected contents clear. Assert only the elements and fields relevant to the behavior.
+
 Do not split one coherent behavior into many tests only to satisfy an arbitrary assertion count.
 
 Prefer assertions that verify observable behavior. Avoid tests that only mirror implementation details or framework wiring.
@@ -62,6 +66,8 @@ For public API tests, assert the behavior and contract that were resolved in Des
 
 Use Mockito for application and controller unit tests when collaborators are ports, handlers, mappers, or servlet requests.
 
+Mock collaborators of the unit under test, such as repositories, gateways, publishers, and external clients. Prefer real domain objects, value objects, entities, and DTOs when they are straightforward to construct; avoid unnecessary mocks and deep mock graphs.
+
 Prefer existing local fixtures and test support, especially for:
 - domain fixtures and test data builders
 - fixed time factories
@@ -69,6 +75,28 @@ Prefer existing local fixtures and test support, especially for:
 - validator factories
 
 Keep tests deterministic. Use fixed clocks and explicit fixtures instead of depending on wall-clock time or random data when the exact value matters.
+
+Use Instancio when it simplifies creating domain objects or test data and is compatible with local fixtures and domain invariants. Override the fields that matter to the scenario, including complete value objects; do not manipulate a value object's internal fields to generate a desired value. Keep meaningful inputs explicit and deterministic.
+
+Use existing Object Mothers when they express meaningful business scenarios or remove substantial repeated setup. Do not introduce one just to wrap simple object creation. Keep helper methods small and specific so the scenario remains clear at the test site.
+
+Extract repeated values into named constants when the name communicates business meaning or avoids meaningful duplication. Keep obvious, scenario-specific values local when extracting them would make the test harder to read.
+
+## Mockito Interactions
+
+Stub and verify exact arguments when their values matter to the behavior, especially when testing parameter propagation. A permissive stub can return the expected result even when production code passes the wrong value.
+
+Use `any()` only when that argument is intentionally irrelevant to the scenario. Prefer exact values or objects when known; use `eq(...)` only when Mockito requires matchers alongside other matchers. Choose the strongest meaningful expectation without verifying every internal call.
+
+Verify interactions when the interaction itself is part of the expected behavior, such as saving state or publishing an event. Avoid reproducing the implementation call by call.
+
+When the expected object has meaningful equality semantics, verify that object directly. Use `ArgumentCaptor` when production code creates an object internally and its relevant state cannot be checked clearly through a return value or direct equality. Assert the captured object's behaviorally relevant fields; do not use a captor when direct verification is simpler.
+
+Assert expected exceptions explicitly with AssertJ, including meaningful message details when relevant. Use `assertThatCode(...).doesNotThrowAnyException()` when the absence of an exception is itself part of the behavior. Do not catch and ignore expected exceptions.
+
+## Test Scope
+
+Choose the smallest test scope that can validate the behavior. Keep unit tests isolated from Spring, databases, messaging infrastructure, and external services. Use unit or slice tests when sufficient; use a full application context only when the behavior requires it. Follow the module's established integration-test annotations and base classes rather than introducing parallel infrastructure.
 
 ## Integration Tests
 
@@ -82,6 +110,8 @@ Use the project's established HTTP test client and keep request setup close to t
 For HTTP integration tests, follow the existing request-specification pattern, including API versioning and request/response logging on validation failures.
 
 Verify both HTTP behavior and the important persistence side effect when the endpoint changes state.
+
+For persistence behavior, assert the state that was stored by reading it back when that is relevant to the behavior under test. A mock interaction alone does not establish that persistence mapping or database behavior is correct.
 
 Clean or isolate state through existing repository/test support patterns. Do not introduce shared mutable state between tests.
 

@@ -1,5 +1,11 @@
 package com.jcondotta.banking.transfers.application.bank_transfer.command.request_internal;
 
+import com.jcondotta.scopedlogging.application.logscope.ScopedLogContext;
+import com.jcondotta.scopedlogging.LogScopeAspect;
+import com.jcondotta.scopedlogging.application.logscope.LogScopeExecutor;
+import com.jcondotta.scopedlogging.infrastructure.slf4j.Slf4jLogEventPublisher;
+import org.springframework.aop.aspectj.annotation.AspectJProxyFactory;
+
 import com.jcondotta.application.command.CommandHandlerWithResult;
 import com.jcondotta.banking.transfers.application.bank_account.ports.output.BankAccountLookupPort;
 import com.jcondotta.banking.transfers.application.bank_transfer.command.request_internal.model.RequestInternalTransferCommand;
@@ -80,7 +86,11 @@ class RequestInternalTransferCommandHandlerTest {
 
   @BeforeEach
   void setUp() {
-    commandHandler = new RequestInternalTransferCommandHandler(bankTransferRepository, bankAccountLookupPort, FIXED_CLOCK);
+    var logContext = new ScopedLogContext();
+    var proxy = new AspectJProxyFactory(new RequestInternalTransferCommandHandler(bankTransferRepository, bankAccountLookupPort, FIXED_CLOCK, logContext));
+    proxy.setProxyTargetClass(true);
+    proxy.addAspect(new LogScopeAspect(new LogScopeExecutor(logContext, new Slf4jLogEventPublisher())));
+    commandHandler = proxy.getProxy();
   }
 
   @Test

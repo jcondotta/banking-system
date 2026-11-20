@@ -1,7 +1,8 @@
 package com.jcondotta.banking.recipients.application.recipient.query.get;
 
-import com.jcondotta.application.logging.LogContext;
-import com.jcondotta.application.logging.LogKey;
+import com.jcondotta.scopedlogging.application.logscope.LogContext;
+import com.jcondotta.scopedlogging.LogScope;
+import com.jcondotta.scopedlogging.domain.logging.LogKey;
 import com.jcondotta.application.query.QueryHandler;
 import com.jcondotta.banking.recipients.application.common.log.RecipientOperation;
 import com.jcondotta.banking.recipients.application.common.log.RecipientLogKey;
@@ -10,22 +11,22 @@ import com.jcondotta.banking.recipients.application.common.log.RecipientFailureR
 import com.jcondotta.banking.recipients.domain.recipient.exceptions.RecipientNotFoundException;
 import com.jcondotta.domain.exception.DomainException;
 import io.micrometer.observation.annotation.Observed;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 @Component
 public class GetRecipientQueryHandler implements QueryHandler<GetRecipientQuery, GetRecipientQueryResult> {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(GetRecipientQueryHandler.class);
+  private final LogContext logContext;
 
   private final RecipientQueryRepository queryRepository;
 
-  public GetRecipientQueryHandler(RecipientQueryRepository queryRepository) {
+  public GetRecipientQueryHandler(RecipientQueryRepository queryRepository, LogContext logContext) {
+    this.logContext = logContext;
     this.queryRepository = queryRepository;
   }
 
   @Override
+  @LogScope(RecipientOperation.GET)
   @Observed(
     name = "recipients.get",
     contextualName = "getRecipient",
@@ -35,8 +36,7 @@ public class GetRecipientQueryHandler implements QueryHandler<GetRecipientQuery,
     }
   )
   public GetRecipientQueryResult handle(GetRecipientQuery query) {
-    var logContext = LogContext.timed(LOGGER, RecipientOperation.GET)
-      .with(RecipientLogKey.BANK_ACCOUNT_ID, query.bankAccountId().asString())
+    logContext.with(RecipientLogKey.BANK_ACCOUNT_ID, query.bankAccountId().asString())
       .with(RecipientLogKey.RECIPIENT_ID, query.recipientId().asString());
 
     try {
@@ -44,8 +44,7 @@ public class GetRecipientQueryHandler implements QueryHandler<GetRecipientQuery,
         .orElseThrow(() -> new RecipientNotFoundException(query.recipientId(), query.bankAccountId()));
 
       logContext.info("Recipient found")
-        .success()
-        .log();
+        .success();
 
       return new GetRecipientQueryResult(recipient);
     }
@@ -53,17 +52,15 @@ public class GetRecipientQueryHandler implements QueryHandler<GetRecipientQuery,
       var reason = RecipientFailureReason.from(ex);
 
       logContext.warn("Recipient retrieval failed")
-        .failure()
         .with(LogKey.REASON, reason.normalize())
-        .log();
+        .failure();
 
       throw ex;
     }
     catch (Exception ex) {
       logContext.error("Unexpected error during recipient retrieval", ex)
-        .failure()
         .with(LogKey.REASON, RecipientFailureReason.INTERNAL_ERROR.normalize())
-        .log();
+        .failure();
 
       throw ex;
     }

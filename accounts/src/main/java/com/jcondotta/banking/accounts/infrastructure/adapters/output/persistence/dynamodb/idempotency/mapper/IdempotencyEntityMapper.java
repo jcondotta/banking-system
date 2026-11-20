@@ -1,33 +1,27 @@
 package com.jcondotta.banking.accounts.infrastructure.adapters.output.persistence.dynamodb.idempotency.mapper;
 
-import com.jcondotta.application.idempotency.IdempotencyKey;
-import com.jcondotta.banking.accounts.application.common.idempotency.IdempotencyRecord;
+import com.jcondotta.application.idempotency.identity.IdempotencyKey;
+import com.jcondotta.application.idempotency.IdempotencyRecord;
 import com.jcondotta.banking.accounts.domain.bankaccount.identity.BankAccountId;
 import com.jcondotta.banking.accounts.infrastructure.adapters.output.persistence.dynamodb.enums.EntityType;
 import com.jcondotta.banking.accounts.infrastructure.adapters.output.persistence.dynamodb.idempotency.entity.IdempotencyEntity;
 import com.jcondotta.banking.accounts.infrastructure.adapters.output.persistence.dynamodb.idempotency.entity.IdempotencyEntityKey;
+import org.springframework.stereotype.Component;
 
-public final class IdempotencyEntityMapper {
-    private IdempotencyEntityMapper() {}
+@Component
+public class IdempotencyEntityMapper {
 
-    public static IdempotencyEntity toEntity(IdempotencyRecord record) {
+    public IdempotencyEntity toEntity(IdempotencyRecord<BankAccountId> record) {
         return IdempotencyEntity.builder()
             .entityType(EntityType.IDEMPOTENCY)
             .partitionKey(IdempotencyEntityKey.partitionKey(record.key()))
             .sortKey(IdempotencyEntityKey.sortKey())
             .requestHash(record.requestHash())
-            .hashVersion(record.hashVersion())
-            .bankAccountId(record.bankAccountId().value())
-            .createdAt(record.createdAt()).build();
+            .bankAccountId(record.aggregateId().value())
+            .build();
     }
 
-    public static IdempotencyRecord toRecord(IdempotencyKey key, IdempotencyEntity entity) {
-        return new IdempotencyRecord(
-            key,
-            entity.getRequestHash(),
-            entity.getHashVersion(),
-            BankAccountId.of(entity.getBankAccountId()),
-            entity.getCreatedAt()
-        );
+    public IdempotencyRecord<BankAccountId> toRecord(IdempotencyKey key, IdempotencyEntity entity) {
+        return new IdempotencyRecord<>(key, entity.getRequestHash(), BankAccountId.of(entity.getBankAccountId()));
     }
 }
