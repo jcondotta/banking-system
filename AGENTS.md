@@ -1,115 +1,72 @@
 # Repository Guidelines
 
-## Project Structure & Module Organization
+## Project Map
 
-This is a Java 25, Spring Boot 4, Maven banking system. The root `pom.xml` reactor contains all code modules under `services/`: shared `core` modules and the `accounts`, `recipients`, `transfers`, and `ledger` bounded contexts.
+This is a Java 25, Spring Boot 4, Maven banking system. The root `pom.xml` reactor contains all code modules under `services/`:
 
-- `services/core/`: shared modules including `domain-core`, `application-core`, `infrastructure-core`, and the opt-in `outbox-infrastructure` module.
-- `services/accounts/`: bounded context implemented as a flat single Maven module. Its API and transactional-outbox worker run in the same Spring Boot application.
-- `services/recipients/`: bounded context implemented as a flat single Maven module, organized by package into domain, application, infrastructure, and bootstrap/runtime concerns.
-- `services/transfers/`: single-module bounded context for internal transfers.
-- `services/ledger/`: single-module bounded context for ledger accounts and entries.
-- Within each module, `src/main/java` and `src/test/java` contain production and test code; `src/main/resources` contains Spring configuration, Liquibase changelogs, logging config, and other runtime resources.
-- `docker/`, `k8s/`, `terraform/`: local infrastructure, Kubernetes manifests, and cloud infrastructure where present.
+- `services/core/`: shared `domain-core`, `money-core`, `movement-core`, `application-core`, `infrastructure-core`, and opt-in `outbox-infrastructure` modules.
+- `services/accounts/`: single-module bounded context; its API and transactional-outbox worker run in the same Spring Boot application.
+- `services/recipients/`, `services/transfers/`, `services/ledger/`: single-module bounded contexts with architectural boundaries organized by package.
+- `docker/`, `k8s/`, `terraform/`: local, Kubernetes, and cloud infrastructure where present.
 
-## Development Workflow
+Read the affected service's `AGENTS.md` for its package map, contracts, commands, and local guidance. Prefer local guidance for paths, commands, fixtures, contracts, and bounded-context behavior when it is more specific than shared guidance.
 
-Shared development workflow guidance lives under `docs/ai/`.
+## Select Relevant Guidance
 
-The first five numbered documents represent stages of the development process. They define how to reason about, design, implement, test, and validate changes.
+Load only the documents relevant to the task and current stage. The conditions below are cumulative: a domain implementation may also require implementation and testing guidance.
 
-| Stage | Purpose | Guidance |
-| --- | --- | --- |
-| 1. Requirements | Understand the requested behavior, scope, constraints, and open questions | `docs/ai/01-requirements.md` |
-| 2. Design | Resolve behavioral, contract, and architectural decisions before implementation | `docs/ai/02-design.md` |
-| 3. Implementation | Implement autonomously after relevant requirements and design decisions are resolved | `docs/ai/03-implementation.md` |
-| 4. Testing | Add or update tests according to repository testing conventions | `docs/ai/04-testing.md` |
-| 5. Validation | Independently review the completed change before considering it finished | `docs/ai/05-validation.md` |
+| Task or stage | Read |
+| --- | --- |
+| Explain existing behavior | Local `AGENTS.md` and relevant production code, tests, or configuration |
+| Clarify requirements for a change | [Requirements](docs/ai/01-requirements.md) |
+| Resolve behavioral, contract, or architectural alternatives | [Design](docs/ai/02-design.md) |
+| Implement a sufficiently defined change | [Implementation](docs/ai/03-implementation.md) |
+| Add, change, or review tests | [Testing](docs/ai/04-testing.md) |
+| Validate a completed change | [Validation](docs/ai/05-validation.md) |
+| Change domain models or shared domain contracts | [Domain guidelines](docs/ai/06-domain-guidelines.md) |
+| Change application responsibilities or shared application contracts | [Application guidelines](docs/ai/07-application-guidelines.md) |
+| Change adapters, transport/storage mapping, or runtime wiring | [Infrastructure guidelines](docs/ai/08-infrastructure-guidelines.md) |
+| Change HTTP endpoints or their clients | [REST API guidelines](docs/ai/09-rest-api-guidelines.md) |
+| Change protobuf definitions, gRPC services, or their clients | [gRPC guidelines](docs/ai/10-grpc-guidelines.md) |
+| Change published messages or their consumers | [Event contract guidelines](docs/ai/11-event-contracts-guidelines.md) |
+| Change logs, metrics, tracing, correlation, or telemetry configuration | [Observability guidelines](docs/ai/12-observability-guidelines.md) |
 
-Shared domain-modeling guidance lives in `docs/ai/06-domain-guidelines.md`.
-Shared application-layer guidance lives in `docs/ai/07-application-guidelines.md`.
+Read only the protocol guides affected by the change. A shared model change may affect more than one boundary; inspect its uses to determine which guides apply.
 
-Bounded contexts may provide local guidance under their own `docs/ai/` directory. When shared workflow guidance and local bounded-context guidance both apply, prefer the more specific local guidance for paths, commands, fixtures, contracts, and bounded-context behavior.
+Use the affected context's change playbook when applicable. Resolve shared-document paths from the repository root or relative to the context you are working in.
 
-The stages describe responsibilities, not mandatory ceremony for every task.
+## Decisions And Autonomy
 
-Start from the earliest unresolved stage relevant to the task.
+Start at the earliest unresolved stage. Stages describe responsibilities, not mandatory ceremony for every task; small mechanical changes may need little or no requirements or design work. Do not repeat established analysis or decisions.
 
-A request to implement, build, add, create, change, or fix something does not by itself mean that requirements or design have already been resolved.
+A request to implement does not itself resolve requirements or design. Before implementing a new feature or non-trivial behavioral change, read Design and pass its gate with no OPEN decisions. Existing patterns support recommendations; they do not replace the user's decision on meaningful alternatives.
 
-Before entering implementation for a new feature or non-trivial behavioral change, determine whether the relevant requirements and design are sufficiently defined.
+Concentrate user interaction in Design. Continue useful requirements investigation and carry open questions into Design. Implementation, testing, and validation are autonomous for the resolved design; do not ask about already-resolved decisions or purely mechanical details.
 
-If meaningful behavioral, contract, or architectural decisions remain unresolved, perform the relevant requirements and design stages before implementation.
+If a later stage reveals an unresolved meaningful decision, follow that stage's procedure. In implementation or testing, return to Design before encoding the choice. In validation, complete the review before reporting findings. Never present an autonomous choice as user-approved.
 
-Skip an earlier stage only when its concerns are already resolved by the user's request, prior explicit decisions in the current task, or a hard technical/contractual constraint that leaves no viable alternative.
+## Build And Test
 
-Repository guidance, established local patterns, similar existing endpoints, technical preference, conservatism, simplicity, safety, or idiomatic style do not resolve feature-level decisions by themselves. Use that evidence to recommend an option during Design, not to replace the user's decision.
+Run commands from the repository root:
 
-Do not repeat analysis or decisions that are already established.
+- `./mvnw clean test`: run unit tests across the reactor.
+- `./mvnw clean verify`: build all modules, run unit/integration tests, and generate JaCoCo reports.
+- `docker compose -f docker/docker-compose.yml up -d`: start local dependencies.
 
-A small or mechanical change may require little or no explicit requirements or design work. A change is not "clearly established" merely because a nearby feature does something similar when the new change exposes behavior, public contract, responsibility, abstraction, architecture, security/data exposure, or observability choices.
+For service startup, focused tests, and mutation testing, use the service's `AGENTS.md` and playbook. Run verification appropriate to the change and review the completed result.
 
-When a later stage exposes a concern that belongs to an earlier stage, handle it according to the rules of the current stage rather than silently treating the earlier decision as user-approved.
+## Shared Conventions
 
-Load only the guidance relevant to the current task.
+Use Java conventions and 4-space indentation. Service packages live under `com.jcondotta.banking`; preserve existing namespaces in shared modules, including `com.jcondotta.domain` and `com.jcondotta.application`. Preserve architectural boundaries: domain code stays framework-free; Spring, persistence, messaging, and transport adapters belong in infrastructure/bootstrap concerns. Follow established local naming patterns. Keep tests in the matching module/package under `src/test/java`, using `*Test` for unit tests and `*IT` for integration tests.
 
-## Interaction And Autonomy
+Do not commit secrets or local credentials. Keep environment-specific values in Spring profiles, Compose overrides, Kubernetes manifests, or Terraform variables. Use low-cardinality metric labels; put identifiers in logs or traces.
 
-Keep user interaction concentrated in the design stage.
+Use focused, imperative commit messages describing the change. PRs should state the behavior changed, affected areas, test evidence, linked issues, and relevant API, event, configuration, or infrastructure changes.
 
-Requirements analysis may identify open questions, ambiguities, edge cases, and decisions that need to be resolved. Continue investigating while useful analysis can still be performed, and carry meaningful unresolved questions into design.
+## Investigation And Scope
 
-Design is the interactive stage. When multiple meaningful behavioral, contract, or architectural alternatives are viable, present them to the user, explain the relevant trade-offs, recommend an option, and obtain a decision before considering the design resolved.
+Use `AGENTS.md` files as the initial map. Do not rediscover documented structure or conventions unless guidance appears incomplete, stale, or inconsistent with the task.
 
-Do not begin implementation merely because the user explicitly asked to implement something. For a new feature or non-trivial behavioral change, unresolved design decisions must first pass through the design stage.
-
-Before editing code for a new feature or non-trivial behavioral change, the Design gate in `docs/ai/02-design.md` must have no OPEN decisions. If working from a bounded context, use the relative path from that context to the shared design document.
-
-Once implementation begins, implementation, testing, and validation are autonomous stages for the resolved design. Do not stop those stages merely to ask about already-resolved decisions or purely mechanical details.
-
-If implementation discovers a meaningful behavioral, public-contract, responsibility, abstraction, architecture, security/data-exposure, or observability decision that was not identified or resolved during Design, stop implementation and return to Design before making further code changes for that decision. Do not use implementation-time discovery as a way to bypass the Design gate.
-
-Only purely mechanical implementation details remain autonomous after Design, such as local variable names, import ordering, helper method extraction with no architectural effect, and formatting.
-
-Do not treat a decision made autonomously during implementation as though it had been agreed with the user.
-
-Validation must complete its review before reporting questions, findings, suggestions, or decisions that may require user attention.
-
-## Build, Test, and Development Commands
-
-- `./mvnw clean verify`: build every module in the root reactor, run unit and integration tests, and generate JaCoCo reports.
-- `./mvnw clean test`: run unit tests through Surefire across the full reactor.
-- `./mvnw -pl services/recipients -am spring-boot:run -Dspring-boot.run.profiles=local`: run the recipients service locally with required upstream modules.
-- `docker compose -f docker/docker-compose.yml up -d`: start all local dependencies (Kafka, OpenSearch, Postgres instances, LocalStack).
-- `./mvnw -pl services/accounts -am spring-boot:run -Dspring-boot.run.profiles=local`: run the accounts API and outbox worker locally.
-- `./mvnw -pl services/accounts -am pitest:mutationCoverage`: run PIT mutation testing for accounts.
-- `./mvnw -pl services/transfers -am test`: run unit tests for transfers and required upstream modules.
-- `./mvnw -pl services/ledger -am test`: run unit tests for ledger and required upstream modules.
-
-## Coding Style & Naming Conventions
-
-Use Java conventions with 4-space indentation, descriptive class names, and packages under `com.jcondotta.banking`. Preserve architecture boundaries: domain code must stay framework-free; Spring, persistence, messaging, and HTTP adapters belong in infrastructure/bootstrap concerns. Follow existing naming patterns such as `*CommandHandler`, `*Repository`, `*Config`, `*Test`, and `*IT`.
-
-## Testing Guidelines
-
-Tests use JUnit 5, Mockito, Rest Assured, ArchUnit, Instancio, Testcontainers, JaCoCo, and PIT. Keep unit tests beside the module or package they verify under `src/test/java`. Name unit tests `*Test` and integration tests `*IT` so Surefire and Failsafe pick them up correctly. Add focused domain tests for business rules and integration tests for REST, persistence, messaging, and containerized dependencies.
-
-## Commit & Pull Request Guidelines
-
-Recent commits use imperative, sentence-style messages such as `Add name filtering to list recipients API`. Keep commits focused and describe the behavioral change. Pull requests should include a short summary, affected modules or areas, test evidence (`./mvnw clean verify`, targeted tests, or PIT where relevant), linked issues, and API/configuration notes when endpoints, events, profiles, or infrastructure files change.
-
-## Security & Configuration Tips
-
-Do not commit secrets or local credentials. Keep environment-specific values in Spring profiles, Docker Compose overrides, Kubernetes manifests, or Terraform variables. Prefer low-cardinality metrics labels; put identifiers such as account IDs, recipient IDs, and correlation IDs in logs or traces.
-
-## Agent-Specific Instructions
-
-Use `AGENTS.md` files as the initial repository map. Do not rediscover repository structure, conventions, or architecture that are already documented unless this guidance appears incomplete, stale, or inconsistent with the task.
-
-For questions about existing behavior, use the documented structure to identify the narrowest relevant entry points. Inspect only the production code, tests, configuration, or resources needed to verify the answer, and expand the investigation only when necessary.
-
-Treat production code and tests as the source of truth for current behavior. These files provide orientation and guidance; they do not replace verification when the task depends on implementation details.
-
-Avoid broad repository scans when the guidance already provides enough information to locate the relevant code.
+For existing behavior, start at the narrowest relevant entry points and expand only as needed. Production code and tests establish current behavior; documentation does not replace verification of implementation details. Avoid broad repository scans when the map is sufficient.
 
 Preserve unrelated user changes.

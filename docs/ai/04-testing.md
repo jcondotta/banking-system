@@ -17,14 +17,15 @@ Unit tests should cover:
 - application command/query handlers, repository interactions, structured logging, concurrency-limit behavior, and failure propagation
 - infrastructure mappers, DTO validation, controllers, exception handlers, properties, persistence mappers, and repository adapters
 
-Integration tests should cover:
+Integration tests should cover the affected boundaries, as applicable:
 - HTTP flows with Rest Assured
-- PostgreSQL persistence through Testcontainers
+- PostgreSQL or DynamoDB persistence using the module's existing Testcontainers support
+- messaging, outbox delivery, or RPC wiring when the change requires verification across those boundaries
 - Liquibase schema behavior
 - concurrency behavior
 - correlation IDs, API version headers, status codes, and `ProblemDetail` payloads when changed
 
-Do not add browser E2E tests for this service unless a real browser-facing workflow is introduced.
+Do not add browser E2E tests for these services unless a real browser-facing workflow is introduced.
 
 ## Naming And Structure
 
@@ -100,10 +101,7 @@ Choose the smallest test scope that can validate the behavior. Keep unit tests i
 
 ## Integration Tests
 
-Use the existing integration-test annotation or base setup when the project provides one. It should configure:
-- random web port
-- `test` profile
-- Testcontainers initialization
+Use the existing integration-test annotation or base setup when the module provides one. Accounts and recipients use `@IntegrationTest` with a random HTTP port, the `test` profile, and container initialization. For other boundaries, follow the module's setup and the Test Scope guidance above; an HTTP server is only needed when it participates in the behavior being verified.
 
 Use the project's established HTTP test client and keep request setup close to the endpoint under test.
 
@@ -118,6 +116,8 @@ Clean or isolate state through existing repository/test support patterns. Do not
 ## Structured Logging Tests
 
 For application handlers that emit structured logs, follow the existing handler-test pattern.
+
+Use [Observability](12-observability-guidelines.md) for field semantics, context propagation, and instrumentation configuration when those are affected.
 
 - Capture log events with the project's existing log-capture support.
 - Attach the appender during setup and detach it during teardown.

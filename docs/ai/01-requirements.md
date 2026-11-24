@@ -6,9 +6,7 @@ Use this stage to understand what should be built before deciding how it should 
 
 Establish the requested behavior, scope, constraints, and relevant open questions.
 
-Requirements analysis should discover what needs to be decided. It should not prematurely turn implementation choices into requirements.
-
-Requirements does not approve a design. It produces evidence and a list of decisions that Design must resolve.
+Requirements produces evidence and open questions for [Design](02-design.md); it does not approve a design or turn implementation choices into requirements.
 
 ## Analysis
 
@@ -31,7 +29,7 @@ Use existing production code and tests to understand current behavior.
 
 Do not infer new requirements solely from what would be convenient to implement.
 
-When existing behavior or tests show a pattern, record it as evidence. Do not treat it as resolving the new feature's behavior unless the user's request or an existing public contract explicitly requires the same behavior.
+Record existing patterns as evidence. Use the Decision Resolution Criteria in [Design](02-design.md#2-decision-resolution-criteria) to distinguish determined behavior from choices requiring the user.
 
 ## Open Questions
 
@@ -49,17 +47,7 @@ Do not stop analysis at the first open question if useful investigation can cont
 
 Collect the relevant open questions and carry them into the design stage.
 
-For each potential decision, note whether it could affect:
-- externally visible behavior or status codes
-- API path, method, headers, request, or response shape
-- resource ownership, authorization, or data exposure
-- application/domain/infrastructure responsibilities
-- repository port choice or abstraction boundaries
-- observability, metrics, logging, or correlation behavior
-- persistence semantics or consistency guarantees
-- test scope for public contracts
-
-If two or more viable alternatives exist in any of these areas, classify the item as a Design decision to be resolved interactively. Do not close it in Requirements because one alternative follows an existing pattern, appears safer, simpler, more conservative, more idiomatic, or matches another endpoint.
+For each potential decision, note the affected behavioral, contract, responsibility, architectural, security, persistence, consistency, observability, or test-scope concerns. Classify meaningful alternatives using Design's criteria; do not resolve them during Requirements based on a preferred pattern.
 
 Do not ask about routine implementation details.
 

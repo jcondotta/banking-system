@@ -6,7 +6,7 @@ Do not introduce a new domain abstraction just because it appears in DDD literat
 
 ## Shared `domain-core` Contracts
 
-The modules under `services/core/domain-core` provide:
+The `services/core/domain-core` module provides:
 
 - `Entity<ID>` stores a required typed ID and defines equality by concrete class and ID.
 - `AggregateRoot<ID>` extends `Entity` and keeps an in-memory list of registered domain events. `pullEvents()` returns a copy in registration order and clears the list; `hasEvents()` reports whether any remain.
@@ -40,7 +40,7 @@ Restoring an entity is different from performing a new domain action:
 - Preserve persisted lifecycle state and version information when the model has them.
 - Do not use a creation factory and then mutate the object to imitate persisted state.
 
-The persistence mapper owns translation between storage representation and domain representation. Convert stored primitives and enums into domain IDs, value objects, and collections, then call `restore(...)`. Do not put JPA, DynamoDB, Spring, or serialization concerns in the domain model.
+For persistence-mapper responsibilities and storage representations, see [Infrastructure](08-infrastructure-guidelines.md#mapping-and-persistence). The domain owns the restoration contract above.
 
 Existing examples include `BankAccountEntityMapperImpl`, `RecipientEntityMapper`, `BankTransferEntityMapper`, and `LedgerAccountEntityMapper`. Their storage shapes differ, but each reconstructs domain types and calls the aggregate's restore factory.
 
@@ -58,7 +58,7 @@ Use `DomainCollection<T>` when a collection has domain invariants or behavior be
 
 Aggregate roots register domain events through `registerEvent(...)` when domain behavior produces them. `pullEvents()` is a one-time drain of the aggregate's current event buffer. A restored aggregate must not replay events from the historical actions that produced its persisted state.
 
-The contexts implement the shared `DomainEvent` contract using metadata and event data records. Keep event payloads domain-owned; map them to transport or integration-event formats outside the domain. Event payload, versioning, timing, and publication changes can affect contracts and must be resolved during Design.
+The contexts implement the shared `DomainEvent` contract using metadata and event data records. Keep event payloads domain-owned. For their transport representation and the impact of payload, version, or timing changes on consumers, use [Event contracts](11-event-contracts-guidelines.md).
 
 ## Testing Construction And Restoration
 
@@ -66,4 +66,4 @@ Keep tests near the domain type under test. Protect observable behavior rather t
 
 For construction, test the meaningful initial state, required-input failures, and initial events when the factory promises them. For restoration, test that persisted values and version are retained, invalid restored state is rejected, and no events are registered. For behavior methods, test state transitions, idempotent outcomes, rule violations, and emitted events where applicable.
 
-Prefer focused fixtures and explicit domain values so the scenario is clear. Use fixed timestamps when time is relevant. Follow `docs/ai/04-testing.md` for shared test style and the service's local guidance for test fixtures and focused commands.
+Prefer focused fixtures and explicit domain values so the scenario is clear. Use fixed timestamps when time is relevant. Follow [Testing](04-testing.md) for shared test style and the service's local guidance for test fixtures and focused commands.
