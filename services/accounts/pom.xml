@@ -23,11 +23,6 @@
 
     <dependencyManagement>
         <dependencies>
-            <dependency>
-                <groupId>com.jcondotta</groupId>
-                <artifactId>domain-core</artifactId>
-                <version>${shared-modules.version}</version>
-            </dependency>
 
             <dependency>
                 <groupId>com.jcondotta</groupId>
@@ -56,7 +51,7 @@
         </dependency>
 
         <dependency>
-            <groupId>com.jcondotta</groupId>
+            <groupId>io.github.jcondotta</groupId>
             <artifactId>domain-core</artifactId>
         </dependency>
         <dependency>

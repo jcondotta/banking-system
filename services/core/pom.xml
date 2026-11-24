@@ -15,7 +15,6 @@
     <packaging>pom</packaging>
 
     <modules>
-        <module>domain-core</module>
         <module>money-core</module>
         <module>movement-core</module>
         <module>application-core</module>

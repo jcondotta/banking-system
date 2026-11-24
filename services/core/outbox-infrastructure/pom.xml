@@ -28,7 +28,7 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>com.jcondotta</groupId>
+            <groupId>io.github.jcondotta</groupId>
             <artifactId>domain-core</artifactId>
         </dependency>
 

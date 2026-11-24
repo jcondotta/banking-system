@@ -6,7 +6,7 @@ Do not introduce a new domain abstraction just because it appears in DDD literat
 
 ## Shared `domain-core` Contracts
 
-The `services/core/domain-core` module provides:
+The published `io.github.jcondotta:domain-core` library provides:
 
 - `Entity<ID>` stores a required typed ID and defines equality by concrete class and ID.
 - `AggregateRoot<ID>` extends `Entity` and keeps an in-memory list of registered domain events. `pullEvents()` returns a copy in registration order and clears the list; `hasEvents()` reports whether any remain.

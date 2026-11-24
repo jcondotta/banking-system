@@ -27,6 +27,7 @@
 	<properties>
 		<java.version>25</java.version>
         <scoped-logging.version>0.1.0-alpha.1</scoped-logging.version>
+		<domain-core.version>0.1.0-alpha.1</domain-core.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
 		<lombok.version>1.18.38</lombok.version>
@@ -105,11 +106,11 @@
 				<scope>import</scope>
 			</dependency>
 
-			<!-- ===== CROSS-CUTTING CORE MODULES ===== -->
+			<!-- ===== CROSS-CUTTING LIBRARIES ===== -->
 			<dependency>
-				<groupId>com.jcondotta</groupId>
+				<groupId>io.github.jcondotta</groupId>
 				<artifactId>domain-core</artifactId>
-				<version>${project.version}</version>
+				<version>${domain-core.version}</version>
 			</dependency>
 
 			<dependency>

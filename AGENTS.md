@@ -4,7 +4,7 @@
 
 This is a Java 25, Spring Boot 4, Maven banking system. The root `pom.xml` reactor contains all code modules under `services/`:
 
-- `services/core/`: shared `domain-core`, `money-core`, `movement-core`, `application-core`, `infrastructure-core`, and opt-in `outbox-infrastructure` modules.
+- `services/core/`: shared `money-core`, `movement-core`, `application-core`, `infrastructure-core`, and opt-in `outbox-infrastructure` modules. Domain contracts come from the published `io.github.jcondotta:domain-core` library.
 - `services/accounts/`: single-module bounded context; its API and transactional-outbox worker run in the same Spring Boot application.
 - `services/recipients/`, `services/transfers/`, `services/ledger/`: single-module bounded contexts with architectural boundaries organized by package.
 - `docker/`, `k8s/`, `terraform/`: local, Kubernetes, and cloud infrastructure where present.
